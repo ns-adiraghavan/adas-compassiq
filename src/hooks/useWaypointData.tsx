@@ -72,9 +72,21 @@ export function useDashboardMetrics() {
       csvData.forEach(file => {
         if (file.data && Array.isArray(file.data)) {
           file.data.forEach((row: any) => {
-            if (row.OEM) uniqueOEMs.add(row.OEM)
-            if (row.Country) uniqueCountries.add(row.Country)
-            if (row.Feature) totalFeatureCount++
+            // Use exact key names from CSV data
+            if (row.OEM && typeof row.OEM === 'string' && 
+                !row.OEM.toLowerCase().includes('merged') &&
+                !row.OEM.toLowerCase().includes('monitoring')) {
+              uniqueOEMs.add(row.OEM.trim())
+            }
+            if (row.Country && typeof row.Country === 'string' && 
+                row.Country.toLowerCase() !== 'yes' && 
+                row.Country.toLowerCase() !== 'no' &&
+                row.Country.toLowerCase() !== 'n/a') {
+              uniqueCountries.add(row.Country.trim())
+            }
+            if (row.Feature && typeof row.Feature === 'string') {
+              totalFeatureCount++
+            }
           })
         }
       })
@@ -109,15 +121,21 @@ export function useFirstAvailableOEM() {
       waypointData.csvData.forEach(file => {
         if (file.data && Array.isArray(file.data)) {
           file.data.forEach((row: any) => {
-            if (row.OEM) {
-              uniqueOEMs.add(row.OEM)
+            // Use exact "OEM" key and filter out invalid values
+            if (row.OEM && typeof row.OEM === 'string' && 
+                row.OEM.trim() !== '' && 
+                !row.OEM.toLowerCase().includes('merged') &&
+                !row.OEM.toLowerCase().includes('monitoring')) {
+              uniqueOEMs.add(row.OEM.trim())
             }
           })
         }
       })
 
       const sortedOEMs = Array.from(uniqueOEMs).sort()
-      return sortedOEMs.length > 0 ? sortedOEMs[0] : null
+      const firstOEM = sortedOEMs.length > 0 ? sortedOEMs[0] : null
+      console.log('First available OEM:', firstOEM)
+      return firstOEM
     },
     enabled: !isLoading && !!waypointData,
   })

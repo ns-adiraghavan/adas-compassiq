@@ -14,19 +14,26 @@ const CountryButtons = ({ selectedCountry, onCountryChange }: CountryButtonsProp
   const countries = useMemo(() => {
     if (!waypointData?.csvData?.length) return ["Global"]
 
+    console.log('Processing Countries from CSV data...')
     const uniqueCountries = new Set<string>()
     
     waypointData.csvData.forEach(file => {
       if (file.data && Array.isArray(file.data)) {
         file.data.forEach((row: any) => {
-          if (row.Country) {
-            uniqueCountries.add(row.Country)
+          // Use the exact "Country" key and filter out invalid values
+          if (row.Country && typeof row.Country === 'string' && 
+              row.Country.trim() !== '' && 
+              row.Country.toLowerCase() !== 'yes' && 
+              row.Country.toLowerCase() !== 'no' &&
+              row.Country.toLowerCase() !== 'n/a') {
+            uniqueCountries.add(row.Country.trim())
           }
         })
       }
     })
 
     const countryList = Array.from(uniqueCountries).sort()
+    console.log('Extracted Countries:', countryList)
     return ["Global", ...countryList]
   }, [waypointData])
 

@@ -14,19 +14,26 @@ const OEMButtons = ({ selectedOEM, onOEMChange }: OEMButtonsProps) => {
   const oems = useMemo(() => {
     if (!waypointData?.csvData?.length) return []
 
+    console.log('Processing OEMs from CSV data...')
     const uniqueOEMs = new Set<string>()
     
     waypointData.csvData.forEach(file => {
       if (file.data && Array.isArray(file.data)) {
         file.data.forEach((row: any) => {
-          if (row.OEM) {
-            uniqueOEMs.add(row.OEM)
+          // Use the exact "OEM" key and filter out invalid values
+          if (row.OEM && typeof row.OEM === 'string' && 
+              row.OEM.trim() !== '' && 
+              !row.OEM.toLowerCase().includes('merged') &&
+              !row.OEM.toLowerCase().includes('monitoring')) {
+            uniqueOEMs.add(row.OEM.trim())
           }
         })
       }
     })
 
-    return Array.from(uniqueOEMs).sort()
+    const oemList = Array.from(uniqueOEMs).sort()
+    console.log('Extracted OEMs:', oemList)
+    return oemList
   }, [waypointData])
 
   if (isLoading) {
