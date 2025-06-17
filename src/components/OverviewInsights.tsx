@@ -1,11 +1,9 @@
 
 import { useWaypointData } from "@/hooks/useWaypointData"
+import { useOverviewAnalysis } from "@/hooks/useOverviewAnalysis"
 import { useMemo } from "react"
-import OEMProfileCard from "./overview/OEMProfileCard"
-import MetricsGrid from "./overview/MetricsGrid"
-import FeatureLandscape from "./overview/FeatureLandscape"
-import MarketIntelligence from "./overview/MarketIntelligence"
-import DataInsights from "./overview/DataInsights"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Building, Globe, Zap, Star, TrendingUp, DollarSign, CheckCircle, XCircle } from "lucide-react"
 
 interface OverviewInsightsProps {
   selectedOEM: string
@@ -14,26 +12,15 @@ interface OverviewInsightsProps {
 
 const OverviewInsights = ({ selectedOEM, selectedCountry }: OverviewInsightsProps) => {
   const { data: waypointData, isLoading } = useWaypointData()
+  const { data: analysisData, isLoading: isAnalysisLoading } = useOverviewAnalysis({ selectedOEM, selectedCountry })
 
   const filteredData = useMemo(() => {
-    console.log('Overview - Processing data for:', { selectedOEM, selectedCountry })
-    console.log('Overview - Full waypoint data:', waypointData)
-    
-    if (!waypointData?.csvData?.length || !selectedOEM) {
-      console.log('Overview - No data or OEM selected')
-      return []
-    }
+    if (!waypointData?.csvData?.length || !selectedOEM) return []
 
     const allRows: any[] = []
-    waypointData.csvData.forEach((file, index) => {
-      console.log(`Overview - Processing file ${index}:`, file)
+    waypointData.csvData.forEach(file => {
       if (file.data && Array.isArray(file.data)) {
-        console.log(`Overview - File ${index} has ${file.data.length} rows`)
-        file.data.forEach((row: any, rowIndex: number) => {
-          if (rowIndex < 3) { // Log first few rows for debugging
-            console.log(`Overview - Sample row ${rowIndex}:`, row)
-          }
-          
+        file.data.forEach((row: any) => {
           const matchesOEM = row.OEM === selectedOEM
           const matchesCountry = selectedCountry === "Global" || row.Country === selectedCountry
           
@@ -44,32 +31,20 @@ const OverviewInsights = ({ selectedOEM, selectedCountry }: OverviewInsightsProp
       }
     })
     
-    console.log('Overview - Filtered data rows:', allRows.length)
-    console.log('Overview - Sample filtered data:', allRows.slice(0, 3))
     return allRows
   }, [waypointData, selectedOEM, selectedCountry])
 
-  const contextData = useMemo(() => {
-    const context = waypointData?.contextData || []
-    console.log('Overview - Context data:', context)
-    return context
-  }, [waypointData])
-
-  if (isLoading) {
+  if (isLoading || isAnalysisLoading) {
     return (
       <div className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 h-48 bg-gray-800/50 rounded-lg animate-pulse"></div>
-          <div className="h-48 bg-gray-800/50 rounded-lg animate-pulse"></div>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-32 bg-gray-800/50 rounded-lg animate-pulse"></div>
-          ))}
-        </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="h-64 bg-gray-800/50 rounded-lg animate-pulse"></div>
           <div className="h-64 bg-gray-800/50 rounded-lg animate-pulse"></div>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-48 bg-gray-800/50 rounded-lg animate-pulse"></div>
+          ))}
         </div>
       </div>
     )
@@ -80,90 +55,180 @@ const OverviewInsights = ({ selectedOEM, selectedCountry }: OverviewInsightsProp
       <div className="flex items-center justify-center h-64 bg-gray-800/30 rounded-lg border border-gray-700/50">
         <div className="text-center">
           <h3 className="text-xl text-white/70 mb-2">No OEM Selected</h3>
-          <p className="text-white/50">
-            Please select an OEM to view overview insights
-          </p>
+          <p className="text-white/50">Please select an OEM to view overview insights</p>
         </div>
       </div>
     )
   }
 
-  // Always show overview content, even with no data
   return (
     <div className="space-y-8">
       {/* Header Section */}
       <div className="mb-8">
-        <h2 className="text-3xl font-light text-white mb-2">
-          {selectedOEM} Overview
-        </h2>
+        <h2 className="text-3xl font-light text-white mb-2">{selectedOEM} Overview</h2>
         <p className="text-white/60 font-light">
           Comprehensive analysis of connected services and market presence
           {selectedCountry !== "Global" && ` in ${selectedCountry}`}
         </p>
-        {filteredData.length === 0 && (
-          <div className="mt-4 p-4 bg-yellow-900/20 border border-yellow-600/30 rounded-lg">
-            <p className="text-yellow-300 text-sm">
-              {waypointData?.csvData?.length ? 
-                `No specific data found for ${selectedOEM}${selectedCountry !== "Global" ? ` in ${selectedCountry}` : ""}. Showing general insights.` :
-                "No data loaded yet. Please ensure CSV data is uploaded to see detailed insights."
-              }
-            </p>
-          </div>
-        )}
       </div>
 
-      {/* Debug Info - Remove this after fixing */}
-      <div className="p-4 bg-gray-800/30 rounded-lg border border-gray-600/30 mb-6">
-        <h4 className="text-white/80 text-sm font-medium mb-2">Debug Information:</h4>
-        <div className="text-xs text-white/60 space-y-1">
-          <div>CSV Files: {waypointData?.csvData?.length || 0}</div>
-          <div>Context Records: {waypointData?.contextData?.length || 0}</div>
-          <div>Filtered Rows: {filteredData.length}</div>
-          <div>Selected OEM: {selectedOEM}</div>
-          <div>Selected Country: {selectedCountry}</div>
-          <div>Loading: {isLoading ? "Yes" : "No"}</div>
-        </div>
-      </div>
-
-      {/* OEM Profile and Quick Stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <OEMProfileCard 
-            selectedOEM={selectedOEM} 
-            selectedCountry={selectedCountry}
-            filteredData={filteredData}
-            contextData={contextData}
-          />
-        </div>
-        <div className="lg:col-span-1">
-          <MetricsGrid 
-            selectedOEM={selectedOEM}
-            selectedCountry={selectedCountry}
-            filteredData={filteredData}
-          />
-        </div>
-      </div>
-
-      {/* Feature Landscape */}
-      <FeatureLandscape 
-        selectedOEM={selectedOEM}
-        selectedCountry={selectedCountry}
-        filteredData={filteredData}
-      />
-
-      {/* Market Intelligence and Data Insights */}
+      {/* Company Overview & Connected Platform */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <MarketIntelligence 
-          selectedOEM={selectedOEM}
-          selectedCountry={selectedCountry}
-          contextData={contextData}
-        />
-        <DataInsights 
-          selectedOEM={selectedOEM}
-          selectedCountry={selectedCountry}
-          filteredData={filteredData}
-        />
+        {/* Company Overview */}
+        <Card className="bg-gradient-to-br from-gray-800/40 to-gray-900/40 border-gray-700/50 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center text-white">
+              <Building className="h-6 w-6 mr-3 text-blue-400" />
+              Overview
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-white/70 text-sm leading-relaxed">
+              {analysisData?.companyOverview || `${selectedOEM} is a leading automotive manufacturer focused on connected vehicle technologies and digital services.`}
+            </p>
+            
+            {/* Financial Performance */}
+            {analysisData?.financialInsights && (
+              <div className="bg-gray-800/50 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-white/80 mb-2">Financial Performance</h4>
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-white/60">Revenue:</span>
+                    <span className="text-white">{analysisData.financialInsights.revenue}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/60">Market Share:</span>
+                    <span className="text-white">{analysisData.financialInsights.marketShare}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Connected Service Platform */}
+        <Card className="bg-gradient-to-br from-purple-900/20 to-blue-900/20 border-purple-600/30 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="text-purple-200 flex items-center">
+              <Zap className="h-5 w-5 mr-2" />
+              Connected Service Platform
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold text-purple-100">
+                  {analysisData?.connectedPlatform?.name || `${selectedOEM} Connect`}
+                </h3>
+                <p className="text-purple-200/80 text-sm mt-2">
+                  {analysisData?.connectedPlatform?.description || "Advanced connected car platform offering integrated digital services"}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {(analysisData?.connectedPlatform?.features || []).slice(0, 6).map((feature, index) => (
+                  <span key={index} className="px-3 py-1 bg-purple-600/20 text-purple-300 text-xs rounded-full border border-purple-600/30">
+                    {feature}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Lighthouse Features */}
+      {analysisData?.lighthouseFeatures?.length > 0 && (
+        <Card className="bg-gradient-to-br from-yellow-900/20 to-orange-900/20 border-yellow-600/30 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="text-yellow-200 flex items-center">
+              <Star className="h-5 w-5 mr-2" />
+              Lighthouse Features
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {analysisData.lighthouseFeatures.map((feature, index) => (
+                <div key={index} className="bg-yellow-600/10 border border-yellow-600/20 rounded-lg p-3">
+                  <h4 className="text-yellow-200 font-medium text-sm mb-1">{feature.name}</h4>
+                  <p className="text-yellow-300/70 text-xs">{feature.description}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Vehicle Type Coverage & Geographical Presence */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Vehicle Type */}
+        <Card className="bg-gradient-to-br from-gray-800/40 to-gray-900/40 border-gray-700/50 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="text-white">Vehicle Type</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              {Object.entries(analysisData?.vehicleTypes || {}).map(([type, available]) => (
+                <div key={type} className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
+                  <span className="text-white/80 capitalize">{type}</span>
+                  {available ? (
+                    <CheckCircle className="h-5 w-5 text-green-400" />
+                  ) : (
+                    <XCircle className="h-5 w-5 text-red-400" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Geographical Presence */}
+        <Card className="bg-gradient-to-br from-gray-800/40 to-gray-900/40 border-gray-700/50 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center">
+              <Globe className="h-5 w-5 mr-2" />
+              Geographical Presence
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {(analysisData?.geographicalPresence || []).slice(0, 8).map((country, index) => (
+                <div key={index} className="flex items-center justify-between">
+                  <span className="text-white/80 text-sm">{country}</span>
+                  <CheckCircle className="h-4 w-4 text-green-400" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Key Connected Services */}
+      <Card className="bg-gradient-to-br from-green-900/20 to-teal-900/20 border-green-600/30 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="text-green-200">Key Connected Services Aligning to Brand Promise</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            {Object.entries(analysisData?.keyServices || {}).map(([category, services]) => (
+              <div key={category} className="bg-green-600/10 border border-green-600/20 rounded-lg p-4">
+                <h4 className="text-green-200 font-medium text-sm mb-2 capitalize flex items-center">
+                  {category === 'safety' && <span className="mr-2">🛡️</span>}
+                  {category === 'maintenance' && <span className="mr-2">🔧</span>}
+                  {category === 'otaUpdates' && <span className="mr-2">📡</span>}
+                  {category === 'telematics' && <span className="mr-2">📊</span>}
+                  {category === 'remoteControl' && <span className="mr-2">📱</span>}
+                  {category.replace(/([A-Z])/g, ' $1').trim()}
+                </h4>
+                <div className="space-y-1">
+                  {(services as string[]).slice(0, 3).map((service, index) => (
+                    <div key={index} className="text-green-300/70 text-xs">{service}</div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
