@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Car, Bike, Truck, Tractor } from "lucide-react"
@@ -179,20 +178,16 @@ const Index = () => {
               <div className="relative">
                 <div className="absolute -inset-4 bg-gradient-to-r from-white/10 to-transparent blur-xl"
                      style={{
-                       clipPath: index % 4 === 0 ? 'polygon(0% 20%, 80% 0%, 100% 70%, 20% 100%)' :
-                                index % 4 === 1 ? 'polygon(20% 0%, 100% 30%, 80% 100%, 0% 80%)' :
-                                index % 4 === 2 ? 'polygon(30% 0%, 100% 20%, 70% 100%, 0% 90%)' :
-                                'polygon(0% 30%, 90% 0%, 100% 80%, 10% 100%)'
+                       borderRadius: index % 4 === 0 ? '60% 40% 30% 70% / 60% 30% 70% 40%' :
+                                    index % 4 === 1 ? '40% 60% 70% 30% / 40% 70% 30% 60%' :
+                                    index % 4 === 2 ? '70% 30% 40% 60% / 30% 60% 40% 70%' :
+                                    '30% 70% 60% 40% / 70% 40% 60% 30%'
                      }} />
                 <img
                   src={category.image}
                   alt={category.title}
                   className="relative w-full h-96 object-cover shadow-2xl"
                   style={{
-                    clipPath: index % 4 === 0 ? 'polygon(0% 20%, 80% 0%, 100% 70%, 20% 100%)' :
-                             index % 4 === 1 ? 'polygon(20% 0%, 100% 30%, 80% 100%, 0% 80%)' :
-                             index % 4 === 2 ? 'polygon(30% 0%, 100% 20%, 70% 100%, 0% 90%)' :
-                             'polygon(0% 30%, 90% 0%, 100% 80%, 10% 100%)',
                     borderRadius: index % 4 === 0 ? '60% 40% 30% 70% / 60% 30% 70% 40%' :
                                  index % 4 === 1 ? '40% 60% 70% 30% / 40% 70% 30% 60%' :
                                  index % 4 === 2 ? '70% 30% 40% 60% / 30% 60% 40% 70%' :
