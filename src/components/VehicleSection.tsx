@@ -1,91 +1,62 @@
 
-import { Button } from "@/components/ui/button"
-import { ArrowRight, LucideIcon } from "lucide-react"
+import { Car, Upload } from "lucide-react"
+import { Link } from "react-router-dom"
 
-interface VehicleCategory {
-  title: string
-  subtitle: string
-  description: string
-  image: string
-  icon: LucideIcon
-  href: string
-  color: string
-}
-
-interface VehicleSectionProps {
-  category: VehicleCategory
-  index: number
-  currentSection: number
-  sectionIndex: number
-}
-
-const VehicleSection = ({ category, index, currentSection, sectionIndex }: VehicleSectionProps) => {
+const VehicleSection = () => {
   return (
-    <section className="section relative h-screen flex items-center justify-center">
-      <div className={`absolute inset-0 bg-gradient-to-r ${category.color} opacity-30`} />
+    <section className="py-20 px-8 bg-gradient-to-b from-black to-gray-900 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 blur-3xl"></div>
       
-      <div className="relative z-10 max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
-        <div 
-          className={`space-y-6 ${index % 2 === 0 ? 'md:order-1' : 'md:order-2'}`}
-          style={{
-            transform: currentSection === sectionIndex ? 'translateX(0)' : `translateX(${index % 2 === 0 ? '-50px' : '50px'})`,
-            opacity: currentSection === sectionIndex ? 1 : 0.7,
-            transition: 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
-          }}
-        >
-          <div className="flex items-center gap-4 mb-4">
-            <div className={`p-3 rounded-full bg-gradient-to-r ${category.color}`}>
-              <category.icon className="h-8 w-8 text-white" />
-            </div>
-            <h2 className="text-4xl md:text-6xl font-bold">{category.title}</h2>
-          </div>
-          
-          <h3 className="text-2xl md:text-3xl font-semibold text-gray-300 mb-4">
-            {category.subtitle}
-          </h3>
-          
-          <p className="text-lg text-gray-400 mb-8 leading-relaxed">
-            {category.description}
+      <div className="max-w-6xl mx-auto relative z-10">
+        <div className="text-center mb-16">
+          <h2 className="text-5xl font-thin mb-6 text-white tracking-tight">
+            Comprehensive Vehicle Intelligence
+          </h2>
+          <p className="text-xl text-white/60 font-light max-w-3xl mx-auto leading-relaxed">
+            Advanced analytics and insights across all vehicle categories
           </p>
-          
-          <Button 
-            size="lg"
-            className={`bg-gradient-to-r ${category.color} hover:opacity-90 text-white text-lg px-8 py-3 rounded-full transition-all duration-300 hover:scale-105 group`}
-            onClick={() => window.location.href = category.href}
-          >
-            Explore {category.title}
-            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-          </Button>
         </div>
-        
-        <div 
-          className={`${index % 2 === 0 ? 'md:order-2' : 'md:order-1'}`}
-          style={{
-            transform: currentSection === sectionIndex ? 'translateY(0) scale(1)' : 'translateY(30px) scale(0.95)',
-            opacity: currentSection === sectionIndex ? 1 : 0.8,
-            transition: 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
-          }}
-        >
-          <div className="relative">
-            <div className="absolute -inset-4 bg-gradient-to-r from-white/10 to-transparent blur-xl"
-                 style={{
-                   borderRadius: index % 4 === 0 ? '60% 40% 30% 70% / 60% 30% 70% 40%' :
-                                index % 4 === 1 ? '40% 60% 70% 30% / 40% 70% 30% 60%' :
-                                index % 4 === 2 ? '70% 30% 40% 60% / 30% 60% 40% 70%' :
-                                '30% 70% 60% 40% / 70% 40% 60% 30%'
-                 }} />
-            <img
-              src={category.image}
-              alt={category.title}
-              className="relative w-full h-96 object-cover shadow-2xl"
-              style={{
-                borderRadius: index % 4 === 0 ? '60% 40% 30% 70% / 60% 30% 70% 40%' :
-                             index % 4 === 1 ? '40% 60% 70% 30% / 40% 70% 30% 60%' :
-                             index % 4 === 2 ? '70% 30% 40% 60% / 30% 60% 40% 70%' :
-                             '30% 70% 60% 40% / 70% 40% 60% 30%'
-              }}
-            />
-          </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Passenger Cars Card */}
+          <Link to="/passenger-cars" className="group block">
+            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md rounded-3xl p-8 border border-white/20 hover:border-white/40 transition-all duration-500 hover:scale-105 hover:bg-white/15">
+              <div className="flex items-center mb-6">
+                <div className="p-3 bg-blue-500/20 rounded-2xl mr-4 group-hover:bg-blue-500/30 transition-colors">
+                  <Car className="h-8 w-8 text-blue-400" />
+                </div>
+                <h3 className="text-2xl font-light text-white">Passenger Cars</h3>
+              </div>
+              <p className="text-white/60 font-light leading-relaxed mb-6">
+                Detailed analytics for passenger vehicles including market segmentation, 
+                feature analysis, and competitive intelligence across global markets.
+              </p>
+              <div className="flex items-center text-blue-400 font-medium group-hover:text-blue-300 transition-colors">
+                <span className="mr-2">Explore Analytics</span>
+                <span className="transform group-hover:translate-x-1 transition-transform">→</span>
+              </div>
+            </div>
+          </Link>
+
+          {/* Document Analysis Card */}
+          <Link to="/document-analysis" className="group block">
+            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md rounded-3xl p-8 border border-white/20 hover:border-white/40 transition-all duration-500 hover:scale-105 hover:bg-white/15">
+              <div className="flex items-center mb-6">
+                <div className="p-3 bg-purple-500/20 rounded-2xl mr-4 group-hover:bg-purple-500/30 transition-colors">
+                  <Upload className="h-8 w-8 text-purple-400" />
+                </div>
+                <h3 className="text-2xl font-light text-white">Document Intelligence</h3>
+              </div>
+              <p className="text-white/60 font-light leading-relaxed mb-6">
+                Upload PDF and PowerPoint documents for AI-powered analysis. Generate intelligent 
+                dashboards that correlate with your automotive data.
+              </p>
+              <div className="flex items-center text-purple-400 font-medium group-hover:text-purple-300 transition-colors">
+                <span className="mr-2">Upload & Analyze</span>
+                <span className="transform group-hover:translate-x-1 transition-transform">→</span>
+              </div>
+            </div>
+          </Link>
         </div>
       </div>
     </section>

@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import PassengerCars from "./pages/PassengerCars";
+import DocumentAnalysis from "./pages/DocumentAnalysis";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -19,10 +20,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/passenger-cars" element={<PassengerCars />} />
-          <Route path="/two-wheelers" element={<div className="min-h-screen bg-black text-white flex items-center justify-center"><h1 className="text-4xl">Two Wheelers - Coming Soon</h1></div>} />
-          <Route path="/commercial-vehicles" element={<div className="min-h-screen bg-black text-white flex items-center justify-center"><h1 className="text-4xl">Commercial Vehicles - Coming Soon</h1></div>} />
-          <Route path="/agriculture-vehicles" element={<div className="min-h-screen bg-black text-white flex items-center justify-center"><h1 className="text-4xl">Agriculture Vehicles - Coming Soon</h1></div>} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/document-analysis" element={<DocumentAnalysis />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
