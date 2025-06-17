@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import { Link } from "react-router-dom"
 import WaypointLogo from "@/components/WaypointLogo"
 import OEMButtons from "@/components/OEMButtons"
@@ -12,7 +11,6 @@ import { useFirstAvailableOEM } from "@/hooks/useWaypointData"
 const PassengerCars = () => {
   const { data: firstOEM, isLoading: isLoadingFirstOEM } = useFirstAvailableOEM()
   const [selectedOEM, setSelectedOEM] = useState("")
-  const [selectedInsight, setSelectedInsight] = useState("Overview")
 
   // Set the first available OEM as default when data is loaded
   useEffect(() => {
@@ -64,7 +62,6 @@ const PassengerCars = () => {
 
       {/* Main Dashboard Content */}
       <div className="min-h-[calc(100vh-200px)]">
-        {/* Enhanced Insights Content */}
         <main className="bg-gradient-to-br from-gray-900/10 to-gray-800/20">
           <div className="p-8">
             <div className="mb-6">
@@ -76,12 +73,7 @@ const PassengerCars = () => {
               </p>
             </div>
             
-            <InsightsSection 
-              selectedInsight={selectedInsight}
-              onInsightChange={setSelectedInsight}
-              selectedOEM={selectedOEM}
-              selectedCountry="Global"
-            />
+            <InsightsSection selectedOEM={selectedOEM} />
           </div>
         </main>
       </div>
