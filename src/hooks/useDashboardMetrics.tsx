@@ -19,7 +19,8 @@ export function useDashboardMetrics(selectedOEM: string, selectedCountry: string
         topCategories: [],
         businessModelData: [],
         countryFeatures: [],
-        oemPerformance: []
+        oemPerformance: [],
+        countryComparison: []
       }
     }
 
@@ -32,6 +33,13 @@ export function useDashboardMetrics(selectedOEM: string, selectedCountry: string
     const categoryCount: Record<string, number> = {}
     const countryFeatureCount: Record<string, number> = {}
     const oemFeatureCount: Record<string, number> = {}
+    const countryDetails: Record<string, {
+      total: number,
+      lighthouse: number,
+      subscription: number,
+      free: number,
+      categories: Record<string, number>
+    }> = {}
 
     // Process CSV data
     waypointData.csvData.forEach(file => {
@@ -43,9 +51,8 @@ export function useDashboardMetrics(selectedOEM: string, selectedCountry: string
           const rowCountry = row.Country?.toString().trim()
           const rowFeature = row.Feature?.toString().trim()
           
-          // Apply filters
+          // Apply OEM filter only
           if (selectedOEM && rowOEM !== selectedOEM) return
-          if (selectedCountry && selectedCountry !== "Global" && rowCountry !== selectedCountry) return
 
           // Only count if we have a valid feature
           if (rowFeature && rowFeature !== '' && rowFeature.toLowerCase() !== 'n/a') {
@@ -62,6 +69,38 @@ export function useDashboardMetrics(selectedOEM: string, selectedCountry: string
                 !['yes', 'no', 'n/a', 'na'].includes(rowCountry.toLowerCase())) {
               uniqueCountries.add(rowCountry)
               countryFeatureCount[rowCountry] = (countryFeatureCount[rowCountry] || 0) + 1
+
+              // Initialize country details if not exists
+              if (!countryDetails[rowCountry]) {
+                countryDetails[rowCountry] = {
+                  total: 0,
+                  lighthouse: 0,
+                  subscription: 0,
+                  free: 0,
+                  categories: {}
+                }
+              }
+
+              countryDetails[rowCountry].total++
+
+              // Track business models by country
+              const businessModel = row['Business Model']?.toString().trim()
+              if (businessModel?.toLowerCase() === 'subscription') {
+                countryDetails[rowCountry].subscription++
+              } else if (businessModel?.toLowerCase() === 'free') {
+                countryDetails[rowCountry].free++
+              }
+
+              // Track lighthouse by country
+              if (row['Lighthouse Feature']?.toString().toLowerCase() === 'yes') {
+                countryDetails[rowCountry].lighthouse++
+              }
+
+              // Track categories by country
+              if (row.Category && row.Category.toString().trim() !== '') {
+                const category = row.Category.toString().trim()
+                countryDetails[rowCountry].categories[category] = (countryDetails[rowCountry].categories[category] || 0) + 1
+              }
             }
 
             // Track Categories
@@ -113,6 +152,21 @@ export function useDashboardMetrics(selectedOEM: string, selectedCountry: string
         countries: Object.keys(countryFeatureCount).length
       }))
 
+    // Country comparison data
+    const countryComparison = Object.entries(countryDetails)
+      .sort(([,a], [,b]) => b.total - a.total)
+      .slice(0, 10)
+      .map(([name, data]) => ({
+        country: name,
+        totalFeatures: data.total,
+        lighthouseFeatures: data.lighthouse,
+        subscriptionFeatures: data.subscription,
+        freeFeatures: data.free,
+        lighthouseRate: Math.round((data.lighthouse / data.total) * 100),
+        subscriptionRate: Math.round((data.subscription / data.total) * 100),
+        topCategory: Object.entries(data.categories).sort(([,a], [,b]) => b - a)[0]?.[0] || 'Unknown'
+      }))
+
     console.log('Calculated metrics:', {
       totalFeatures,
       totalOEMs: uniqueOEMs.size,
@@ -132,7 +186,8 @@ export function useDashboardMetrics(selectedOEM: string, selectedCountry: string
       topCategories,
       businessModelData,
       countryFeatures,
-      oemPerformance
+      oemPerformance,
+      countryComparison
     }
   }, [waypointData, selectedOEM, selectedCountry])
 

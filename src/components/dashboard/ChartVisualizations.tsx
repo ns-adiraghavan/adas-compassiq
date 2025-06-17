@@ -7,9 +7,17 @@ const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316'
 interface ChartVisualizationsProps {
   topCategories: Array<{ name: string; value: number }>
   countryFeatures: Array<{ name: string; count: number }>
+  countryComparison?: Array<{
+    country: string
+    totalFeatures: number
+    lighthouseFeatures: number
+    subscriptionFeatures: number
+    lighthouseRate: number
+    subscriptionRate: number
+  }>
 }
 
-const ChartVisualizations = ({ topCategories, countryFeatures }: ChartVisualizationsProps) => {
+const ChartVisualizations = ({ topCategories, countryFeatures, countryComparison }: ChartVisualizationsProps) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Top Categories Chart */}
@@ -44,21 +52,20 @@ const ChartVisualizations = ({ topCategories, countryFeatures }: ChartVisualizat
         </div>
       </Card>
 
-      {/* Country Distribution */}
+      {/* Country Comparison Chart */}
       <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-6 backdrop-blur-sm">
-        <h3 className="text-xl font-light text-white mb-6">Features by Country</h3>
+        <h3 className="text-xl font-light text-white mb-6">Country Feature Comparison</h3>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={countryFeatures}>
+            <BarChart data={countryComparison || countryFeatures} layout="horizontal">
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-              <XAxis 
-                dataKey="name" 
-                tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 12 }}
-                angle={-45}
-                textAnchor="end"
-                height={60}
+              <XAxis type="number" tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 12 }} />
+              <YAxis 
+                type="category" 
+                dataKey={countryComparison ? "country" : "name"}
+                tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 10 }}
+                width={100}
               />
-              <YAxis tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 12 }} />
               <Tooltip 
                 contentStyle={{ 
                   backgroundColor: 'rgba(0,0,0,0.8)', 
@@ -67,7 +74,14 @@ const ChartVisualizations = ({ topCategories, countryFeatures }: ChartVisualizat
                   color: 'white'
                 }}
               />
-              <Bar dataKey="count" fill="#3B82F6" />
+              <Bar 
+                dataKey={countryComparison ? "totalFeatures" : "count"} 
+                fill="#3B82F6" 
+                name="Total Features"
+              />
+              {countryComparison && (
+                <Bar dataKey="lighthouseFeatures" fill="#F59E0B" name="Lighthouse Features" />
+              )}
             </BarChart>
           </ResponsiveContainer>
         </div>

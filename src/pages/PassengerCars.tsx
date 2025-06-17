@@ -6,14 +6,12 @@ import { Card } from "@/components/ui/card"
 import { Link } from "react-router-dom"
 import WaypointLogo from "@/components/WaypointLogo"
 import OEMButtons from "@/components/OEMButtons"
-import CountryButtons from "@/components/CountryButtons"
 import InsightsSection from "@/components/InsightsSection"
 import { useFirstAvailableOEM } from "@/hooks/useWaypointData"
 
 const PassengerCars = () => {
   const { data: firstOEM, isLoading: isLoadingFirstOEM } = useFirstAvailableOEM()
   const [selectedOEM, setSelectedOEM] = useState("")
-  const [selectedCountry, setSelectedCountry] = useState("Global")
   const [selectedInsight, setSelectedInsight] = useState("Overview")
 
   // Set the first available OEM as default when data is loaded
@@ -40,7 +38,7 @@ const PassengerCars = () => {
           </div>
           <div className="text-center">
             <h1 className="text-3xl font-light tracking-tight">Passenger Cars Intelligence</h1>
-            <p className="text-white/60 font-light mt-1">Real-time automotive market analytics powered by AI</p>
+            <p className="text-white/60 font-light mt-1">Global automotive market analytics powered by AI</p>
           </div>
           <div className="w-32"></div> {/* Spacer for balance */}
         </div>
@@ -65,45 +63,16 @@ const PassengerCars = () => {
       </div>
 
       {/* Main Dashboard Content */}
-      <div className="flex min-h-[calc(100vh-280px)]">
-        {/* Enhanced Country Sidebar */}
-        <aside className="w-72 border-r border-gray-700/50 bg-gray-900/20 backdrop-blur-sm">
-          <div className="p-6">
-            <h3 className="text-lg font-light text-white/90 mb-4">Regional Analysis</h3>
-            <CountryButtons selectedCountry={selectedCountry} onCountryChange={setSelectedCountry} />
-          </div>
-          
-          {/* Quick Stats */}
-          <div className="px-6 pb-6">
-            <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-4 backdrop-blur-sm">
-              <h4 className="text-sm font-medium text-white/80 mb-3">Current Selection</h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-white/60">OEM:</span>
-                  <span className="text-white font-medium">{selectedOEM || "Loading..."}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white/60">Region:</span>
-                  <span className="text-white font-medium">{selectedCountry}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-white/60">Analysis:</span>
-                  <span className="text-white font-medium">{selectedInsight}</span>
-                </div>
-              </div>
-            </Card>
-          </div>
-        </aside>
-
+      <div className="min-h-[calc(100vh-200px)]">
         {/* Enhanced Insights Content */}
-        <main className="flex-1 bg-gradient-to-br from-gray-900/10 to-gray-800/20">
+        <main className="bg-gradient-to-br from-gray-900/10 to-gray-800/20">
           <div className="p-8">
             <div className="mb-6">
               <h2 className="text-2xl font-light text-white mb-2">
-                Intelligence Dashboard
+                Global Intelligence Dashboard
               </h2>
               <p className="text-white/60 font-light">
-                Comprehensive analysis of {selectedOEM} across {selectedCountry === "Global" ? "global markets" : selectedCountry}
+                Comprehensive analysis of {selectedOEM} across all global markets
               </p>
             </div>
             
@@ -111,7 +80,7 @@ const PassengerCars = () => {
               selectedInsight={selectedInsight}
               onInsightChange={setSelectedInsight}
               selectedOEM={selectedOEM}
-              selectedCountry={selectedCountry}
+              selectedCountry="Global"
             />
           </div>
         </main>

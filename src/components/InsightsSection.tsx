@@ -27,13 +27,13 @@ const InsightsSection = ({
             value="Overview" 
             className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-500 data-[state=active]:text-white transition-all duration-300"
           >
-            Overview
+            Global Overview
           </TabsTrigger>
           <TabsTrigger 
             value="Category" 
             className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-purple-500 data-[state=active]:text-white transition-all duration-300"
           >
-            Category Analysis
+            Category Comparison
           </TabsTrigger>
           <TabsTrigger 
             value="Feature" 
@@ -45,13 +45,13 @@ const InsightsSection = ({
             value="Segment" 
             className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-600 data-[state=active]:to-orange-500 data-[state=active]:text-white transition-all duration-300"
           >
-            Segment Analysis
+            Market Segments
           </TabsTrigger>
           <TabsTrigger 
             value="Business" 
             className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-600 data-[state=active]:to-pink-500 data-[state=active]:text-white transition-all duration-300"
           >
-            Business Model
+            Business Models
           </TabsTrigger>
         </TabsList>
         
