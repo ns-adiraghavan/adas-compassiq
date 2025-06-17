@@ -36,6 +36,36 @@ export type Database = {
         }
         Relationships: []
       }
+      documents: {
+        Row: {
+          file_content: string
+          file_name: string
+          file_size: number
+          file_type: string
+          id: string
+          metadata: Json | null
+          uploaded_at: string
+        }
+        Insert: {
+          file_content: string
+          file_name: string
+          file_size: number
+          file_type: string
+          id?: string
+          metadata?: Json | null
+          uploaded_at?: string
+        }
+        Update: {
+          file_content?: string
+          file_name?: string
+          file_size?: number
+          file_type?: string
+          id?: string
+          metadata?: Json | null
+          uploaded_at?: string
+        }
+        Relationships: []
+      }
       waypoint_data_context: {
         Row: {
           created_at: string

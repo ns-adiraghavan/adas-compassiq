@@ -12,7 +12,7 @@ interface FileUploadProps {
 
 const FileUpload = ({ onFileAnalyzed }: FileUploadProps) => {
   const [isUploading, setIsUploading] = useState(false)
-  const [uploadedFiles, setUploadedFiles] = useState<Array<{ name: string; type: string; analysis?: any }>>([])
+  const [uploadedFiles, setUploadedFiles] = useState<Array<{ id: string; name: string; type: string; size: number }>>([])
   const { toast } = useToast()
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,12 +42,13 @@ const FileUpload = ({ onFileAnalyzed }: FileUploadProps) => {
           reader.readAsDataURL(file)
         })
 
-        // Call edge function to analyze document
-        const { data, error } = await supabase.functions.invoke('document-analysis', {
+        // Call edge function to store document directly
+        const { data, error } = await supabase.functions.invoke('store-document', {
           body: {
             fileName: file.name,
             fileType: file.type,
-            fileContent: base64
+            fileContent: base64,
+            fileSize: file.size
           }
         })
 
@@ -56,24 +57,25 @@ const FileUpload = ({ onFileAnalyzed }: FileUploadProps) => {
         }
 
         const newFile = {
+          id: data.id,
           name: file.name,
           type: file.type,
-          analysis: data.analysis
+          size: file.size
         }
 
         setUploadedFiles(prev => [...prev, newFile])
-        onFileAnalyzed(data.analysis)
+        onFileAnalyzed({ file: newFile, stored: true })
 
         toast({
-          title: "File analyzed successfully",
-          description: `${file.name} has been processed and analyzed.`
+          title: "File uploaded successfully",
+          description: `${file.name} has been stored in the database.`
         })
 
       } catch (error) {
-        console.error('Error analyzing file:', error)
+        console.error('Error uploading file:', error)
         toast({
-          title: "Analysis failed",
-          description: `Failed to analyze ${file.name}. Please try again.`,
+          title: "Upload failed",
+          description: `Failed to upload ${file.name}. Please try again.`,
           variant: "destructive"
         })
       }
@@ -94,9 +96,9 @@ const FileUpload = ({ onFileAnalyzed }: FileUploadProps) => {
     <div className="space-y-6">
       <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-6 backdrop-blur-sm">
         <div className="text-center space-y-4">
-          <h3 className="text-xl font-light text-white mb-4">Upload Documents for AI Analysis</h3>
+          <h3 className="text-xl font-light text-white mb-4">Upload Documents</h3>
           <p className="text-white/60 font-light">
-            Upload PDF or PowerPoint files to generate intelligent dashboards based on document content and passenger car data.
+            Upload PDF or PowerPoint files to store them directly in the database for analysis and dashboard generation.
           </p>
           
           <div className="flex flex-col items-center space-y-4">
@@ -110,7 +112,7 @@ const FileUpload = ({ onFileAnalyzed }: FileUploadProps) => {
                   {isUploading ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Analyzing...
+                      Uploading...
                     </>
                   ) : (
                     <>
@@ -137,13 +139,16 @@ const FileUpload = ({ onFileAnalyzed }: FileUploadProps) => {
 
       {uploadedFiles.length > 0 && (
         <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-6 backdrop-blur-sm">
-          <h4 className="text-lg font-light text-white mb-4">Analyzed Documents</h4>
+          <h4 className="text-lg font-light text-white mb-4">Uploaded Documents</h4>
           <div className="space-y-3">
             {uploadedFiles.map((file, index) => (
               <div key={index} className="flex items-center space-x-3 p-3 bg-white/5 rounded-lg">
                 {getFileIcon(file.type)}
-                <span className="text-white font-medium flex-1">{file.name}</span>
-                <span className="text-green-400 text-sm">✓ Analyzed</span>
+                <div className="flex-1">
+                  <span className="text-white font-medium block">{file.name}</span>
+                  <span className="text-white/60 text-sm">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                </div>
+                <span className="text-green-400 text-sm">✓ Stored</span>
               </div>
             ))}
           </div>
