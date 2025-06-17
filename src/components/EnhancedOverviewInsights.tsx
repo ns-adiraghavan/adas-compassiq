@@ -1,7 +1,6 @@
 
 import { Card } from "@/components/ui/card"
 import { useWaypointData } from "@/hooks/useWaypointData"
-import { TrendingUp, Globe } from "lucide-react"
 
 interface EnhancedOverviewInsightsProps {
   selectedOEM: string
@@ -28,42 +27,8 @@ const EnhancedOverviewInsights = ({ selectedOEM, selectedCountry }: EnhancedOver
     )
   }
 
-  if (!selectedOEM) {
-    return (
-      <Card className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 border-gray-700/30 p-8 text-center backdrop-blur-sm">
-        <div className="flex flex-col items-center space-y-4">
-          <h3 className="text-xl font-light text-white mb-2">Select an OEM to Begin</h3>
-          <p className="text-gray-400 font-light max-w-md">
-            Choose an automotive manufacturer from the selection above to view detailed market intelligence and analytics.
-          </p>
-        </div>
-      </Card>
-    )
-  }
-
   return (
     <div className="space-y-8">
-      {/* Current Selection Display */}
-      <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-6 backdrop-blur-sm">
-        <h3 className="text-xl font-light text-white mb-4">Current Selection</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex items-center space-x-3">
-            <TrendingUp className="h-5 w-5 text-blue-400" />
-            <div>
-              <p className="text-white/60 text-sm">Selected OEM</p>
-              <p className="text-white font-medium">{selectedOEM}</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-3">
-            <Globe className="h-5 w-5 text-green-400" />
-            <div>
-              <p className="text-white/60 text-sm">Selected Region</p>
-              <p className="text-white font-medium">{selectedCountry}</p>
-            </div>
-          </div>
-        </div>
-      </Card>
-
       {/* Summary Statistics Section - Empty */}
       <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-8 backdrop-blur-sm">
         <h3 className="text-xl font-light text-white mb-4">Summary Statistics</h3>
