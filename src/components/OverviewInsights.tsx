@@ -16,7 +16,13 @@ const OverviewInsights = ({ selectedOEM, selectedCountry }: OverviewInsightsProp
   const { data: waypointData, isLoading } = useWaypointData()
 
   const filteredData = useMemo(() => {
-    if (!waypointData?.csvData?.length || !selectedOEM) return []
+    console.log('Overview - Processing data for:', { selectedOEM, selectedCountry })
+    console.log('Overview - Waypoint data:', waypointData)
+    
+    if (!waypointData?.csvData?.length || !selectedOEM) {
+      console.log('Overview - No data or OEM selected')
+      return []
+    }
 
     const allRows: any[] = []
     waypointData.csvData.forEach(file => {
@@ -32,11 +38,14 @@ const OverviewInsights = ({ selectedOEM, selectedCountry }: OverviewInsightsProp
       }
     })
     
+    console.log('Overview - Filtered data rows:', allRows.length)
     return allRows
   }, [waypointData, selectedOEM, selectedCountry])
 
   const contextData = useMemo(() => {
-    return waypointData?.contextData || []
+    const context = waypointData?.contextData || []
+    console.log('Overview - Context data:', context)
+    return context
   }, [waypointData])
 
   if (isLoading) {
@@ -59,22 +68,20 @@ const OverviewInsights = ({ selectedOEM, selectedCountry }: OverviewInsightsProp
     )
   }
 
-  if (!selectedOEM || filteredData.length === 0) {
+  if (!selectedOEM) {
     return (
       <div className="flex items-center justify-center h-64 bg-gray-800/30 rounded-lg border border-gray-700/50">
         <div className="text-center">
-          <h3 className="text-xl text-white/70 mb-2">No Data Available</h3>
+          <h3 className="text-xl text-white/70 mb-2">No OEM Selected</h3>
           <p className="text-white/50">
-            {!selectedOEM 
-              ? "Please select an OEM to view overview insights"
-              : `No data found for ${selectedOEM} in ${selectedCountry}`
-            }
+            Please select an OEM to view overview insights
           </p>
         </div>
       </div>
     )
   }
 
+  // Show overview even with limited data
   return (
     <div className="space-y-8">
       {/* Header Section */}
@@ -86,6 +93,15 @@ const OverviewInsights = ({ selectedOEM, selectedCountry }: OverviewInsightsProp
           Comprehensive analysis of connected services and market presence
           {selectedCountry !== "Global" && ` in ${selectedCountry}`}
         </p>
+        {filteredData.length === 0 && (
+          <div className="mt-4 p-4 bg-yellow-900/20 border border-yellow-600/30 rounded-lg">
+            <p className="text-yellow-300 text-sm">
+              Limited data available for {selectedOEM} 
+              {selectedCountry !== "Global" && ` in ${selectedCountry}`}. 
+              Showing general insights and available information.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* OEM Profile and Quick Stats */}
