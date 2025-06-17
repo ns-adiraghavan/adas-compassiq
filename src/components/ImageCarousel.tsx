@@ -1,4 +1,3 @@
-
 import {
   Carousel,
   CarouselContent,
@@ -10,22 +9,22 @@ import { getVehicleImageUrl } from "@/utils/uploadVehicleImages"
 
 const vehicleImages = [
   {
-    src: getVehicleImageUrl("passenger-car.jpg"),
+    src: "/lovable-uploads/c13e6208-3f44-451f-9b43-5f2707ee413c.png",
     alt: "Futuristic luxury car with city skyline",
     title: "Premium Vehicles"
   },
   {
-    src: getVehicleImageUrl("commercial-vehicle.jpg"),
+    src: "/lovable-uploads/849e6ee5-f48d-44b5-b934-674f44399eeb.png",
     alt: "Smart autonomous truck with digital interface",
     title: "Commercial Vehicles"
   },
   {
-    src: getVehicleImageUrl("two-wheeler.jpg"),
+    src: "/lovable-uploads/5bc26e8f-c225-4798-a305-557d8cc8b4af.png",
     alt: "Electric motorcycle with neon lighting",
     title: "Two Wheelers"
   },
   {
-    src: getVehicleImageUrl("agriculture-vehicle.jpg"),
+    src: "/lovable-uploads/a639b2c6-adaa-455a-adb5-c2c550261d96.png",
     alt: "High-tech agricultural tractor with solar panels",
     title: "Agricultural Vehicles"
   }
