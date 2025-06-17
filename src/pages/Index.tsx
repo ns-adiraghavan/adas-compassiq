@@ -6,10 +6,12 @@ import VehicleSection from "@/components/VehicleSection"
 import FooterSection from "@/components/FooterSection"
 import NavigationDots from "@/components/NavigationDots"
 import FloatingParticles from "@/components/FloatingParticles"
+import Dashboard from "@/components/Dashboard"
 
 const Index = () => {
   const [scrollY, setScrollY] = useState(0)
   const [currentSection, setCurrentSection] = useState(0)
+  const [showDashboard, setShowDashboard] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -68,25 +70,43 @@ const Index = () => {
     }
   ]
 
+  // Toggle dashboard view
+  if (showDashboard) {
+    return <Dashboard />
+  }
+
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
-      {/* Hero Section */}
-      <HeroSection scrollY={scrollY} />
+      {/* Hero Section with Dashboard Toggle */}
+      <div className="section">
+        <HeroSection scrollY={scrollY} />
+        <div className="absolute top-6 right-6 z-50">
+          <button
+            onClick={() => setShowDashboard(true)}
+            className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-6 py-3 text-white hover:bg-white/20 transition-all duration-300 font-light"
+          >
+            View Live Data
+          </button>
+        </div>
+      </div>
       <FloatingParticles scrollY={scrollY} />
 
       {/* Vehicle Categories */}
       {vehicleCategories.map((category, index) => (
-        <VehicleSection
-          key={category.title}
-          category={category}
-          index={index}
-          currentSection={currentSection}
-          sectionIndex={index + 1}
-        />
+        <div key={category.title} className="section">
+          <VehicleSection
+            category={category}
+            index={index}
+            currentSection={currentSection}
+            sectionIndex={index + 1}
+          />
+        </div>
       ))}
 
       {/* Footer */}
-      <FooterSection />
+      <div className="section">
+        <FooterSection />
+      </div>
 
       {/* Navigation dots */}
       <NavigationDots currentSection={currentSection} totalSections={6} />
