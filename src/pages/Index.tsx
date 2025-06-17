@@ -8,8 +8,11 @@ import { DataTable } from "@/components/DataTable"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Car, Truck, Brain, Globe, TrendingUp, Database, Sparkles } from "lucide-react"
+import { useDashboardMetrics } from "@/hooks/useWaypointData"
 
 const Index = () => {
+  const { data: metrics, isLoading: metricsLoading } = useDashboardMetrics()
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
@@ -22,7 +25,7 @@ const Index = () => {
                 <SidebarTrigger className="hover:bg-primary/10 transition-colors duration-200" />
                 <div>
                   <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
-                    EOM Dashboard
+                    WayPoint Dashboard
                   </h1>
                   <p className="text-muted-foreground mt-1">AI-Powered Automotive Intelligence Platform</p>
                 </div>
@@ -44,8 +47,8 @@ const Index = () => {
               <div style={{ animationDelay: '300ms' }}>
                 <KPICard
                   title="Total Features"
-                  value="543"
-                  trend={12}
+                  value={metricsLoading ? "..." : metrics?.totalFeatures.toString() || "0"}
+                  trend={metricsLoading ? undefined : 12}
                   subtitle="Across all OEMs"
                   icon={<Database className="h-5 w-5" />}
                 />
@@ -53,8 +56,8 @@ const Index = () => {
               <div style={{ animationDelay: '400ms' }}>
                 <KPICard
                   title="OEM Partners"
-                  value="8"
-                  trend={0}
+                  value={metricsLoading ? "..." : metrics?.oemPartners.toString() || "0"}
+                  trend={metricsLoading ? undefined : 0}
                   subtitle="Active manufacturers"
                   icon={<Car className="h-5 w-5" />}
                 />
@@ -62,18 +65,18 @@ const Index = () => {
               <div style={{ animationDelay: '500ms' }}>
                 <KPICard
                   title="Global Coverage"
-                  value="15"
-                  trend={7}
+                  value={metricsLoading ? "..." : metrics?.globalCoverage.toString() || "0"}
+                  trend={metricsLoading ? undefined : 7}
                   subtitle="Countries monitored"
                   icon={<Globe className="h-5 w-5" />}
                 />
               </div>
               <div style={{ animationDelay: '600ms' }}>
                 <KPICard
-                  title="Availability Rate"
-                  value="87%"
-                  trend={3}
-                  subtitle="Feature deployment"
+                  title="Data Files"
+                  value={metricsLoading ? "..." : metrics?.dataFiles.toString() || "0"}
+                  trend={metricsLoading ? undefined : 3}
+                  subtitle="CSV datasets loaded"
                   icon={<TrendingUp className="h-5 w-5" />}
                 />
               </div>
@@ -97,28 +100,37 @@ const Index = () => {
                   <div className="p-4 bg-primary/10 rounded-lg border border-primary/20 hover-glow transition-all duration-300 hover:bg-primary/15">
                     <h4 className="font-semibold text-primary mb-2 flex items-center gap-2">
                       <TrendingUp className="h-4 w-4" />
-                      Premium Features Trend
+                      Data Quality Insights
                     </h4>
                     <p className="text-muted-foreground text-sm">
-                      Luxury OEMs are leading in autonomous driving features with 23% higher adoption than mass market brands.
+                      {metricsLoading 
+                        ? "Analyzing data patterns..." 
+                        : `Currently tracking ${metrics?.totalFeatures || 0} features across ${metrics?.oemPartners || 0} OEMs with ${metrics?.totalRows || 0} total data points.`
+                      }
                     </p>
                   </div>
                   <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20 hover-glow transition-all duration-300 hover:bg-green-500/15">
                     <h4 className="font-semibold text-green-400 mb-2 flex items-center gap-2">
                       <Globe className="h-4 w-4" />
-                      Regional Analysis
+                      Coverage Analysis
                     </h4>
                     <p className="text-muted-foreground text-sm">
-                      European markets show highest feature availability at 92%, followed by North America at 85%.
+                      {metricsLoading 
+                        ? "Processing geographic data..." 
+                        : `Global coverage spans ${metrics?.globalCoverage || 0} countries with comprehensive OEM feature mapping.`
+                      }
                     </p>
                   </div>
                   <div className="p-4 bg-purple-500/10 rounded-lg border border-purple-500/20 hover-glow transition-all duration-300 hover:bg-purple-500/15">
                     <h4 className="font-semibold text-purple-400 mb-2 flex items-center gap-2">
                       <Sparkles className="h-4 w-4" />
-                      Emerging Technologies
+                      Dataset Status
                     </h4>
                     <p className="text-muted-foreground text-sm">
-                      Vehicle-to-infrastructure communication features are gaining traction with 34% YoY growth.
+                      {metricsLoading 
+                        ? "Loading dataset information..." 
+                        : `${metrics?.dataFiles || 0} active data files providing real-time automotive intelligence.`
+                      }
                     </p>
                   </div>
                 </CardContent>

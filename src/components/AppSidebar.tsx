@@ -56,10 +56,10 @@ export function AppSidebar() {
       <SidebarHeader className="p-6 border-b">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">EOM</span>
+            <span className="text-white font-bold text-sm">WP</span>
           </div>
           <div>
-            <h2 className="font-semibold text-lg">EOM Dashboard</h2>
+            <h2 className="font-semibold text-lg">WayPoint</h2>
             <p className="text-xs text-muted-foreground">AI-Powered Analytics</p>
           </div>
         </div>
