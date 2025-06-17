@@ -1,5 +1,7 @@
 
 import { Button } from "@/components/ui/button"
+import { useWaypointData } from "@/hooks/useWaypointData"
+import { useMemo } from "react"
 
 interface OEMButtonsProps {
   selectedOEM: string
@@ -7,10 +9,38 @@ interface OEMButtonsProps {
 }
 
 const OEMButtons = ({ selectedOEM, onOEMChange }: OEMButtonsProps) => {
-  const oems = [
-    "All", "Toyota", "Volkswagen", "Ford", "Honda", "Nissan", 
-    "Hyundai", "BMW", "Mercedes", "Audi", "Tesla", "General Motors"
-  ]
+  const { data: waypointData, isLoading } = useWaypointData()
+
+  const oems = useMemo(() => {
+    if (!waypointData?.csvData?.length) return []
+
+    const uniqueOEMs = new Set<string>()
+    
+    waypointData.csvData.forEach(file => {
+      if (file.data && Array.isArray(file.data)) {
+        file.data.forEach((row: any) => {
+          if (row.OEM || row.oem) {
+            uniqueOEMs.add(row.OEM || row.oem)
+          }
+        })
+      }
+    })
+
+    return Array.from(uniqueOEMs).sort()
+  }, [waypointData])
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-wrap gap-2">
+        <span className="text-gray-400 mr-4 flex items-center">OEMs:</span>
+        <div className="flex gap-2">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-8 w-20 bg-gray-700 rounded animate-pulse"></div>
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-wrap gap-2">

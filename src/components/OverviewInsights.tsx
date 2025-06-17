@@ -28,8 +28,8 @@ const OverviewInsights = ({ selectedOEM, selectedCountry }: OverviewInsightsProp
           if (row.Feature || row.feature) {
             totalFeatures++
             
-            // Apply filters
-            const matchesOEM = selectedOEM === "All" || row.OEM === selectedOEM || row.oem === selectedOEM
+            // Apply filters - no "All" option for OEM anymore
+            const matchesOEM = !selectedOEM || row.OEM === selectedOEM || row.oem === selectedOEM
             const matchesCountry = selectedCountry === "Global" || row.Country === selectedCountry || row.country === selectedCountry
             
             if (matchesOEM && matchesCountry) {
@@ -76,12 +76,18 @@ const OverviewInsights = ({ selectedOEM, selectedCountry }: OverviewInsightsProp
     )
   }
 
-  if (!filteredData) {
+  if (!filteredData || !selectedOEM) {
     return (
       <div className="space-y-6">
         <Card className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 border-gray-700/30 p-8 text-center backdrop-blur-sm">
-          <h3 className="text-xl font-light text-white mb-4">No Data Available</h3>
-          <p className="text-gray-400 font-light">Upload CSV files to see automotive insights and analytics.</p>
+          <h3 className="text-xl font-light text-white mb-4">
+            {!selectedOEM ? "Loading OEM Data..." : "No Data Available"}
+          </h3>
+          <p className="text-gray-400 font-light">
+            {!selectedOEM 
+              ? "Please wait while we load the available OEMs from the database." 
+              : "Upload CSV files to see automotive insights and analytics."}
+          </p>
         </Card>
       </div>
     )

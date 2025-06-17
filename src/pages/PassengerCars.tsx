@@ -1,5 +1,5 @@
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Link } from "react-router-dom"
@@ -7,11 +7,20 @@ import WaypointLogo from "@/components/WaypointLogo"
 import OEMButtons from "@/components/OEMButtons"
 import CountryButtons from "@/components/CountryButtons"
 import InsightsSection from "@/components/InsightsSection"
+import { useFirstAvailableOEM } from "@/hooks/useWaypointData"
 
 const PassengerCars = () => {
-  const [selectedOEM, setSelectedOEM] = useState("All")
+  const { data: firstOEM, isLoading: isLoadingFirstOEM } = useFirstAvailableOEM()
+  const [selectedOEM, setSelectedOEM] = useState("")
   const [selectedCountry, setSelectedCountry] = useState("Global")
   const [selectedInsight, setSelectedInsight] = useState("Overview")
+
+  // Set the first available OEM as default when data is loaded
+  useEffect(() => {
+    if (firstOEM && !selectedOEM) {
+      setSelectedOEM(firstOEM)
+    }
+  }, [firstOEM, selectedOEM])
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -31,7 +40,18 @@ const PassengerCars = () => {
 
       {/* OEM Buttons Row */}
       <div className="px-6 py-4 border-b border-gray-800">
-        <OEMButtons selectedOEM={selectedOEM} onOEMChange={setSelectedOEM} />
+        {isLoadingFirstOEM ? (
+          <div className="flex flex-wrap gap-2">
+            <span className="text-gray-400 mr-4 flex items-center">OEMs:</span>
+            <div className="flex gap-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-8 w-20 bg-gray-700 rounded animate-pulse"></div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <OEMButtons selectedOEM={selectedOEM} onOEMChange={setSelectedOEM} />
+        )}
       </div>
 
       {/* Main Content */}

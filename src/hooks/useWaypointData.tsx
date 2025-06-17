@@ -94,3 +94,31 @@ export function useDashboardMetrics() {
     enabled: !isLoading && !!waypointData,
   })
 }
+
+// Hook to get the first available OEM for default selection
+export function useFirstAvailableOEM() {
+  const { data: waypointData, isLoading } = useWaypointData()
+  
+  return useQuery({
+    queryKey: ['first-oem', waypointData],
+    queryFn: () => {
+      if (!waypointData?.csvData?.length) return null
+
+      const uniqueOEMs = new Set<string>()
+      
+      waypointData.csvData.forEach(file => {
+        if (file.data && Array.isArray(file.data)) {
+          file.data.forEach((row: any) => {
+            if (row.OEM || row.oem) {
+              uniqueOEMs.add(row.OEM || row.oem)
+            }
+          })
+        }
+      })
+
+      const sortedOEMs = Array.from(uniqueOEMs).sort()
+      return sortedOEMs.length > 0 ? sortedOEMs[0] : null
+    },
+    enabled: !isLoading && !!waypointData,
+  })
+}
