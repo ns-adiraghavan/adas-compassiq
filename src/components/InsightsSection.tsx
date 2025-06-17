@@ -1,6 +1,6 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import EnhancedOverviewInsights from "@/components/EnhancedOverviewInsights"
+import OverviewInsights from "@/components/OverviewInsights"
 import CategoryAnalysis from "@/components/CategoryAnalysis"
 import FeatureAnalysis from "@/components/FeatureAnalysis"
 import SegmentAnalysis from "@/components/SegmentAnalysis"
@@ -56,7 +56,7 @@ const InsightsSection = ({
         </TabsList>
         
         <TabsContent value="Overview" className="mt-8">
-          <EnhancedOverviewInsights selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
+          <OverviewInsights selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
         </TabsContent>
         
         <TabsContent value="Category" className="mt-8">
