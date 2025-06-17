@@ -2,19 +2,24 @@
 import { useStoredDocuments } from "@/hooks/useStoredDocuments"
 import { useWaypointData } from "@/hooks/useWaypointData"
 import { Card } from "@/components/ui/card"
-import { FileText, Database, TrendingUp, Globe, Car, Building, Users, MapPin } from "lucide-react"
+import { FileText, Database, TrendingUp, Globe, Car, Building, Users, MapPin, Star, DollarSign } from "lucide-react"
 import { useMemo } from "react"
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts"
 
 interface EnhancedOverviewDashboardProps {
   selectedOEM: string
   selectedCountry: string
 }
 
+const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316']
+
 const EnhancedOverviewDashboard = ({ selectedOEM, selectedCountry }: EnhancedOverviewDashboardProps) => {
   const { data: waypointData, isLoading: waypointLoading } = useWaypointData()
   const { data: documents, isLoading: documentsLoading } = useStoredDocuments()
 
   const dashboardMetrics = useMemo(() => {
+    console.log('Processing waypoint data:', waypointData)
+    
     if (!waypointData?.csvData?.length) {
       return {
         totalFeatures: 0,
@@ -23,10 +28,10 @@ const EnhancedOverviewDashboard = ({ selectedOEM, selectedCountry }: EnhancedOve
         lighthouseFeatures: 0,
         subscriptionFeatures: 0,
         freeFeatures: 0,
-        segments: {},
-        categories: {},
-        oemFeatureCount: {},
-        countryFeatureCount: {}
+        topCategories: [],
+        businessModelData: [],
+        countryFeatures: [],
+        oemPerformance: []
       }
     }
 
@@ -36,56 +41,97 @@ const EnhancedOverviewDashboard = ({ selectedOEM, selectedCountry }: EnhancedOve
     let lighthouseFeatures = 0
     let subscriptionFeatures = 0
     let freeFeatures = 0
-    const segments: Record<string, number> = {}
-    const categories: Record<string, number> = {}
-    const oemFeatureCount: Record<string, number> = {}
+    const categoryCount: Record<string, number> = {}
     const countryFeatureCount: Record<string, number> = {}
+    const oemFeatureCount: Record<string, number> = {}
 
+    // Process CSV data
     waypointData.csvData.forEach(file => {
+      console.log('Processing file:', file.file_name, 'with rows:', file.data?.length)
+      
       if (file.data && Array.isArray(file.data)) {
         file.data.forEach((row: any) => {
-          // Filter by selected OEM and Country if provided
-          const rowOEM = row.OEM?.trim()
-          const rowCountry = row.Country?.trim()
+          const rowOEM = row.OEM?.toString().trim()
+          const rowCountry = row.Country?.toString().trim()
+          const rowFeature = row.Feature?.toString().trim()
           
+          // Apply filters
           if (selectedOEM && rowOEM !== selectedOEM) return
           if (selectedCountry && selectedCountry !== "Global" && rowCountry !== selectedCountry) return
 
-          totalFeatures++
+          // Only count if we have a valid feature
+          if (rowFeature && rowFeature !== '' && rowFeature.toLowerCase() !== 'n/a') {
+            totalFeatures++
 
-          // Track OEMs and Countries
-          if (rowOEM && !rowOEM.toLowerCase().includes('merged') && !rowOEM.toLowerCase().includes('monitoring')) {
-            uniqueOEMs.add(rowOEM)
-            oemFeatureCount[rowOEM] = (oemFeatureCount[rowOEM] || 0) + 1
-          }
-          if (rowCountry && rowCountry.toLowerCase() !== 'yes' && rowCountry.toLowerCase() !== 'no') {
-            uniqueCountries.add(rowCountry)
-            countryFeatureCount[rowCountry] = (countryFeatureCount[rowCountry] || 0) + 1
-          }
+            // Track OEMs
+            if (rowOEM && rowOEM !== '' && !rowOEM.toLowerCase().includes('merged')) {
+              uniqueOEMs.add(rowOEM)
+              oemFeatureCount[rowOEM] = (oemFeatureCount[rowOEM] || 0) + 1
+            }
 
-          // Track Lighthouse features
-          if (row['Lighthouse Feature'] === 'Yes') {
-            lighthouseFeatures++
-          }
+            // Track Countries
+            if (rowCountry && rowCountry !== '' && 
+                !['yes', 'no', 'n/a', 'na'].includes(rowCountry.toLowerCase())) {
+              uniqueCountries.add(rowCountry)
+              countryFeatureCount[rowCountry] = (countryFeatureCount[rowCountry] || 0) + 1
+            }
 
-          // Track Business Models
-          if (row['Business Model'] === 'Subscription') {
-            subscriptionFeatures++
-          } else if (row['Business Model'] === 'Free') {
-            freeFeatures++
-          }
+            // Track Categories
+            if (row.Category && row.Category.toString().trim() !== '') {
+              const category = row.Category.toString().trim()
+              categoryCount[category] = (categoryCount[category] || 0) + 1
+            }
 
-          // Track Segments
-          if (row.Segment) {
-            segments[row.Segment] = (segments[row.Segment] || 0) + 1
-          }
+            // Track Lighthouse features
+            if (row['Lighthouse Feature']?.toString().toLowerCase() === 'yes') {
+              lighthouseFeatures++
+            }
 
-          // Track Categories
-          if (row.Category) {
-            categories[row.Category] = (categories[row.Category] || 0) + 1
+            // Track Business Models
+            const businessModel = row['Business Model']?.toString().trim()
+            if (businessModel?.toLowerCase() === 'subscription') {
+              subscriptionFeatures++
+            } else if (businessModel?.toLowerCase() === 'free') {
+              freeFeatures++
+            }
           }
         })
       }
+    })
+
+    // Prepare visualization data
+    const topCategories = Object.entries(categoryCount)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 6)
+      .map(([name, count]) => ({ name, value: count }))
+
+    const businessModelData = [
+      { name: 'Subscription', value: subscriptionFeatures, color: '#10B981' },
+      { name: 'Free', value: freeFeatures, color: '#3B82F6' },
+      { name: 'Other', value: totalFeatures - subscriptionFeatures - freeFeatures, color: '#8B5CF6' }
+    ].filter(item => item.value > 0)
+
+    const countryFeatures = Object.entries(countryFeatureCount)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 8)
+      .map(([name, count]) => ({ name: name.length > 12 ? name.substring(0, 12) + '...' : name, count }))
+
+    const oemPerformance = Object.entries(oemFeatureCount)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 6)
+      .map(([name, count]) => ({ 
+        name: name.length > 15 ? name.substring(0, 15) + '...' : name, 
+        features: count,
+        countries: Object.keys(countryFeatureCount).length
+      }))
+
+    console.log('Calculated metrics:', {
+      totalFeatures,
+      totalOEMs: uniqueOEMs.size,
+      totalCountries: uniqueCountries.size,
+      lighthouseFeatures,
+      subscriptionFeatures,
+      freeFeatures
     })
 
     return {
@@ -95,46 +141,62 @@ const EnhancedOverviewDashboard = ({ selectedOEM, selectedCountry }: EnhancedOve
       lighthouseFeatures,
       subscriptionFeatures,
       freeFeatures,
-      segments,
-      categories,
-      oemFeatureCount,
-      countryFeatureCount
+      topCategories,
+      businessModelData,
+      countryFeatures,
+      oemPerformance
     }
   }, [waypointData, selectedOEM, selectedCountry])
 
+  // Extract PDF insights
+  const pdfInsights = useMemo(() => {
+    const contextData = waypointData?.contextData?.find(ctx => 
+      ctx.data_summary?.document_name?.toLowerCase().includes('accenture') ||
+      ctx.data_summary?.analysis
+    )
+    
+    if (contextData?.data_summary?.analysis) {
+      return contextData.data_summary.analysis
+    }
+    
+    return {
+      summary: "Connected automotive services market analysis",
+      insights: [
+        "Global connected car market is experiencing rapid growth",
+        "Subscription-based services are becoming dominant revenue model",
+        "Geographic expansion varies significantly by OEM strategy"
+      ],
+      recommended_metrics: ["Feature adoption rates", "Geographic coverage", "Revenue model distribution"]
+    }
+  }, [waypointData])
+
   if (waypointLoading || documentsLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {[1, 2, 3, 4].map(i => (
-          <Card key={i} className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-6 backdrop-blur-sm">
-            <div className="animate-pulse space-y-3">
-              <div className="h-4 bg-white/20 rounded"></div>
-              <div className="h-8 bg-white/20 rounded"></div>
-              <div className="h-3 bg-white/20 rounded w-3/4"></div>
-            </div>
-          </Card>
-        ))}
+      <div className="space-y-6">
+        <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-8 text-center backdrop-blur-sm">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
+          <p className="text-white/60 font-light mt-4">Loading intelligence dashboard...</p>
+        </Card>
       </div>
     )
   }
 
-  const pdfDocument = documents?.find(doc => doc.file_name.toLowerCase().includes('accenture') || doc.file_name.toLowerCase().includes('connected'))
-
   return (
     <div className="space-y-8">
-      {/* Strategic Overview Cards */}
+      {/* Key Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/20 border-blue-500/20 p-6 backdrop-blur-sm">
           <div className="flex items-center space-x-3 mb-4">
-            <Car className="h-6 w-6 text-blue-400" />
+            <Database className="h-6 w-6 text-blue-400" />
             <h3 className="text-lg font-light text-blue-100">Total Features</h3>
           </div>
           <div className="space-y-2">
             <p className="text-3xl font-bold text-blue-50">{dashboardMetrics.totalFeatures.toLocaleString()}</p>
             <p className="text-blue-200/80 text-sm">Connected services tracked</p>
-            <p className="text-blue-200/60 text-xs">
-              {dashboardMetrics.lighthouseFeatures} lighthouse features
-            </p>
+            <div className="flex items-center space-x-2 mt-3">
+              <Star className="h-4 w-4 text-yellow-400" />
+              <span className="text-blue-200/60 text-xs">{dashboardMetrics.lighthouseFeatures} lighthouse features</span>
+            </div>
           </div>
         </Card>
 
@@ -161,15 +223,15 @@ const EnhancedOverviewDashboard = ({ selectedOEM, selectedCountry }: EnhancedOve
             <p className="text-3xl font-bold text-purple-50">{dashboardMetrics.totalCountries}</p>
             <p className="text-purple-200/80 text-sm">Countries covered</p>
             <p className="text-purple-200/60 text-xs">
-              Avg {Math.round(dashboardMetrics.totalFeatures / (dashboardMetrics.totalCountries || 1))} features per country
+              {Math.round(dashboardMetrics.totalFeatures / (dashboardMetrics.totalCountries || 1))} avg features/country
             </p>
           </div>
         </Card>
 
         <Card className="bg-gradient-to-br from-orange-500/10 to-orange-600/20 border-orange-500/20 p-6 backdrop-blur-sm">
           <div className="flex items-center space-x-3 mb-4">
-            <TrendingUp className="h-6 w-6 text-orange-400" />
-            <h3 className="text-lg font-light text-orange-100">Business Models</h3>
+            <DollarSign className="h-6 w-6 text-orange-400" />
+            <h3 className="text-lg font-light text-orange-100">Revenue Model</h3>
           </div>
           <div className="space-y-2">
             <p className="text-3xl font-bold text-orange-50">
@@ -177,118 +239,135 @@ const EnhancedOverviewDashboard = ({ selectedOEM, selectedCountry }: EnhancedOve
             </p>
             <p className="text-orange-200/80 text-sm">Subscription-based</p>
             <p className="text-orange-200/60 text-xs">
-              {dashboardMetrics.freeFeatures} free features available
+              {dashboardMetrics.freeFeatures} free features
             </p>
           </div>
         </Card>
       </div>
 
-      {/* Category Distribution */}
-      <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-6 backdrop-blur-sm">
-        <h3 className="text-xl font-light text-white mb-6">Feature Category Distribution</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Object.entries(dashboardMetrics.categories)
-            .sort(([,a], [,b]) => b - a)
-            .slice(0, 6)
-            .map(([category, count]) => (
-              <div key={category} className="bg-white/5 rounded-lg p-4 border border-white/10">
-                <div className="flex justify-between items-center">
-                  <h4 className="text-white font-medium text-sm">{category}</h4>
-                  <span className="text-white/60 text-xs">{count} features</span>
+      {/* Data Visualizations Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Top Categories Chart */}
+        <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-6 backdrop-blur-sm">
+          <h3 className="text-xl font-light text-white mb-6">Top Feature Categories</h3>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={dashboardMetrics.topCategories}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                >
+                  {dashboardMetrics.topCategories.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(0,0,0,0.8)', 
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '8px',
+                    color: 'white'
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
+        {/* Country Distribution */}
+        <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-6 backdrop-blur-sm">
+          <h3 className="text-xl font-light text-white mb-6">Features by Country</h3>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={dashboardMetrics.countryFeatures}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                <XAxis 
+                  dataKey="name" 
+                  tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 12 }}
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
+                />
+                <YAxis tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 12 }} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(0,0,0,0.8)', 
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '8px',
+                    color: 'white'
+                  }}
+                />
+                <Bar dataKey="count" fill="#3B82F6" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+      </div>
+
+      {/* Business Model Distribution */}
+      {dashboardMetrics.businessModelData.length > 0 && (
+        <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-6 backdrop-blur-sm">
+          <h3 className="text-xl font-light text-white mb-6">Business Model Distribution</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {dashboardMetrics.businessModelData.map((model) => (
+              <div key={model.name} className="text-center">
+                <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-lg p-6 border border-white/10">
+                  <h4 className="text-white font-medium mb-2">{model.name}</h4>
+                  <p className="text-3xl font-bold text-white mb-1" style={{ color: model.color }}>
+                    {model.value}
+                  </p>
+                  <p className="text-white/60 text-sm">
+                    {Math.round((model.value / dashboardMetrics.totalFeatures) * 100)}% of features
+                  </p>
                 </div>
-                <div className="mt-2 bg-white/10 rounded-full h-2">
-                  <div 
-                    className="bg-gradient-to-r from-blue-400 to-purple-400 h-2 rounded-full"
-                    style={{ width: `${(count / dashboardMetrics.totalFeatures) * 100}%` }}
-                  ></div>
-                </div>
-                <p className="text-white/50 text-xs mt-1">
-                  {Math.round((count / dashboardMetrics.totalFeatures) * 100)}% of total
-                </p>
               </div>
             ))}
-        </div>
-      </Card>
-
-      {/* Current Selection Summary */}
-      <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-6 backdrop-blur-sm">
-        <h3 className="text-xl font-light text-white mb-6">Current Analysis Context</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <h4 className="text-lg font-medium text-white/90 mb-3 flex items-center">
-              <Users className="h-5 w-5 mr-2 text-blue-400" />
-              Selected OEM
-            </h4>
-            <p className="text-white/70 text-sm leading-relaxed">
-              <span className="font-semibold text-white">{selectedOEM || 'All OEMs'}</span>
-              {selectedOEM && (
-                <span className="block text-white/50 text-xs mt-1">
-                  {dashboardMetrics.oemFeatureCount[selectedOEM] || 0} features analyzed
-                </span>
-              )}
-            </p>
-          </div>
-          <div>
-            <h4 className="text-lg font-medium text-white/90 mb-3 flex items-center">
-              <MapPin className="h-5 w-5 mr-2 text-green-400" />
-              Geographic Scope
-            </h4>
-            <p className="text-white/70 text-sm leading-relaxed">
-              <span className="font-semibold text-white">{selectedCountry || 'Global'}</span>
-              {selectedCountry && selectedCountry !== "Global" && (
-                <span className="block text-white/50 text-xs mt-1">
-                  {dashboardMetrics.countryFeatureCount[selectedCountry] || 0} features in region
-                </span>
-              )}
-            </p>
-          </div>
-          <div>
-            <h4 className="text-lg font-medium text-white/90 mb-3 flex items-center">
-              <FileText className="h-5 w-5 mr-2 text-purple-400" />
-              Intelligence Source
-            </h4>
-            <p className="text-white/70 text-sm leading-relaxed">
-              {pdfDocument ? (
-                <>
-                  <span className="font-semibold text-white">Accenture Report</span>
-                  <span className="block text-white/50 text-xs mt-1">
-                    Strategic context integrated
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span className="font-semibold text-white">Data Analysis</span>
-                  <span className="block text-white/50 text-xs mt-1">
-                    {waypointData?.csvData?.length || 0} data files processed
-                  </span>
-                </>
-              )}
-            </p>
-          </div>
-        </div>
-      </Card>
-
-      {/* Segment Analysis */}
-      {Object.keys(dashboardMetrics.segments).length > 0 && (
-        <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-6 backdrop-blur-sm">
-          <h3 className="text-xl font-light text-white mb-6">Market Segment Distribution</h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {Object.entries(dashboardMetrics.segments)
-              .sort(([,a], [,b]) => b - a)
-              .map(([segment, count]) => (
-                <div key={segment} className="text-center">
-                  <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-lg p-4 border border-white/10">
-                    <h4 className="text-white font-medium mb-2">{segment}</h4>
-                    <p className="text-2xl font-bold text-white">{count}</p>
-                    <p className="text-white/60 text-sm">
-                      {Math.round((count / dashboardMetrics.totalFeatures) * 100)}%
-                    </p>
-                  </div>
-                </div>
-              ))}
           </div>
         </Card>
       )}
+
+      {/* PDF Intelligence Integration */}
+      <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-6 backdrop-blur-sm">
+        <div className="flex items-center space-x-3 mb-6">
+          <FileText className="h-6 w-6 text-blue-400" />
+          <h3 className="text-xl font-light text-white">Strategic Intelligence</h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h4 className="text-lg font-medium text-white/90 mb-3">Market Insights</h4>
+            <div className="space-y-2">
+              {pdfInsights.insights?.slice(0, 3).map((insight: string, index: number) => (
+                <div key={index} className="flex items-start space-x-2">
+                  <TrendingUp className="h-4 w-4 text-green-400 mt-1 flex-shrink-0" />
+                  <p className="text-white/70 text-sm">{insight}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h4 className="text-lg font-medium text-white/90 mb-3">Current Analysis Context</h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-white/60">Selected OEM:</span>
+                <span className="text-white font-medium">{selectedOEM || 'All OEMs'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-white/60">Geographic Scope:</span>
+                <span className="text-white font-medium">{selectedCountry || 'Global'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-white/60">Data Source:</span>
+                <span className="text-white font-medium">CSV + PDF Analysis</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
     </div>
   )
 }
