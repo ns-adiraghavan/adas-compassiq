@@ -12,7 +12,7 @@ const CountryButtons = ({ selectedCountry, onCountryChange }: CountryButtonsProp
   const { data: waypointData, isLoading } = useWaypointData()
 
   const countries = useMemo(() => {
-    if (!waypointData?.csvData?.length) return ["Global"]
+    if (!waypointData?.csvData?.length) return []
 
     console.log('Processing Countries from CSV data...')
     const uniqueCountries = new Set<string>()
@@ -34,7 +34,7 @@ const CountryButtons = ({ selectedCountry, onCountryChange }: CountryButtonsProp
 
     const countryList = Array.from(uniqueCountries).sort()
     console.log('Extracted Countries:', countryList)
-    return ["Global", ...countryList]
+    return countryList
   }, [waypointData])
 
   if (isLoading) {
