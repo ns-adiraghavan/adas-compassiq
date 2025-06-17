@@ -1,4 +1,6 @@
 
+import ImageStorage from "./ImageStorage"
+
 interface InsightsSectionProps {
   selectedOEM: string
 }
@@ -6,6 +8,8 @@ interface InsightsSectionProps {
 const InsightsSection = ({ selectedOEM }: InsightsSectionProps) => {
   return (
     <div className="space-y-6">
+      <ImageStorage />
+      
       <div className="text-center py-16">
         <h2 className="text-2xl font-light text-white mb-4">
           Ready to Build Analytics
