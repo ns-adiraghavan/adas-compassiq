@@ -2,7 +2,7 @@
 import { Card } from "@/components/ui/card"
 import { useStoredDocuments } from "@/hooks/useStoredDocuments"
 import { useMemo } from "react"
-import { FileText, Download, Calendar, HardDrive, Presentation } from "lucide-react"
+import { FileText, Download, Calendar, HardDrive, Presentation, Image, Video, Music, FileSpreadsheet, File } from "lucide-react"
 
 interface DocumentDashboardProps {
   documentAnalysis?: any
@@ -28,13 +28,25 @@ const DocumentDashboard = ({ documentAnalysis }: DocumentDashboardProps) => {
       latestUpload: documents[0]?.uploaded_at
     }
 
-    // Count file types
+    // Count file types with better categorization
     documents.forEach(doc => {
       const type = doc.file_type
+      const name = doc.file_name.toLowerCase()
+      
       if (type.includes('pdf')) {
         stats.fileTypes['PDF'] = (stats.fileTypes['PDF'] || 0) + 1
-      } else if (type.includes('presentation') || type.includes('pptx')) {
+      } else if (type.includes('presentation') || name.includes('.pptx') || name.includes('.ppt')) {
         stats.fileTypes['PowerPoint'] = (stats.fileTypes['PowerPoint'] || 0) + 1
+      } else if (type.includes('wordprocessing') || name.includes('.docx') || name.includes('.doc')) {
+        stats.fileTypes['Word Documents'] = (stats.fileTypes['Word Documents'] || 0) + 1
+      } else if (type.includes('spreadsheet') || name.includes('.xlsx') || name.includes('.xls') || name.includes('.csv')) {
+        stats.fileTypes['Spreadsheets'] = (stats.fileTypes['Spreadsheets'] || 0) + 1
+      } else if (type.includes('image')) {
+        stats.fileTypes['Images'] = (stats.fileTypes['Images'] || 0) + 1
+      } else if (type.includes('video')) {
+        stats.fileTypes['Videos'] = (stats.fileTypes['Videos'] || 0) + 1
+      } else if (type.includes('audio')) {
+        stats.fileTypes['Audio'] = (stats.fileTypes['Audio'] || 0) + 1
       } else {
         stats.fileTypes['Other'] = (stats.fileTypes['Other'] || 0) + 1
       }
@@ -61,6 +73,20 @@ const DocumentDashboard = ({ documentAnalysis }: DocumentDashboardProps) => {
     })
   }
 
+  const getFileIcon = (type: string, name: string) => {
+    if (type.includes('pdf')) return <FileText className="h-5 w-5 text-red-500" />
+    if (type.includes('presentation') || name.toLowerCase().includes('.pptx') || name.toLowerCase().includes('.ppt')) 
+      return <Presentation className="h-5 w-5 text-orange-500" />
+    if (type.includes('wordprocessing') || name.toLowerCase().includes('.docx') || name.toLowerCase().includes('.doc')) 
+      return <FileText className="h-5 w-5 text-blue-500" />
+    if (type.includes('spreadsheet') || name.toLowerCase().includes('.xlsx') || name.toLowerCase().includes('.xls') || name.toLowerCase().includes('.csv')) 
+      return <FileSpreadsheet className="h-5 w-5 text-green-500" />
+    if (type.includes('image')) return <Image className="h-5 w-5 text-blue-500" />
+    if (type.includes('video')) return <Video className="h-5 w-5 text-purple-500" />
+    if (type.includes('audio')) return <Music className="h-5 w-5 text-pink-500" />
+    return <File className="h-5 w-5 text-gray-500" />
+  }
+
   if (isLoading) {
     return (
       <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-8 text-center backdrop-blur-sm">
@@ -74,9 +100,9 @@ const DocumentDashboard = ({ documentAnalysis }: DocumentDashboardProps) => {
     return (
       <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-8 text-center backdrop-blur-sm">
         <FileText className="h-12 w-12 mx-auto mb-4 text-white/40" />
-        <h3 className="text-xl font-light text-white mb-2">No Documents Stored</h3>
+        <h3 className="text-xl font-light text-white mb-2">No Files Stored</h3>
         <p className="text-white/60 font-light">
-          Upload PDF or PowerPoint documents to get started with your document library.
+          Upload documents, images, media files, spreadsheets, and data files to get started with your file library.
         </p>
       </Card>
     )
@@ -84,14 +110,14 @@ const DocumentDashboard = ({ documentAnalysis }: DocumentDashboardProps) => {
 
   return (
     <div className="space-y-8">
-      {/* Document Statistics */}
+      {/* File Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/20 border-blue-500/20 p-4 backdrop-blur-sm">
           <div className="flex items-center space-x-3">
             <FileText className="h-8 w-8 text-blue-400" />
             <div>
               <p className="text-2xl font-bold text-blue-100">{dashboardStats.totalFiles}</p>
-              <p className="text-blue-200/60 text-sm">Total Documents</p>
+              <p className="text-blue-200/60 text-sm">Total Files</p>
             </div>
           </div>
         </Card>
@@ -142,18 +168,14 @@ const DocumentDashboard = ({ documentAnalysis }: DocumentDashboardProps) => {
         </div>
       </Card>
 
-      {/* Document List */}
+      {/* File Library */}
       <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-6 backdrop-blur-sm">
-        <h4 className="text-lg font-light text-white mb-4">Document Library</h4>
+        <h4 className="text-lg font-light text-white mb-4">File Library</h4>
         <div className="space-y-3">
           {documents.map((doc) => (
             <div key={doc.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
               <div className="flex items-center space-x-3">
-                {doc.file_type.includes('pdf') ? (
-                  <FileText className="h-5 w-5 text-red-500" />
-                ) : (
-                  <Presentation className="h-5 w-5 text-orange-500" />
-                )}
+                {getFileIcon(doc.file_type, doc.file_name)}
                 <div>
                   <p className="text-white font-medium">{doc.file_name}</p>
                   <p className="text-white/60 text-sm">
