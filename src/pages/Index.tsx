@@ -1,7 +1,11 @@
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { ArrowRight, Car, Bike, Truck, Tractor } from "lucide-react"
+import { Car, Bike, Truck, Tractor } from "lucide-react"
+import HeroSection from "@/components/HeroSection"
+import VehicleSection from "@/components/VehicleSection"
+import FooterSection from "@/components/FooterSection"
+import NavigationDots from "@/components/NavigationDots"
+import FloatingParticles from "@/components/FloatingParticles"
 
 const Index = () => {
   const [scrollY, setScrollY] = useState(0)
@@ -67,176 +71,25 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
       {/* Hero Section */}
-      <section className="section relative h-screen flex items-center justify-center">
-        <div 
-          className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black"
-          style={{
-            transform: `translateY(${scrollY * 0.5}px)`,
-          }}
-        />
-        <div className="relative z-10 text-center max-w-4xl mx-auto px-6">
-          <h1 
-            className="text-7xl md:text-9xl font-bold mb-6 bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent"
-            style={{
-              transform: `translateY(${scrollY * 0.2}px)`,
-              opacity: Math.max(0, 1 - scrollY / 600)
-            }}
-          >
-            WayPoint
-          </h1>
-          <p 
-            className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto"
-            style={{
-              transform: `translateY(${scrollY * 0.3}px)`,
-              opacity: Math.max(0, 1 - scrollY / 500)
-            }}
-          >
-            AI-Powered Automotive Intelligence Platform
-          </p>
-          <div 
-            className="text-base md:text-lg text-gray-400 leading-relaxed max-w-3xl mx-auto"
-            style={{
-              transform: `translateY(${scrollY * 0.4}px)`,
-              opacity: Math.max(0, 1 - scrollY / 400)
-            }}
-          >
-            <p>
-              WayPoint is a specialized data and insights platform designed specifically for the mobility industry. 
-              Curated by a team of passionate automotive analysts, it reflects a deep understanding of the pulse 
-              and dynamics of the automotive sector. The platform is structured around four core solution areas, 
-              each tailored to a distinct vehicle class, ensuring targeted, relevant insights for strategic thinking.
-            </p>
-          </div>
-        </div>
-        
-        {/* Floating particles */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(20)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-white rounded-full opacity-30"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                transform: `translateY(${scrollY * (0.1 + Math.random() * 0.2)}px)`,
-                animationDelay: `${Math.random() * 2}s`,
-              }}
-            />
-          ))}
-        </div>
-      </section>
+      <HeroSection scrollY={scrollY} />
+      <FloatingParticles scrollY={scrollY} />
 
       {/* Vehicle Categories */}
       {vehicleCategories.map((category, index) => (
-        <section 
+        <VehicleSection
           key={category.title}
-          className="section relative h-screen flex items-center justify-center"
-        >
-          <div className={`absolute inset-0 bg-gradient-to-r ${category.color} opacity-30`} />
-          
-          <div className="relative z-10 max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
-            <div 
-              className={`space-y-6 ${index % 2 === 0 ? 'md:order-1' : 'md:order-2'}`}
-              style={{
-                transform: currentSection === index + 1 ? 'translateX(0)' : `translateX(${index % 2 === 0 ? '-50px' : '50px'})`,
-                opacity: currentSection === index + 1 ? 1 : 0.7,
-                transition: 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
-              }}
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <div className={`p-3 rounded-full bg-gradient-to-r ${category.color}`}>
-                  <category.icon className="h-8 w-8 text-white" />
-                </div>
-                <h2 className="text-4xl md:text-6xl font-bold">{category.title}</h2>
-              </div>
-              
-              <h3 className="text-2xl md:text-3xl font-semibold text-gray-300 mb-4">
-                {category.subtitle}
-              </h3>
-              
-              <p className="text-lg text-gray-400 mb-8 leading-relaxed">
-                {category.description}
-              </p>
-              
-              <Button 
-                size="lg"
-                className={`bg-gradient-to-r ${category.color} hover:opacity-90 text-white text-lg px-8 py-3 rounded-full transition-all duration-300 hover:scale-105 group`}
-                onClick={() => window.location.href = category.href}
-              >
-                Explore {category.title}
-                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </div>
-            
-            <div 
-              className={`${index % 2 === 0 ? 'md:order-2' : 'md:order-1'}`}
-              style={{
-                transform: currentSection === index + 1 ? 'translateY(0) scale(1)' : 'translateY(30px) scale(0.95)',
-                opacity: currentSection === index + 1 ? 1 : 0.8,
-                transition: 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
-              }}
-            >
-              <div className="relative">
-                <div className="absolute -inset-4 bg-gradient-to-r from-white/10 to-transparent blur-xl"
-                     style={{
-                       borderRadius: index % 4 === 0 ? '60% 40% 30% 70% / 60% 30% 70% 40%' :
-                                    index % 4 === 1 ? '40% 60% 70% 30% / 40% 70% 30% 60%' :
-                                    index % 4 === 2 ? '70% 30% 40% 60% / 30% 60% 40% 70%' :
-                                    '30% 70% 60% 40% / 70% 40% 60% 30%'
-                     }} />
-                <img
-                  src={category.image}
-                  alt={category.title}
-                  className="relative w-full h-96 object-cover shadow-2xl"
-                  style={{
-                    borderRadius: index % 4 === 0 ? '60% 40% 30% 70% / 60% 30% 70% 40%' :
-                                 index % 4 === 1 ? '40% 60% 70% 30% / 40% 70% 30% 60%' :
-                                 index % 4 === 2 ? '70% 30% 40% 60% / 30% 60% 40% 70%' :
-                                 '30% 70% 60% 40% / 70% 40% 60% 30%'
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        </section>
+          category={category}
+          index={index}
+          currentSection={currentSection}
+          sectionIndex={index + 1}
+        />
       ))}
 
       {/* Footer */}
-      <section className="section relative py-20 bg-gradient-to-t from-gray-900 to-black">
-        <div className="max-w-4xl mx-auto text-center px-6">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Ready to Transform Your Business?
-          </h2>
-          <p className="text-xl text-gray-400 mb-8">
-            Join the future of automotive intelligence with WayPoint
-          </p>
-          <Button 
-            size="lg"
-            className="bg-white text-black hover:bg-gray-200 text-lg px-8 py-3 rounded-full transition-all duration-300 hover:scale-105"
-          >
-            Get Started Today
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
-        </div>
-      </section>
+      <FooterSection />
 
       {/* Navigation dots */}
-      <div className="fixed right-8 top-1/2 -translate-y-1/2 z-50 space-y-3">
-        {[0, 1, 2, 3, 4, 5].map((section) => (
-          <button
-            key={section}
-            className={`block w-3 h-3 rounded-full transition-all duration-300 ${
-              currentSection === section 
-                ? 'bg-white scale-125' 
-                : 'bg-white/30 hover:bg-white/50'
-            }`}
-            onClick={() => {
-              const sectionElement = document.querySelectorAll('.section')[section]
-              sectionElement?.scrollIntoView({ behavior: 'smooth' })
-            }}
-          />
-        ))}
-      </div>
+      <NavigationDots currentSection={currentSection} totalSections={6} />
     </div>
   )
 }
