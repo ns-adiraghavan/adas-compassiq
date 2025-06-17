@@ -10,7 +10,7 @@ export function useStoredDocuments() {
       
       const { data, error } = await supabase
         .from('documents')
-        .select('id, file_name, file_type, file_size, uploaded_at, metadata')
+        .select('id, file_name, file_type, file_size, uploaded_at, metadata, file_path, storage_path')
         .order('uploaded_at', { ascending: false })
       
       if (error) {
