@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react"
 import { storeImageInSupabase } from "@/utils/storeImageInSupabase"
 import { useToast } from "@/hooks/use-toast"
@@ -9,6 +8,7 @@ const ImageStorage = () => {
   const [gmStoredUrl, setGmStoredUrl] = useState<string | null>(null)
   const [nioStoredUrl, setNioStoredUrl] = useState<string | null>(null)
   const [hyundaiStoredUrl, setHyundaiStoredUrl] = useState<string | null>(null)
+  const [zeekrStoredUrl, setZeekrStoredUrl] = useState<string | null>(null)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -42,10 +42,17 @@ const ImageStorage = () => {
           'Hyundai_cspe'
         )
         setHyundaiStoredUrl(hyundaiResult.url)
+
+        // Store Zeekr image
+        const zeekrResult = await storeImageInSupabase(
+          '/lovable-uploads/312b51e8-529e-455e-9113-231120d4fcd9.png',
+          'Zeekr_cspe'
+        )
+        setZeekrStoredUrl(zeekrResult.url)
         
         toast({
           title: "Images stored successfully",
-          description: "All four images (Mahindra_scpe, GM_cspe, Nio_cspe, and Hyundai_cspe) have been stored in Supabase database."
+          description: "All five images (Mahindra_scpe, GM_cspe, Nio_cspe, Hyundai_cspe, and Zeekr_cspe) have been stored in Supabase database."
         })
       } catch (error) {
         console.error('Failed to store images:', error)
@@ -133,6 +140,22 @@ const ImageStorage = () => {
             <img 
               src={hyundaiStoredUrl} 
               alt="Hyundai CSPE" 
+              className="max-w-full h-auto rounded-lg border border-white/10"
+            />
+          </div>
+        )}
+
+        {zeekrStoredUrl && (
+          <div className="space-y-4">
+            <div className="text-green-400">
+              ✓ Zeekr_cspe image successfully stored
+            </div>
+            <div className="text-white/60 text-sm break-all">
+              Storage URL: {zeekrStoredUrl}
+            </div>
+            <img 
+              src={zeekrStoredUrl} 
+              alt="Zeekr CSPE" 
               className="max-w-full h-auto rounded-lg border border-white/10"
             />
           </div>
