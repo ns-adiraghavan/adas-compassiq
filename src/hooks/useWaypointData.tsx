@@ -64,7 +64,7 @@ export function useDashboardMetrics() {
       const totalRows = csvData.reduce((sum, file) => sum + (file.row_count || 0), 0)
       const dataFiles = csvData.length
       
-      // Extract unique values from data
+      // Extract unique values from data using correct keys
       let uniqueOEMs = new Set()
       let uniqueCountries = new Set()
       let totalFeatureCount = 0
@@ -109,8 +109,8 @@ export function useFirstAvailableOEM() {
       waypointData.csvData.forEach(file => {
         if (file.data && Array.isArray(file.data)) {
           file.data.forEach((row: any) => {
-            if (row.OEM || row.oem) {
-              uniqueOEMs.add(row.OEM || row.oem)
+            if (row.OEM) {
+              uniqueOEMs.add(row.OEM)
             }
           })
         }

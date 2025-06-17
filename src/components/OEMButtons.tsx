@@ -19,8 +19,8 @@ const OEMButtons = ({ selectedOEM, onOEMChange }: OEMButtonsProps) => {
     waypointData.csvData.forEach(file => {
       if (file.data && Array.isArray(file.data)) {
         file.data.forEach((row: any) => {
-          if (row.OEM || row.oem) {
-            uniqueOEMs.add(row.OEM || row.oem)
+          if (row.OEM) {
+            uniqueOEMs.add(row.OEM)
           }
         })
       }

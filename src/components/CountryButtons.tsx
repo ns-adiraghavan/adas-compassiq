@@ -19,8 +19,8 @@ const CountryButtons = ({ selectedCountry, onCountryChange }: CountryButtonsProp
     waypointData.csvData.forEach(file => {
       if (file.data && Array.isArray(file.data)) {
         file.data.forEach((row: any) => {
-          if (row.Country || row.country) {
-            uniqueCountries.add(row.Country || row.country)
+          if (row.Country) {
+            uniqueCountries.add(row.Country)
           }
         })
       }
