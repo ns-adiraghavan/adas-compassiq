@@ -18,7 +18,10 @@ const DocumentDashboard = ({ documentAnalysis }: DocumentDashboardProps) => {
 
     // Get the latest document analysis from context data
     const latestAnalysis = waypointData.contextData
-      .filter(item => item.metadata?.source === 'document_upload')
+      .filter(item => {
+        const metadata = item.metadata as any
+        return metadata?.source === 'document_upload'
+      })
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]
 
     return latestAnalysis?.data_summary || documentAnalysis
