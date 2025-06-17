@@ -1,17 +1,19 @@
 
 import { useState, useEffect } from "react"
-import { Car, Bike, Truck, Tractor } from "lucide-react"
+import { Car, Bike, Truck, Tractor, Upload } from "lucide-react"
 import HeroSection from "@/components/HeroSection"
 import VehicleSection from "@/components/VehicleSection"
 import FooterSection from "@/components/FooterSection"
 import NavigationDots from "@/components/NavigationDots"
 import FloatingParticles from "@/components/FloatingParticles"
 import Dashboard from "@/components/Dashboard"
+import FileUpload from "@/components/FileUpload"
 
 const Index = () => {
   const [scrollY, setScrollY] = useState(0)
   const [currentSection, setCurrentSection] = useState(0)
   const [showDashboard, setShowDashboard] = useState(false)
+  const [showUpload, setShowUpload] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -70,6 +72,11 @@ const Index = () => {
     }
   ]
 
+  // Toggle upload view
+  if (showUpload) {
+    return <FileUpload />
+  }
+
   // Toggle dashboard view
   if (showDashboard) {
     return <Dashboard />
@@ -77,10 +84,17 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
-      {/* Hero Section with Dashboard Toggle */}
+      {/* Hero Section with Upload and Dashboard Toggle */}
       <div className="section">
         <HeroSection scrollY={scrollY} />
-        <div className="absolute top-6 right-6 z-50">
+        <div className="absolute top-6 right-6 z-50 flex gap-4">
+          <button
+            onClick={() => setShowUpload(true)}
+            className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-6 py-3 text-white hover:bg-white/20 transition-all duration-300 font-light flex items-center gap-2"
+          >
+            <Upload className="h-4 w-4" />
+            Upload Documents
+          </button>
           <button
             onClick={() => setShowDashboard(true)}
             className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-6 py-3 text-white hover:bg-white/20 transition-all duration-300 font-light"
