@@ -39,16 +39,28 @@ export function ImageCarousel() {
         <CarouselContent>
           {vehicleImages.map((image, index) => (
             <CarouselItem key={index}>
-              <div className="relative group">
-                <img
-                  src={image.src}
-                  alt={image.alt}
-                  className="w-full h-64 object-cover transition-all duration-500 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-6 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                  <h3 className="text-white font-bold text-xl mb-2">{image.title}</h3>
-                  <p className="text-gray-200 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
+              <div className="relative group p-8">
+                <div 
+                  className="relative overflow-hidden transition-all duration-500 group-hover:scale-105"
+                  style={{
+                    borderRadius: index % 2 === 0 
+                      ? "60% 40% 30% 70% / 60% 30% 70% 40%" 
+                      : "40% 60% 70% 30% / 40% 70% 30% 60%",
+                    transform: `rotate(${index % 2 === 0 ? '2deg' : '-2deg'})`,
+                    width: "100%",
+                    height: "300px"
+                  }}
+                >
+                  <img
+                    src={image.src}
+                    alt={image.alt}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                <div className="absolute bottom-4 left-4 right-4 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                  <h3 className="text-white font-bold text-xl mb-2 drop-shadow-lg">{image.title}</h3>
+                  <p className="text-gray-200 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100 drop-shadow-md">
                     Advanced automotive technologies and features
                   </p>
                 </div>

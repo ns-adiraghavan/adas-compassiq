@@ -30,33 +30,45 @@ const VehicleSection = ({ category, index, currentSection, sectionIndex }: Vehic
         <div className="max-w-6xl mx-auto relative z-10">
           <Link to={category.href} className="group block">
             <div className={`bg-gradient-to-br ${category.color}/20 to-white/5 backdrop-blur-md rounded-3xl p-8 border border-white/20 hover:border-white/40 transition-all duration-500 hover:scale-105 hover:bg-white/15 relative overflow-hidden`}>
-              {/* Background Image */}
-              <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-500">
-                <img 
-                  src={category.image} 
-                  alt={category.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent"></div>
-              </div>
               
-              {/* Content */}
-              <div className="relative z-10">
-                <div className="flex items-center mb-6">
-                  <div className="p-3 bg-white/20 rounded-2xl mr-4 group-hover:bg-white/30 transition-colors">
-                    <Icon className="h-8 w-8 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-light text-white">{category.title}</h3>
-                    <p className="text-lg text-white/70 font-light">{category.subtitle}</p>
-                  </div>
+              {/* Organic Image Shape */}
+              <div className="flex items-start gap-8">
+                <div 
+                  className="relative overflow-hidden flex-shrink-0 group-hover:scale-105 transition-all duration-500"
+                  style={{
+                    borderRadius: index && index % 2 === 0 
+                      ? "65% 35% 25% 75% / 55% 25% 75% 45%" 
+                      : "35% 65% 75% 25% / 45% 75% 25% 55%",
+                    transform: `rotate(${index && index % 2 === 0 ? '3deg' : '-3deg'})`,
+                    width: "200px",
+                    height: "150px"
+                  }}
+                >
+                  <img 
+                    src={category.image} 
+                    alt={category.title}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                <p className="text-white/60 font-light leading-relaxed mb-6">
-                  {category.description}
-                </p>
-                <div className="flex items-center text-white/80 font-medium group-hover:text-white transition-colors">
-                  <span className="mr-2">Explore</span>
-                  <span className="transform group-hover:translate-x-1 transition-transform">→</span>
+                
+                {/* Content */}
+                <div className="flex-1 relative z-10">
+                  <div className="flex items-center mb-6">
+                    <div className="p-3 bg-white/20 rounded-2xl mr-4 group-hover:bg-white/30 transition-colors">
+                      <Icon className="h-8 w-8 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-light text-white">{category.title}</h3>
+                      <p className="text-lg text-white/70 font-light">{category.subtitle}</p>
+                    </div>
+                  </div>
+                  <p className="text-white/60 font-light leading-relaxed mb-6">
+                    {category.description}
+                  </p>
+                  <div className="flex items-center text-white/80 font-medium group-hover:text-white transition-colors">
+                    <span className="mr-2">Explore</span>
+                    <span className="transform group-hover:translate-x-1 transition-transform">→</span>
+                  </div>
                 </div>
               </div>
             </div>
