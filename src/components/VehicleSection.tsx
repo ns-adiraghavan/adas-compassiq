@@ -1,6 +1,7 @@
 
 import { Car, Upload } from "lucide-react"
 import { Link } from "react-router-dom"
+import { useState, useEffect, useRef } from "react"
 
 interface VehicleCategory {
   title: string
@@ -20,29 +21,83 @@ interface VehicleSectionProps {
 }
 
 const VehicleSection = ({ category, index, currentSection, sectionIndex }: VehicleSectionProps) => {
+  const [scrollY, setScrollY] = useState(0)
+  const [isVisible, setIsVisible] = useState(false)
+  const sectionRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY)
+      
+      if (sectionRef.current) {
+        const rect = sectionRef.current.getBoundingClientRect()
+        const windowHeight = window.innerHeight
+        
+        // Check if section is in viewport
+        const isInView = rect.top < windowHeight * 0.8 && rect.bottom > windowHeight * 0.2
+        setIsVisible(isInView)
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    handleScroll() // Initial check
+    
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  // Calculate animation values based on scroll position
+  const getImageTransform = () => {
+    if (!sectionRef.current) return {}
+    
+    const rect = sectionRef.current.getBoundingClientRect()
+    const windowHeight = window.innerHeight
+    
+    // Calculate progress (0 to 1) as element enters viewport
+    const progress = Math.max(0, Math.min(1, (windowHeight - rect.top) / (windowHeight * 0.8)))
+    
+    // Scale from 0.8 to 1.05 with easing
+    const scale = 0.8 + (progress * 0.25)
+    
+    // Opacity from 0 to 1
+    const opacity = progress
+    
+    // Slight parallax movement
+    const translateY = (1 - progress) * 50
+    
+    return {
+      transform: `scale(${scale}) translateY(${translateY}px)`,
+      opacity,
+      transition: 'none' // Smooth scroll, no CSS transitions
+    }
+  }
+
   // If category prop is provided, render single category
   if (category) {
     const Icon = category.icon
     const isEven = index !== undefined && index % 2 === 0
     
     return (
-      <section className="py-20 px-8 bg-gradient-to-b from-black to-gray-900 relative overflow-hidden">
+      <section 
+        ref={sectionRef}
+        className="py-20 px-8 bg-gradient-to-b from-black to-gray-900 relative overflow-hidden"
+      >
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 blur-3xl"></div>
         
         <div className="max-w-7xl mx-auto relative z-10">
           <Link to={category.href} className="group block">
             <div className={`flex items-center gap-12 ${isEven ? 'flex-row' : 'flex-row-reverse'}`}>
               
-              {/* Large Curved Image */}
+              {/* Large Curved Image with Scroll Animation */}
               <div 
-                className="relative overflow-hidden flex-shrink-0 group-hover:scale-105 transition-all duration-500"
+                className="relative overflow-hidden flex-shrink-0 group-hover:scale-110 transition-transform duration-700 ease-out"
                 style={{
                   borderRadius: isEven 
                     ? "65% 35% 25% 75% / 55% 25% 75% 45%" 
                     : "35% 65% 75% 25% / 45% 75% 25% 55%",
                   transform: `rotate(${isEven ? '3deg' : '-3deg'})`,
-                  width: "400px",
-                  height: "300px"
+                  width: "450px",
+                  height: "350px",
+                  ...getImageTransform()
                 }}
               >
                 <img 
@@ -50,11 +105,18 @@ const VehicleSection = ({ category, index, currentSection, sectionIndex }: Vehic
                   alt={category.title}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               </div>
               
-              {/* Content */}
-              <div className="flex-1 relative z-10">
+              {/* Content with subtle animation */}
+              <div 
+                className="flex-1 relative z-10"
+                style={{
+                  transform: `translateY(${isVisible ? 0 : 30}px)`,
+                  opacity: isVisible ? 1 : 0.7,
+                  transition: 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                }}
+              >
                 <div className="flex items-center mb-8">
                   <div className="p-4 bg-white/20 rounded-3xl mr-6 group-hover:bg-white/30 transition-colors backdrop-blur-sm">
                     <Icon className="h-10 w-10 text-white" />
