@@ -58,7 +58,7 @@ const VehicleCards = () => {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   )
 }
 
