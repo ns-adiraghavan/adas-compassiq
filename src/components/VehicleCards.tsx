@@ -1,6 +1,5 @@
 
 import { Car, Upload } from "lucide-react"
-import { Link } from "react-router-dom"
 
 const VehicleCards = () => {
   return (
@@ -19,7 +18,7 @@ const VehicleCards = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Passenger Cars Card */}
-          <Link to="/passenger-cars" className="group block">
+          <div className="group block">
             <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md rounded-3xl p-8 border border-white/20 hover:border-white/40 transition-all duration-500 hover:scale-105 hover:bg-white/15">
               <div className="flex items-center mb-6">
                 <div className="p-3 bg-blue-500/20 rounded-2xl mr-4 group-hover:bg-blue-500/30 transition-colors">
@@ -32,14 +31,14 @@ const VehicleCards = () => {
                 feature analysis, and competitive intelligence across global markets.
               </p>
               <div className="flex items-center text-blue-400 font-medium group-hover:text-blue-300 transition-colors">
-                <span className="mr-2">Explore Analytics</span>
+                <span className="mr-2">Coming Soon</span>
                 <span className="transform group-hover:translate-x-1 transition-transform">→</span>
               </div>
             </div>
-          </Link>
+          </div>
 
           {/* Document Analysis Card */}
-          <Link to="/document-analysis" className="group block">
+          <div className="group block">
             <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md rounded-3xl p-8 border border-white/20 hover:border-white/40 transition-all duration-500 hover:scale-105 hover:bg-white/15">
               <div className="flex items-center mb-6">
                 <div className="p-3 bg-purple-500/20 rounded-2xl mr-4 group-hover:bg-purple-500/30 transition-colors">
@@ -52,14 +51,14 @@ const VehicleCards = () => {
                 dashboards that correlate with your automotive data.
               </p>
               <div className="flex items-center text-purple-400 font-medium group-hover:text-purple-300 transition-colors">
-                <span className="mr-2">Upload & Analyze</span>
+                <span className="mr-2">Coming Soon</span>
                 <span className="transform group-hover:translate-x-1 transition-transform">→</span>
               </div>
             </div>
-          </Link>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
   )
 }
 

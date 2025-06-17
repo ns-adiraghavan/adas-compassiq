@@ -1,21 +1,16 @@
 
 import { useState, useEffect } from "react"
-import { Car, Bike, Truck, Tractor, Upload } from "lucide-react"
+import { Car, Bike, Truck, Tractor } from "lucide-react"
 import HeroSection from "@/components/HeroSection"
 import VehicleSection from "@/components/VehicleSection"
 import FooterSection from "@/components/FooterSection"
 import NavigationDots from "@/components/NavigationDots"
 import FloatingParticles from "@/components/FloatingParticles"
-import Dashboard from "@/components/Dashboard"
-import FileUpload from "@/components/FileUpload"
 import { getVehicleImageUrl, uploadVehicleImages } from "@/utils/uploadVehicleImages"
 
 const Index = () => {
   const [scrollY, setScrollY] = useState(0)
   const [currentSection, setCurrentSection] = useState(0)
-  const [showDashboard, setShowDashboard] = useState(false)
-  const [showUpload, setShowUpload] = useState(false)
-  const [analysisData, setAnalysisData] = useState<any>(null)
   const [imagesUploaded, setImagesUploaded] = useState(false)
 
   useEffect(() => {
@@ -58,7 +53,7 @@ const Index = () => {
       description: "Advanced AI-powered insights for passenger vehicle features and technologies",
       image: getVehicleImageUrl("passenger-car.jpg"),
       icon: Car,
-      href: "/passenger-cars",
+      href: "#",
       color: "from-blue-600 to-purple-600"
     },
     {
@@ -67,7 +62,7 @@ const Index = () => {
       description: "Next-generation analytics for motorcycles and electric two-wheelers",
       image: getVehicleImageUrl("two-wheeler.jpg"),
       icon: Bike,
-      href: "/two-wheelers",
+      href: "#",
       color: "from-green-600 to-teal-600"
     },
     {
@@ -76,7 +71,7 @@ const Index = () => {
       description: "Comprehensive data analytics for trucks and commercial transportation",
       image: getVehicleImageUrl("commercial-vehicle.jpg"),
       icon: Truck,
-      href: "/commercial-vehicles",
+      href: "#",
       color: "from-orange-600 to-red-600"
     },
     {
@@ -85,46 +80,16 @@ const Index = () => {
       description: "Revolutionary insights for agricultural machinery and automation",
       image: getVehicleImageUrl("agriculture-vehicle.jpg"),
       icon: Tractor,
-      href: "/agriculture-vehicles",
+      href: "#",
       color: "from-yellow-600 to-orange-600"
     }
   ]
 
-  const handleFileAnalyzed = (analysis: any) => {
-    setAnalysisData(analysis)
-    console.log('File analysis completed:', analysis)
-  }
-
-  // Toggle upload view
-  if (showUpload) {
-    return <FileUpload onFileAnalyzed={handleFileAnalyzed} />
-  }
-
-  // Toggle dashboard view
-  if (showDashboard) {
-    return <Dashboard />
-  }
-
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
-      {/* Hero Section with Upload and Dashboard Toggle */}
+      {/* Hero Section */}
       <div className="section">
         <HeroSection scrollY={scrollY} />
-        <div className="absolute top-6 right-6 z-50 flex gap-4">
-          <button
-            onClick={() => setShowUpload(true)}
-            className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-6 py-3 text-white hover:bg-white/20 transition-all duration-300 font-light flex items-center gap-2"
-          >
-            <Upload className="h-4 w-4" />
-            Upload Documents
-          </button>
-          <button
-            onClick={() => setShowDashboard(true)}
-            className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-6 py-3 text-white hover:bg-white/20 transition-all duration-300 font-light"
-          >
-            View Live Data
-          </button>
-        </div>
       </div>
       <FloatingParticles scrollY={scrollY} />
 
