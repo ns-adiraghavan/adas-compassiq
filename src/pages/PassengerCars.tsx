@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react"
-import { ArrowLeft, TrendingUp, Globe, Users, Zap } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Link } from "react-router-dom"
@@ -8,12 +8,10 @@ import WaypointLogo from "@/components/WaypointLogo"
 import OEMButtons from "@/components/OEMButtons"
 import CountryButtons from "@/components/CountryButtons"
 import InsightsSection from "@/components/InsightsSection"
-import { KPICard } from "@/components/KPICard"
-import { useFirstAvailableOEM, useDashboardMetrics } from "@/hooks/useWaypointData"
+import { useFirstAvailableOEM } from "@/hooks/useWaypointData"
 
 const PassengerCars = () => {
   const { data: firstOEM, isLoading: isLoadingFirstOEM } = useFirstAvailableOEM()
-  const { data: dashboardMetrics, isLoading: metricsLoading } = useDashboardMetrics()
   const [selectedOEM, setSelectedOEM] = useState("")
   const [selectedCountry, setSelectedCountry] = useState("Global")
   const [selectedInsight, setSelectedInsight] = useState("Overview")
@@ -47,57 +45,6 @@ const PassengerCars = () => {
           <div className="w-32"></div> {/* Spacer for balance */}
         </div>
       </header>
-
-      {/* KPI Dashboard */}
-      <div className="px-6 py-8 border-b border-gray-700/50">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-xl font-light text-white/90 mb-6">Market Overview</h2>
-          {metricsLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              {[1, 2, 3, 4].map((i) => (
-                <Card key={i} className="bg-gray-800/50 border-gray-700/50 p-6 h-32 animate-pulse">
-                  <div className="space-y-3">
-                    <div className="h-4 bg-gray-700 rounded w-3/4"></div>
-                    <div className="h-8 bg-gray-700 rounded w-1/2"></div>
-                    <div className="h-3 bg-gray-700 rounded w-2/3"></div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <KPICard
-                title="Total Features"
-                value={dashboardMetrics?.totalFeatures?.toLocaleString() || "0"}
-                trend={8}
-                subtitle="Active automotive features"
-                icon={<Zap className="h-5 w-5" />}
-              />
-              <KPICard
-                title="OEM Partners"
-                value={dashboardMetrics?.oemPartners || 0}
-                trend={12}
-                subtitle="Manufacturing partners"
-                icon={<Users className="h-5 w-5" />}
-              />
-              <KPICard
-                title="Global Coverage"
-                value={`${dashboardMetrics?.globalCoverage || 0} Countries`}
-                trend={5}
-                subtitle="Market presence"
-                icon={<Globe className="h-5 w-5" />}
-              />
-              <KPICard
-                title="Data Quality"
-                value={`${dashboardMetrics?.availabilityRate || 0}%`}
-                trend={3}
-                subtitle="Availability rate"
-                icon={<TrendingUp className="h-5 w-5" />}
-              />
-            </div>
-          )}
-        </div>
-      </div>
 
       {/* OEM Selection */}
       <div className="px-6 py-4 border-b border-gray-700/50 bg-gray-900/30">
