@@ -6,12 +6,10 @@ import VehicleSection from "@/components/VehicleSection"
 import FooterSection from "@/components/FooterSection"
 import NavigationDots from "@/components/NavigationDots"
 import FloatingParticles from "@/components/FloatingParticles"
-import { getVehicleImageUrl, uploadVehicleImages } from "@/utils/uploadVehicleImages"
 
 const Index = () => {
   const [scrollY, setScrollY] = useState(0)
   const [currentSection, setCurrentSection] = useState(0)
-  const [imagesUploaded, setImagesUploaded] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,27 +29,12 @@ const Index = () => {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  useEffect(() => {
-    // Upload images to Supabase on component mount
-    const uploadImages = async () => {
-      try {
-        await uploadVehicleImages()
-        setImagesUploaded(true)
-        console.log('Vehicle images uploaded to Supabase successfully')
-      } catch (error) {
-        console.error('Error uploading vehicle images:', error)
-      }
-    }
-
-    uploadImages()
-  }, [])
-
   const vehicleCategories = [
     {
       title: "Passenger Cars",
       subtitle: "Premium Automotive Intelligence",
       description: "Advanced AI-powered insights for passenger vehicle features and technologies",
-      image: getVehicleImageUrl("passenger-car.jpg"),
+      image: "/lovable-uploads/c13e6208-3f44-451f-9b43-5f2707ee413c.png",
       icon: Car,
       href: "#",
       color: "from-blue-600 to-purple-600"
@@ -60,7 +43,7 @@ const Index = () => {
       title: "Two Wheelers",
       subtitle: "Smart Mobility Solutions",
       description: "Next-generation analytics for motorcycles and electric two-wheelers",
-      image: getVehicleImageUrl("two-wheeler.jpg"),
+      image: "/lovable-uploads/5bc26e8f-c225-4798-a305-557d8cc8b4af.png",
       icon: Bike,
       href: "#",
       color: "from-green-600 to-teal-600"
@@ -69,7 +52,7 @@ const Index = () => {
       title: "Commercial Vehicles",
       subtitle: "Fleet Intelligence Platform",
       description: "Comprehensive data analytics for trucks and commercial transportation",
-      image: getVehicleImageUrl("commercial-vehicle.jpg"),
+      image: "/lovable-uploads/849e6ee5-f48d-44b5-b934-674f44399eeb.png",
       icon: Truck,
       href: "#",
       color: "from-orange-600 to-red-600"
@@ -78,7 +61,7 @@ const Index = () => {
       title: "Agriculture Vehicles",
       subtitle: "Smart Farming Technology",
       description: "Revolutionary insights for agricultural machinery and automation",
-      image: getVehicleImageUrl("agriculture-vehicle.jpg"),
+      image: "/lovable-uploads/a639b2c6-adaa-455a-adb5-c2c550261d96.png",
       icon: Tractor,
       href: "#",
       color: "from-yellow-600 to-orange-600"
