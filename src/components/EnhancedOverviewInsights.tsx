@@ -1,7 +1,7 @@
 
 import { Card } from "@/components/ui/card"
 import { useWaypointData } from "@/hooks/useWaypointData"
-import { TrendingUp, Globe, Zap, Database } from "lucide-react"
+import { TrendingUp, Globe } from "lucide-react"
 
 interface EnhancedOverviewInsightsProps {
   selectedOEM: string
@@ -32,7 +32,6 @@ const EnhancedOverviewInsights = ({ selectedOEM, selectedCountry }: EnhancedOver
     return (
       <Card className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 border-gray-700/30 p-8 text-center backdrop-blur-sm">
         <div className="flex flex-col items-center space-y-4">
-          <Database className="h-12 w-12 text-gray-400" />
           <h3 className="text-xl font-light text-white mb-2">Select an OEM to Begin</h3>
           <p className="text-gray-400 font-light max-w-md">
             Choose an automotive manufacturer from the selection above to view detailed market intelligence and analytics.
@@ -65,31 +64,22 @@ const EnhancedOverviewInsights = ({ selectedOEM, selectedCountry }: EnhancedOver
         </div>
       </Card>
 
-      {/* Summary Stats Section - Placeholder */}
-      <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-8 text-center backdrop-blur-sm">
-        <div className="flex flex-col items-center space-y-4">
-          <Zap className="h-12 w-12 text-gray-400" />
-          <h3 className="text-xl font-light text-white mb-2">Summary Statistics</h3>
-          <p className="text-gray-400 font-light">This section will show key metrics and statistics</p>
-        </div>
+      {/* Summary Stats Section - Empty */}
+      <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-8 backdrop-blur-sm">
+        <h3 className="text-xl font-light text-white mb-4">Summary Statistics</h3>
+        {/* Content will be built here */}
       </Card>
 
-      {/* Charts Section - Placeholder */}
-      <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-8 text-center backdrop-blur-sm">
-        <div className="flex flex-col items-center space-y-4">
-          <Database className="h-12 w-12 text-gray-400" />
-          <h3 className="text-xl font-light text-white mb-2">Data Visualization</h3>
-          <p className="text-gray-400 font-light">Charts and graphs will be displayed here</p>
-        </div>
+      {/* Charts Section - Empty */}
+      <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-8 backdrop-blur-sm">
+        <h3 className="text-xl font-light text-white mb-4">Data Visualization</h3>
+        {/* Content will be built here */}
       </Card>
 
-      {/* Analysis Section - Placeholder */}
-      <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-8 text-center backdrop-blur-sm">
-        <div className="flex flex-col items-center space-y-4">
-          <TrendingUp className="h-12 w-12 text-gray-400" />
-          <h3 className="text-xl font-light text-white mb-2">Detailed Analysis</h3>
-          <p className="text-gray-400 font-light">In-depth analysis and insights will appear here</p>
-        </div>
+      {/* Analysis Section - Empty */}
+      <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-8 backdrop-blur-sm">
+        <h3 className="text-xl font-light text-white mb-4">Detailed Analysis</h3>
+        {/* Content will be built here */}
       </Card>
     </div>
   )
