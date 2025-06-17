@@ -10,7 +10,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
+  SidebarSeparator,
 } from "@/components/ui/sidebar"
+import SidebarPartnerEcosystem from "./SidebarPartnerEcosystem"
 
 const menuItems = [
   {
@@ -50,7 +52,11 @@ const menuItems = [
   },
 ]
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  selectedOEM?: string
+}
+
+export function AppSidebar({ selectedOEM = "" }: AppSidebarProps) {
   return (
     <Sidebar>
       <SidebarHeader className="p-6 border-b">
@@ -81,6 +87,12 @@ export function AppSidebar() {
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
+        </SidebarGroup>
+        
+        <SidebarSeparator />
+        
+        <SidebarGroup>
+          <SidebarPartnerEcosystem selectedOEM={selectedOEM} />
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
