@@ -14,6 +14,7 @@ const Index = () => {
   const [currentSection, setCurrentSection] = useState(0)
   const [showDashboard, setShowDashboard] = useState(false)
   const [showUpload, setShowUpload] = useState(false)
+  const [analysisData, setAnalysisData] = useState<any>(null)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -72,9 +73,14 @@ const Index = () => {
     }
   ]
 
+  const handleFileAnalyzed = (analysis: any) => {
+    setAnalysisData(analysis)
+    console.log('File analysis completed:', analysis)
+  }
+
   // Toggle upload view
   if (showUpload) {
-    return <FileUpload />
+    return <FileUpload onFileAnalyzed={handleFileAnalyzed} />
   }
 
   // Toggle dashboard view
