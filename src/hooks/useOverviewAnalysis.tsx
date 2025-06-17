@@ -1,6 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query"
 import { useWaypointData } from "./useWaypointData"
+import { supabase } from "@/integrations/supabase/client"
 
 interface OverviewAnalysisProps {
   selectedOEM: string
@@ -17,6 +18,8 @@ export function useOverviewAnalysis({ selectedOEM, selectedCountry }: OverviewAn
         return null
       }
 
+      console.log('Starting overview analysis for:', selectedOEM, selectedCountry)
+
       // Filter CSV data
       const filteredData: any[] = []
       waypointData.csvData.forEach(file => {
@@ -31,6 +34,8 @@ export function useOverviewAnalysis({ selectedOEM, selectedCountry }: OverviewAn
           })
         }
       })
+
+      console.log('Filtered data:', filteredData.length, 'records')
 
       // Prepare data for OpenAI analysis
       const analysisPrompt = `
@@ -83,26 +88,24 @@ export function useOverviewAnalysis({ selectedOEM, selectedCountry }: OverviewAn
       `
 
       try {
-        const response = await fetch('/api/openai-analysis', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
+        console.log('Calling OpenAI analysis function...')
+        const { data, error } = await supabase.functions.invoke('openai-analysis', {
+          body: {
             prompt: analysisPrompt,
             selectedOEM,
             selectedCountry,
             filteredData: filteredData.slice(0, 10), // Limit data size
             contextData: waypointData.contextData
-          })
+          }
         })
 
-        if (!response.ok) {
-          throw new Error('Failed to get OpenAI analysis')
+        if (error) {
+          console.error('Supabase function error:', error)
+          throw error
         }
 
-        const result = await response.json()
-        return result.analysis || null
+        console.log('OpenAI analysis result:', data)
+        return data.analysis || null
       } catch (error) {
         console.error('OpenAI analysis error:', error)
         
@@ -116,6 +119,8 @@ export function useOverviewAnalysis({ selectedOEM, selectedCountry }: OverviewAn
 }
 
 function generateFallbackAnalysis(filteredData: any[], selectedOEM: string, selectedCountry: string) {
+  console.log('Generating fallback analysis for:', selectedOEM)
+  
   const features = new Set<string>()
   const countries = new Set<string>()
   const categories = new Set<string>()
@@ -137,7 +142,7 @@ function generateFallbackAnalysis(filteredData: any[], selectedOEM: string, sele
     if (row["Luxury Segment"] && row["Luxury Segment"].toLowerCase() !== 'no') segments.luxury = true
   })
 
-  return {
+  const fallbackAnalysis = {
     companyOverview: `${selectedOEM} is a leading automotive manufacturer with a strong focus on connected vehicle technologies. The company offers comprehensive digital services across multiple market segments and geographical regions.`,
     connectedPlatform: {
       name: `${selectedOEM} Connect`,
@@ -163,4 +168,7 @@ function generateFallbackAnalysis(filteredData: any[], selectedOEM: string, sele
       marketShare: "Market share data not available"
     }
   }
+
+  console.log('Fallback analysis generated:', fallbackAnalysis)
+  return fallbackAnalysis
 }

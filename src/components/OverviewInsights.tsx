@@ -12,7 +12,9 @@ interface OverviewInsightsProps {
 
 const OverviewInsights = ({ selectedOEM, selectedCountry }: OverviewInsightsProps) => {
   const { data: waypointData, isLoading } = useWaypointData()
-  const { data: analysisData, isLoading: isAnalysisLoading } = useOverviewAnalysis({ selectedOEM, selectedCountry })
+  const { data: analysisData, isLoading: isAnalysisLoading, error: analysisError } = useOverviewAnalysis({ selectedOEM, selectedCountry })
+
+  console.log('OverviewInsights render:', { selectedOEM, selectedCountry, isLoading, isAnalysisLoading, analysisData, analysisError })
 
   const filteredData = useMemo(() => {
     if (!waypointData?.csvData?.length || !selectedOEM) return []
@@ -31,10 +33,11 @@ const OverviewInsights = ({ selectedOEM, selectedCountry }: OverviewInsightsProp
       }
     })
     
+    console.log('Filtered data in component:', allRows.length, 'records')
     return allRows
   }, [waypointData, selectedOEM, selectedCountry])
 
-  if (isLoading || isAnalysisLoading) {
+  if (isLoading) {
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -61,6 +64,35 @@ const OverviewInsights = ({ selectedOEM, selectedCountry }: OverviewInsightsProp
     )
   }
 
+  // Show content even if analysis is loading
+  const displayData = analysisData || {
+    companyOverview: `${selectedOEM} is a leading automotive manufacturer with a strong focus on connected vehicle technologies and digital innovation.`,
+    connectedPlatform: {
+      name: `${selectedOEM} Connect`,
+      description: `Integrated connected services platform delivering comprehensive digital experiences`,
+      features: ["Connected Services", "Digital Platform", "Smart Integration", "Mobile Apps", "Cloud Services", "Data Analytics"]
+    },
+    lighthouseFeatures: [
+      { name: "Advanced Connectivity", description: "Seamless integration across all touchpoints", category: "Platform" },
+      { name: "Digital Services", description: "Comprehensive digital service ecosystem", category: "Services" },
+      { name: "Smart Analytics", description: "AI-powered insights and recommendations", category: "Technology" },
+      { name: "Mobile Experience", description: "Native mobile applications and interfaces", category: "User Experience" }
+    ],
+    vehicleTypes: { entry: true, mid: true, premium: true, luxury: false },
+    geographicalPresence: selectedCountry === "Global" ? ["North America", "Europe", "Asia Pacific"] : [selectedCountry],
+    keyServices: {
+      safety: ["Emergency Services", "Vehicle Security", "Driver Assistance"],
+      maintenance: ["Predictive Maintenance", "Service Scheduling", "Remote Diagnostics"],
+      otaUpdates: ["Software Updates", "Feature Deployment", "System Optimization"],
+      telematics: ["Vehicle Tracking", "Usage Analytics", "Performance Monitoring"],
+      remoteControl: ["Remote Start", "Climate Control", "Door Lock/Unlock"]
+    },
+    financialInsights: {
+      revenue: "Revenue data not publicly available",
+      marketShare: "Market position varies by region"
+    }
+  }
+
   return (
     <div className="space-y-8">
       {/* Header Section */}
@@ -70,6 +102,12 @@ const OverviewInsights = ({ selectedOEM, selectedCountry }: OverviewInsightsProp
           Comprehensive analysis of connected services and market presence
           {selectedCountry !== "Global" && ` in ${selectedCountry}`}
         </p>
+        {isAnalysisLoading && (
+          <div className="flex items-center mt-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400 mr-2"></div>
+            <span className="text-blue-400 text-sm">AI analysis in progress...</span>
+          </div>
+        )}
       </div>
 
       {/* Company Overview & Connected Platform */}
@@ -84,21 +122,21 @@ const OverviewInsights = ({ selectedOEM, selectedCountry }: OverviewInsightsProp
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-white/70 text-sm leading-relaxed">
-              {analysisData?.companyOverview || `${selectedOEM} is a leading automotive manufacturer focused on connected vehicle technologies and digital services.`}
+              {displayData.companyOverview}
             </p>
             
             {/* Financial Performance */}
-            {analysisData?.financialInsights && (
+            {displayData.financialInsights && (
               <div className="bg-gray-800/50 rounded-lg p-4">
                 <h4 className="text-sm font-medium text-white/80 mb-2">Financial Performance</h4>
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
                     <span className="text-white/60">Revenue:</span>
-                    <span className="text-white">{analysisData.financialInsights.revenue}</span>
+                    <span className="text-white">{displayData.financialInsights.revenue}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/60">Market Share:</span>
-                    <span className="text-white">{analysisData.financialInsights.marketShare}</span>
+                    <span className="text-white">{displayData.financialInsights.marketShare}</span>
                   </div>
                 </div>
               </div>
@@ -118,14 +156,14 @@ const OverviewInsights = ({ selectedOEM, selectedCountry }: OverviewInsightsProp
             <div className="space-y-4">
               <div>
                 <h3 className="text-lg font-semibold text-purple-100">
-                  {analysisData?.connectedPlatform?.name || `${selectedOEM} Connect`}
+                  {displayData.connectedPlatform?.name}
                 </h3>
                 <p className="text-purple-200/80 text-sm mt-2">
-                  {analysisData?.connectedPlatform?.description || "Advanced connected car platform offering integrated digital services"}
+                  {displayData.connectedPlatform?.description}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
-                {(analysisData?.connectedPlatform?.features || []).slice(0, 6).map((feature, index) => (
+                {(displayData.connectedPlatform?.features || []).slice(0, 6).map((feature, index) => (
                   <span key={index} className="px-3 py-1 bg-purple-600/20 text-purple-300 text-xs rounded-full border border-purple-600/30">
                     {feature}
                   </span>
@@ -137,7 +175,7 @@ const OverviewInsights = ({ selectedOEM, selectedCountry }: OverviewInsightsProp
       </div>
 
       {/* Lighthouse Features */}
-      {analysisData?.lighthouseFeatures?.length > 0 && (
+      {displayData.lighthouseFeatures?.length > 0 && (
         <Card className="bg-gradient-to-br from-yellow-900/20 to-orange-900/20 border-yellow-600/30 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="text-yellow-200 flex items-center">
@@ -147,7 +185,7 @@ const OverviewInsights = ({ selectedOEM, selectedCountry }: OverviewInsightsProp
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {analysisData.lighthouseFeatures.map((feature, index) => (
+              {displayData.lighthouseFeatures.map((feature, index) => (
                 <div key={index} className="bg-yellow-600/10 border border-yellow-600/20 rounded-lg p-3">
                   <h4 className="text-yellow-200 font-medium text-sm mb-1">{feature.name}</h4>
                   <p className="text-yellow-300/70 text-xs">{feature.description}</p>
@@ -167,7 +205,7 @@ const OverviewInsights = ({ selectedOEM, selectedCountry }: OverviewInsightsProp
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
-              {Object.entries(analysisData?.vehicleTypes || {}).map(([type, available]) => (
+              {Object.entries(displayData.vehicleTypes || {}).map(([type, available]) => (
                 <div key={type} className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
                   <span className="text-white/80 capitalize">{type}</span>
                   {available ? (
@@ -191,7 +229,7 @@ const OverviewInsights = ({ selectedOEM, selectedCountry }: OverviewInsightsProp
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {(analysisData?.geographicalPresence || []).slice(0, 8).map((country, index) => (
+              {(displayData.geographicalPresence || []).slice(0, 8).map((country, index) => (
                 <div key={index} className="flex items-center justify-between">
                   <span className="text-white/80 text-sm">{country}</span>
                   <CheckCircle className="h-4 w-4 text-green-400" />
@@ -209,7 +247,7 @@ const OverviewInsights = ({ selectedOEM, selectedCountry }: OverviewInsightsProp
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            {Object.entries(analysisData?.keyServices || {}).map(([category, services]) => (
+            {Object.entries(displayData.keyServices || {}).map(([category, services]) => (
               <div key={category} className="bg-green-600/10 border border-green-600/20 rounded-lg p-4">
                 <h4 className="text-green-200 font-medium text-sm mb-2 capitalize flex items-center">
                   {category === 'safety' && <span className="mr-2">🛡️</span>}
