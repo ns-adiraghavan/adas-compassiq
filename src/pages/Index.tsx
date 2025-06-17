@@ -1,174 +1,242 @@
 
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/AppSidebar"
-import { KPICard } from "@/components/KPICard"
-import { FeatureChart } from "@/components/FeatureChart"
-import { ImageCarousel } from "@/components/ImageCarousel"
-import { DataTable } from "@/components/DataTable"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Car, Truck, Brain, Globe, TrendingUp, Database, Sparkles } from "lucide-react"
-import { useDashboardMetrics } from "@/hooks/useWaypointData"
+import { ArrowRight, Car, Motorcycle, Truck, Tractor } from "lucide-react"
 
 const Index = () => {
-  const { data: metrics, isLoading: metricsLoading } = useDashboardMetrics()
+  const [scrollY, setScrollY] = useState(0)
+  const [currentSection, setCurrentSection] = useState(0)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY)
+      
+      // Determine current section based on scroll position
+      const sections = document.querySelectorAll('.section')
+      sections.forEach((section, index) => {
+        const rect = section.getBoundingClientRect()
+        if (rect.top <= window.innerHeight / 2 && rect.bottom >= window.innerHeight / 2) {
+          setCurrentSection(index)
+        }
+      })
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const vehicleCategories = [
+    {
+      title: "Passenger Cars",
+      subtitle: "Premium Automotive Intelligence",
+      description: "Advanced AI-powered insights for passenger vehicle features and technologies",
+      image: "/lovable-uploads/c13e6208-3f44-451f-9b43-5f2707ee413c.png",
+      icon: Car,
+      href: "/passenger-cars",
+      color: "from-blue-600 to-purple-600"
+    },
+    {
+      title: "Two Wheelers",
+      subtitle: "Smart Mobility Solutions",
+      description: "Next-generation analytics for motorcycles and electric two-wheelers",
+      image: "/lovable-uploads/5bc26e8f-c225-4798-a305-557d8cc8b4af.png",
+      icon: Motorcycle,
+      href: "/two-wheelers",
+      color: "from-green-600 to-teal-600"
+    },
+    {
+      title: "Commercial Vehicles",
+      subtitle: "Fleet Intelligence Platform",
+      description: "Comprehensive data analytics for trucks and commercial transportation",
+      image: "/lovable-uploads/849e6ee5-f48d-44b5-b934-674f44399eeb.png",
+      icon: Truck,
+      href: "/commercial-vehicles",
+      color: "from-orange-600 to-red-600"
+    },
+    {
+      title: "Agriculture Vehicles",
+      subtitle: "Smart Farming Technology",
+      description: "Revolutionary insights for agricultural machinery and automation",
+      image: "/lovable-uploads/a639b2c6-adaa-455a-adb5-c2c550261d96.png",
+      icon: Tractor,
+      href: "/agriculture-vehicles",
+      color: "from-yellow-600 to-orange-600"
+    }
+  ]
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <AppSidebar />
-        <main className="flex-1 p-6 bg-gradient-to-br from-background via-background to-primary/5">
-          <div className="max-w-7xl mx-auto space-y-8">
-            {/* Header */}
-            <div className="flex items-center justify-between animate-fade-in">
-              <div className="flex items-center gap-4">
-                <SidebarTrigger className="hover:bg-primary/10 transition-colors duration-200" />
-                <div>
-                  <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
-                    WayPoint Dashboard
-                  </h1>
-                  <p className="text-muted-foreground mt-1">AI-Powered Automotive Intelligence Platform</p>
+    <div className="min-h-screen bg-black text-white overflow-x-hidden">
+      {/* Hero Section */}
+      <section className="section relative h-screen flex items-center justify-center">
+        <div 
+          className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-purple-900/20"
+          style={{
+            transform: `translateY(${scrollY * 0.5}px)`,
+          }}
+        />
+        <div className="relative z-10 text-center max-w-4xl mx-auto px-6">
+          <h1 
+            className="text-7xl md:text-9xl font-bold mb-6 bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent"
+            style={{
+              transform: `translateY(${scrollY * 0.2}px)`,
+              opacity: Math.max(0, 1 - scrollY / 600)
+            }}
+          >
+            WayPoint
+          </h1>
+          <p 
+            className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto"
+            style={{
+              transform: `translateY(${scrollY * 0.3}px)`,
+              opacity: Math.max(0, 1 - scrollY / 500)
+            }}
+          >
+            AI-Powered Automotive Intelligence Platform
+          </p>
+          <div 
+            style={{
+              transform: `translateY(${scrollY * 0.4}px)`,
+              opacity: Math.max(0, 1 - scrollY / 400)
+            }}
+          >
+            <Button 
+              size="lg" 
+              className="bg-white text-black hover:bg-gray-200 text-lg px-8 py-3 rounded-full transition-all duration-300 hover:scale-105"
+            >
+              Explore Solutions
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+        
+        {/* Floating particles */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-white rounded-full opacity-30"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                transform: `translateY(${scrollY * (0.1 + Math.random() * 0.2)}px)`,
+                animationDelay: `${Math.random() * 2}s`,
+              }}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* Vehicle Categories */}
+      {vehicleCategories.map((category, index) => (
+        <section 
+          key={category.title}
+          className="section relative h-screen flex items-center justify-center"
+        >
+          <div className="absolute inset-0 overflow-hidden">
+            <img
+              src={category.image}
+              alt={category.title}
+              className="w-full h-full object-cover"
+              style={{
+                transform: `scale(${1 + Math.max(0, (scrollY - (index + 1) * window.innerHeight) / window.innerHeight) * 0.1})`,
+                filter: 'brightness(0.4)'
+              }}
+            />
+            <div className={`absolute inset-0 bg-gradient-to-r ${category.color} opacity-30`} />
+          </div>
+          
+          <div className="relative z-10 max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+            <div 
+              className={`space-y-6 ${index % 2 === 0 ? 'md:order-1' : 'md:order-2'}`}
+              style={{
+                transform: currentSection === index + 1 ? 'translateX(0)' : `translateX(${index % 2 === 0 ? '-50px' : '50px'})`,
+                opacity: currentSection === index + 1 ? 1 : 0.7,
+                transition: 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+              }}
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <div className={`p-3 rounded-full bg-gradient-to-r ${category.color}`}>
+                  <category.icon className="h-8 w-8 text-white" />
                 </div>
-              </div>
-              <Button className="bg-primary hover:bg-primary/90 transition-all duration-300 hover:scale-105 group">
-                <Brain className="w-4 h-4 mr-2 group-hover:animate-pulse" />
-                Ask AI
-                <Sparkles className="w-4 h-4 ml-2 opacity-70" />
-              </Button>
-            </div>
-
-            {/* Hero Image Carousel */}
-            <div style={{ animationDelay: '200ms' }}>
-              <ImageCarousel />
-            </div>
-
-            {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div style={{ animationDelay: '300ms' }}>
-                <KPICard
-                  title="Total Features"
-                  value={metricsLoading ? "..." : metrics?.totalFeatures.toString() || "0"}
-                  trend={metricsLoading ? undefined : 12}
-                  subtitle="Across all OEMs"
-                  icon={<Database className="h-5 w-5" />}
-                />
-              </div>
-              <div style={{ animationDelay: '400ms' }}>
-                <KPICard
-                  title="OEM Partners"
-                  value={metricsLoading ? "..." : metrics?.oemPartners.toString() || "0"}
-                  trend={metricsLoading ? undefined : 0}
-                  subtitle="Active manufacturers"
-                  icon={<Car className="h-5 w-5" />}
-                />
-              </div>
-              <div style={{ animationDelay: '500ms' }}>
-                <KPICard
-                  title="Global Coverage"
-                  value={metricsLoading ? "..." : metrics?.globalCoverage.toString() || "0"}
-                  trend={metricsLoading ? undefined : 7}
-                  subtitle="Countries monitored"
-                  icon={<Globe className="h-5 w-5" />}
-                />
-              </div>
-              <div style={{ animationDelay: '600ms' }}>
-                <KPICard
-                  title="Data Files"
-                  value={metricsLoading ? "..." : metrics?.dataFiles.toString() || "0"}
-                  trend={metricsLoading ? undefined : 3}
-                  subtitle="CSV datasets loaded"
-                  icon={<TrendingUp className="h-5 w-5" />}
-                />
-              </div>
-            </div>
-
-            {/* Charts and Analytics */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div style={{ animationDelay: '700ms' }}>
-                <FeatureChart />
+                <h2 className="text-4xl md:text-6xl font-bold">{category.title}</h2>
               </div>
               
-              <Card className="hover-lift animate-fade-in bg-gradient-to-br from-card/50 to-card border-primary/20" style={{ animationDelay: '800ms' }}>
-                <CardHeader>
-                  <CardTitle className="text-foreground flex items-center gap-2">
-                    <Brain className="h-5 w-5 text-primary animate-pulse-slow" />
-                    AI Insights
-                  </CardTitle>
-                  <CardDescription className="text-muted-foreground">Latest intelligent analysis from your data</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-4 bg-primary/10 rounded-lg border border-primary/20 hover-glow transition-all duration-300 hover:bg-primary/15">
-                    <h4 className="font-semibold text-primary mb-2 flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4" />
-                      Data Quality Insights
-                    </h4>
-                    <p className="text-muted-foreground text-sm">
-                      {metricsLoading 
-                        ? "Analyzing data patterns..." 
-                        : `Currently tracking ${metrics?.totalFeatures || 0} features across ${metrics?.oemPartners || 0} OEMs with ${metrics?.totalRows || 0} total data points.`
-                      }
-                    </p>
-                  </div>
-                  <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20 hover-glow transition-all duration-300 hover:bg-green-500/15">
-                    <h4 className="font-semibold text-green-400 mb-2 flex items-center gap-2">
-                      <Globe className="h-4 w-4" />
-                      Coverage Analysis
-                    </h4>
-                    <p className="text-muted-foreground text-sm">
-                      {metricsLoading 
-                        ? "Processing geographic data..." 
-                        : `Global coverage spans ${metrics?.globalCoverage || 0} countries with comprehensive OEM feature mapping.`
-                      }
-                    </p>
-                  </div>
-                  <div className="p-4 bg-purple-500/10 rounded-lg border border-purple-500/20 hover-glow transition-all duration-300 hover:bg-purple-500/15">
-                    <h4 className="font-semibold text-purple-400 mb-2 flex items-center gap-2">
-                      <Sparkles className="h-4 w-4" />
-                      Dataset Status
-                    </h4>
-                    <p className="text-muted-foreground text-sm">
-                      {metricsLoading 
-                        ? "Loading dataset information..." 
-                        : `${metrics?.dataFiles || 0} active data files providing real-time automotive intelligence.`
-                      }
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              <h3 className="text-2xl md:text-3xl font-semibold text-gray-300 mb-4">
+                {category.subtitle}
+              </h3>
+              
+              <p className="text-lg text-gray-400 mb-8 leading-relaxed">
+                {category.description}
+              </p>
+              
+              <Button 
+                size="lg"
+                className={`bg-gradient-to-r ${category.color} hover:opacity-90 text-white text-lg px-8 py-3 rounded-full transition-all duration-300 hover:scale-105 group`}
+                onClick={() => window.location.href = category.href}
+              >
+                Explore {category.title}
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
             </div>
-
-            {/* Data Table */}
-            <div style={{ animationDelay: '900ms' }}>
-              <DataTable />
+            
+            <div 
+              className={`${index % 2 === 0 ? 'md:order-2' : 'md:order-1'}`}
+              style={{
+                transform: currentSection === index + 1 ? 'translateY(0) scale(1)' : 'translateY(30px) scale(0.95)',
+                opacity: currentSection === index + 1 ? 1 : 0.8,
+                transition: 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+              }}
+            >
+              <div className="relative">
+                <div className="absolute -inset-4 bg-gradient-to-r from-white/10 to-transparent rounded-2xl blur-xl" />
+                <img
+                  src={category.image}
+                  alt={category.title}
+                  className="relative w-full h-96 object-cover rounded-2xl shadow-2xl"
+                />
+              </div>
             </div>
-
-            {/* Quick Actions */}
-            <Card className="hover-lift animate-fade-in bg-gradient-to-br from-card/50 to-card border-primary/20" style={{ animationDelay: '1000ms' }}>
-              <CardHeader>
-                <CardTitle className="text-foreground">Quick Actions</CardTitle>
-                <CardDescription className="text-muted-foreground">Common tasks and shortcuts</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Button variant="outline" className="h-auto p-6 flex flex-col items-center gap-3 hover-lift bg-card/50 border-primary/20 hover:border-primary/40 transition-all duration-300 group">
-                    <Database className="h-8 w-8 text-primary group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-foreground">Upload CSV Data</span>
-                  </Button>
-                  <Button variant="outline" className="h-auto p-6 flex flex-col items-center gap-3 hover-lift bg-card/50 border-primary/20 hover:border-primary/40 transition-all duration-300 group">
-                    <Brain className="h-8 w-8 text-primary group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-foreground">Generate Report</span>
-                  </Button>
-                  <Button variant="outline" className="h-auto p-6 flex flex-col items-center gap-3 hover-lift bg-card/50 border-primary/20 hover:border-primary/40 transition-all duration-300 group">
-                    <TrendingUp className="h-8 w-8 text-primary group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-foreground">View Analytics</span>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
           </div>
-        </main>
+        </section>
+      ))}
+
+      {/* Footer */}
+      <section className="section relative py-20 bg-gradient-to-t from-gray-900 to-black">
+        <div className="max-w-4xl mx-auto text-center px-6">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            Ready to Transform Your Business?
+          </h2>
+          <p className="text-xl text-gray-400 mb-8">
+            Join the future of automotive intelligence with WayPoint
+          </p>
+          <Button 
+            size="lg"
+            className="bg-white text-black hover:bg-gray-200 text-lg px-8 py-3 rounded-full transition-all duration-300 hover:scale-105"
+          >
+            Get Started Today
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+        </div>
+      </section>
+
+      {/* Navigation dots */}
+      <div className="fixed right-8 top-1/2 -translate-y-1/2 z-50 space-y-3">
+        {[0, 1, 2, 3, 4, 5].map((section) => (
+          <button
+            key={section}
+            className={`block w-3 h-3 rounded-full transition-all duration-300 ${
+              currentSection === section 
+                ? 'bg-white scale-125' 
+                : 'bg-white/30 hover:bg-white/50'
+            }`}
+            onClick={() => {
+              const sectionElement = document.querySelectorAll('.section')[section]
+              sectionElement?.scrollIntoView({ behavior: 'smooth' })
+            }}
+          />
+        ))}
       </div>
-    </SidebarProvider>
+    </div>
   )
 }
 
