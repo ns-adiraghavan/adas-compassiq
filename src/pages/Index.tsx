@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Car, Bike, Truck, Tractor } from "lucide-react"
@@ -68,7 +69,7 @@ const Index = () => {
       {/* Hero Section */}
       <section className="section relative h-screen flex items-center justify-center">
         <div 
-          className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-purple-900/20"
+          className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black"
           style={{
             transform: `translateY(${scrollY * 0.5}px)`,
           }}
@@ -93,18 +94,18 @@ const Index = () => {
             AI-Powered Automotive Intelligence Platform
           </p>
           <div 
+            className="text-base md:text-lg text-gray-400 leading-relaxed max-w-3xl mx-auto"
             style={{
               transform: `translateY(${scrollY * 0.4}px)`,
               opacity: Math.max(0, 1 - scrollY / 400)
             }}
           >
-            <Button 
-              size="lg" 
-              className="bg-white text-black hover:bg-gray-200 text-lg px-8 py-3 rounded-full transition-all duration-300 hover:scale-105"
-            >
-              Explore Solutions
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            <p>
+              WayPoint is a specialized data and insights platform designed specifically for the mobility industry. 
+              Curated by a team of passionate automotive analysts, it reflects a deep understanding of the pulse 
+              and dynamics of the automotive sector. The platform is structured around four core solution areas, 
+              each tailored to a distinct vehicle class, ensuring targeted, relevant insights for strategic thinking.
+            </p>
           </div>
         </div>
         
