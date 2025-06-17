@@ -17,25 +17,44 @@ const sampleData = [
 const chartConfig = {
   features: {
     label: "Features",
-    color: "hsl(var(--primary))",
+    color: "hsl(217.2 91.2% 59.8%)",
   },
 }
 
 export function FeatureChart() {
   return (
-    <Card>
+    <Card className="hover-lift animate-fade-in bg-gradient-to-br from-card/50 to-card border-primary/20">
       <CardHeader>
-        <CardTitle>Feature Count by OEM</CardTitle>
-        <CardDescription>Total available features across different manufacturers</CardDescription>
+        <CardTitle className="text-foreground">Feature Count by OEM</CardTitle>
+        <CardDescription className="text-muted-foreground">Total available features across different manufacturers</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={sampleData}>
-              <XAxis dataKey="oem" />
-              <YAxis />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar dataKey="features" fill="var(--color-features)" radius={4} />
+              <XAxis 
+                dataKey="oem" 
+                tick={{ fill: 'hsl(215 20.2% 65.1%)' }}
+                axisLine={{ stroke: 'hsl(217.2 32.6% 17.5%)' }}
+              />
+              <YAxis 
+                tick={{ fill: 'hsl(215 20.2% 65.1%)' }}
+                axisLine={{ stroke: 'hsl(217.2 32.6% 17.5%)' }}
+              />
+              <ChartTooltip 
+                content={<ChartTooltipContent />} 
+                contentStyle={{
+                  backgroundColor: 'hsl(217.2 32.6% 17.5%)',
+                  border: '1px solid hsl(217.2 32.6% 17.5%)',
+                  borderRadius: '8px'
+                }}
+              />
+              <Bar 
+                dataKey="features" 
+                fill="hsl(217.2 91.2% 59.8%)" 
+                radius={[4, 4, 0, 0]}
+                className="transition-all duration-300 hover:opacity-80"
+              />
             </BarChart>
           </ResponsiveContainer>
         </ChartContainer>

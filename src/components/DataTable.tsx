@@ -19,32 +19,36 @@ const sampleTableData = [
 
 export function DataTable() {
   return (
-    <Card>
+    <Card className="hover-lift animate-slide-in-right bg-gradient-to-br from-card/50 to-card border-primary/20">
       <CardHeader>
-        <CardTitle>Feature Availability Overview</CardTitle>
-        <CardDescription>Recent feature availability across OEMs and regions</CardDescription>
+        <CardTitle className="text-foreground">Feature Availability Overview</CardTitle>
+        <CardDescription className="text-muted-foreground">Recent feature availability across OEMs and regions</CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Feature</TableHead>
-              <TableHead>OEM</TableHead>
-              <TableHead>Country</TableHead>
-              <TableHead>Status</TableHead>
+            <TableRow className="border-border hover:bg-muted/50 transition-colors duration-200">
+              <TableHead className="text-muted-foreground font-semibold">Feature</TableHead>
+              <TableHead className="text-muted-foreground font-semibold">OEM</TableHead>
+              <TableHead className="text-muted-foreground font-semibold">Country</TableHead>
+              <TableHead className="text-muted-foreground font-semibold">Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {sampleTableData.map((row, index) => (
-              <TableRow key={index}>
-                <TableCell className="font-medium">{row.feature}</TableCell>
-                <TableCell>{row.oem}</TableCell>
-                <TableCell>{row.country}</TableCell>
+              <TableRow 
+                key={index} 
+                className="border-border hover:bg-muted/30 transition-all duration-200 hover:translate-x-1"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <TableCell className="font-medium text-foreground">{row.feature}</TableCell>
+                <TableCell className="text-muted-foreground">{row.oem}</TableCell>
+                <TableCell className="text-muted-foreground">{row.country}</TableCell>
                 <TableCell>
-                  <span className={`px-2 py-1 rounded-full text-xs ${
-                    row.availability === 'Available' ? 'bg-green-100 text-green-800' :
-                    row.availability === 'Limited' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-blue-100 text-blue-800'
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105 ${
+                    row.availability === 'Available' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+                    row.availability === 'Limited' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
+                    'bg-blue-500/20 text-blue-400 border border-blue-500/30'
                   }`}>
                     {row.availability}
                   </span>

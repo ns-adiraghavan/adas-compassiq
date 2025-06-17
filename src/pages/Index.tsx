@@ -7,90 +7,117 @@ import { ImageCarousel } from "@/components/ImageCarousel"
 import { DataTable } from "@/components/DataTable"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Car, Truck, Brain, Globe, TrendingUp, Database } from "lucide-react"
+import { Car, Truck, Brain, Globe, TrendingUp, Database, Sparkles } from "lucide-react"
 
 const Index = () => {
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
-        <main className="flex-1 p-6 bg-background">
-          <div className="max-w-7xl mx-auto space-y-6">
+        <main className="flex-1 p-6 bg-gradient-to-br from-background via-background to-primary/5">
+          <div className="max-w-7xl mx-auto space-y-8">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between animate-fade-in">
               <div className="flex items-center gap-4">
-                <SidebarTrigger />
+                <SidebarTrigger className="hover:bg-primary/10 transition-colors duration-200" />
                 <div>
-                  <h1 className="text-3xl font-bold">EOM Dashboard</h1>
-                  <p className="text-muted-foreground">AI-Powered Automotive Intelligence Platform</p>
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
+                    EOM Dashboard
+                  </h1>
+                  <p className="text-muted-foreground mt-1">AI-Powered Automotive Intelligence Platform</p>
                 </div>
               </div>
-              <Button>
-                <Brain className="w-4 h-4 mr-2" />
+              <Button className="bg-primary hover:bg-primary/90 transition-all duration-300 hover:scale-105 group">
+                <Brain className="w-4 h-4 mr-2 group-hover:animate-pulse" />
                 Ask AI
+                <Sparkles className="w-4 h-4 ml-2 opacity-70" />
               </Button>
             </div>
 
             {/* Hero Image Carousel */}
-            <ImageCarousel />
+            <div style={{ animationDelay: '200ms' }}>
+              <ImageCarousel />
+            </div>
 
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <KPICard
-                title="Total Features"
-                value="543"
-                trend={12}
-                subtitle="Across all OEMs"
-                icon={<Database className="h-4 w-4 text-muted-foreground" />}
-              />
-              <KPICard
-                title="OEM Partners"
-                value="8"
-                trend={0}
-                subtitle="Active manufacturers"
-                icon={<Car className="h-4 w-4 text-muted-foreground" />}
-              />
-              <KPICard
-                title="Global Coverage"
-                value="15"
-                trend={7}
-                subtitle="Countries monitored"
-                icon={<Globe className="h-4 w-4 text-muted-foreground" />}
-              />
-              <KPICard
-                title="Availability Rate"
-                value="87%"
-                trend={3}
-                subtitle="Feature deployment"
-                icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />}
-              />
+              <div style={{ animationDelay: '300ms' }}>
+                <KPICard
+                  title="Total Features"
+                  value="543"
+                  trend={12}
+                  subtitle="Across all OEMs"
+                  icon={<Database className="h-5 w-5" />}
+                />
+              </div>
+              <div style={{ animationDelay: '400ms' }}>
+                <KPICard
+                  title="OEM Partners"
+                  value="8"
+                  trend={0}
+                  subtitle="Active manufacturers"
+                  icon={<Car className="h-5 w-5" />}
+                />
+              </div>
+              <div style={{ animationDelay: '500ms' }}>
+                <KPICard
+                  title="Global Coverage"
+                  value="15"
+                  trend={7}
+                  subtitle="Countries monitored"
+                  icon={<Globe className="h-5 w-5" />}
+                />
+              </div>
+              <div style={{ animationDelay: '600ms' }}>
+                <KPICard
+                  title="Availability Rate"
+                  value="87%"
+                  trend={3}
+                  subtitle="Feature deployment"
+                  icon={<TrendingUp className="h-5 w-5" />}
+                />
+              </div>
             </div>
 
             {/* Charts and Analytics */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <FeatureChart />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div style={{ animationDelay: '700ms' }}>
+                <FeatureChart />
+              </div>
               
-              <Card>
+              <Card className="hover-lift animate-fade-in bg-gradient-to-br from-card/50 to-card border-primary/20" style={{ animationDelay: '800ms' }}>
                 <CardHeader>
-                  <CardTitle>AI Insights</CardTitle>
-                  <CardDescription>Latest intelligent analysis from your data</CardDescription>
+                  <CardTitle className="text-foreground flex items-center gap-2">
+                    <Brain className="h-5 w-5 text-primary animate-pulse-slow" />
+                    AI Insights
+                  </CardTitle>
+                  <CardDescription className="text-muted-foreground">Latest intelligent analysis from your data</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="p-4 bg-blue-50 rounded-lg">
-                    <h4 className="font-semibold text-blue-900 mb-2">Premium Features Trend</h4>
-                    <p className="text-blue-800 text-sm">
+                  <div className="p-4 bg-primary/10 rounded-lg border border-primary/20 hover-glow transition-all duration-300 hover:bg-primary/15">
+                    <h4 className="font-semibold text-primary mb-2 flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4" />
+                      Premium Features Trend
+                    </h4>
+                    <p className="text-muted-foreground text-sm">
                       Luxury OEMs are leading in autonomous driving features with 23% higher adoption than mass market brands.
                     </p>
                   </div>
-                  <div className="p-4 bg-green-50 rounded-lg">
-                    <h4 className="font-semibold text-green-900 mb-2">Regional Analysis</h4>
-                    <p className="text-green-800 text-sm">
+                  <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20 hover-glow transition-all duration-300 hover:bg-green-500/15">
+                    <h4 className="font-semibold text-green-400 mb-2 flex items-center gap-2">
+                      <Globe className="h-4 w-4" />
+                      Regional Analysis
+                    </h4>
+                    <p className="text-muted-foreground text-sm">
                       European markets show highest feature availability at 92%, followed by North America at 85%.
                     </p>
                   </div>
-                  <div className="p-4 bg-purple-50 rounded-lg">
-                    <h4 className="font-semibold text-purple-900 mb-2">Emerging Technologies</h4>
-                    <p className="text-purple-800 text-sm">
+                  <div className="p-4 bg-purple-500/10 rounded-lg border border-purple-500/20 hover-glow transition-all duration-300 hover:bg-purple-500/15">
+                    <h4 className="font-semibold text-purple-400 mb-2 flex items-center gap-2">
+                      <Sparkles className="h-4 w-4" />
+                      Emerging Technologies
+                    </h4>
+                    <p className="text-muted-foreground text-sm">
                       Vehicle-to-infrastructure communication features are gaining traction with 34% YoY growth.
                     </p>
                   </div>
@@ -99,27 +126,29 @@ const Index = () => {
             </div>
 
             {/* Data Table */}
-            <DataTable />
+            <div style={{ animationDelay: '900ms' }}>
+              <DataTable />
+            </div>
 
             {/* Quick Actions */}
-            <Card>
+            <Card className="hover-lift animate-fade-in bg-gradient-to-br from-card/50 to-card border-primary/20" style={{ animationDelay: '1000ms' }}>
               <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-                <CardDescription>Common tasks and shortcuts</CardDescription>
+                <CardTitle className="text-foreground">Quick Actions</CardTitle>
+                <CardDescription className="text-muted-foreground">Common tasks and shortcuts</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
-                    <Database className="h-6 w-6" />
-                    <span>Upload CSV Data</span>
+                  <Button variant="outline" className="h-auto p-6 flex flex-col items-center gap-3 hover-lift bg-card/50 border-primary/20 hover:border-primary/40 transition-all duration-300 group">
+                    <Database className="h-8 w-8 text-primary group-hover:scale-110 transition-transform duration-300" />
+                    <span className="text-foreground">Upload CSV Data</span>
                   </Button>
-                  <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
-                    <Brain className="h-6 w-6" />
-                    <span>Generate Report</span>
+                  <Button variant="outline" className="h-auto p-6 flex flex-col items-center gap-3 hover-lift bg-card/50 border-primary/20 hover:border-primary/40 transition-all duration-300 group">
+                    <Brain className="h-8 w-8 text-primary group-hover:scale-110 transition-transform duration-300" />
+                    <span className="text-foreground">Generate Report</span>
                   </Button>
-                  <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
-                    <TrendingUp className="h-6 w-6" />
-                    <span>View Analytics</span>
+                  <Button variant="outline" className="h-auto p-6 flex flex-col items-center gap-3 hover-lift bg-card/50 border-primary/20 hover:border-primary/40 transition-all duration-300 group">
+                    <TrendingUp className="h-8 w-8 text-primary group-hover:scale-110 transition-transform duration-300" />
+                    <span className="text-foreground">View Analytics</span>
                   </Button>
                 </div>
               </CardContent>
