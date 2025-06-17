@@ -102,11 +102,11 @@ const OEMProfileCard = ({ selectedOEM, selectedCountry, filteredData, contextDat
         </div>
 
         {/* Business Models */}
-        {oemInsights.businessModels.size > 0 && (
+        {oemInsights.businessModels.length > 0 && (
           <div>
             <h4 className="text-sm font-medium text-white/80 mb-2">Business Models</h4>
             <div className="flex flex-wrap gap-2">
-              {Array.from(oemInsights.businessModels).map((model) => (
+              {oemInsights.businessModels.map((model) => (
                 <span 
                   key={model}
                   className="px-3 py-1 bg-blue-600/20 text-blue-300 text-xs rounded-full border border-blue-600/30"
@@ -119,11 +119,11 @@ const OEMProfileCard = ({ selectedOEM, selectedCountry, filteredData, contextDat
         )}
 
         {/* Connected Platform */}
-        {oemInsights.platforms.size > 0 && (
+        {oemInsights.platforms.length > 0 && (
           <div>
             <h4 className="text-sm font-medium text-white/80 mb-2">Connected Platforms</h4>
             <div className="flex flex-wrap gap-2">
-              {Array.from(oemInsights.platforms).map((platform) => (
+              {oemInsights.platforms.map((platform) => (
                 <span 
                   key={platform}
                   className="px-3 py-1 bg-purple-600/20 text-purple-300 text-xs rounded-full border border-purple-600/30"
