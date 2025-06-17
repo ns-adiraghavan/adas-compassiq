@@ -20,7 +20,7 @@ const EnhancedOverviewDashboard = ({ selectedOEM, selectedCountry }: EnhancedOve
   const dashboardMetrics = useMemo(() => {
     console.log('Processing waypoint data:', waypointData)
     
-    if (!waypointData?.csvData?.length) {
+    if (!waypointData?.csvData || !Array.isArray(waypointData.csvData) || waypointData.csvData.length === 0) {
       return {
         totalFeatures: 0,
         totalOEMs: 0,
@@ -47,7 +47,7 @@ const EnhancedOverviewDashboard = ({ selectedOEM, selectedCountry }: EnhancedOve
 
     // Process CSV data
     waypointData.csvData.forEach(file => {
-      console.log('Processing file:', file.file_name, 'with rows:', file.data?.length)
+      console.log('Processing file:', file.file_name, 'with rows:', Array.isArray(file.data) ? file.data.length : 0)
       
       if (file.data && Array.isArray(file.data)) {
         file.data.forEach((row: any) => {
@@ -150,13 +150,17 @@ const EnhancedOverviewDashboard = ({ selectedOEM, selectedCountry }: EnhancedOve
 
   // Extract PDF insights
   const pdfInsights = useMemo(() => {
-    const contextData = waypointData?.contextData?.find(ctx => 
-      ctx.data_summary?.document_name?.toLowerCase().includes('accenture') ||
-      ctx.data_summary?.analysis
-    )
+    const contextData = waypointData?.contextData?.find(ctx => {
+      const dataSummary = ctx.data_summary as any
+      return dataSummary?.document_name?.toLowerCase().includes('accenture') ||
+             dataSummary?.analysis
+    })
     
-    if (contextData?.data_summary?.analysis) {
-      return contextData.data_summary.analysis
+    if (contextData?.data_summary) {
+      const dataSummary = contextData.data_summary as any
+      if (dataSummary?.analysis) {
+        return dataSummary.analysis
+      }
     }
     
     return {
