@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card"
 import { useAIAnalysis } from "@/hooks/useAIAnalysis"
 import { useWaypointData } from "@/hooks/useWaypointData"
@@ -17,6 +16,18 @@ const BusinessModelAnalysis = ({ selectedOEM, selectedCountry }: BusinessModelAn
     analysisType: 'business',
     enabled: !!selectedOEM
   })
+
+  const getBusinessModelDescription = (modelType: string) => {
+    const descriptions = {
+      'Traditional Sales': 'Direct vehicle sales through dealerships',
+      'Subscription': 'Monthly subscription-based vehicle access',
+      'Leasing': 'Long-term vehicle leasing arrangements',
+      'Mobility as a Service': 'Integrated transportation solutions',
+      'Digital Sales': 'Online direct-to-consumer sales model',
+      'Hybrid': 'Combination of traditional and digital approaches'
+    }
+    return descriptions[modelType] || 'Custom business model approach'
+  }
 
   const businessModelData = useMemo(() => {
     if (!waypointData?.csvData?.length) return []
@@ -46,18 +57,6 @@ const BusinessModelAnalysis = ({ selectedOEM, selectedCountry }: BusinessModelAn
       description: getBusinessModelDescription(name)
     })).sort((a, b) => b.count - a.count)
   }, [waypointData, selectedOEM, selectedCountry])
-
-  const getBusinessModelDescription = (modelType: string) => {
-    const descriptions = {
-      'Traditional Sales': 'Direct vehicle sales through dealerships',
-      'Subscription': 'Monthly subscription-based vehicle access',
-      'Leasing': 'Long-term vehicle leasing arrangements',
-      'Mobility as a Service': 'Integrated transportation solutions',
-      'Digital Sales': 'Online direct-to-consumer sales model',
-      'Hybrid': 'Combination of traditional and digital approaches'
-    }
-    return descriptions[modelType] || 'Custom business model approach'
-  }
 
   if (dataLoading || aiLoading) {
     return (
