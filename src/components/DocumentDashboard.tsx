@@ -2,7 +2,7 @@
 import { Card } from "@/components/ui/card"
 import { useStoredDocuments } from "@/hooks/useStoredDocuments"
 import { useMemo } from "react"
-import { FileText, Download, Calendar, HardDrive } from "lucide-react"
+import { FileText, Download, Calendar, HardDrive, Presentation } from "lucide-react"
 
 interface DocumentDashboardProps {
   documentAnalysis?: any
@@ -16,7 +16,7 @@ const DocumentDashboard = ({ documentAnalysis }: DocumentDashboardProps) => {
       return {
         totalFiles: 0,
         totalSize: 0,
-        fileTypes: {},
+        fileTypes: {} as Record<string, number>,
         latestUpload: null
       }
     }
@@ -24,7 +24,7 @@ const DocumentDashboard = ({ documentAnalysis }: DocumentDashboardProps) => {
     const stats = {
       totalFiles: documents.length,
       totalSize: documents.reduce((sum, doc) => sum + (doc.file_size || 0), 0),
-      fileTypes: {},
+      fileTypes: {} as Record<string, number>,
       latestUpload: documents[0]?.uploaded_at
     }
 
