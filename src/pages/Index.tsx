@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Car, Motorcycle, Truck, Tractor } from "lucide-react"
+import { ArrowRight, Car, Bike, Truck, Tractor } from "lucide-react"
 
 const Index = () => {
   const [scrollY, setScrollY] = useState(0)
@@ -40,7 +40,7 @@ const Index = () => {
       subtitle: "Smart Mobility Solutions",
       description: "Next-generation analytics for motorcycles and electric two-wheelers",
       image: "/lovable-uploads/5bc26e8f-c225-4798-a305-557d8cc8b4af.png",
-      icon: Motorcycle,
+      icon: Bike,
       href: "/two-wheelers",
       color: "from-green-600 to-teal-600"
     },
