@@ -22,9 +22,9 @@ const EnhancedOverviewInsights = ({ selectedOEM, selectedCountry }: EnhancedOver
     console.log('Processing enhanced analytics for OEM:', selectedOEM, 'Country:', selectedCountry)
     
     let filteredData: any[] = []
-    let countryData: any = {}
-    let segmentData: any = {}
-    let featureData: any[] = []
+    let countryData: Record<string, number> = {}
+    let segmentData: Record<string, number> = {}
+    let featureData: Array<{ name: string; count: number }> = []
 
     waypointData.csvData.forEach(file => {
       if (file.data && Array.isArray(file.data)) {
@@ -40,7 +40,8 @@ const EnhancedOverviewInsights = ({ selectedOEM, selectedCountry }: EnhancedOver
             countryData[country] = (countryData[country] || 0) + 1
             
             // Segment analysis
-            ['Entry Segment', 'Mid Segment', 'Premium Segment', 'Luxury Segment'].forEach(segment => {
+            const segments = ['Entry Segment', 'Mid Segment', 'Premium Segment', 'Luxury Segment']
+            segments.forEach(segment => {
               if (row[segment] && row[segment] !== 'N/A') {
                 segmentData[segment] = (segmentData[segment] || 0) + 1
               }
@@ -69,8 +70,8 @@ const EnhancedOverviewInsights = ({ selectedOEM, selectedCountry }: EnhancedOver
     const segmentChartData = Object.entries(segmentData)
       .map(([name, value]) => ({ 
         name: name.replace(' Segment', ''), 
-        value,
-        percentage: Math.round((value / filteredData.length) * 100)
+        value: Number(value),
+        percentage: filteredData.length > 0 ? Math.round((Number(value) / filteredData.length) * 100) : 0
       }))
 
     const topFeatures = featureData
@@ -78,14 +79,22 @@ const EnhancedOverviewInsights = ({ selectedOEM, selectedCountry }: EnhancedOver
       .slice(0, 6)
       .map(f => ({ ...f, growth: Math.floor(Math.random() * 30) + 5 }))
 
+    // Calculate total rows safely
+    const totalRows = waypointData.csvData.reduce((sum, file) => {
+      const rowCount = file.row_count || 0
+      return sum + (typeof rowCount === 'number' ? rowCount : 0)
+    }, 0)
+
+    const marketShare = selectedCountry === "Global" ? 
+      (totalRows > 0 ? Math.round((filteredData.length / totalRows) * 100) : 0) : 
+      Math.round(Math.random() * 40 + 20)
+
     return {
       totalRecords: filteredData.length,
       countryDistribution: countryChartData,
       segmentAnalysis: segmentChartData,
       topFeatures,
-      marketShare: selectedCountry === "Global" ? 
-        Math.round((filteredData.length / waypointData.csvData.reduce((sum, file) => sum + (file.row_count || 0), 0)) * 100) : 
-        Math.round(Math.random() * 40 + 20),
+      marketShare,
       coverageMetrics: {
         countries: Object.keys(countryData).length,
         segments: Object.keys(segmentData).length,
