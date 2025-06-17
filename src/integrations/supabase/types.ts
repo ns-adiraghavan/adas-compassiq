@@ -38,30 +38,33 @@ export type Database = {
       }
       documents: {
         Row: {
-          file_content: string
           file_name: string
+          file_path: string
           file_size: number
           file_type: string
           id: string
           metadata: Json | null
+          storage_path: string | null
           uploaded_at: string
         }
         Insert: {
-          file_content: string
           file_name: string
+          file_path?: string
           file_size: number
           file_type: string
           id?: string
           metadata?: Json | null
+          storage_path?: string | null
           uploaded_at?: string
         }
         Update: {
-          file_content?: string
           file_name?: string
+          file_path?: string
           file_size?: number
           file_type?: string
           id?: string
           metadata?: Json | null
+          storage_path?: string | null
           uploaded_at?: string
         }
         Relationships: []

@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card"
 import { useStoredDocuments } from "@/hooks/useStoredDocuments"
 import { useMemo } from "react"
@@ -127,7 +126,7 @@ const DocumentDashboard = ({ documentAnalysis }: DocumentDashboardProps) => {
             <HardDrive className="h-8 w-8 text-green-400" />
             <div>
               <p className="text-2xl font-bold text-green-100">{formatFileSize(dashboardStats.totalSize)}</p>
-              <p className="text-green-200/60 text-sm">Total Storage</p>
+              <p className="text-green-200/60 text-sm">Storage Used</p>
             </div>
           </div>
         </Card>
@@ -170,7 +169,7 @@ const DocumentDashboard = ({ documentAnalysis }: DocumentDashboardProps) => {
 
       {/* File Library */}
       <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-6 backdrop-blur-sm">
-        <h4 className="text-lg font-light text-white mb-4">File Library</h4>
+        <h4 className="text-lg font-light text-white mb-4">File Library (Stored in Supabase Storage)</h4>
         <div className="space-y-3">
           {documents.map((doc) => (
             <div key={doc.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
@@ -181,10 +180,14 @@ const DocumentDashboard = ({ documentAnalysis }: DocumentDashboardProps) => {
                   <p className="text-white/60 text-sm">
                     {formatFileSize(doc.file_size)} • {formatDate(doc.uploaded_at)}
                   </p>
+                  {doc.storage_path && (
+                    <p className="text-white/40 text-xs">Storage: {doc.storage_path}</p>
+                  )}
                 </div>
               </div>
-              <div className="text-white/40 text-sm">
-                ID: {doc.id.slice(0, 8)}...
+              <div className="text-green-400 text-sm flex items-center space-x-2">
+                <HardDrive className="h-4 w-4" />
+                <span>✓ In Storage</span>
               </div>
             </div>
           ))}

@@ -1,4 +1,3 @@
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -74,43 +73,62 @@ const FileUpload = ({ onFileAnalyzed }: FileUploadProps) => {
       }
 
       try {
-        // Convert file to base64
-        const base64 = await new Promise<string>((resolve) => {
-          const reader = new FileReader()
-          reader.onloadend = () => {
-            const result = reader.result as string
-            resolve(result.split(',')[1]) // Remove data:... prefix
-          }
-          reader.readAsDataURL(file)
-        })
+        // Generate unique file path
+        const timestamp = Date.now()
+        const randomId = Math.random().toString(36).substring(2)
+        const fileExtension = file.name.split('.').pop()
+        const fileName = `${timestamp}_${randomId}.${fileExtension}`
+        const filePath = `uploads/${fileName}`
 
-        // Call edge function to store document directly
-        const { data, error } = await supabase.functions.invoke('store-document', {
-          body: {
-            fileName: file.name,
-            fileType: file.type || 'application/octet-stream',
-            fileContent: base64,
-            fileSize: file.size
-          }
-        })
+        // Upload file to Supabase Storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('documents')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+          })
 
-        if (error) {
-          throw error
+        if (uploadError) {
+          throw uploadError
+        }
+
+        // Store file metadata in database
+        const { data: dbData, error: dbError } = await supabase
+          .from('documents')
+          .insert({
+            file_name: file.name,
+            file_type: file.type || 'application/octet-stream',
+            file_size: file.size,
+            file_path: uploadData.path,
+            storage_path: uploadData.path,
+            metadata: {
+              upload_timestamp: new Date().toISOString(),
+              original_name: file.name,
+              storage_bucket: 'documents'
+            }
+          })
+          .select()
+          .single()
+
+        if (dbError) {
+          // Clean up uploaded file if database insert fails
+          await supabase.storage.from('documents').remove([uploadData.path])
+          throw dbError
         }
 
         const newFile = {
-          id: data.id,
+          id: dbData.id,
           name: file.name,
           type: file.type || 'application/octet-stream',
           size: file.size
         }
 
         setUploadedFiles(prev => [...prev, newFile])
-        onFileAnalyzed({ file: newFile, stored: true })
+        onFileAnalyzed({ file: newFile, stored: true, storagePath: uploadData.path })
 
         toast({
           title: "File uploaded successfully",
-          description: `${file.name} has been stored in the database.`
+          description: `${file.name} has been stored in Supabase Storage.`
         })
 
       } catch (error) {
@@ -146,7 +164,7 @@ const FileUpload = ({ onFileAnalyzed }: FileUploadProps) => {
         <div className="text-center space-y-4">
           <h3 className="text-xl font-light text-white mb-4">Upload Files</h3>
           <p className="text-white/60 font-light">
-            Upload documents, images, media files, spreadsheets, and data files to store them directly in the database for analysis and dashboard generation.
+            Upload documents, images, media files, spreadsheets, and data files to store them in Supabase Storage for analysis and dashboard generation.
           </p>
           
           <div className="flex flex-col items-center space-y-4">
@@ -199,7 +217,7 @@ const FileUpload = ({ onFileAnalyzed }: FileUploadProps) => {
                   <span className="text-white font-medium block">{file.name}</span>
                   <span className="text-white/60 text-sm">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
                 </div>
-                <span className="text-green-400 text-sm">✓ Stored</span>
+                <span className="text-green-400 text-sm">✓ Stored in Storage</span>
               </div>
             ))}
           </div>
