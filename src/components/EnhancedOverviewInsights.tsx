@@ -64,22 +64,19 @@ const EnhancedOverviewInsights = ({ selectedOEM, selectedCountry }: EnhancedOver
         </div>
       </Card>
 
-      {/* Summary Stats Section - Empty */}
+      {/* Summary Statistics Section - Empty */}
       <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-8 backdrop-blur-sm">
         <h3 className="text-xl font-light text-white mb-4">Summary Statistics</h3>
-        {/* Content will be built here */}
       </Card>
 
       {/* Charts Section - Empty */}
       <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-8 backdrop-blur-sm">
         <h3 className="text-xl font-light text-white mb-4">Data Visualization</h3>
-        {/* Content will be built here */}
       </Card>
 
       {/* Analysis Section - Empty */}
       <Card className="bg-gradient-to-br from-white/5 to-white/10 border-white/10 p-8 backdrop-blur-sm">
         <h3 className="text-xl font-light text-white mb-4">Detailed Analysis</h3>
-        {/* Content will be built here */}
       </Card>
     </div>
   )
