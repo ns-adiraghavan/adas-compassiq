@@ -8,6 +8,7 @@ const ImageStorage = () => {
   const [storedUrl, setStoredUrl] = useState<string | null>(null)
   const [gmStoredUrl, setGmStoredUrl] = useState<string | null>(null)
   const [nioStoredUrl, setNioStoredUrl] = useState<string | null>(null)
+  const [hyundaiStoredUrl, setHyundaiStoredUrl] = useState<string | null>(null)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -34,10 +35,17 @@ const ImageStorage = () => {
           'Nio_cspe'
         )
         setNioStoredUrl(nioResult.url)
+
+        // Store Hyundai image
+        const hyundaiResult = await storeImageInSupabase(
+          '/lovable-uploads/8df6189c-34ee-459e-9b75-c92cdcad5aaf.png',
+          'Hyundai_cspe'
+        )
+        setHyundaiStoredUrl(hyundaiResult.url)
         
         toast({
           title: "Images stored successfully",
-          description: "All three images (Mahindra_scpe, GM_cspe, and Nio_cspe) have been stored in Supabase database."
+          description: "All four images (Mahindra_scpe, GM_cspe, Nio_cspe, and Hyundai_cspe) have been stored in Supabase database."
         })
       } catch (error) {
         console.error('Failed to store images:', error)
@@ -109,6 +117,22 @@ const ImageStorage = () => {
             <img 
               src={nioStoredUrl} 
               alt="Nio CSPE" 
+              className="max-w-full h-auto rounded-lg border border-white/10"
+            />
+          </div>
+        )}
+
+        {hyundaiStoredUrl && (
+          <div className="space-y-4">
+            <div className="text-green-400">
+              ✓ Hyundai_cspe image successfully stored
+            </div>
+            <div className="text-white/60 text-sm break-all">
+              Storage URL: {hyundaiStoredUrl}
+            </div>
+            <img 
+              src={hyundaiStoredUrl} 
+              alt="Hyundai CSPE" 
               className="max-w-full h-auto rounded-lg border border-white/10"
             />
           </div>
