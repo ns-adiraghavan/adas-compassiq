@@ -1,5 +1,5 @@
 
-import { useWaypointData } from "@/hooks/useWaypointData"
+import EnhancedCategoryAnalysis from "./EnhancedCategoryAnalysis"
 
 interface CategoryAnalysisProps {
   selectedOEM: string
@@ -7,10 +7,7 @@ interface CategoryAnalysisProps {
 }
 
 const CategoryAnalysis = ({ selectedOEM, selectedCountry }: CategoryAnalysisProps) => {
-  const { data: waypointData, isLoading } = useWaypointData()
-
-  // Return completely empty - no content at all
-  return null
+  return <EnhancedCategoryAnalysis selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
 }
 
 export default CategoryAnalysis

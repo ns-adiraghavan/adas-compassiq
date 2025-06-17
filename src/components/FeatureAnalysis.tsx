@@ -1,5 +1,5 @@
 
-import { useWaypointData } from "@/hooks/useWaypointData"
+import EnhancedFeatureAnalysis from "./EnhancedFeatureAnalysis"
 
 interface FeatureAnalysisProps {
   selectedOEM: string
@@ -7,10 +7,7 @@ interface FeatureAnalysisProps {
 }
 
 const FeatureAnalysis = ({ selectedOEM, selectedCountry }: FeatureAnalysisProps) => {
-  const { data: waypointData, isLoading } = useWaypointData()
-
-  // Return completely empty - no content at all
-  return null
+  return <EnhancedFeatureAnalysis selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
 }
 
 export default FeatureAnalysis
