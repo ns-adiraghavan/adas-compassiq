@@ -5,7 +5,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
-import { getVehicleImageUrl } from "@/utils/uploadVehicleImages"
 
 const vehicleImages = [
   {
