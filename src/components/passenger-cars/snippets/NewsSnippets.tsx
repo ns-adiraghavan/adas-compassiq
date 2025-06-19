@@ -31,14 +31,14 @@ const NewsSnippets = () => {
   ]
 
   return (
-    <Card className="h-full bg-gray-900/50 border-gray-700">
+    <Card className="bg-gray-900/50 border-gray-700">
       <CardHeader className="pb-3">
         <CardTitle className="text-white text-lg flex items-center">
           <Newspaper className="h-5 w-5 mr-2" />
           News Snippets - From AI
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3 max-h-[300px] overflow-y-auto">
+      <CardContent className="space-y-3">
         {mockNews.map((news) => (
           <div key={news.id} className="p-3 bg-gray-800/50 rounded-lg border border-gray-700/50">
             <h4 className="text-white text-sm font-medium mb-1">{news.title}</h4>

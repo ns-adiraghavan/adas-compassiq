@@ -35,14 +35,14 @@ const DataSnippets = () => {
   ]
 
   return (
-    <Card className="h-full bg-gray-900/50 border-gray-700">
+    <Card className="bg-gray-900/50 border-gray-700">
       <CardHeader className="pb-3">
         <CardTitle className="text-white text-lg flex items-center">
           <BarChart className="h-5 w-5 mr-2" />
           Data Snippets - From AI
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3 max-h-[300px] overflow-y-auto">
+      <CardContent className="space-y-3">
         {mockData.map((data) => (
           <div key={data.id} className="p-3 bg-gray-800/50 rounded-lg border border-gray-700/50">
             <div className="flex justify-between items-start mb-1">
