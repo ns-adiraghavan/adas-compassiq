@@ -39,11 +39,11 @@ const CountryButtons = ({ selectedCountry, onCountryChange }: CountryButtonsProp
 
   if (isLoading) {
     return (
-      <div className="space-y-2">
+      <div className="space-y-3">
         <h3 className="text-gray-400 font-medium mb-4">Countries/Regions</h3>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 justify-start">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-8 w-24 bg-gray-700 rounded animate-pulse"></div>
+            <div key={i} className="h-8 w-20 bg-gray-700 rounded animate-pulse"></div>
           ))}
         </div>
       </div>
@@ -53,17 +53,17 @@ const CountryButtons = ({ selectedCountry, onCountryChange }: CountryButtonsProp
   return (
     <div>
       <h3 className="text-gray-400 font-medium mb-4">Countries/Regions</h3>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 justify-start items-center">
         {countries.map((country) => (
           <Button
             key={country}
             variant={selectedCountry === country ? "default" : "ghost"}
             size="sm"
             onClick={() => onCountryChange(country)}
-            className={`${
+            className={`flex-shrink-0 px-4 py-2 text-sm font-medium transition-all ${
               selectedCountry === country 
-                ? "bg-blue-600 text-white hover:bg-blue-700" 
-                : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                ? "bg-blue-600 text-white hover:bg-blue-700 shadow-md" 
+                : "text-gray-300 hover:bg-gray-800 hover:text-white border-gray-600"
             }`}
           >
             {country}
