@@ -36,7 +36,7 @@ const Index = () => {
       description: "Advanced AI-powered insights for passenger vehicle features and technologies",
       image: "/lovable-uploads/c13e6208-3f44-451f-9b43-5f2707ee413c.png",
       icon: Car,
-      href: "#",
+      href: "/passenger-cars",
       color: "from-blue-600 to-purple-600"
     },
     {
