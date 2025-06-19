@@ -1,3 +1,4 @@
+
 import { useRef, useEffect } from "react"
 import LandscapeSection from "./sections/LandscapeSection"
 import Section2 from "./sections/Section2"
@@ -62,7 +63,7 @@ const HorizontalSectionContainer = ({ currentSection, onSectionChange }: Horizon
         ))}
       </div>
 
-      {/* Horizontal Scrollable Container */}
+      {/* Horizontal Scrollable Container - Full Width */}
       <div
         ref={containerRef}
         className="flex overflow-x-auto scrollbar-hide h-full snap-x snap-mandatory w-full"
