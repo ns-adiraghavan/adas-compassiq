@@ -5,6 +5,7 @@ import Section2 from "./sections/Section2"
 import Section3 from "./sections/Section3"
 import Section4 from "./sections/Section4"
 import Section5 from "./sections/Section5"
+import { useTheme } from "@/contexts/ThemeContext"
 
 interface HorizontalSectionContainerProps {
   currentSection: number
@@ -13,6 +14,7 @@ interface HorizontalSectionContainerProps {
 
 const HorizontalSectionContainer = ({ currentSection, onSectionChange }: HorizontalSectionContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
+  const { theme } = useTheme()
 
   const sections = [
     { id: 0, name: "Landscape", component: LandscapeSection },
@@ -53,10 +55,10 @@ const HorizontalSectionContainer = ({ currentSection, onSectionChange }: Horizon
             <button
               key={section.id}
               onClick={() => scrollToSection(section.id)}
-              className={`flex-1 mx-1 px-6 py-3 rounded-lg text-sm font-medium transition-all ${
+              className={`flex-1 mx-1 px-6 py-3 rounded-lg text-sm font-medium transition-all duration-300 ${theme.shadowColor} ${
                 currentSection === section.id
-                  ? "bg-blue-600 text-white shadow-lg"
-                  : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white"
+                  ? `${theme.primary} ${theme.textPrimary} shadow-lg transform scale-105`
+                  : `${theme.cardBackground} ${theme.cardBorder} border ${theme.textSecondary} ${theme.hoverEffect}`
               }`}
             >
               {section.name}

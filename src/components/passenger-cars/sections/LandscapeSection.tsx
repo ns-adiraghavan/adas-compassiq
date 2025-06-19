@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from "react"
 import { useFirstAvailableOEM, useWaypointData } from "@/hooks/useWaypointData"
 import CountryButtons from "@/components/CountryButtons"
 import OEMBarChart from "../charts/OEMBarChart"
 import LandscapeDetails from "../details/LandscapeDetails"
 import AISnippetsSidebar from "../AISnippetsSidebar"
+import { useTheme } from "@/contexts/ThemeContext"
 
 const LandscapeSection = () => {
   const [selectedCountry, setSelectedCountry] = useState("")
@@ -12,6 +12,7 @@ const LandscapeSection = () => {
   const [showDetails, setShowDetails] = useState(false)
   const { data: firstOEM } = useFirstAvailableOEM()
   const { data: waypointData } = useWaypointData()
+  const { theme } = useTheme()
 
   // Set default country when data is loaded
   useEffect(() => {
@@ -58,12 +59,12 @@ const LandscapeSection = () => {
   }
 
   return (
-    <div className="w-full min-h-full flex">
+    <div className={`w-full min-h-full flex ${theme.backgroundGradient} transition-all duration-500`}>
       {/* Main Content Area - 60% */}
       <div className="w-[60%] px-8">
         <div className="space-y-6 pb-8">
           {/* Countries Section */}
-          <div className="bg-gray-800/30 rounded-lg p-6">
+          <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
             <CountryButtons
               selectedCountry={selectedCountry}
               onCountryChange={handleCountryChange}
@@ -71,10 +72,10 @@ const LandscapeSection = () => {
           </div>
 
           {/* OEM Bar Chart */}
-          <div className="bg-gray-800/30 rounded-lg p-6">
+          <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
             <div className="mb-4">
-              <h3 className="text-xl font-medium text-white mb-2">OEM Feature Distribution</h3>
-              <p className="text-gray-400 text-sm">
+              <h3 className={`text-xl font-medium ${theme.textPrimary} mb-2`}>OEM Feature Distribution</h3>
+              <p className={`${theme.textMuted} text-sm`}>
                 {selectedCountry ? `Showing feature counts for ${selectedCountry}. ` : ''}
                 Click on any OEM bar to view detailed analysis
               </p>
@@ -89,13 +90,13 @@ const LandscapeSection = () => {
 
           {/* Details Section - Shows below bar chart when OEM is selected */}
           {showDetails && (
-            <div className="bg-gray-800/30 rounded-lg p-6">
+            <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-medium text-white">
+                <h3 className={`text-xl font-medium ${theme.textPrimary}`}>
                   {selectedOEM} - Detailed Analysis
                 </h3>
                 {selectedCountry && (
-                  <div className="text-sm text-gray-400">
+                  <div className={`text-sm ${theme.textMuted}`}>
                     Country: {selectedCountry}
                   </div>
                 )}
@@ -111,7 +112,7 @@ const LandscapeSection = () => {
       </div>
 
       {/* AI Snippets Sidebar - 40% */}
-      <div className="w-[40%] p-6 bg-gray-900/30 border-l border-gray-800">
+      <div className={`w-[40%] p-6 ${theme.cardBackground} ${theme.cardBorder} border-l backdrop-blur-sm`}>
         <AISnippetsSidebar />
       </div>
     </div>
