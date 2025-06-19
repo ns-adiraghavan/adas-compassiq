@@ -1,26 +1,46 @@
 
 import { ArrowLeft } from "lucide-react"
 import { Link } from "react-router-dom"
+import { useState } from "react"
+import HorizontalSectionContainer from "@/components/passenger-cars/HorizontalSectionContainer"
+import AISnippetsSidebar from "@/components/passenger-cars/AISnippetsSidebar"
 
 const PassengerCars = () => {
+  const [currentSection, setCurrentSection] = useState(0)
+
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="container mx-auto px-8 py-12">
+      {/* Header */}
+      <div className="container mx-auto px-8 py-6">
         <Link 
           to="/" 
-          className="inline-flex items-center text-white/60 hover:text-white transition-colors mb-8"
+          className="inline-flex items-center text-white/60 hover:text-white transition-colors mb-4"
         >
           <ArrowLeft className="h-5 w-5 mr-2" />
           Back to Home
         </Link>
         
-        <div className="text-center">
-          <h1 className="text-5xl font-thin mb-6 text-white tracking-tight">
-            Passenger Cars
-          </h1>
-          <p className="text-xl text-white/60 font-light max-w-3xl mx-auto leading-relaxed">
-            Premium Automotive Intelligence - Coming Soon
-          </p>
+        <h1 className="text-4xl font-thin mb-2 text-white tracking-tight">
+          Passenger Cars
+        </h1>
+        <p className="text-lg text-white/60 font-light mb-6">
+          Premium Automotive Intelligence
+        </p>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex h-[calc(100vh-200px)]">
+        {/* Horizontal Sections Container - 70% */}
+        <div className="flex-1 pr-4">
+          <HorizontalSectionContainer 
+            currentSection={currentSection}
+            onSectionChange={setCurrentSection}
+          />
+        </div>
+
+        {/* AI Snippets Sidebar - 30% */}
+        <div className="w-[30%] pl-4 pr-8">
+          <AISnippetsSidebar />
         </div>
       </div>
     </div>
