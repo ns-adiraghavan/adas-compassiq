@@ -23,12 +23,11 @@ serve(async (req) => {
     // Create Supabase client
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    // Fetch data from Supabase
+    // Fetch relevant data from csv_data table
     const { data: csvData, error } = await supabase
       .from('csv_data')
       .select('*')
-      .order('uploaded_at', { ascending: false })
-      .limit(3);
+      .order('uploaded_at', { ascending: false });
 
     if (error) {
       throw error;
@@ -36,54 +35,99 @@ serve(async (req) => {
 
     // Filter and process data based on OEM and Country
     let filteredData = [];
-    if (csvData && csvData.length > 0) {
-      csvData.forEach(file => {
-        if (file.data && Array.isArray(file.data)) {
-          const fileData = file.data.filter((row: any) => {
-            const matchesOEM = !oem || row.OEM === oem;
-            const matchesCountry = country === "Global" || row.Country === country;
-            return matchesOEM && matchesCountry;
-          });
-          filteredData.push(...fileData);
-        }
-      });
-    }
+    csvData.forEach(file => {
+      if (file.data && Array.isArray(file.data)) {
+        file.data.forEach((row: any) => {
+          const matchesOEM = !oem || row.OEM === oem;
+          const matchesCountry = country === "Global" || row.Country === country;
+          
+          if (matchesOEM && matchesCountry) {
+            filteredData.push(row);
+          }
+        });
+      }
+    });
 
-    // Create a comprehensive data summary for AI analysis
+    // Prepare data summary for AI analysis
     const dataSummary = {
       totalRecords: filteredData.length,
-      availableFeatures: filteredData.filter(row => row["Feature Availability"] === "Available").length,
-      categories: [...new Set(filteredData.map(row => row.Category).filter(Boolean))],
-      businessModels: [...new Set(filteredData.map(row => row["Business Model Type"]).filter(Boolean))],
-      features: [...new Set(filteredData.map(row => row.Feature).filter(Boolean))].slice(0, 10),
-      segments: [...new Set(filteredData.map(row => row.Segment).filter(Boolean))],
+      features: filteredData.map(row => row.Feature).filter(Boolean),
+      categories: filteredData.map(row => row.Category).filter(Boolean),
+      featureAvailability: filteredData.map(row => row["Feature Availability"]).filter(Boolean),
+      entrySegment: filteredData.map(row => row["Entry Segment"]).filter(Boolean),
+      midSegment: filteredData.map(row => row["Mid Segment"]).filter(Boolean),
+      luxurySegment: filteredData.map(row => row["Luxury Segment"]).filter(Boolean),
+      premiumSegment: filteredData.map(row => row["Premium Segment"]).filter(Boolean),
+      lighthouseFeatures: filteredData.map(row => row["Lighthouse Feature"]).filter(Boolean),
+      businessModelTypes: filteredData.map(row => row["Business Model Type"]).filter(Boolean),
     };
 
-    // Create detailed prompt for AI analysis
+    // Create AI prompt based on analysis type
     let prompt = '';
-    if (analysisType === 'insights') {
-      prompt = `Analyze the automotive data for ${oem} in ${country} and provide exactly 5 key business insights in JSON format.
+    switch (analysisType) {
+      case 'insights':
+        prompt = `Analyze the automotive data for ${oem} in ${country} and provide exactly 5 key data insights as bullet points.
 
-      Data Summary:
-      - Total Records: ${dataSummary.totalRecords}
-      - Available Features: ${dataSummary.availableFeatures}
-      - Categories: ${dataSummary.categories.join(', ')}
-      - Business Models: ${dataSummary.businessModels.join(', ')}
-      - Key Features: ${dataSummary.features.join(', ')}
-      - Segments: ${dataSummary.segments.join(', ')}
+        Data Summary:
+        - Total Records: ${dataSummary.totalRecords}
+        - Available Features: ${[...new Set(dataSummary.features)].length} unique features
+        - Categories: ${[...new Set(dataSummary.categories)].join(', ')}
+        - Business Models: ${[...new Set(dataSummary.businessModelTypes)].join(', ')}
+        - Segments: Entry (${[...new Set(dataSummary.entrySegment)].length}), Mid (${[...new Set(dataSummary.midSegment)].length}), Luxury (${[...new Set(dataSummary.luxurySegment)].length}), Premium (${[...new Set(dataSummary.premiumSegment)].length})
 
-      Provide strategic insights about market positioning, competitive advantages, feature adoption patterns, business model effectiveness, and growth opportunities.
+        Please provide exactly 5 concise, informative bullet points that highlight:
+        1. Market position and competitive standing
+        2. Feature adoption trends and patterns
+        3. Segment performance and coverage
+        4. Business model effectiveness
+        5. Strategic opportunities or key differentiators
 
-      Return ONLY this JSON format:
-      {
-        "insights": [
-          {"text": "First strategic insight", "context": "supporting context"},
-          {"text": "Second market insight", "context": "supporting context"},
-          {"text": "Third competitive insight", "context": "supporting context"},
-          {"text": "Fourth business model insight", "context": "supporting context"},
-          {"text": "Fifth growth opportunity insight", "context": "supporting context"}
-        ]
-      }`;
+        Return ONLY a JSON object with this structure:
+        {
+          "insights": [
+            {"text": "insight 1 text", "context": "supporting context"},
+            {"text": "insight 2 text", "context": "supporting context"},
+            {"text": "insight 3 text", "context": "supporting context"},
+            {"text": "insight 4 text", "context": "supporting context"},
+            {"text": "insight 5 text", "context": "supporting context"}
+          ]
+        }`;
+        break;
+      
+      case 'category':
+        prompt = `Analyze the automotive category data for ${oem} in ${country}. 
+        Categories: ${JSON.stringify([...new Set(dataSummary.categories)])}
+        Feature Availability: ${JSON.stringify([...new Set(dataSummary.featureAvailability)])}
+        Provide insights on category performance, trends, and market share analysis. Return a structured JSON response with categories, performance metrics, and insights.`;
+        break;
+      
+      case 'segment':
+        prompt = `Analyze the automotive segment data for ${oem} in ${country}.
+        Entry Segment: ${JSON.stringify([...new Set(dataSummary.entrySegment)])}
+        Mid Segment: ${JSON.stringify([...new Set(dataSummary.midSegment)])}
+        Luxury Segment: ${JSON.stringify([...new Set(dataSummary.luxurySegment)])}
+        Premium Segment: ${JSON.stringify([...new Set(dataSummary.premiumSegment)])}
+        Provide detailed segment analysis with volume, pricing insights, and growth trends. Return structured JSON.`;
+        break;
+      
+      case 'feature':
+        prompt = `Analyze the automotive feature adoption for ${oem} in ${country}.
+        Features: ${JSON.stringify([...new Set(dataSummary.features)])}
+        Lighthouse Features: ${JSON.stringify([...new Set(dataSummary.lighthouseFeatures)])}
+        Feature Availability: ${JSON.stringify([...new Set(dataSummary.featureAvailability)])}
+        Provide insights on feature adoption rates, importance levels, and technology trends. Return structured JSON.`;
+        break;
+      
+      case 'business':
+        prompt = `Analyze the business model distribution for ${oem} in ${country}.
+        Business Model Types: ${JSON.stringify([...new Set(dataSummary.businessModelTypes)])}
+        Provide insights on business model effectiveness, market share, and revenue implications. Return structured JSON.`;
+        break;
+      
+      default:
+        prompt = `Provide a comprehensive overview analysis for ${oem} in ${country} based on this automotive data:
+        ${JSON.stringify(dataSummary)}
+        Include market insights, key metrics, and strategic recommendations. Return structured JSON.`;
     }
 
     // Call OpenAI API
@@ -98,14 +142,14 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are an expert automotive industry analyst. Provide concise, actionable business insights based on the provided data. Always return valid JSON.'
+            content: 'You are an expert automotive industry analyst. Provide detailed, accurate analysis based on the data provided. Always return valid JSON responses with structured insights. For insights analysis, focus on actionable business intelligence and market trends.'
           },
           {
             role: 'user',
             content: prompt
           }
         ],
-        temperature: 0.7,
+        temperature: 0.3,
         max_tokens: 2000,
       }),
     });
@@ -117,21 +161,25 @@ serve(async (req) => {
     const aiData = await response.json();
     const analysis = aiData.choices[0].message.content;
 
-    // Parse AI response
+    // Try to parse as JSON, fallback to text if needed
     let structuredAnalysis;
     try {
       structuredAnalysis = JSON.parse(analysis);
-    } catch (parseError) {
-      // Fallback if JSON parsing fails
-      structuredAnalysis = {
-        insights: [
-          { text: `${oem} shows strong market presence in ${country}`, context: "Based on feature availability data" },
-          { text: "Feature distribution indicates competitive positioning", context: "Analysis of available vs. planned features" },
-          { text: "Business model diversity suggests strategic flexibility", context: "Multiple revenue streams identified" },
-          { text: "Technology adoption patterns align with market trends", context: "Feature categories show innovation focus" },
-          { text: "Growth opportunities exist in underrepresented segments", context: "Gap analysis reveals potential areas" }
-        ]
-      };
+    } catch {
+      // Fallback structure for insights if JSON parsing fails
+      if (analysisType === 'insights') {
+        structuredAnalysis = {
+          insights: [
+            { text: "Analysis in progress for selected context", context: "Processing available data" },
+            { text: "Market positioning insights being generated", context: "Based on current selection" },
+            { text: "Feature distribution analysis pending", context: "Real-time processing" },
+            { text: "Competitive landscape assessment ongoing", context: "Data compilation in progress" },
+            { text: "Strategic recommendations being formulated", context: "Analysis completion pending" }
+          ]
+        };
+      } else {
+        structuredAnalysis = { analysis, rawData: dataSummary };
+      }
     }
 
     return new Response(

@@ -32,8 +32,5 @@ export function useAIDataInsights({ selectedOEM, selectedCountry, enabled = true
     },
     enabled: enabled && !!selectedOEM && !!selectedCountry,
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes
-    gcTime: 20 * 60 * 1000, // Keep in cache for 20 minutes
-    retry: 2,
-    retryDelay: 2000,
   })
 }
