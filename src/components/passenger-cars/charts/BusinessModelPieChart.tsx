@@ -15,28 +15,72 @@ const BusinessModelPieChart = ({ selectedOEM, selectedCountry }: BusinessModelPi
   const { data: waypointData } = useWaypointData()
 
   const chartData = useMemo(() => {
-    if (!waypointData?.csvData?.length) return []
+    if (!waypointData?.csvData?.length || !selectedOEM || !selectedCountry) return []
 
+    console.log('Processing business model data for OEM:', selectedOEM, 'Country:', selectedCountry)
+    
     const modelCounts = new Map<string, number>()
 
     waypointData.csvData.forEach(file => {
       if (file.data && Array.isArray(file.data)) {
         file.data.forEach((row: any) => {
-          if (row.OEM === selectedOEM && 
-              (!selectedCountry || row.Country === selectedCountry) &&
-              row['Business Model'] && typeof row['Business Model'] === 'string') {
-            
-            const model = row['Business Model'].trim()
+          // Step 1: Filter by selected country first
+          const country = row.Country || row.country || row['Country '] || row[' Country']
+          if (!country || country.toString().trim() !== selectedCountry) return
+
+          // Step 2: Filter by availability = "Available"
+          const featureAvailability = row['Feature Availability'] || 
+                                    row['Available Feature'] || 
+                                    row['Available_Feature'] || 
+                                    row.available_feature || 
+                                    row.AvailableFeature ||
+                                    row['feature_availability'] ||
+                                    row['FEATURE AVAILABILITY']
+
+          if (!featureAvailability || 
+              featureAvailability.toString().trim().toLowerCase() !== 'available') return
+
+          // Step 3: Filter by selected OEM
+          const oem = row.OEM || row.oem || row['OEM '] || row[' OEM']
+          if (!oem || oem.toString().trim() !== selectedOEM) return
+
+          // Step 4: Extract business model
+          const businessModel = row['Business Model'] || 
+                              row['business_model'] || 
+                              row['BusinessModel'] || 
+                              row['BUSINESS MODEL']
+
+          if (businessModel && typeof businessModel === 'string' && businessModel.trim() !== '') {
+            const model = businessModel.toString().trim()
             modelCounts.set(model, (modelCounts.get(model) || 0) + 1)
+            console.log('Found business model:', model, 'Total count:', modelCounts.get(model))
           }
         })
       }
     })
 
+    console.log('Final business model counts:', Array.from(modelCounts.entries()))
+
     return Array.from(modelCounts.entries())
       .map(([model, count]) => ({ name: model, value: count }))
       .sort((a, b) => b.value - a.value)
   }, [waypointData, selectedOEM, selectedCountry])
+
+  if (chartData.length === 0) {
+    return (
+      <Card className="h-full bg-gray-900/50 border-gray-700">
+        <CardHeader>
+          <CardTitle className="text-white text-lg">Business Model</CardTitle>
+        </CardHeader>
+        <CardContent className="h-[calc(100%-80px)] flex items-center justify-center">
+          <div className="text-gray-400 text-center">
+            <p>No business model data available</p>
+            <p className="text-sm mt-1">for {selectedOEM} in {selectedCountry}</p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <Card className="h-full bg-gray-900/50 border-gray-700">
