@@ -14,45 +14,63 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
   const chartData = useMemo(() => {
     if (!waypointData?.csvData?.length || !selectedCountry) return []
 
-    console.log('Processing Available Features for country:', selectedCountry)
+    console.log('Processing data for country:', selectedCountry)
     
     const oemAvailableFeatureCounts = new Map<string, number>()
+    let totalRowsProcessed = 0
+    let matchingCountryRows = 0
+    let availableFeatureRows = 0
 
     waypointData.csvData.forEach(file => {
       console.log('Processing file:', file.file_name)
       
       if (file.data && Array.isArray(file.data)) {
         file.data.forEach((row: any) => {
-          // Log a sample row to understand the structure
-          if (oemAvailableFeatureCounts.size === 0) {
+          totalRowsProcessed++
+          
+          // Log first few rows to understand structure
+          if (totalRowsProcessed <= 3) {
             console.log('Sample row structure:', row)
             console.log('Available keys in row:', Object.keys(row))
           }
 
-          const oem = row.OEM || row.oem || row['OEM '] || row[' OEM']
+          // Step 1: Extract and validate country field
           const country = row.Country || row.country || row['Country '] || row[' Country']
-          // Check for Feature Availability field instead of Available Feature
-          const featureAvailability = row['Feature Availability'] || row['Available Feature'] || row['Available_Feature'] || row.available_feature || row.AvailableFeature
-
-          console.log('Row data:', { oem, country, featureAvailability })
-
-          // Only process rows with valid OEM, Country, and Feature Availability data
-          if (oem && typeof oem === 'string' && 
-              country && typeof country === 'string' &&
-              featureAvailability &&
-              !oem.toLowerCase().includes('merged') &&
-              !oem.toLowerCase().includes('monitoring') &&
-              oem.trim() !== '') {
+          
+          // Step 2: Filter by selected country first
+          if (country && typeof country === 'string' && country.toString().trim() === selectedCountry) {
+            matchingCountryRows++
+            console.log('Found matching country row:', country.toString().trim())
             
-            // Filter by selected country - exact match
-            if (country.toString().trim() === selectedCountry) {
-              console.log('Found matching country row:', { oem: oem.toString().trim(), featureAvailability: featureAvailability.toString().trim() })
+            // Step 3: Extract feature availability field
+            const featureAvailability = row['Feature Availability'] || 
+                                      row['Available Feature'] || 
+                                      row['Available_Feature'] || 
+                                      row.available_feature || 
+                                      row.AvailableFeature ||
+                                      row['feature_availability'] ||
+                                      row['FEATURE AVAILABILITY']
+
+            // Step 4: Filter by availability = "Available"
+            if (featureAvailability && 
+                typeof featureAvailability === 'string' && 
+                featureAvailability.toString().trim().toLowerCase() === 'available') {
+              availableFeatureRows++
+              console.log('Found available feature row with availability:', featureAvailability.toString().trim())
               
-              // Check for "Available" in Feature Availability field
-              if (featureAvailability.toString().trim().toLowerCase() === 'available') {
+              // Step 5: Extract and validate OEM field
+              const oem = row.OEM || row.oem || row['OEM '] || row[' OEM'] || row['oem '] || row[' oem']
+              
+              if (oem && 
+                  typeof oem === 'string' && 
+                  oem.trim() !== '' &&
+                  !oem.toLowerCase().includes('merged') &&
+                  !oem.toLowerCase().includes('monitoring') &&
+                  !oem.toLowerCase().includes('total')) {
+                
                 const oemName = oem.toString().trim()
                 oemAvailableFeatureCounts.set(oemName, (oemAvailableFeatureCounts.get(oemName) || 0) + 1)
-                console.log('Added available feature for OEM:', oemName)
+                console.log('Added available feature for OEM:', oemName, 'Total count:', oemAvailableFeatureCounts.get(oemName))
               }
             }
           }
@@ -60,7 +78,11 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
       }
     })
 
-    console.log('Available Feature Counts for', selectedCountry, ':', Array.from(oemAvailableFeatureCounts.entries()))
+    console.log('Processing summary:')
+    console.log('- Total rows processed:', totalRowsProcessed)
+    console.log('- Matching country rows:', matchingCountryRows)
+    console.log('- Available feature rows:', availableFeatureRows)
+    console.log('- Final OEM counts:', Array.from(oemAvailableFeatureCounts.entries()))
 
     return Array.from(oemAvailableFeatureCounts.entries())
       .map(([oem, count]) => ({ oem, count }))
