@@ -31,22 +31,28 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
 
           const oem = row.OEM || row.oem || row['OEM '] || row[' OEM']
           const country = row.Country || row.country || row['Country '] || row[' Country']
-          const availableFeature = row['Available Feature'] || row['Available_Feature'] || row.available_feature || row.AvailableFeature
+          // Check for Feature Availability field instead of Available Feature
+          const featureAvailability = row['Feature Availability'] || row['Available Feature'] || row['Available_Feature'] || row.available_feature || row.AvailableFeature
 
-          // Only process rows with valid OEM, Country, and Available Feature data
+          console.log('Row data:', { oem, country, featureAvailability })
+
+          // Only process rows with valid OEM, Country, and Feature Availability data
           if (oem && typeof oem === 'string' && 
               country && typeof country === 'string' &&
-              availableFeature &&
+              featureAvailability &&
               !oem.toLowerCase().includes('merged') &&
               !oem.toLowerCase().includes('monitoring') &&
               oem.trim() !== '') {
             
             // Filter by selected country - exact match
             if (country.toString().trim() === selectedCountry) {
-              // Only count features where Available Feature is "Available"
-              if (availableFeature.toString().trim().toLowerCase() === 'available') {
+              console.log('Found matching country row:', { oem: oem.toString().trim(), featureAvailability: featureAvailability.toString().trim() })
+              
+              // Check for "Available" in Feature Availability field
+              if (featureAvailability.toString().trim().toLowerCase() === 'available') {
                 const oemName = oem.toString().trim()
                 oemAvailableFeatureCounts.set(oemName, (oemAvailableFeatureCounts.get(oemName) || 0) + 1)
+                console.log('Added available feature for OEM:', oemName)
               }
             }
           }
@@ -74,6 +80,14 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
     return (
       <div className="h-96 flex items-center justify-center">
         <div className="text-gray-400">Please select a country to view OEM data</div>
+      </div>
+    )
+  }
+
+  if (chartData.length === 0) {
+    return (
+      <div className="h-96 flex items-center justify-center">
+        <div className="text-gray-400">No available features found for {selectedCountry}</div>
       </div>
     )
   }
