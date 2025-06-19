@@ -50,6 +50,13 @@ const LandscapeSection = () => {
     setShowDetails(true)
   }
 
+  const handleCountryChange = (country: string) => {
+    setSelectedCountry(country)
+    // Hide details when country changes since no OEM is selected
+    setShowDetails(false)
+    setSelectedOEM("")
+  }
+
   return (
     <div className="w-full min-h-full flex">
       {/* Main Content Area - 60% */}
@@ -59,7 +66,7 @@ const LandscapeSection = () => {
           <div className="bg-gray-800/30 rounded-lg p-6">
             <CountryButtons
               selectedCountry={selectedCountry}
-              onCountryChange={setSelectedCountry}
+              onCountryChange={handleCountryChange}
             />
           </div>
 
