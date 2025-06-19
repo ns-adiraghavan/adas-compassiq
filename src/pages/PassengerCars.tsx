@@ -28,18 +28,18 @@ const PassengerCars = () => {
         </p>
       </div>
 
-      {/* Main Content Area */}
-      <div className="flex h-[calc(100vh-200px)] px-8">
-        {/* Horizontal Sections Container - 70% */}
-        <div className="w-[70%] pr-4">
+      {/* Main Content Area - Full Width with Overlay Sidebar */}
+      <div className="relative h-[calc(100vh-200px)]">
+        {/* Horizontal Sections Container - Full Width */}
+        <div className="w-full h-full">
           <HorizontalSectionContainer 
             currentSection={currentSection}
             onSectionChange={setCurrentSection}
           />
         </div>
 
-        {/* AI Snippets Sidebar - 30% */}
-        <div className="w-[30%] pl-4">
+        {/* AI Snippets Sidebar - Overlay on right */}
+        <div className="absolute top-0 right-0 w-[30%] h-full p-4 bg-black/80 backdrop-blur-sm border-l border-gray-800">
           <AISnippetsSidebar />
         </div>
       </div>

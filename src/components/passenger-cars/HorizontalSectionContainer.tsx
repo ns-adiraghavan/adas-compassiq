@@ -1,4 +1,3 @@
-
 import { useRef, useEffect } from "react"
 import LandscapeSection from "./sections/LandscapeSection"
 import Section2 from "./sections/Section2"
@@ -47,7 +46,7 @@ const HorizontalSectionContainer = ({ currentSection, onSectionChange }: Horizon
   return (
     <div className="h-full w-full">
       {/* Section Navigation */}
-      <div className="flex items-center justify-center mb-4 space-x-1">
+      <div className="flex items-center justify-center mb-4 space-x-1 px-8">
         {sections.map((section) => (
           <button
             key={section.id}
@@ -75,7 +74,7 @@ const HorizontalSectionContainer = ({ currentSection, onSectionChange }: Horizon
           return (
             <div
               key={section.id}
-              className="min-w-full h-full snap-start flex-shrink-0 px-8"
+              className="min-w-full h-full snap-start flex-shrink-0"
             >
               <SectionComponent />
             </div>
