@@ -60,9 +60,9 @@ const LandscapeSection = () => {
   }
 
   return (
-    <div className={`w-full h-full flex ${theme.backgroundGradient} transition-all duration-500 overflow-hidden`}>
+    <div className={`w-full h-full flex ${theme.backgroundGradient} transition-all duration-500`}>
       {/* Main Content Area - 60% */}
-      <div className="w-[60%] flex flex-col overflow-hidden">
+      <div className="w-[60%] flex flex-col">
         <div className="flex-1 overflow-auto px-8 py-6">
           <div className="space-y-6 pb-8">
             {/* Countries Section */}
@@ -115,8 +115,8 @@ const LandscapeSection = () => {
       </div>
 
       {/* AI Snippets Sidebar - 40% */}
-      <div className={`w-[40%] flex flex-col ${theme.cardBackground} ${theme.cardBorder} border-l backdrop-blur-sm overflow-hidden`}>
-        <div className="flex-1 overflow-auto p-6">
+      <div className={`w-[40%] flex flex-col ${theme.cardBackground} ${theme.cardBorder} border-l backdrop-blur-sm`}>
+        <div className="flex-1 p-6">
           <AISnippetsSidebar selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
         </div>
       </div>

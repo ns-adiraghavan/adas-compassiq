@@ -41,7 +41,7 @@ const AISnippetsSidebar = ({ selectedOEM = "", selectedCountry = "" }: AISnippet
 
   return (
     <div className="h-full flex flex-col">
-      <Card className={`${theme.cardBackground} ${theme.cardBorder} border backdrop-blur-sm flex-1 flex flex-col overflow-hidden`}>
+      <Card className={`${theme.cardBackground} ${theme.cardBorder} border backdrop-blur-sm flex-1 flex flex-col`}>
         <CardHeader className="pb-3 flex-shrink-0">
           <CardTitle className={`${theme.textPrimary} text-lg flex items-center`}>
             <Newspaper className="h-5 w-5 mr-2" />
