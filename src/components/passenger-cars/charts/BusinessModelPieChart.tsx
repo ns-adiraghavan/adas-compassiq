@@ -44,22 +44,27 @@ const BusinessModelPieChart = ({ selectedOEM, selectedCountry }: BusinessModelPi
           const oem = row.OEM || row.oem || row['OEM '] || row[' OEM']
           if (!oem || oem.toString().trim() !== selectedOEM) return
 
-          // Step 4: Extract business model
-          const businessModel = row['Business Model'] || 
-                              row['business_model'] || 
-                              row['BusinessModel'] || 
-                              row['BUSINESS MODEL']
+          // Step 4: Extract business model type and exclude "Not Available"
+          const businessModelType = row['Business Model Type'] || 
+                                  row['business_model_type'] || 
+                                  row['BusinessModelType'] || 
+                                  row['BUSINESS MODEL TYPE'] ||
+                                  row['Business_Model_Type']
 
-          if (businessModel && typeof businessModel === 'string' && businessModel.trim() !== '') {
-            const model = businessModel.toString().trim()
-            modelCounts.set(model, (modelCounts.get(model) || 0) + 1)
-            console.log('Found business model:', model, 'Total count:', modelCounts.get(model))
+          if (businessModelType && 
+              typeof businessModelType === 'string' && 
+              businessModelType.trim() !== '' &&
+              businessModelType.toString().trim().toLowerCase() !== 'not available') {
+            
+            const modelType = businessModelType.toString().trim()
+            modelCounts.set(modelType, (modelCounts.get(modelType) || 0) + 1)
+            console.log('Found business model type:', modelType, 'Total count:', modelCounts.get(modelType))
           }
         })
       }
     })
 
-    console.log('Final business model counts:', Array.from(modelCounts.entries()))
+    console.log('Final business model type counts:', Array.from(modelCounts.entries()))
 
     return Array.from(modelCounts.entries())
       .map(([model, count]) => ({ name: model, value: count }))
