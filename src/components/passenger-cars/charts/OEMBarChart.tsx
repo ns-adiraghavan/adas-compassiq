@@ -14,9 +14,9 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
   const chartData = useMemo(() => {
     if (!waypointData?.csvData?.length || !selectedCountry) return []
 
-    console.log('Processing OEM feature counts for country:', selectedCountry)
+    console.log('Processing Available Features for country:', selectedCountry)
     
-    const oemFeatureCounts = new Map<string, number>()
+    const oemAvailableFeatureCounts = new Map<string, number>()
 
     waypointData.csvData.forEach(file => {
       console.log('Processing file:', file.file_name)
@@ -24,35 +24,39 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
       if (file.data && Array.isArray(file.data)) {
         file.data.forEach((row: any) => {
           // Log a sample row to understand the structure
-          if (oemFeatureCounts.size === 0) {
+          if (oemAvailableFeatureCounts.size === 0) {
             console.log('Sample row structure:', row)
             console.log('Available keys in row:', Object.keys(row))
           }
 
           const oem = row.OEM || row.oem || row['OEM '] || row[' OEM']
           const country = row.Country || row.country || row['Country '] || row[' Country']
+          const availableFeature = row['Available Feature'] || row['Available_Feature'] || row.available_feature || row.AvailableFeature
 
-          // Only process rows with valid OEM and Country data
+          // Only process rows with valid OEM, Country, and Available Feature data
           if (oem && typeof oem === 'string' && 
               country && typeof country === 'string' &&
+              availableFeature &&
               !oem.toLowerCase().includes('merged') &&
               !oem.toLowerCase().includes('monitoring') &&
               oem.trim() !== '') {
             
             // Filter by selected country - exact match
             if (country.toString().trim() === selectedCountry) {
-              // Count every feature entry for this OEM in this country
-              const oemName = oem.toString().trim()
-              oemFeatureCounts.set(oemName, (oemFeatureCounts.get(oemName) || 0) + 1)
+              // Only count features where Available Feature is "Available"
+              if (availableFeature.toString().trim().toLowerCase() === 'available') {
+                const oemName = oem.toString().trim()
+                oemAvailableFeatureCounts.set(oemName, (oemAvailableFeatureCounts.get(oemName) || 0) + 1)
+              }
             }
           }
         })
       }
     })
 
-    console.log('OEM Feature Counts for', selectedCountry, ':', Array.from(oemFeatureCounts.entries()))
+    console.log('Available Feature Counts for', selectedCountry, ':', Array.from(oemAvailableFeatureCounts.entries()))
 
-    return Array.from(oemFeatureCounts.entries())
+    return Array.from(oemAvailableFeatureCounts.entries())
       .map(([oem, count]) => ({ oem, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 15) // Top 15 OEMs
@@ -99,7 +103,7 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
               color: '#F9FAFB'
             }}
             labelStyle={{ color: '#F9FAFB' }}
-            formatter={(value, name) => [value, 'Feature Count']}
+            formatter={(value, name) => [value, 'Available Features']}
           />
           <Bar 
             dataKey="count" 
