@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react"
-import { useFirstAvailableOEM } from "@/hooks/useWaypointData"
+import { useFirstAvailableOEM, useWaypointData } from "@/hooks/useWaypointData"
 import CountryButtons from "@/components/CountryButtons"
 import OEMBarChart from "../charts/OEMBarChart"
 import LandscapeDetails from "../details/LandscapeDetails"
@@ -11,6 +11,33 @@ const LandscapeSection = () => {
   const [selectedOEM, setSelectedOEM] = useState("")
   const [showDetails, setShowDetails] = useState(false)
   const { data: firstOEM } = useFirstAvailableOEM()
+  const { data: waypointData } = useWaypointData()
+
+  // Set default country when data is loaded
+  useEffect(() => {
+    if (waypointData?.csvData?.length && !selectedCountry) {
+      const uniqueCountries = new Set<string>()
+      
+      waypointData.csvData.forEach(file => {
+        if (file.data && Array.isArray(file.data)) {
+          file.data.forEach((row: any) => {
+            if (row.Country && typeof row.Country === 'string' && 
+                row.Country.trim() !== '' && 
+                row.Country.toLowerCase() !== 'yes' && 
+                row.Country.toLowerCase() !== 'no' &&
+                row.Country.toLowerCase() !== 'n/a') {
+              uniqueCountries.add(row.Country.trim())
+            }
+          })
+        }
+      })
+
+      const sortedCountries = Array.from(uniqueCountries).sort()
+      if (sortedCountries.length > 0) {
+        setSelectedCountry(sortedCountries[0])
+      }
+    }
+  }, [waypointData, selectedCountry])
 
   useEffect(() => {
     if (firstOEM && !selectedOEM) {
@@ -40,7 +67,10 @@ const LandscapeSection = () => {
           <div className="bg-gray-800/30 rounded-lg p-6">
             <div className="mb-4">
               <h3 className="text-xl font-medium text-white mb-2">OEM Feature Distribution</h3>
-              <p className="text-gray-400 text-sm">Click on any OEM bar to view detailed analysis</p>
+              <p className="text-gray-400 text-sm">
+                {selectedCountry ? `Showing feature counts for ${selectedCountry}. ` : ''}
+                Click on any OEM bar to view detailed analysis
+              </p>
             </div>
             <div className="h-96">
               <OEMBarChart

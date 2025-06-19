@@ -54,18 +54,6 @@ const CountryButtons = ({ selectedCountry, onCountryChange }: CountryButtonsProp
     <div>
       <h3 className="text-gray-400 font-medium mb-4">Countries/Regions</h3>
       <div className="flex flex-wrap gap-2">
-        <Button
-          variant={selectedCountry === "" ? "default" : "ghost"}
-          size="sm"
-          onClick={() => onCountryChange("")}
-          className={`${
-            selectedCountry === "" 
-              ? "bg-blue-600 text-white hover:bg-blue-700" 
-              : "text-gray-300 hover:bg-gray-800 hover:text-white"
-          }`}
-        >
-          All Countries
-        </Button>
         {countries.map((country) => (
           <Button
             key={country}
