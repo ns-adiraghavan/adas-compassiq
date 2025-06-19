@@ -14,7 +14,7 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
   const chartData = useMemo(() => {
     if (!waypointData?.csvData?.length) return []
 
-    const oemCounts = new Map<string, number>()
+    const oemFeatureCounts = new Map<string, number>()
 
     waypointData.csvData.forEach(file => {
       if (file.data && Array.isArray(file.data)) {
@@ -28,14 +28,21 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
               return
             }
 
-            const oem = row.OEM.trim()
-            oemCounts.set(oem, (oemCounts.get(oem) || 0) + 1)
+            // Only count if there's an actual feature available
+            if (row.Feature && typeof row.Feature === 'string' && 
+                row.Feature.trim() !== '' && 
+                row.Feature.toLowerCase() !== 'n/a' &&
+                row.Feature.toLowerCase() !== 'na') {
+              
+              const oem = row.OEM.trim()
+              oemFeatureCounts.set(oem, (oemFeatureCounts.get(oem) || 0) + 1)
+            }
           }
         })
       }
     })
 
-    return Array.from(oemCounts.entries())
+    return Array.from(oemFeatureCounts.entries())
       .map(([oem, count]) => ({ oem, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 15) // Top 15 OEMs
@@ -74,6 +81,7 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
               color: '#F9FAFB'
             }}
             labelStyle={{ color: '#F9FAFB' }}
+            formatter={(value, name) => [value, 'Available Features']}
           />
           <Bar 
             dataKey="count" 
