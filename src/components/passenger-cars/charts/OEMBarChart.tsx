@@ -1,4 +1,3 @@
-
 import { useMemo } from "react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { useWaypointData } from "@/hooks/useWaypointData"
@@ -134,14 +133,6 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
     return theme.name === 'Arctic White' ? '#475569' : '#9CA3AF'
   }
 
-  const getTooltipBg = () => {
-    return theme.name === 'Arctic White' ? '#FFFFFF' : '#1F2937'
-  }
-
-  const getTooltipBorder = () => {
-    return theme.name === 'Arctic White' ? '#E2E8F0' : '#374151'
-  }
-
   return (
     <div className="h-96">
       <ResponsiveContainer width="100%" height="100%">
@@ -160,14 +151,8 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
           />
           <YAxis stroke={getTextColor()} />
           <Tooltip
-            contentStyle={{
-              backgroundColor: getTooltipBg(),
-              border: `1px solid ${getTooltipBorder()}`,
-              borderRadius: '8px',
-              color: theme.name === 'Arctic White' ? '#1F2937' : '#F9FAFB'
-            }}
-            labelStyle={{ color: theme.name === 'Arctic White' ? '#1F2937' : '#F9FAFB' }}
             formatter={(value, name) => [value, 'Available Features']}
+            cursor={false}
           />
           <Bar 
             dataKey="count" 

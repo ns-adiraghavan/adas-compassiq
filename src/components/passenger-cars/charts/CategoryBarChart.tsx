@@ -1,4 +1,3 @@
-
 import { useMemo } from "react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -80,18 +79,6 @@ const CategoryBarChart = ({ selectedOEM, selectedCountry }: CategoryBarChartProp
     return theme.name === 'Arctic White' ? '#475569' : 'rgba(255,255,255,0.7)'
   }
 
-  const getTooltipBg = () => {
-    return theme.name === 'Arctic White' ? 'rgba(255, 255, 255, 0.95)' : 'rgba(0, 0, 0, 0.8)'
-  }
-
-  const getTooltipBorder = () => {
-    return theme.name === 'Arctic White' ? 'rgba(148, 163, 184, 0.3)' : 'rgba(255, 255, 255, 0.2)'
-  }
-
-  const getTooltipTextColor = () => {
-    return theme.name === 'Arctic White' ? '#1f2937' : '#F9FAFB'
-  }
-
   if (chartData.length === 0) {
     return (
       <Card className={`h-full ${theme.cardBackground} backdrop-blur-sm ${theme.cardBorder} border shadow-xl animate-fade-in`}>
@@ -136,23 +123,7 @@ const CategoryBarChart = ({ selectedOEM, selectedCountry }: CategoryBarChartProp
             />
             <YAxis stroke={getTextColor()} fontSize={12} fontWeight="500" />
             <Tooltip
-              contentStyle={{
-                backgroundColor: getTooltipBg(),
-                backdropFilter: 'blur(20px)',
-                border: `1px solid ${getTooltipBorder()}`,
-                borderRadius: '12px',
-                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-                color: getTooltipTextColor(),
-                fontSize: '14px',
-                fontWeight: '500',
-                padding: '12px 16px'
-              }}
               formatter={(value: number) => [`${value} features`, 'Count']}
-              labelStyle={{
-                color: getTooltipTextColor(),
-                fontWeight: '600',
-                marginBottom: '4px'
-              }}
               cursor={false}
             />
             <Bar 
