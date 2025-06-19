@@ -113,7 +113,7 @@ const LandscapeSection = () => {
 
       {/* AI Snippets Sidebar - 40% */}
       <div className={`w-[40%] p-6 ${theme.cardBackground} ${theme.cardBorder} border-l backdrop-blur-sm`}>
-        <AISnippetsSidebar />
+        <AISnippetsSidebar selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
       </div>
     </div>
   )
