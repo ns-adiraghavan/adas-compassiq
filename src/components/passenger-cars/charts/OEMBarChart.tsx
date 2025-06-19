@@ -2,6 +2,7 @@
 import { useMemo } from "react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { useWaypointData } from "@/hooks/useWaypointData"
+import { useTheme } from "@/contexts/ThemeContext"
 
 interface OEMBarChartProps {
   selectedCountry: string
@@ -10,6 +11,7 @@ interface OEMBarChartProps {
 
 const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
   const { data: waypointData, isLoading } = useWaypointData()
+  const { theme } = useTheme()
 
   const chartData = useMemo(() => {
     if (!waypointData?.csvData?.length || !selectedCountry) return []
@@ -93,7 +95,7 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
   if (isLoading) {
     return (
       <div className="h-96 flex items-center justify-center">
-        <div className="text-gray-400">Loading OEM data...</div>
+        <div className={`${theme.textSecondary}`}>Loading OEM data...</div>
       </div>
     )
   }
@@ -101,7 +103,7 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
   if (!selectedCountry) {
     return (
       <div className="h-96 flex items-center justify-center">
-        <div className="text-gray-400">Please select a country to view OEM data</div>
+        <div className={`${theme.textSecondary}`}>Please select a country to view OEM data</div>
       </div>
     )
   }
@@ -109,9 +111,35 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
   if (chartData.length === 0) {
     return (
       <div className="h-96 flex items-center justify-center">
-        <div className="text-gray-400">No available features found for {selectedCountry}</div>
+        <div className={`${theme.textSecondary}`}>No available features found for {selectedCountry}</div>
       </div>
     )
+  }
+
+  // Extract color values from theme classes for recharts
+  const getPrimaryColor = () => {
+    if (theme.primary.includes('blue')) return '#3B82F6'
+    if (theme.primary.includes('emerald')) return '#10B981'
+    if (theme.primary.includes('orange')) return '#F97316'
+    if (theme.primary.includes('purple')) return '#8B5CF6'
+    if (theme.primary.includes('slate')) return '#64748B'
+    return '#3B82F6' // default
+  }
+
+  const getGridColor = () => {
+    return theme.name === 'Arctic White' ? '#E2E8F0' : '#374151'
+  }
+
+  const getTextColor = () => {
+    return theme.name === 'Arctic White' ? '#475569' : '#9CA3AF'
+  }
+
+  const getTooltipBg = () => {
+    return theme.name === 'Arctic White' ? '#FFFFFF' : '#1F2937'
+  }
+
+  const getTooltipBorder = () => {
+    return theme.name === 'Arctic White' ? '#E2E8F0' : '#374151'
   }
 
   return (
@@ -121,29 +149,29 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
           data={chartData}
           margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+          <CartesianGrid strokeDasharray="3 3" stroke={getGridColor()} />
           <XAxis 
             dataKey="oem" 
-            stroke="#9CA3AF"
+            stroke={getTextColor()}
             angle={-45}
             textAnchor="end"
             height={100}
             fontSize={12}
           />
-          <YAxis stroke="#9CA3AF" />
+          <YAxis stroke={getTextColor()} />
           <Tooltip
             contentStyle={{
-              backgroundColor: '#1F2937',
-              border: '1px solid #374151',
+              backgroundColor: getTooltipBg(),
+              border: `1px solid ${getTooltipBorder()}`,
               borderRadius: '8px',
-              color: '#F9FAFB'
+              color: theme.name === 'Arctic White' ? '#1F2937' : '#F9FAFB'
             }}
-            labelStyle={{ color: '#F9FAFB' }}
+            labelStyle={{ color: theme.name === 'Arctic White' ? '#1F2937' : '#F9FAFB' }}
             formatter={(value, name) => [value, 'Available Features']}
           />
           <Bar 
             dataKey="count" 
-            fill="#3B82F6"
+            fill={getPrimaryColor()}
             cursor="pointer"
             onClick={(data) => data && onOEMClick(data.oem)}
           />

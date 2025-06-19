@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button"
 import { useWaypointData } from "@/hooks/useWaypointData"
+import { useTheme } from "@/contexts/ThemeContext"
 import { useMemo } from "react"
 
 interface CountryButtonsProps {
@@ -10,6 +11,7 @@ interface CountryButtonsProps {
 
 const CountryButtons = ({ selectedCountry, onCountryChange }: CountryButtonsProps) => {
   const { data: waypointData, isLoading } = useWaypointData()
+  const { theme } = useTheme()
 
   const countries = useMemo(() => {
     if (!waypointData?.csvData?.length) return []
@@ -40,10 +42,10 @@ const CountryButtons = ({ selectedCountry, onCountryChange }: CountryButtonsProp
   if (isLoading) {
     return (
       <div className="space-y-3">
-        <h3 className="text-gray-400 font-medium mb-4">Countries/Regions</h3>
+        <h3 className={`${theme.textSecondary} font-medium mb-4`}>Countries/Regions</h3>
         <div className="flex flex-wrap gap-2 justify-start">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-8 w-20 bg-gray-700 rounded animate-pulse"></div>
+            <div key={i} className={`h-8 w-20 ${theme.cardBackground} rounded animate-pulse`}></div>
           ))}
         </div>
       </div>
@@ -52,7 +54,7 @@ const CountryButtons = ({ selectedCountry, onCountryChange }: CountryButtonsProp
 
   return (
     <div>
-      <h3 className="text-gray-400 font-medium mb-4">Countries/Regions</h3>
+      <h3 className={`${theme.textSecondary} font-medium mb-4`}>Countries/Regions</h3>
       <div className="flex flex-wrap gap-2 justify-start items-center">
         {countries.map((country) => (
           <Button
@@ -62,8 +64,8 @@ const CountryButtons = ({ selectedCountry, onCountryChange }: CountryButtonsProp
             onClick={() => onCountryChange(country)}
             className={`flex-shrink-0 px-4 py-2 text-sm font-medium transition-all ${
               selectedCountry === country 
-                ? "bg-blue-600 text-white hover:bg-blue-700 shadow-md" 
-                : "text-gray-300 hover:bg-gray-800 hover:text-white border-gray-600"
+                ? `${theme.primary} ${theme.textPrimary} ${theme.hoverEffect} ${theme.shadowColor} shadow-md` 
+                : `${theme.textSecondary} ${theme.hoverEffect} ${theme.cardBorder} border`
             }`}
           >
             {country}
