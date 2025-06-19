@@ -40,32 +40,38 @@ const AISnippetsSidebar = ({ selectedOEM = "", selectedCountry = "" }: AISnippet
   ]
 
   return (
-    <div className="h-full">
-      <Card className={`${theme.cardBackground} ${theme.cardBorder} border backdrop-blur-sm`}>
-        <CardHeader className="pb-3">
+    <div className="h-full flex flex-col overflow-hidden">
+      <Card className={`${theme.cardBackground} ${theme.cardBorder} border backdrop-blur-sm flex flex-col h-full`}>
+        <CardHeader className="pb-3 flex-shrink-0">
           <CardTitle className={`${theme.textPrimary} text-lg flex items-center`}>
             <Newspaper className="h-5 w-5 mr-2" />
             AI Snippets
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* News Section */}
-          <div className="space-y-3">
-            <h3 className={`${theme.textPrimary} text-sm font-medium flex items-center`}>
-              <Newspaper className="h-4 w-4 mr-2" />
-              News Updates
-            </h3>
-            {mockNews.map((news) => (
-              <div key={news.id} className={`p-3 ${theme.cardBackground} rounded-lg ${theme.cardBorder} border backdrop-blur-sm`}>
-                <h4 className={`${theme.textPrimary} text-sm font-medium mb-1`}>{news.title}</h4>
-                <p className={`${theme.textSecondary} text-xs mb-2`}>{news.summary}</p>
-                <div className={`${theme.textMuted} text-xs`}>{news.timestamp}</div>
+        <CardContent className="flex-1 overflow-y-auto">
+          <div className="space-y-6">
+            {/* News Section */}
+            <div className="space-y-3">
+              <h3 className={`${theme.textPrimary} text-sm font-medium flex items-center`}>
+                <Newspaper className="h-4 w-4 mr-2" />
+                News Updates
+              </h3>
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {mockNews.map((news) => (
+                  <div key={news.id} className={`p-3 ${theme.cardBackground} rounded-lg ${theme.cardBorder} border backdrop-blur-sm`}>
+                    <h4 className={`${theme.textPrimary} text-sm font-medium mb-1`}>{news.title}</h4>
+                    <p className={`${theme.textSecondary} text-xs mb-2`}>{news.summary}</p>
+                    <div className={`${theme.textMuted} text-xs`}>{news.timestamp}</div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
 
-          {/* AI Data Insights Section */}
-          <DataSnippets selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
+            {/* AI Data Insights Section */}
+            <div className="flex-1">
+              <DataSnippets selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
