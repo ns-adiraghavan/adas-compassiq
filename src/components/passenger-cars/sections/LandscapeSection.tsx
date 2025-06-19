@@ -24,10 +24,10 @@ const LandscapeSection = () => {
   }
 
   return (
-    <div className="w-full">
-      <div className="flex w-full min-h-screen">
-        {/* Main Content Area - 60% */}
-        <div className="w-[60%] px-8 space-y-6">
+    <div className="w-full h-full flex">
+      {/* Main Content Area - 60% */}
+      <div className="w-[60%] px-8 h-full overflow-y-auto">
+        <div className="space-y-6 pb-8">
           {/* Countries Section */}
           <div className="bg-gray-800/30 rounded-lg p-6">
             <CountryButtons
@@ -71,11 +71,11 @@ const LandscapeSection = () => {
             </div>
           )}
         </div>
+      </div>
 
-        {/* AI Snippets Sidebar - 40% */}
-        <div className="w-[40%] p-6 bg-gray-900/30 border-l border-gray-800">
-          <AISnippetsSidebar />
-        </div>
+      {/* AI Snippets Sidebar - 40% */}
+      <div className="w-[40%] p-6 bg-gray-900/30 border-l border-gray-800 h-full overflow-y-auto">
+        <AISnippetsSidebar />
       </div>
     </div>
   )
