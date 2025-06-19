@@ -15,7 +15,7 @@ interface LandscapeDetailsProps {
 
 const LandscapeDetails = ({ selectedOEM, selectedCountry, onBack }: LandscapeDetailsProps) => {
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
@@ -37,29 +37,23 @@ const LandscapeDetails = ({ selectedOEM, selectedCountry, onBack }: LandscapeDet
         )}
       </div>
 
-      {/* Content Grid */}
-      <div className="grid grid-cols-12 gap-6 h-[calc(100%-80px)]">
+      {/* Content Grid - matches the layout from the image */}
+      <div className="flex-1 space-y-6">
         {/* Top Row - Value Boxes */}
-        <div className="col-span-4">
+        <div className="grid grid-cols-3 gap-6 h-32">
           <RankingValueBox selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
-        </div>
-        <div className="col-span-4">
           <BigBetCategoriesBox selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
-        </div>
-        <div className="col-span-4">
           <LighthouseFeaturesBox selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
         </div>
 
         {/* Middle Row - Charts */}
-        <div className="col-span-8">
+        <div className="grid grid-cols-2 gap-6 h-80">
           <CategoryBarChart selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
-        </div>
-        <div className="col-span-4">
           <BusinessModelPieChart selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
         </div>
 
         {/* Bottom Row - Partner Ecosystem */}
-        <div className="col-span-12">
+        <div className="h-32">
           <PartnerEcosystem selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
         </div>
       </div>

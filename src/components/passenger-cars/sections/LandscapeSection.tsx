@@ -23,20 +23,26 @@ const LandscapeSection = () => {
   }
 
   return (
-    <div className="h-full flex">
+    <div className="h-full flex flex-col">
       {!showDetails ? (
         <>
-          {/* Left Side - Country Selection */}
-          <div className="w-1/4 pr-4 border-r border-gray-800">
-            <h2 className="text-2xl font-thin mb-6 text-white">Landscape</h2>
-            <CountryButtons
-              selectedCountry={selectedCountry}
-              onCountryChange={setSelectedCountry}
-            />
+          {/* Header */}
+          <div className="mb-6">
+            <h2 className="text-2xl font-thin mb-4 text-white">Landscape</h2>
           </div>
 
-          {/* Right Side - OEM Bar Chart */}
-          <div className="flex-1 pl-6">
+          {/* Countries Section - Horizontal */}
+          <div className="mb-6">
+            <div className="bg-gray-800/30 rounded-lg p-4">
+              <CountryButtons
+                selectedCountry={selectedCountry}
+                onCountryChange={setSelectedCountry}
+              />
+            </div>
+          </div>
+
+          {/* OEM Bar Chart */}
+          <div className="flex-1">
             <div className="mb-4">
               <h3 className="text-xl font-medium text-white mb-2">OEM Feature Distribution</h3>
               <p className="text-gray-400 text-sm">Click on any OEM bar to view detailed analysis</p>
