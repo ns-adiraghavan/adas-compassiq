@@ -13,23 +13,47 @@ const BigBetCategoriesBox = ({ selectedOEM, selectedCountry }: BigBetCategoriesB
   const { data: waypointData } = useWaypointData()
 
   const categoryData = useMemo(() => {
-    if (!waypointData?.csvData?.length) return []
+    if (!waypointData?.csvData?.length || !selectedOEM || !selectedCountry) return []
 
+    console.log('Processing big-bet categories for OEM:', selectedOEM, 'Country:', selectedCountry)
+    
     const categoryCounts = new Map<string, number>()
 
     waypointData.csvData.forEach(file => {
       if (file.data && Array.isArray(file.data)) {
         file.data.forEach((row: any) => {
-          if (row.OEM === selectedOEM && 
-              (!selectedCountry || row.Country === selectedCountry) &&
-              row.Category && typeof row.Category === 'string') {
-            
-            const category = row.Category.trim()
-            categoryCounts.set(category, (categoryCounts.get(category) || 0) + 1)
+          // Step 1: Filter by selected country first
+          const country = row.Country || row.country || row['Country '] || row[' Country']
+          if (!country || country.toString().trim() !== selectedCountry) return
+
+          // Step 2: Filter by availability = "Available"
+          const featureAvailability = row['Feature Availability'] || 
+                                    row['Available Feature'] || 
+                                    row['Available_Feature'] || 
+                                    row.available_feature || 
+                                    row.AvailableFeature ||
+                                    row['feature_availability'] ||
+                                    row['FEATURE AVAILABILITY']
+
+          if (!featureAvailability || 
+              featureAvailability.toString().trim().toLowerCase() !== 'available') return
+
+          // Step 3: Filter by selected OEM
+          const oem = row.OEM || row.oem || row['OEM '] || row[' OEM']
+          if (!oem || oem.toString().trim() !== selectedOEM) return
+
+          // Step 4: Extract category data
+          const category = row.Category || row.category || row['Category '] || row[' Category']
+          if (category && typeof category === 'string' && category.trim() !== '') {
+            const categoryName = category.toString().trim()
+            categoryCounts.set(categoryName, (categoryCounts.get(categoryName) || 0) + 1)
+            console.log('Found category:', categoryName, 'Total count:', categoryCounts.get(categoryName))
           }
         })
       }
     })
+
+    console.log('Final category counts:', Array.from(categoryCounts.entries()))
 
     return Array.from(categoryCounts.entries())
       .map(([category, count]) => ({ category, count }))
