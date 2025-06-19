@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BarChart, Loader2 } from "lucide-react"
+import { BarChart, Loader2, AlertCircle } from "lucide-react"
 import { useAIDataInsights } from "@/hooks/useAIDataInsights"
 import { useTheme } from "@/contexts/ThemeContext"
 
@@ -20,23 +20,62 @@ const DataSnippets = ({ selectedOEM, selectedCountry }: DataSnippetsProps) => {
   // Extract insights from AI response
   const insights = aiInsights?.analysis?.insights || []
 
-  // Fallback mock data if AI fails
-  const fallbackData = [
+  // Faster, more relevant fallback data based on context
+  const contextualFallback = [
     {
-      text: "Feature availability analysis in progress",
-      context: "AI analysis loading..."
+      text: `${selectedOEM} market positioning analysis in progress`,
+      context: "Processing competitive landscape data..."
     },
     {
-      text: "Market positioning insights pending",
-      context: "Processing data..."
+      text: `Feature distribution trends for ${selectedCountry} being calculated`,
+      context: "Analyzing regional preferences..."
     },
     {
-      text: "Competitive analysis being generated",
-      context: "Please wait..."
+      text: "Business model effectiveness assessment pending",
+      context: "Evaluating revenue strategies..."
+    },
+    {
+      text: "Technology adoption patterns being evaluated",
+      context: "Measuring innovation impact..."
+    },
+    {
+      text: "Market share insights generation in progress",
+      context: "Calculating competitive metrics..."
     }
   ]
 
-  const displayData = insights.length > 0 ? insights.slice(0, 5) : fallbackData
+  const displayData = insights.length > 0 ? insights.slice(0, 5) : contextualFallback
+
+  if (error) {
+    return (
+      <Card className={`${theme.cardBackground} ${theme.cardBorder} border backdrop-blur-sm`}>
+        <CardHeader className="pb-3">
+          <CardTitle className={`${theme.textPrimary} text-sm font-medium flex items-center`}>
+            <AlertCircle className="h-4 w-4 mr-2 text-red-500" />
+            Data Insights
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className={`p-3 ${theme.cardBackground} rounded-lg ${theme.cardBorder} border`}>
+            <p className={`${theme.textMuted} text-xs`}>
+              AI analysis temporarily unavailable. Showing contextual insights.
+            </p>
+          </div>
+          {contextualFallback.slice(0, 3).map((insight, index) => (
+            <div key={index} className={`p-3 ${theme.cardBackground} rounded-lg ${theme.cardBorder} border backdrop-blur-sm`}>
+              <div className="flex items-start mb-1">
+                <span className={`${theme.secondary} text-xs font-bold mr-2 mt-0.5`}>•</span>
+                <p className={`${theme.textPrimary} text-xs font-medium leading-relaxed`}>
+                  {insight.text}
+                </p>
+              </div>
+              <p className={`${theme.textSecondary} text-xs ml-4`}>{insight.context}</p>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <Card className={`${theme.cardBackground} ${theme.cardBorder} border backdrop-blur-sm`}>
@@ -50,18 +89,17 @@ const DataSnippets = ({ selectedOEM, selectedCountry }: DataSnippetsProps) => {
       <CardContent className="space-y-3">
         {isLoading ? (
           <div className="space-y-3">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className={`p-3 ${theme.cardBackground} rounded-lg ${theme.cardBorder} border animate-pulse`}>
-                <div className={`h-3 ${theme.cardBackground} rounded mb-2`}></div>
-                <div className={`h-2 ${theme.cardBackground} rounded w-3/4`}></div>
+            {contextualFallback.map((insight, index) => (
+              <div key={index} className={`p-3 ${theme.cardBackground} rounded-lg ${theme.cardBorder} border`}>
+                <div className="flex items-start mb-1">
+                  <span className={`${theme.secondary} text-xs font-bold mr-2 mt-0.5`}>•</span>
+                  <p className={`${theme.textPrimary} text-xs font-medium leading-relaxed`}>
+                    {insight.text}
+                  </p>
+                </div>
+                <p className={`${theme.textSecondary} text-xs ml-4`}>{insight.context}</p>
               </div>
             ))}
-          </div>
-        ) : error ? (
-          <div className={`p-3 ${theme.cardBackground} rounded-lg ${theme.cardBorder} border`}>
-            <p className={`${theme.textMuted} text-xs`}>
-              Unable to generate AI insights. Please try again later.
-            </p>
           </div>
         ) : (
           displayData.map((insight, index) => (
