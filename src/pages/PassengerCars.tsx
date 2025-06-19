@@ -29,9 +29,9 @@ const PassengerCars = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex h-[calc(100vh-200px)]">
+      <div className="flex h-[calc(100vh-200px)] px-8">
         {/* Horizontal Sections Container - 70% */}
-        <div className="flex-1 pr-4">
+        <div className="w-[70%] pr-4">
           <HorizontalSectionContainer 
             currentSection={currentSection}
             onSectionChange={setCurrentSection}
@@ -39,7 +39,7 @@ const PassengerCars = () => {
         </div>
 
         {/* AI Snippets Sidebar - 30% */}
-        <div className="w-[30%] pl-4 pr-8">
+        <div className="w-[30%] pl-4">
           <AISnippetsSidebar />
         </div>
       </div>

@@ -45,7 +45,7 @@ const HorizontalSectionContainer = ({ currentSection, onSectionChange }: Horizon
   }
 
   return (
-    <div className="h-full">
+    <div className="h-full w-full">
       {/* Section Navigation */}
       <div className="flex items-center justify-center mb-4 space-x-1">
         {sections.map((section) => (
@@ -66,7 +66,7 @@ const HorizontalSectionContainer = ({ currentSection, onSectionChange }: Horizon
       {/* Horizontal Scrollable Container */}
       <div
         ref={containerRef}
-        className="flex overflow-x-auto scrollbar-hide h-full snap-x snap-mandatory"
+        className="flex overflow-x-auto scrollbar-hide h-full snap-x snap-mandatory w-full"
         onScroll={handleScroll}
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
@@ -75,7 +75,7 @@ const HorizontalSectionContainer = ({ currentSection, onSectionChange }: Horizon
           return (
             <div
               key={section.id}
-              className="min-w-full h-full snap-start flex-shrink-0 px-4"
+              className="min-w-full h-full snap-start flex-shrink-0 px-8"
             >
               <SectionComponent />
             </div>
