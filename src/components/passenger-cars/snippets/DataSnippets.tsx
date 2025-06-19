@@ -1,92 +1,60 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BarChart, Loader2 } from "lucide-react"
-import { useAIDataInsights } from "@/hooks/useAIDataInsights"
-import { useTheme } from "@/contexts/ThemeContext"
+import { BarChart } from "lucide-react"
 
-interface DataSnippetsProps {
-  selectedOEM: string
-  selectedCountry: string
-}
-
-const DataSnippets = ({ selectedOEM, selectedCountry }: DataSnippetsProps) => {
-  const { theme } = useTheme()
-  const { data: aiInsights, isLoading, error } = useAIDataInsights({
-    selectedOEM,
-    selectedCountry,
-    enabled: !!selectedOEM && !!selectedCountry
-  })
-
-  // Extract insights from AI response
-  const insights = aiInsights?.analysis?.insights || []
-
-  // Fallback mock data if AI fails
-  const fallbackData = [
+const DataSnippets = () => {
+  const mockData = [
     {
-      text: "Feature availability analysis in progress",
-      context: "AI analysis loading..."
+      id: 1,
+      metric: "ADAS Adoption Rate",
+      value: "73%",
+      trend: "+5.2%",
+      context: "YoY growth in premium segment"
     },
     {
-      text: "Market positioning insights pending",
-      context: "Processing data..."
+      id: 2,
+      metric: "EV Feature Integration",
+      value: "89%",
+      trend: "+12.1%",
+      context: "New model launches"
     },
     {
-      text: "Competitive analysis being generated",
-      context: "Please wait..."
+      id: 3,
+      metric: "OTA Update Frequency",
+      value: "2.3x",
+      trend: "+15%",
+      context: "Monthly average per OEM"
+    },
+    {
+      id: 4,
+      metric: "Connected Services",
+      value: "91%",
+      trend: "+8.7%",
+      context: "Market penetration rate"
     }
   ]
 
-  const displayData = insights.length > 0 ? insights.slice(0, 5) : fallbackData
-
   return (
-    <Card className={`${theme.cardBackground} ${theme.cardBorder} border backdrop-blur-sm h-full flex flex-col`}>
-      <CardHeader className="pb-3 flex-shrink-0">
-        <CardTitle className={`${theme.textPrimary} text-sm font-medium flex items-center`}>
-          <BarChart className="h-4 w-4 mr-2" />
-          Data Insights
-          {isLoading && <Loader2 className="h-3 w-3 ml-2 animate-spin" />}
+    <Card className="bg-gray-900/50 border-gray-700">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-white text-lg flex items-center">
+          <BarChart className="h-5 w-5 mr-2" />
+          Data Snippets - From AI
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 overflow-y-auto">
-        <div className="space-y-3">
-          {isLoading ? (
-            <div className="space-y-3">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className={`p-3 ${theme.cardBackground} rounded-lg ${theme.cardBorder} border animate-pulse`}>
-                  <div className={`h-3 ${theme.cardBackground} rounded mb-2`}></div>
-                  <div className={`h-2 ${theme.cardBackground} rounded w-3/4`}></div>
-                </div>
-              ))}
+      <CardContent className="space-y-3">
+        {mockData.map((data) => (
+          <div key={data.id} className="p-3 bg-gray-800/50 rounded-lg border border-gray-700/50">
+            <div className="flex justify-between items-start mb-1">
+              <h4 className="text-white text-sm font-medium">{data.metric}</h4>
+              <span className="text-blue-400 text-sm font-bold">{data.value}</span>
             </div>
-          ) : error ? (
-            <div className={`p-3 ${theme.cardBackground} rounded-lg ${theme.cardBorder} border`}>
-              <p className={`${theme.textMuted} text-xs`}>
-                Unable to generate AI insights. Please try again later.
-              </p>
+            <div className="flex justify-between items-center">
+              <p className="text-gray-400 text-xs">{data.context}</p>
+              <span className="text-green-400 text-xs font-medium">{data.trend}</span>
             </div>
-          ) : (
-            <div className="space-y-3">
-              {displayData.map((insight, index) => (
-                <div key={index} className={`p-3 ${theme.cardBackground} rounded-lg ${theme.cardBorder} border backdrop-blur-sm`}>
-                  <div className="flex items-start mb-1">
-                    <span className={`${theme.secondary} text-xs font-bold mr-2 mt-0.5 flex-shrink-0`}>•</span>
-                    <p className={`${theme.textPrimary} text-xs font-medium leading-relaxed break-words`}>
-                      {insight.text || insight}
-                    </p>
-                  </div>
-                  {insight.context && (
-                    <p className={`${theme.textSecondary} text-xs ml-4 break-words`}>{insight.context}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-          {selectedOEM && selectedCountry && (
-            <div className={`text-xs ${theme.textMuted} text-center pt-2 border-t ${theme.cardBorder} mt-4`}>
-              Analysis for {selectedOEM} in {selectedCountry}
-            </div>
-          )}
-        </div>
+          </div>
+        ))}
       </CardContent>
     </Card>
   )

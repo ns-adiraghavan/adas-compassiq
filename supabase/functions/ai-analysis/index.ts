@@ -65,35 +65,6 @@ serve(async (req) => {
     // Create AI prompt based on analysis type
     let prompt = '';
     switch (analysisType) {
-      case 'insights':
-        prompt = `Analyze the automotive data for ${oem} in ${country} and provide exactly 5 key data insights as bullet points.
-
-        Data Summary:
-        - Total Records: ${dataSummary.totalRecords}
-        - Available Features: ${[...new Set(dataSummary.features)].length} unique features
-        - Categories: ${[...new Set(dataSummary.categories)].join(', ')}
-        - Business Models: ${[...new Set(dataSummary.businessModelTypes)].join(', ')}
-        - Segments: Entry (${[...new Set(dataSummary.entrySegment)].length}), Mid (${[...new Set(dataSummary.midSegment)].length}), Luxury (${[...new Set(dataSummary.luxurySegment)].length}), Premium (${[...new Set(dataSummary.premiumSegment)].length})
-
-        Please provide exactly 5 concise, informative bullet points that highlight:
-        1. Market position and competitive standing
-        2. Feature adoption trends and patterns
-        3. Segment performance and coverage
-        4. Business model effectiveness
-        5. Strategic opportunities or key differentiators
-
-        Return ONLY a JSON object with this structure:
-        {
-          "insights": [
-            {"text": "insight 1 text", "context": "supporting context"},
-            {"text": "insight 2 text", "context": "supporting context"},
-            {"text": "insight 3 text", "context": "supporting context"},
-            {"text": "insight 4 text", "context": "supporting context"},
-            {"text": "insight 5 text", "context": "supporting context"}
-          ]
-        }`;
-        break;
-      
       case 'category':
         prompt = `Analyze the automotive category data for ${oem} in ${country}. 
         Categories: ${JSON.stringify([...new Set(dataSummary.categories)])}
@@ -142,7 +113,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are an expert automotive industry analyst. Provide detailed, accurate analysis based on the data provided. Always return valid JSON responses with structured insights. For insights analysis, focus on actionable business intelligence and market trends.'
+            content: 'You are an expert automotive industry analyst. Provide detailed, accurate analysis based on the data provided. Always return valid JSON responses with structured insights.'
           },
           {
             role: 'user',
@@ -166,20 +137,7 @@ serve(async (req) => {
     try {
       structuredAnalysis = JSON.parse(analysis);
     } catch {
-      // Fallback structure for insights if JSON parsing fails
-      if (analysisType === 'insights') {
-        structuredAnalysis = {
-          insights: [
-            { text: "Analysis in progress for selected context", context: "Processing available data" },
-            { text: "Market positioning insights being generated", context: "Based on current selection" },
-            { text: "Feature distribution analysis pending", context: "Real-time processing" },
-            { text: "Competitive landscape assessment ongoing", context: "Data compilation in progress" },
-            { text: "Strategic recommendations being formulated", context: "Analysis completion pending" }
-          ]
-        };
-      } else {
-        structuredAnalysis = { analysis, rawData: dataSummary };
-      }
+      structuredAnalysis = { analysis, rawData: dataSummary };
     }
 
     return new Response(
