@@ -46,21 +46,23 @@ const HorizontalSectionContainer = ({ currentSection, onSectionChange }: Horizon
 
   return (
     <div className="h-full w-full">
-      {/* Section Navigation */}
-      <div className="flex items-center justify-center mb-4 space-x-1 px-8">
-        {sections.map((section) => (
-          <button
-            key={section.id}
-            onClick={() => scrollToSection(section.id)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              currentSection === section.id
-                ? "bg-blue-600 text-white"
-                : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-            }`}
-          >
-            {section.name}
-          </button>
-        ))}
+      {/* Section Navigation - Full Width Distribution */}
+      <div className="w-full px-8 mb-4">
+        <div className="flex items-center justify-between w-full max-w-none">
+          {sections.map((section) => (
+            <button
+              key={section.id}
+              onClick={() => scrollToSection(section.id)}
+              className={`flex-1 mx-1 px-6 py-3 rounded-lg text-sm font-medium transition-all ${
+                currentSection === section.id
+                  ? "bg-blue-600 text-white shadow-lg"
+                  : "bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white"
+              }`}
+            >
+              {section.name}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Horizontal Scrollable Container - Full Width */}
