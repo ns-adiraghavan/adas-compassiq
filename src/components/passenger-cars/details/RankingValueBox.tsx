@@ -13,34 +13,51 @@ const RankingValueBox = ({ selectedOEM, selectedCountry }: RankingValueBoxProps)
   const { data: waypointData } = useWaypointData()
 
   const rankingData = useMemo(() => {
-    if (!waypointData?.csvData?.length) return { rank: 0, totalFeatures: 0, totalOEMs: 0 }
+    if (!waypointData?.csvData?.length) return { rank: 0, availableFeatures: 0, totalOEMs: 0 }
 
-    const oemCounts = new Map<string, number>()
+    const oemAvailableFeatureCounts = new Map<string, number>()
 
     waypointData.csvData.forEach(file => {
       if (file.data && Array.isArray(file.data)) {
         file.data.forEach((row: any) => {
-          if (row.OEM && typeof row.OEM === 'string' && 
-              !row.OEM.toLowerCase().includes('merged') &&
-              !row.OEM.toLowerCase().includes('monitoring')) {
-            
-            if (selectedCountry && row.Country !== selectedCountry) return
+          // Step 1: Filter by selected country first
+          const country = row.Country || row.country || row['Country '] || row[' Country']
+          if (selectedCountry && country?.toString().trim() !== selectedCountry) return
 
-            const oem = row.OEM.trim()
-            oemCounts.set(oem, (oemCounts.get(oem) || 0) + 1)
+          // Step 2: Filter by availability = "Available"
+          const featureAvailability = row['Feature Availability'] || 
+                                    row['Available Feature'] || 
+                                    row['Available_Feature'] || 
+                                    row.available_feature || 
+                                    row.AvailableFeature ||
+                                    row['feature_availability'] ||
+                                    row['FEATURE AVAILABILITY']
+
+          if (!featureAvailability || 
+              featureAvailability.toString().trim().toLowerCase() !== 'available') return
+
+          // Step 3: Process OEM data
+          const oem = row.OEM || row.oem || row['OEM '] || row[' OEM']
+          if (oem && typeof oem === 'string' && 
+              !oem.toLowerCase().includes('merged') &&
+              !oem.toLowerCase().includes('monitoring') &&
+              !oem.toLowerCase().includes('total')) {
+            
+            const oemName = oem.toString().trim()
+            oemAvailableFeatureCounts.set(oemName, (oemAvailableFeatureCounts.get(oemName) || 0) + 1)
           }
         })
       }
     })
 
-    const sortedOEMs = Array.from(oemCounts.entries())
+    const sortedOEMs = Array.from(oemAvailableFeatureCounts.entries())
       .sort((a, b) => b[1] - a[1])
 
     const rank = sortedOEMs.findIndex(([oem]) => oem === selectedOEM) + 1
-    const totalFeatures = oemCounts.get(selectedOEM) || 0
-    const totalOEMs = oemCounts.size
+    const availableFeatures = oemAvailableFeatureCounts.get(selectedOEM) || 0
+    const totalOEMs = oemAvailableFeatureCounts.size
 
-    return { rank, totalFeatures, totalOEMs }
+    return { rank, availableFeatures, totalOEMs }
   }, [waypointData, selectedOEM, selectedCountry])
 
   return (
@@ -58,8 +75,8 @@ const RankingValueBox = ({ selectedOEM, selectedCountry }: RankingValueBoxProps)
             <div className="text-sm text-gray-400">out of {rankingData.totalOEMs} OEMs</div>
           </div>
           <div>
-            <div className="text-xl font-semibold text-white">{rankingData.totalFeatures}</div>
-            <div className="text-sm text-gray-400">Total Features</div>
+            <div className="text-xl font-semibold text-white">{rankingData.availableFeatures}</div>
+            <div className="text-sm text-gray-400">Available Features</div>
           </div>
         </div>
       </CardContent>
