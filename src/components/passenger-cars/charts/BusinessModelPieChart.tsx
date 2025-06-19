@@ -1,4 +1,3 @@
-
 import { useMemo } from "react"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,7 +8,17 @@ interface BusinessModelPieChartProps {
   selectedCountry: string
 }
 
-const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
+// Apple-inspired color palette with better contrast and accessibility
+const COLORS = [
+  '#007AFF', // Blue
+  '#34C759', // Green  
+  '#FF9500', // Orange
+  '#FF3B30', // Red
+  '#AF52DE', // Purple
+  '#00C7BE', // Teal
+  '#FFD60A', // Yellow
+  '#FF6482'  // Pink
+]
 
 const BusinessModelPieChart = ({ selectedOEM, selectedCountry }: BusinessModelPieChartProps) => {
   const { data: waypointData } = useWaypointData()
@@ -73,14 +82,19 @@ const BusinessModelPieChart = ({ selectedOEM, selectedCountry }: BusinessModelPi
 
   if (chartData.length === 0) {
     return (
-      <Card className="h-full bg-gray-900/50 border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-white text-lg">Business Model</CardTitle>
+      <Card className="h-full bg-white/5 backdrop-blur-xl border-white/10 shadow-2xl animate-fade-in">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-white/90 text-lg font-medium tracking-tight">
+            Business Model
+          </CardTitle>
         </CardHeader>
         <CardContent className="h-[calc(100%-80px)] flex items-center justify-center">
-          <div className="text-gray-400 text-center">
-            <p>No business model data available</p>
-            <p className="text-sm mt-1">for {selectedOEM} in {selectedCountry}</p>
+          <div className="text-center animate-pulse-slow">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/5 flex items-center justify-center">
+              <div className="w-6 h-6 rounded-full bg-white/20"></div>
+            </div>
+            <p className="text-white/60 font-medium text-sm">No business model data available</p>
+            <p className="text-white/40 text-xs mt-1">for {selectedOEM} in {selectedCountry}</p>
           </div>
         </CardContent>
       </Card>
@@ -88,36 +102,71 @@ const BusinessModelPieChart = ({ selectedOEM, selectedCountry }: BusinessModelPi
   }
 
   return (
-    <Card className="h-full bg-gray-900/50 border-gray-700">
-      <CardHeader>
-        <CardTitle className="text-white text-lg">Business Model</CardTitle>
+    <Card className="h-full bg-white/5 backdrop-blur-xl border-white/10 shadow-2xl hover-lift animate-fade-in">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-white/90 text-lg font-medium tracking-tight flex items-center">
+          <div className="w-2 h-2 rounded-full bg-blue-400 mr-3 animate-pulse"></div>
+          Business Model
+        </CardTitle>
       </CardHeader>
-      <CardContent className="h-[calc(100%-80px)]">
+      <CardContent className="h-[calc(100%-80px)] p-4">
         <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
+          <PieChart className="animate-scale-in">
             <Pie
               data={chartData}
               cx="50%"
               cy="50%"
-              innerRadius={40}
-              outerRadius={80}
-              paddingAngle={5}
+              innerRadius={50}
+              outerRadius={90}
+              paddingAngle={2}
               dataKey="value"
+              animationBegin={0}
+              animationDuration={1200}
+              animationEasing="ease-out"
             >
               {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={COLORS[index % COLORS.length]}
+                  className="hover:opacity-80 transition-opacity duration-200"
+                />
               ))}
             </Pie>
             <Tooltip
               contentStyle={{
-                backgroundColor: '#1F2937',
-                border: '1px solid #374151',
-                borderRadius: '8px',
-                color: '#F9FAFB'
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '12px',
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                color: '#1f2937',
+                fontSize: '14px',
+                fontWeight: '500',
+                padding: '12px 16px'
+              }}
+              formatter={(value: number, name: string) => [
+                `${value} features`,
+                name
+              ]}
+              labelStyle={{
+                color: '#374151',
+                fontWeight: '600',
+                marginBottom: '4px'
               }}
             />
             <Legend 
-              wrapperStyle={{ color: '#F9FAFB', fontSize: '12px' }}
+              wrapperStyle={{ 
+                color: '#F9FAFB', 
+                fontSize: '12px',
+                fontWeight: '500',
+                paddingTop: '16px'
+              }}
+              iconType="circle"
+              formatter={(value) => (
+                <span className="text-white/80 hover:text-white transition-colors duration-200">
+                  {value}
+                </span>
+              )}
             />
           </PieChart>
         </ResponsiveContainer>
