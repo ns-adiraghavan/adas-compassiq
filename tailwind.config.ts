@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -84,11 +85,40 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'tire-roll': {
+					'0%': {
+						transform: 'rotate(0deg)'
+					},
+					'100%': {
+						transform: 'rotate(360deg)'
+					}
+				},
+				'tire-move': {
+					'0%': {
+						transform: 'translateX(0)'
+					},
+					'100%': {
+						transform: 'translateX(var(--target-x))'
+					}
+				},
+				'count-fade': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(10px)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'tire-roll': 'tire-roll 1s linear infinite',
+				'tire-move': 'tire-move 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+				'count-fade': 'count-fade 0.3s ease-out'
 			}
 		}
 	},

@@ -1,8 +1,8 @@
-
-import { useMemo } from "react"
+import { useMemo, useState, useRef, useEffect } from "react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { useWaypointData } from "@/hooks/useWaypointData"
 import { useTheme } from "@/contexts/ThemeContext"
+import AnimatedTireIcon from "./AnimatedTireIcon"
 
 interface OEMBarChartProps {
   selectedCountry: string
@@ -12,6 +12,21 @@ interface OEMBarChartProps {
 const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
   const { data: waypointData, isLoading } = useWaypointData()
   const { theme } = useTheme()
+  const [hoveredBarIndex, setHoveredBarIndex] = useState(0)
+  const [chartWidth, setChartWidth] = useState(800)
+  const chartContainerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const updateChartWidth = () => {
+      if (chartContainerRef.current) {
+        setChartWidth(chartContainerRef.current.offsetWidth)
+      }
+    }
+
+    updateChartWidth()
+    window.addEventListener('resize', updateChartWidth)
+    return () => window.removeEventListener('resize', updateChartWidth)
+  }, [])
 
   const chartData = useMemo(() => {
     if (!waypointData?.csvData?.length || !selectedCountry) return []
@@ -92,6 +107,16 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
       .slice(0, 15) // Top 15 OEMs
   }, [waypointData, selectedCountry])
 
+  const handleBarMouseEnter = (data: any, index: number) => {
+    setHoveredBarIndex(index)
+  }
+
+  const handleBarClick = (data: any) => {
+    if (data && data.oem) {
+      onOEMClick(data.oem)
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="h-96 flex items-center justify-center">
@@ -135,11 +160,21 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
   }
 
   return (
-    <div className="h-96">
+    <div className="h-96 relative" ref={chartContainerRef}>
+      <AnimatedTireIcon
+        targetBarIndex={hoveredBarIndex}
+        chartData={chartData}
+        chartWidth={chartWidth}
+      />
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={chartData}
-          margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+          margin={{ top: 60, right: 30, left: 20, bottom: 60 }}
+          onMouseMove={(data) => {
+            if (data && data.activeTooltipIndex !== undefined) {
+              setHoveredBarIndex(data.activeTooltipIndex)
+            }
+          }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke={getGridColor()} />
           <XAxis 
@@ -160,7 +195,8 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
             dataKey="count" 
             fill={getPrimaryColor()}
             cursor="pointer"
-            onClick={(data) => data && onOEMClick(data.oem)}
+            onClick={handleBarClick}
+            onMouseEnter={handleBarMouseEnter}
           />
         </BarChart>
       </ResponsiveContainer>
