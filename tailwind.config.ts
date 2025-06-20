@@ -84,49 +84,11 @@ export default {
 					to: {
 						height: '0'
 					}
-				},
-				'tire-jump': {
-					'0%': {
-						transform: 'translateX(var(--start-x)) translateY(0) rotate(0deg)'
-					},
-					'25%': {
-						transform: 'translateX(calc(var(--start-x) + (var(--end-x) - var(--start-x)) * 0.25)) translateY(-40px) rotate(90deg)'
-					},
-					'50%': {
-						transform: 'translateX(calc(var(--start-x) + (var(--end-x) - var(--start-x)) * 0.5)) translateY(-60px) rotate(180deg)'
-					},
-					'75%': {
-						transform: 'translateX(calc(var(--start-x) + (var(--end-x) - var(--start-x)) * 0.75)) translateY(-40px) rotate(270deg)'
-					},
-					'100%': {
-						transform: 'translateX(var(--end-x)) translateY(0) rotate(360deg)'
-					}
-				},
-				'tire-roll': {
-					'0%': {
-						transform: 'rotate(0deg)'
-					},
-					'100%': {
-						transform: 'rotate(360deg)'
-					}
-				},
-				'count-fade': {
-					'0%': {
-						opacity: '0',
-						transform: 'translateY(-10px)'
-					},
-					'100%': {
-						opacity: '1',
-						transform: 'translateY(0)'
-					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out',
-				'tire-jump': 'tire-jump 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-				'tire-roll': 'tire-roll 2s linear infinite',
-				'count-fade': 'count-fade 0.3s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out'
 			}
 		}
 	},
