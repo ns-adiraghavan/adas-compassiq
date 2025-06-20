@@ -16,20 +16,20 @@ const LandscapeDetails = ({ selectedOEM, selectedCountry }: LandscapeDetailsProp
   return (
     <div className="w-full h-full flex flex-col space-y-4">
       {/* Top Row - Value Boxes - Fixed height */}
-      <div className="grid grid-cols-3 gap-4 flex-shrink-0" style={{ height: '100px' }}>
+      <div className="grid grid-cols-3 gap-4 flex-shrink-0" style={{ height: '110px' }}>
         <RankingValueBox selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
         <BigBetCategoriesBox selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
         <LighthouseFeaturesBox selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
       </div>
 
       {/* Middle Row - Charts - Flexible height */}
-      <div className="grid grid-cols-2 gap-4 flex-1" style={{ minHeight: '120px' }}>
+      <div className="grid grid-cols-2 gap-4 flex-1" style={{ minHeight: '140px' }}>
         <CategoryBarChart selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
         <BusinessModelPieChart selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
       </div>
 
       {/* Bottom Row - Partner Ecosystem - Fixed height */}
-      <div className="flex-shrink-0" style={{ height: '80px' }}>
+      <div className="flex-shrink-0" style={{ height: '60px' }}>
         <PartnerEcosystem selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
       </div>
     </div>

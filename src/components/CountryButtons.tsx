@@ -42,10 +42,10 @@ const CountryButtons = ({ selectedCountry, onCountryChange }: CountryButtonsProp
   if (isLoading) {
     return (
       <div className="h-full flex flex-col">
-        <h3 className={`${theme.textSecondary} font-medium text-sm mb-2`}>Countries/Regions</h3>
+        <h3 className={`${theme.textSecondary} font-medium text-sm mb-3`}>Countries/Regions</h3>
         <div className="flex flex-wrap gap-2 items-center flex-1">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className={`h-7 w-20 ${theme.cardBackground} rounded animate-pulse`}></div>
+            <div key={i} className={`h-8 w-20 ${theme.cardBackground} rounded animate-pulse`}></div>
           ))}
         </div>
       </div>
@@ -54,15 +54,15 @@ const CountryButtons = ({ selectedCountry, onCountryChange }: CountryButtonsProp
 
   return (
     <div className="h-full flex flex-col">
-      <h3 className={`${theme.textSecondary} font-medium text-sm mb-2`}>Countries/Regions</h3>
-      <div className="flex flex-wrap gap-2 items-center flex-1 overflow-y-auto">
+      <h3 className={`${theme.textSecondary} font-medium text-sm mb-3`}>Countries/Regions</h3>
+      <div className="flex flex-wrap gap-2 items-start flex-1" style={{ maxHeight: 'calc(100% - 30px)', overflow: 'visible' }}>
         {countries.map((country) => (
           <Button
             key={country}
             variant={selectedCountry === country ? "default" : "ghost"}
             size="sm"
             onClick={() => onCountryChange(country)}
-            className={`flex-shrink-0 px-3 py-1.5 text-xs font-medium transition-all h-7 ${
+            className={`flex-shrink-0 px-3 py-2 text-sm font-medium transition-all h-8 ${
               selectedCountry === country 
                 ? `${theme.primary} ${theme.textPrimary} ${theme.hoverEffect} ${theme.shadowColor} shadow-md` 
                 : `${theme.textSecondary} ${theme.hoverEffect} ${theme.cardBorder} border`
