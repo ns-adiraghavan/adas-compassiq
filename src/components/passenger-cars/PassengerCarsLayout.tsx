@@ -25,11 +25,11 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
   }
 
   return (
-    <div className={`h-screen flex flex-col ${theme.backgroundGradient} ${theme.textPrimary} transition-all duration-500`} style={{ overflow: 'hidden' }}>
+    <div className={`${theme.backgroundGradient} ${theme.textPrimary} transition-all duration-500`}>
       <ThemeSelector />
       
       {/* Header - Fixed height */}
-      <div className="container mx-auto px-8 py-4 flex-shrink-0">
+      <div className="container mx-auto px-8 py-4">
         <Link 
           to="/" 
           className={`inline-flex items-center ${theme.textMuted} hover:${theme.textPrimary.replace('text-', 'text-')} transition-colors mb-3`}
@@ -47,7 +47,7 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
       </div>
 
       {/* Section Navigation - Fixed height */}
-      <div className="w-full px-8 mb-4 flex-shrink-0">
+      <div className="w-full px-8 mb-4">
         <div className="flex items-center justify-between w-full max-w-none">
           {sections.map((section) => (
             <Link
@@ -65,8 +65,8 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
         </div>
       </div>
 
-      {/* Main Content - Flexible height */}
-      <div className="flex-1" style={{ overflow: 'hidden' }}>
+      {/* Main Content - Natural height with page scrolling */}
+      <div className="pb-8">
         {children}
       </div>
     </div>
