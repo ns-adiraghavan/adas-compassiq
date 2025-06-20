@@ -1,7 +1,9 @@
+
 import { useMemo } from "react"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useWaypointData } from "@/hooks/useWaypointData"
+import { useTheme } from "@/contexts/ThemeContext"
 
 interface BusinessModelPieChartProps {
   selectedOEM: string
@@ -22,6 +24,7 @@ const COLORS = [
 
 const BusinessModelPieChart = ({ selectedOEM, selectedCountry }: BusinessModelPieChartProps) => {
   const { data: waypointData } = useWaypointData()
+  const { theme } = useTheme()
 
   const chartData = useMemo(() => {
     if (!waypointData?.csvData?.length || !selectedOEM || !selectedCountry) return []
@@ -82,19 +85,18 @@ const BusinessModelPieChart = ({ selectedOEM, selectedCountry }: BusinessModelPi
 
   if (chartData.length === 0) {
     return (
-      <Card className="h-full bg-white/5 backdrop-blur-xl border-white/10 shadow-2xl animate-fade-in">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-white/90 text-lg font-medium tracking-tight">
+      <Card className={`w-full h-full ${theme.cardBackground} backdrop-blur-sm ${theme.cardBorder} border shadow-xl animate-fade-in`}>
+        <CardHeader className="pb-2">
+          <CardTitle className={`${theme.textSecondary} text-sm font-medium tracking-tight`}>
             Business Model
           </CardTitle>
         </CardHeader>
-        <CardContent className="h-[calc(100%-80px)] flex items-center justify-center">
+        <CardContent className="flex items-center justify-center h-32">
           <div className="text-center animate-pulse-slow">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/5 flex items-center justify-center">
-              <div className="w-6 h-6 rounded-full bg-white/20"></div>
+            <div className={`w-8 h-8 mx-auto mb-2 rounded-full ${theme.cardBackground} flex items-center justify-center`}>
+              <div className={`w-3 h-3 rounded-full ${theme.accent}`}></div>
             </div>
-            <p className="text-white/60 font-medium text-sm">No business model data available</p>
-            <p className="text-white/40 text-xs mt-1">for {selectedOEM} in {selectedCountry}</p>
+            <p className={`${theme.textMuted} font-medium text-xs`}>No data available</p>
           </div>
         </CardContent>
       </Card>
@@ -102,22 +104,22 @@ const BusinessModelPieChart = ({ selectedOEM, selectedCountry }: BusinessModelPi
   }
 
   return (
-    <Card className="h-full bg-white/5 backdrop-blur-xl border-white/10 shadow-2xl hover-lift animate-fade-in">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-white/90 text-lg font-medium tracking-tight flex items-center">
-          <div className="w-2 h-2 rounded-full bg-blue-400 mr-3 animate-pulse"></div>
+    <Card className={`w-full h-full ${theme.cardBackground} backdrop-blur-sm ${theme.cardBorder} border shadow-xl hover-lift animate-fade-in`}>
+      <CardHeader className="pb-2">
+        <CardTitle className={`${theme.textSecondary} text-sm font-medium tracking-tight flex items-center`}>
+          <div className={`w-1.5 h-1.5 rounded-full ${theme.secondary} mr-2 animate-pulse`}></div>
           Business Model
         </CardTitle>
       </CardHeader>
-      <CardContent className="h-[calc(100%-80px)] p-4">
+      <CardContent className="p-2 h-44">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart className="animate-scale-in">
             <Pie
               data={chartData}
               cx="50%"
-              cy="50%"
-              innerRadius={50}
-              outerRadius={90}
+              cy="45%"
+              innerRadius={30}
+              outerRadius={60}
               paddingAngle={2}
               dataKey="value"
               animationBegin={0}
@@ -134,36 +136,30 @@ const BusinessModelPieChart = ({ selectedOEM, selectedCountry }: BusinessModelPi
             </Pie>
             <Tooltip
               contentStyle={{
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
                 backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                borderRadius: '12px',
-                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-                color: '#1f2937',
-                fontSize: '14px',
+                border: 'none',
+                borderRadius: '6px',
+                color: 'white',
+                fontSize: '11px',
                 fontWeight: '500',
-                padding: '12px 16px'
+                padding: '8px 12px'
               }}
               formatter={(value: number, name: string) => [
                 `${value} features`,
                 name
               ]}
-              labelStyle={{
-                color: '#374151',
-                fontWeight: '600',
-                marginBottom: '4px'
-              }}
             />
             <Legend 
               wrapperStyle={{ 
-                color: '#F9FAFB', 
-                fontSize: '12px',
+                color: theme.name === 'Arctic White' ? '#374151' : '#F9FAFB', 
+                fontSize: '10px',
                 fontWeight: '500',
-                paddingTop: '16px'
+                paddingTop: '8px'
               }}
               iconType="circle"
               formatter={(value) => (
-                <span className="text-white/80 hover:text-white transition-colors duration-200">
+                <span className={`${theme.textMuted} hover:${theme.textPrimary} transition-colors duration-200 text-xs`}>
                   {value}
                 </span>
               )}

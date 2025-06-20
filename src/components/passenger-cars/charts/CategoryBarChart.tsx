@@ -1,3 +1,4 @@
+
 import { useMemo } from "react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -81,19 +82,18 @@ const CategoryBarChart = ({ selectedOEM, selectedCountry }: CategoryBarChartProp
 
   if (chartData.length === 0) {
     return (
-      <Card className={`h-full ${theme.cardBackground} backdrop-blur-sm ${theme.cardBorder} border shadow-xl animate-fade-in`}>
-        <CardHeader className="pb-4">
-          <CardTitle className={`${theme.textSecondary} text-lg font-medium tracking-tight`}>
+      <Card className={`w-full h-full ${theme.cardBackground} backdrop-blur-sm ${theme.cardBorder} border shadow-xl animate-fade-in`}>
+        <CardHeader className="pb-2">
+          <CardTitle className={`${theme.textSecondary} text-sm font-medium tracking-tight`}>
             Category Distribution
           </CardTitle>
         </CardHeader>
-        <CardContent className="h-[calc(100%-80px)] flex items-center justify-center">
+        <CardContent className="flex items-center justify-center h-32">
           <div className="text-center animate-pulse-slow">
-            <div className={`w-16 h-16 mx-auto mb-4 rounded-full ${theme.cardBackground} flex items-center justify-center`}>
-              <div className={`w-6 h-6 rounded-full ${theme.accent}`}></div>
+            <div className={`w-8 h-8 mx-auto mb-2 rounded-full ${theme.cardBackground} flex items-center justify-center`}>
+              <div className={`w-3 h-3 rounded-full ${theme.accent}`}></div>
             </div>
-            <p className={`${theme.textMuted} font-medium text-sm`}>No category data available</p>
-            <p className={`${theme.textMuted} text-xs mt-1 opacity-60`}>for {selectedOEM} in {selectedCountry}</p>
+            <p className={`${theme.textMuted} font-medium text-xs`}>No data available</p>
           </div>
         </CardContent>
       </Card>
@@ -101,35 +101,42 @@ const CategoryBarChart = ({ selectedOEM, selectedCountry }: CategoryBarChartProp
   }
 
   return (
-    <Card className={`h-full ${theme.cardBackground} backdrop-blur-sm ${theme.cardBorder} border shadow-xl hover-lift animate-fade-in`}>
-      <CardHeader className="pb-4">
-        <CardTitle className={`${theme.textSecondary} text-lg font-medium tracking-tight flex items-center`}>
-          <div className={`w-2 h-2 rounded-full ${theme.secondary} mr-3 animate-pulse`}></div>
+    <Card className={`w-full h-full ${theme.cardBackground} backdrop-blur-sm ${theme.cardBorder} border shadow-xl hover-lift animate-fade-in`}>
+      <CardHeader className="pb-2">
+        <CardTitle className={`${theme.textSecondary} text-sm font-medium tracking-tight flex items-center`}>
+          <div className={`w-1.5 h-1.5 rounded-full ${theme.secondary} mr-2 animate-pulse`}></div>
           Category Distribution
         </CardTitle>
       </CardHeader>
-      <CardContent className="h-[calc(100%-80px)] p-4">
+      <CardContent className="p-2 h-44">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }} className="animate-scale-in">
+          <BarChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 40 }} className="animate-scale-in">
             <CartesianGrid strokeDasharray="3 3" stroke={getGridColor()} />
             <XAxis 
               dataKey="category" 
               stroke={getTextColor()}
               angle={-45}
               textAnchor="end"
-              height={80}
-              fontSize={11}
+              height={40}
+              fontSize={9}
               fontWeight="500"
             />
-            <YAxis stroke={getTextColor()} fontSize={12} fontWeight="500" />
+            <YAxis stroke={getTextColor()} fontSize={9} fontWeight="500" />
             <Tooltip
               formatter={(value: number) => [`${value} features`, 'Count']}
               cursor={false}
+              contentStyle={{
+                fontSize: '12px',
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                border: 'none',
+                borderRadius: '6px',
+                color: 'white'
+              }}
             />
             <Bar 
               dataKey="count" 
               fill={getPrimaryColor()}
-              radius={[4, 4, 0, 0]}
+              radius={[2, 2, 0, 0]}
               className="hover:opacity-80 transition-opacity duration-200"
             />
           </BarChart>
