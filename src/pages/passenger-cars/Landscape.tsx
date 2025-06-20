@@ -88,9 +88,9 @@ const LandscapeContent = () => {
           </div>
         </div>
 
-        {/* Details Section - Increased height to accommodate all components */}
+        {/* Details Section - Auto height to accommodate content */}
         {showDetails && (
-          <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm h-[380px]`}>
+          <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm min-h-[400px]`}>
             <div className="flex items-center justify-between mb-4">
               <h3 className={`text-lg font-medium ${theme.textPrimary}`}>
                 {selectedOEM} - Detailed Analysis
@@ -101,7 +101,7 @@ const LandscapeContent = () => {
                 </div>
               )}
             </div>
-            <div className="h-[320px] overflow-hidden">
+            <div className="w-full">
               <LandscapeDetails
                 selectedOEM={selectedOEM}
                 selectedCountry={selectedCountry}
