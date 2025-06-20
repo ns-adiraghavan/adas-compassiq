@@ -25,35 +25,35 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
   }
 
   return (
-    <div className={`min-h-screen ${theme.backgroundGradient} ${theme.textPrimary} transition-all duration-500`}>
+    <div className={`h-screen flex flex-col ${theme.backgroundGradient} ${theme.textPrimary} transition-all duration-500`} style={{ overflow: 'hidden' }}>
       <ThemeSelector />
       
-      {/* Header */}
-      <div className="container mx-auto px-8 py-6">
+      {/* Header - Fixed height */}
+      <div className="container mx-auto px-8 py-4 flex-shrink-0">
         <Link 
           to="/" 
-          className={`inline-flex items-center ${theme.textMuted} hover:${theme.textPrimary.replace('text-', 'text-')} transition-colors mb-4`}
+          className={`inline-flex items-center ${theme.textMuted} hover:${theme.textPrimary.replace('text-', 'text-')} transition-colors mb-3`}
         >
-          <ArrowLeft className="h-5 w-5 mr-2" />
+          <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Home
         </Link>
         
-        <h1 className={`text-4xl font-thin mb-2 ${theme.textPrimary} tracking-tight`}>
+        <h1 className={`text-3xl font-thin mb-1 ${theme.textPrimary} tracking-tight`}>
           Passenger Cars
         </h1>
-        <p className={`text-lg ${theme.textSecondary} font-light mb-6`}>
+        <p className={`text-base ${theme.textSecondary} font-light mb-4`}>
           Premium Automotive Intelligence
         </p>
       </div>
 
-      {/* Section Navigation */}
-      <div className="w-full px-8 mb-4">
+      {/* Section Navigation - Fixed height */}
+      <div className="w-full px-8 mb-4 flex-shrink-0">
         <div className="flex items-center justify-between w-full max-w-none">
           {sections.map((section) => (
             <Link
               key={section.id}
               to={section.path}
-              className={`flex-1 mx-1 px-6 py-3 rounded-lg text-sm font-medium transition-all duration-300 text-center ${theme.shadowColor} ${
+              className={`flex-1 mx-1 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 text-center ${theme.shadowColor} ${
                 getCurrentSection() === section.id
                   ? `${theme.primary} ${theme.textPrimary} shadow-lg transform scale-105`
                   : `${theme.cardBackground} ${theme.cardBorder} border ${theme.textSecondary} ${theme.hoverEffect}`
@@ -65,8 +65,8 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="h-[calc(100vh-280px)]">
+      {/* Main Content - Flexible height */}
+      <div className="flex-1" style={{ overflow: 'hidden' }}>
         {children}
       </div>
     </div>

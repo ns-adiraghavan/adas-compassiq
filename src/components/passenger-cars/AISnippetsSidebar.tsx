@@ -65,54 +65,58 @@ const AISnippetsSidebar = () => {
   ]
 
   return (
-    <div className="h-full p-6 w-full max-w-full overflow-hidden">
-      <Card className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl ${theme.shadowColor} shadow-lg backdrop-blur-sm h-full flex flex-col w-full max-w-full overflow-hidden`}>
-        <CardHeader className="pb-3 flex-shrink-0 w-full max-w-full overflow-hidden">
-          <CardTitle className={`${theme.textPrimary} text-lg flex items-center w-full max-w-full overflow-hidden`}>
+    <div className="h-full p-6 w-full max-w-full" style={{ overflow: 'hidden' }}>
+      <Card className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl ${theme.shadowColor} shadow-lg backdrop-blur-sm h-full flex flex-col w-full max-w-full`} style={{ overflow: 'hidden' }}>
+        <CardHeader className="pb-3 flex-shrink-0 w-full max-w-full">
+          <CardTitle className={`${theme.textPrimary} text-lg flex items-center w-full max-w-full`}>
             <Newspaper className="h-5 w-5 mr-2 flex-shrink-0" />
             <span className="truncate">AI Snippets</span>
           </CardTitle>
         </CardHeader>
         
-        <CardContent className="flex-1 w-full max-w-full overflow-hidden p-6">
-          <div className="space-y-6 h-full overflow-y-auto w-full max-w-full pr-2">
+        <CardContent className="flex-1 w-full max-w-full p-6" style={{ overflow: 'hidden' }}>
+          <div className="space-y-6 h-full w-full max-w-full flex flex-col" style={{ overflow: 'hidden' }}>
             {/* News Section */}
-            <div className="space-y-3 w-full max-w-full overflow-hidden">
+            <div className="space-y-3 w-full max-w-full flex-1" style={{ overflow: 'hidden' }}>
               <h3 className={`${theme.textPrimary} text-sm font-medium flex items-center`}>
                 <Newspaper className="h-4 w-4 mr-2 flex-shrink-0" />
                 <span className="truncate">News Updates</span>
               </h3>
-              <ul className="space-y-2 w-full max-w-full overflow-hidden">
-                {mockNews.map((news) => (
-                  <li key={news.id} className={`${theme.textPrimary} text-sm w-full max-w-full overflow-hidden`}>
-                    <div className="w-full max-w-full overflow-hidden">
-                      <span className="font-medium break-words">{news.title}:</span>{" "}
-                      <span className={`${theme.textSecondary} break-words`}>{news.summary}</span>{" "}
-                      <span className={`${theme.textMuted} text-xs break-words`}>({news.timestamp})</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              <div className="w-full max-w-full h-full" style={{ overflow: 'auto' }}>
+                <ul className="space-y-2 w-full max-w-full pr-2">
+                  {mockNews.map((news) => (
+                    <li key={news.id} className={`${theme.textPrimary} text-sm w-full max-w-full`}>
+                      <div className="w-full max-w-full">
+                        <span className="font-medium break-words">{news.title}:</span>{" "}
+                        <span className={`${theme.textSecondary} break-words`}>{news.summary}</span>{" "}
+                        <span className={`${theme.textMuted} text-xs break-words`}>({news.timestamp})</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
 
             {/* Data Section */}
-            <div className="space-y-3 w-full max-w-full overflow-hidden">
+            <div className="space-y-3 w-full max-w-full flex-1" style={{ overflow: 'hidden' }}>
               <h3 className={`${theme.textPrimary} text-sm font-medium flex items-center`}>
                 <BarChart className="h-4 w-4 mr-2 flex-shrink-0" />
                 <span className="truncate">Data Insights</span>
               </h3>
-              <ul className="space-y-2 w-full max-w-full overflow-hidden">
-                {mockData.map((data) => (
-                  <li key={data.id} className={`${theme.textPrimary} text-sm w-full max-w-full overflow-hidden`}>
-                    <div className="w-full max-w-full overflow-hidden">
-                      <span className="font-medium break-words">{data.metric}:</span>{" "}
-                      <span className={`${theme.secondary} font-bold break-words`}>{data.value}</span>{" "}
-                      <span className={`${theme.accent} font-medium break-words`}>({data.trend})</span>{" "}
-                      <span className={`${theme.textSecondary} break-words`}>- {data.context}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              <div className="w-full max-w-full h-full" style={{ overflow: 'auto' }}>
+                <ul className="space-y-2 w-full max-w-full pr-2">
+                  {mockData.map((data) => (
+                    <li key={data.id} className={`${theme.textPrimary} text-sm w-full max-w-full`}>
+                      <div className="w-full max-w-full">
+                        <span className="font-medium break-words">{data.metric}:</span>{" "}
+                        <span className={`${theme.secondary} font-bold break-words`}>{data.value}</span>{" "}
+                        <span className={`${theme.accent} font-medium break-words`}>({data.trend})</span>{" "}
+                        <span className={`${theme.textSecondary} break-words`}>- {data.context}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           </div>
         </CardContent>
