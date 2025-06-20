@@ -15,30 +15,29 @@ const corsHeaders = {
 // In-memory cache for processed insights
 const insightsCache = new Map<string, any>();
 
-const createInsightsPrompt = (oem: string, country: string, dashboardMetrics: any) => {
-  const isMarketOverview = oem === "Market Overview";
-  
-  if (isMarketOverview) {
+const createInsightsPrompt = (oem: string, country: string, dashboardMetrics: any, isMarketOverview: boolean) => {
+  if (isMarketOverview || oem === "Market Overview") {
     return `Generate market strategic insights for ${country || 'global market'}.
 
 MARKET DATA SUMMARY:
 • Total Available Features: ${dashboardMetrics.totalFeatures}
 • Active OEMs: ${dashboardMetrics.totalOEMs}
+• Countries Covered: ${dashboardMetrics.totalCountries}
 • Lighthouse Features: ${dashboardMetrics.lighthouseFeatures} (${Math.round((dashboardMetrics.lighthouseFeatures / dashboardMetrics.totalFeatures) * 100)}%)
 • Subscription Features: ${dashboardMetrics.subscriptionFeatures} (${Math.round((dashboardMetrics.subscriptionFeatures / dashboardMetrics.totalFeatures) * 100)}%)
 • Market Leaders: ${dashboardMetrics.marketLeaders?.slice(0, 3).map(leader => `${leader.oem} (${leader.totalFeatures} features)`).join(', ') || 'N/A'}
 • Top Category: ${dashboardMetrics.topCategories?.[0]?.name || 'N/A'}
 
 REQUIREMENTS:
-- Generate exactly 4 bullet points
+- Generate exactly 4 bullet points about the OVERALL MARKET (not any specific OEM)
 - Each bullet point: Maximum 25 words
-- Focus on market trends and competitive landscape
-- Actionable market insights
-- Data-driven observations about the overall market
+- Focus on market trends, opportunities, and competitive landscape
+- Actionable market-level insights for the automotive industry
+- Data-driven observations about market dynamics
 
 Respond with ONLY a JSON array of exactly 4 strings. No other text or formatting.
 
-Example: ["Market shows strong innovation with X% lighthouse features", "Subscription model adoption at Y% indicates revenue shift", "Leading OEMs concentrate in Z category", "Market fragmentation creates opportunity gaps"]`;
+Example: ["${country || 'Global'} market shows strong innovation with ${Math.round((dashboardMetrics.lighthouseFeatures / dashboardMetrics.totalFeatures) * 100)}% lighthouse features across ${dashboardMetrics.totalOEMs} OEMs", "Subscription model adoption creates new revenue opportunities in automotive tech", "Market leaders concentrate in ${dashboardMetrics.topCategories?.[0]?.name || 'key'} category with competitive advantages", "Feature availability gaps present expansion opportunities for new entrants"]`;
   }
 
   return `Generate strategic insights for ${oem} in ${country || 'global market'}.
@@ -52,7 +51,7 @@ OEM DATA SUMMARY:
 • Top Category: ${dashboardMetrics.topCategories?.[0]?.name || 'N/A'}
 
 REQUIREMENTS:
-- Generate exactly 4 bullet points
+- Generate exactly 4 bullet points about ${oem} specifically
 - Each bullet point: Maximum 25 words
 - Focus on competitive positioning and performance gaps
 - Actionable business insights for this specific OEM
@@ -60,7 +59,7 @@ REQUIREMENTS:
 
 Respond with ONLY a JSON array of exactly 4 strings. No other text or formatting.
 
-Example: ["${oem} ranks #X with Y features, above/below market average", "Innovation gap: Z% lighthouse vs W% market rate", "Revenue model opportunity in subscription features", "Category leadership potential in top segments"]`;
+Example: ["${oem} ranks #${dashboardMetrics.competitiveAnalysis?.marketPosition || 'X'} with ${dashboardMetrics.competitiveAnalysis?.selectedOEM?.features || 'Y'} features, ${dashboardMetrics.competitiveAnalysis?.selectedOEM?.features > dashboardMetrics.competitiveAnalysis?.marketAverage?.features ? 'above' : 'below'} market average", "Innovation ${dashboardMetrics.competitiveAnalysis?.selectedOEM?.lighthouseRate > dashboardMetrics.competitiveAnalysis?.marketAverage?.lighthouseRate ? 'leadership' : 'gap'}: ${dashboardMetrics.competitiveAnalysis?.selectedOEM?.lighthouseRate || 0}% lighthouse vs ${dashboardMetrics.competitiveAnalysis?.marketAverage?.lighthouseRate || 0}% market rate", "Revenue model opportunity in subscription features for increased monetization", "Category ${dashboardMetrics.competitiveAnalysis?.selectedOEM?.features > 10 ? 'leadership' : 'expansion'} potential in ${dashboardMetrics.topCategories?.[0]?.name || 'core'} segments"]`;
 }
 
 serve(async (req) => {
@@ -69,9 +68,10 @@ serve(async (req) => {
   }
 
   try {
-    const { oem, country, dashboardMetrics } = await req.json();
+    const { oem, country, dashboardMetrics, isMarketOverview } = await req.json();
     
-    const requestCacheKey = `insights-${oem}-${country || 'global'}-${JSON.stringify(dashboardMetrics).slice(0, 50)}`;
+    const analysisType = isMarketOverview ? 'market-overview' : oem;
+    const requestCacheKey = `insights-${analysisType}-${country || 'global'}-${JSON.stringify(dashboardMetrics).slice(0, 50)}`;
     
     if (insightsCache.has(requestCacheKey)) {
       console.log('Returning cached insights for:', requestCacheKey);
@@ -82,7 +82,6 @@ serve(async (req) => {
     }
 
     if (!dashboardMetrics || dashboardMetrics.totalFeatures === 0) {
-      const isMarketOverview = oem === "Market Overview";
       const emptyResult = {
         success: true,
         insights: isMarketOverview ? [
@@ -106,7 +105,7 @@ serve(async (req) => {
       );
     }
 
-    const prompt = createInsightsPrompt(oem, country, dashboardMetrics);
+    const prompt = createInsightsPrompt(oem, country, dashboardMetrics, isMarketOverview);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -162,14 +161,12 @@ serve(async (req) => {
     } catch (parseError) {
       console.log('JSON parse failed, using fallback insights:', parseError);
       // Fallback to generated insights based on data
-      const isMarketOverview = oem === "Market Overview";
-      
       if (isMarketOverview) {
         insights = [
-          `Market shows ${dashboardMetrics.totalFeatures} available features across ${dashboardMetrics.totalOEMs} active OEMs`,
-          `${Math.round((dashboardMetrics.lighthouseFeatures / dashboardMetrics.totalFeatures) * 100)}% lighthouse features indicate strong innovation momentum`,
-          `Subscription adoption at ${Math.round((dashboardMetrics.subscriptionFeatures / dashboardMetrics.totalFeatures) * 100)}% signals revenue model transformation`,
-          `${dashboardMetrics.topCategories?.[0]?.name || 'Key'} category dominance creates competitive opportunities`
+          `${country || 'Global'} market demonstrates ${dashboardMetrics.totalFeatures} available features across ${dashboardMetrics.totalOEMs} active OEMs`,
+          `${Math.round((dashboardMetrics.lighthouseFeatures / dashboardMetrics.totalFeatures) * 100)}% lighthouse features indicate strong market innovation momentum`,
+          `Subscription adoption at ${Math.round((dashboardMetrics.subscriptionFeatures / dashboardMetrics.totalFeatures) * 100)}% signals revenue model transformation opportunity`,
+          `${dashboardMetrics.topCategories?.[0]?.name || 'Key'} category dominance creates competitive differentiation opportunities`
         ];
       } else {
         insights = [
@@ -182,11 +179,11 @@ serve(async (req) => {
     }
 
     // Ensure exactly 4 insights
-    const fallbackInsights = oem === "Market Overview" ? [
-      `Market demonstrates ${dashboardMetrics.totalFeatures} available features across ${dashboardMetrics.totalOEMs} competitors`,
-      `Innovation leadership with ${Math.round((dashboardMetrics.lighthouseFeatures / dashboardMetrics.totalFeatures) * 100)}% lighthouse feature adoption`,
+    const fallbackInsights = isMarketOverview ? [
+      `${country || 'Global'} market demonstrates ${dashboardMetrics.totalFeatures} available features with strong competition`,
+      `Innovation leadership with ${Math.round((dashboardMetrics.lighthouseFeatures / dashboardMetrics.totalFeatures) * 100)}% lighthouse feature adoption rate`,
       `Revenue transformation through ${Math.round((dashboardMetrics.subscriptionFeatures / dashboardMetrics.totalFeatures) * 100)}% subscription model penetration`,
-      `Category concentration in ${dashboardMetrics.topCategories?.[0]?.name || 'core'} segment creates market focus`
+      `Category concentration in ${dashboardMetrics.topCategories?.[0]?.name || 'core'} segment creates market focus opportunities`
     ] : [
       `${oem} demonstrates competitive positioning with available feature portfolio`,
       `Innovation opportunity exists in lighthouse feature development`,

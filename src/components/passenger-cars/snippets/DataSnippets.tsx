@@ -9,22 +9,22 @@ interface DataSnippetsProps {
 }
 
 const DataSnippets = ({ selectedOEM, selectedCountry }: DataSnippetsProps) => {
-  // Always enable insights, even when no OEM is selected
+  // Only enable insights when an OEM is actually selected OR for market overview
   const { data: aiInsights, isLoading, error } = useDataInsightsAI({
-    selectedOEM: selectedOEM || "Market Overview", // Use market overview when no OEM selected
+    selectedOEM: selectedOEM || "", // Pass empty string when no OEM selected
     selectedCountry,
     enabled: true // Always enabled to show market insights
   })
 
   const getTitle = () => {
-    if (selectedOEM) {
+    if (selectedOEM && selectedOEM.trim() !== "") {
       return `Strategic Insights - ${selectedOEM}`
     }
     return "Market Strategic Insights"
   }
 
   const getSubtitle = () => {
-    if (selectedOEM) {
+    if (selectedOEM && selectedOEM.trim() !== "") {
       return `${selectedOEM} • ${selectedCountry || 'Global'} • ${aiInsights?.dataPoints || 0} data points analyzed`
     }
     return `Market Overview • ${selectedCountry || 'Global'} • ${aiInsights?.dataPoints || 0} features analyzed`
@@ -36,7 +36,7 @@ const DataSnippets = ({ selectedOEM, selectedCountry }: DataSnippetsProps) => {
         <div className="flex items-center justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-blue-400 mr-2" />
           <span className="text-white/60">
-            {selectedOEM ? 'Analyzing OEM performance...' : 'Analyzing market landscape...'}
+            {selectedOEM && selectedOEM.trim() !== "" ? 'Analyzing OEM performance...' : 'Analyzing market landscape...'}
           </span>
         </div>
       )
@@ -66,7 +66,7 @@ const DataSnippets = ({ selectedOEM, selectedCountry }: DataSnippetsProps) => {
       <div className="space-y-3">
         {aiInsights.insights.map((insight: string, index: number) => (
           <div key={index} className="flex items-start space-x-3 p-3 bg-gray-800/30 rounded-lg border border-gray-700/50">
-            {selectedOEM ? (
+            {selectedOEM && selectedOEM.trim() !== "" ? (
               <Lightbulb className="h-4 w-4 text-yellow-400 mt-0.5 flex-shrink-0" />
             ) : (
               <TrendingUp className="h-4 w-4 text-blue-400 mt-0.5 flex-shrink-0" />

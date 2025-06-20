@@ -22,14 +22,23 @@ export function useDataInsightsAI({ selectedOEM, selectedCountry, enabled = true
   const { dashboardMetrics, isLoading: isMetricsLoading } = useDashboardMetrics(selectedOEM, selectedCountry)
   
   const queryFn = useCallback(async (): Promise<DataInsightsResponse> => {
-    console.log('Requesting Data Insights AI for:', { selectedOEM, selectedCountry })
+    // Determine if this is market overview or OEM-specific analysis
+    const isMarketOverview = !selectedOEM || selectedOEM.trim() === ""
+    const analysisType = isMarketOverview ? "Market Overview" : selectedOEM
+    
+    console.log('Requesting Data Insights AI for:', { 
+      selectedOEM: analysisType, 
+      selectedCountry, 
+      isMarketOverview 
+    })
     console.log('Using dashboard metrics:', dashboardMetrics)
     
     const { data, error } = await supabase.functions.invoke('data-insights-ai', {
       body: {
-        oem: selectedOEM,
+        oem: analysisType,
         country: selectedCountry,
-        dashboardMetrics: dashboardMetrics // Pass the processed data context
+        dashboardMetrics: dashboardMetrics,
+        isMarketOverview: isMarketOverview
       }
     })
 
@@ -43,9 +52,9 @@ export function useDataInsightsAI({ selectedOEM, selectedCountry, enabled = true
   }, [selectedOEM, selectedCountry, dashboardMetrics])
 
   return useQuery<DataInsightsResponse>({
-    queryKey: ['data-insights-ai', selectedOEM, selectedCountry, dashboardMetrics],
+    queryKey: ['data-insights-ai', selectedOEM || 'market-overview', selectedCountry, dashboardMetrics],
     queryFn: queryFn,
-    enabled: enabled && !!selectedOEM && !isMetricsLoading && !!dashboardMetrics,
+    enabled: enabled && !isMetricsLoading && !!dashboardMetrics,
     staleTime: 15 * 60 * 1000, // Cache for 15 minutes
     gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
     refetchOnWindowFocus: false,
