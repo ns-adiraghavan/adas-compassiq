@@ -111,7 +111,7 @@ const LandscapeSection = () => {
         </div>
       </div>
 
-      {/* AI Snippets Sidebar - 40% with clean transparent container */}
+      {/* AI Snippets Sidebar - 40% with proper alignment */}
       <div 
         className="flex-shrink-0 min-h-screen"
         style={{ 
@@ -119,7 +119,8 @@ const LandscapeSection = () => {
           maxWidth: '40%',
           minWidth: '40%',
           overflow: 'hidden',
-          position: 'relative'
+          position: 'relative',
+          paddingRight: '32px' // Match the 8*4 = 32px right padding from main content
         }}
       >
         <AISnippetsSidebar />
