@@ -60,9 +60,9 @@ const LandscapeSection = () => {
   }
 
   return (
-    <div className={`w-full min-h-screen flex ${theme.backgroundGradient} transition-all duration-500 overflow-hidden`}>
-      {/* Main Content Area - 60% */}
-      <div className="w-[60%] flex-shrink-0 px-8 overflow-y-auto overflow-x-hidden">
+    <div className={`w-full min-h-screen flex ${theme.backgroundGradient} transition-all duration-500`}>
+      {/* Main Content Area - 60% with proper constraints */}
+      <div className="w-3/5 flex-shrink-0 px-8 overflow-y-auto max-w-[60%]">
         <div className="space-y-6 pb-8">
           {/* Countries Section */}
           <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
@@ -112,9 +112,9 @@ const LandscapeSection = () => {
         </div>
       </div>
 
-      {/* AI Snippets Sidebar - 40% */}
-      <div className="w-[40%] flex-shrink-0 min-h-screen overflow-hidden">
-        <div className={`h-full ${theme.cardBackground} ${theme.cardBorder} border-l backdrop-blur-sm`}>
+      {/* AI Snippets Sidebar - 40% with strict width constraints */}
+      <div className="w-2/5 flex-shrink-0 min-h-screen max-w-[40%] overflow-hidden">
+        <div className={`h-full w-full ${theme.cardBackground} ${theme.cardBorder} border-l backdrop-blur-sm`}>
           <AISnippetsSidebar />
         </div>
       </div>

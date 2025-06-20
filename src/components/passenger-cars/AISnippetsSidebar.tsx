@@ -65,7 +65,7 @@ const AISnippetsSidebar = () => {
   ]
 
   return (
-    <div className="h-full w-full flex flex-col overflow-hidden">
+    <div className="h-full w-full flex flex-col">
       <Card className={`${theme.cardBackground} ${theme.cardBorder} border-0 rounded-none h-full flex flex-col`}>
         <CardHeader className="pb-3 flex-shrink-0">
           <CardTitle className={`${theme.textPrimary} text-lg flex items-center`}>
@@ -73,22 +73,20 @@ const AISnippetsSidebar = () => {
             AI Snippets
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4">
-          <div className="space-y-6">
+        <CardContent className="flex-1 px-4 pb-4 overflow-hidden">
+          <div className="space-y-6 h-full">
             {/* News Section */}
             <div className="space-y-3">
               <h3 className={`${theme.textPrimary} text-sm font-medium flex items-center`}>
                 <Newspaper className="h-4 w-4 mr-2 flex-shrink-0" />
                 News Updates
               </h3>
-              <ul className="space-y-2 pl-4">
+              <ul className="space-y-2 list-disc list-inside pl-2">
                 {mockNews.map((news) => (
-                  <li key={news.id} className={`${theme.textPrimary} text-sm list-disc break-words`}>
-                    <div className="break-words overflow-wrap-anywhere">
-                      <span className="font-medium">{news.title}:</span>{" "}
-                      <span className={`${theme.textSecondary}`}>{news.summary}</span>{" "}
-                      <span className={`${theme.textMuted} text-xs`}>({news.timestamp})</span>
-                    </div>
+                  <li key={news.id} className={`${theme.textPrimary} text-sm break-words word-wrap-break-word hyphens-auto`}>
+                    <span className="font-medium break-words">{news.title}:</span>{" "}
+                    <span className={`${theme.textSecondary} break-words`}>{news.summary}</span>{" "}
+                    <span className={`${theme.textMuted} text-xs break-words`}>({news.timestamp})</span>
                   </li>
                 ))}
               </ul>
@@ -100,15 +98,13 @@ const AISnippetsSidebar = () => {
                 <BarChart className="h-4 w-4 mr-2 flex-shrink-0" />
                 Data Insights
               </h3>
-              <ul className="space-y-2 pl-4">
+              <ul className="space-y-2 list-disc list-inside pl-2">
                 {mockData.map((data) => (
-                  <li key={data.id} className={`${theme.textPrimary} text-sm list-disc break-words`}>
-                    <div className="break-words overflow-wrap-anywhere">
-                      <span className="font-medium">{data.metric}:</span>{" "}
-                      <span className={`${theme.secondary} font-bold`}>{data.value}</span>{" "}
-                      <span className={`${theme.accent} font-medium`}>({data.trend})</span>{" "}
-                      <span className={`${theme.textSecondary}`}>- {data.context}</span>
-                    </div>
+                  <li key={data.id} className={`${theme.textPrimary} text-sm break-words word-wrap-break-word hyphens-auto`}>
+                    <span className="font-medium break-words">{data.metric}:</span>{" "}
+                    <span className={`${theme.secondary} font-bold break-words`}>{data.value}</span>{" "}
+                    <span className={`${theme.accent} font-medium break-words`}>({data.trend})</span>{" "}
+                    <span className={`${theme.textSecondary} break-words`}>- {data.context}</span>
                   </li>
                 ))}
               </ul>
