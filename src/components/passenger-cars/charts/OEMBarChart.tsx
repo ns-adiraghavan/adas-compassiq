@@ -1,3 +1,4 @@
+
 import { useMemo } from "react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { useWaypointData } from "@/hooks/useWaypointData"
@@ -138,16 +139,17 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={chartData}
-          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+          margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke={getGridColor()} />
           <XAxis 
             dataKey="oem" 
             stroke={getTextColor()}
-            angle={-45}
-            textAnchor="end"
-            height={100}
-            fontSize={12}
+            angle={0}
+            textAnchor="middle"
+            height={60}
+            fontSize={11}
+            interval={0}
           />
           <YAxis stroke={getTextColor()} />
           <Tooltip
