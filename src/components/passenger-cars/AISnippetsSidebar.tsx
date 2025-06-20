@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Newspaper, BarChart } from "lucide-react"
 import { useTheme } from "@/contexts/ThemeContext"
@@ -74,17 +75,17 @@ const AISnippetsSidebar = () => {
         </CardHeader>
         
         <CardContent className="flex-1 p-4">
-          <div className="space-y-6 h-full flex flex-col">
+          <div className="space-y-4 h-full flex flex-col">
             {/* News Section */}
             <div className="flex-1">
               <h3 className={`${theme.textPrimary} text-sm font-medium flex items-center mb-3`}>
                 <Newspaper className="h-4 w-4 mr-2 flex-shrink-0" />
                 News Updates
               </h3>
-              <div className="space-y-3">
-                {mockNews.slice(0, 4).map((news) => (
-                  <div key={news.id} className={`${theme.textPrimary} text-sm p-3 ${theme.cardBackground} rounded-lg border ${theme.cardBorder}`}>
-                    <div className="font-medium mb-1">{news.title}</div>
+              <div className="space-y-2">
+                {mockNews.slice(0, 3).map((news) => (
+                  <div key={news.id} className={`${theme.textPrimary} text-xs p-2 ${theme.cardBackground} rounded-lg border ${theme.cardBorder}`}>
+                    <div className="font-medium mb-1 text-sm">{news.title}</div>
                     <div className={`${theme.textSecondary} text-xs mb-1`}>{news.summary}</div>
                     <div className={`${theme.textMuted} text-xs`}>{news.timestamp}</div>
                   </div>
@@ -98,12 +99,12 @@ const AISnippetsSidebar = () => {
                 <BarChart className="h-4 w-4 mr-2 flex-shrink-0" />
                 Data Insights
               </h3>
-              <div className="space-y-3">
-                {mockData.slice(0, 4).map((data) => (
-                  <div key={data.id} className={`${theme.textPrimary} text-sm p-3 ${theme.cardBackground} rounded-lg border ${theme.cardBorder}`}>
+              <div className="space-y-2">
+                {mockData.slice(0, 3).map((data) => (
+                  <div key={data.id} className={`${theme.textPrimary} text-xs p-2 ${theme.cardBackground} rounded-lg border ${theme.cardBorder}`}>
                     <div className="flex justify-between items-center mb-1">
-                      <span className="font-medium">{data.metric}</span>
-                      <span className={`${theme.secondary} font-bold`}>{data.value}</span>
+                      <span className="font-medium text-sm">{data.metric}</span>
+                      <span className={`${theme.secondary} font-bold text-sm`}>{data.value}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className={`${theme.textSecondary} text-xs`}>{data.context}</span>
