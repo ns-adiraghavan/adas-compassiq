@@ -65,220 +65,51 @@ const AISnippetsSidebar = () => {
   ]
 
   return (
-    <div 
-      className="h-full p-6"
-      style={{ 
-        width: '100%',
-        maxWidth: '100%',
-        overflow: 'hidden',
-        boxSizing: 'border-box'
-      }}
-    >
-      <Card 
-        className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl ${theme.shadowColor} shadow-lg backdrop-blur-sm h-full flex flex-col`}
-        style={{ 
-          width: '100%',
-          maxWidth: '100%',
-          minWidth: 0,
-          overflow: 'hidden',
-          boxSizing: 'border-box'
-        }}
-      >
-        <CardHeader className="pb-3 flex-shrink-0" style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
-          <CardTitle className={`${theme.textPrimary} text-lg flex items-center`} style={{ width: '100%', maxWidth: '100%' }}>
+    <div className="h-full p-6 w-full max-w-full overflow-hidden">
+      <Card className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl ${theme.shadowColor} shadow-lg backdrop-blur-sm h-full flex flex-col w-full max-w-full overflow-hidden`}>
+        <CardHeader className="pb-3 flex-shrink-0 w-full max-w-full overflow-hidden">
+          <CardTitle className={`${theme.textPrimary} text-lg flex items-center w-full max-w-full overflow-hidden`}>
             <Newspaper className="h-5 w-5 mr-2 flex-shrink-0" />
-            <span style={{ 
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              maxWidth: 'calc(100% - 2rem)'
-            }}>
-              AI Snippets
-            </span>
+            <span className="truncate">AI Snippets</span>
           </CardTitle>
         </CardHeader>
-        <CardContent 
-          className="flex-1" 
-          style={{ 
-            width: '100%',
-            maxWidth: '100%',
-            minWidth: 0,
-            overflow: 'hidden',
-            boxSizing: 'border-box'
-          }}
-        >
-          <div 
-            className="space-y-6 h-full overflow-y-auto"
-            style={{ 
-              width: '100%',
-              maxWidth: '100%',
-              boxSizing: 'border-box',
-              paddingRight: '0.5rem'
-            }}
-          >
+        
+        <CardContent className="flex-1 w-full max-w-full overflow-hidden p-6">
+          <div className="space-y-6 h-full overflow-y-auto w-full max-w-full pr-2">
             {/* News Section */}
-            <div 
-              className="space-y-3" 
-              style={{ 
-                width: '100%',
-                maxWidth: '100%',
-                boxSizing: 'border-box'
-              }}
-            >
+            <div className="space-y-3 w-full max-w-full overflow-hidden">
               <h3 className={`${theme.textPrimary} text-sm font-medium flex items-center`}>
                 <Newspaper className="h-4 w-4 mr-2 flex-shrink-0" />
-                <span style={{ 
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
-                }}>
-                  News Updates
-                </span>
+                <span className="truncate">News Updates</span>
               </h3>
-              <ul 
-                className="space-y-2 list-disc list-inside pl-2"
-                style={{ 
-                  width: '100%',
-                  maxWidth: '100%',
-                  boxSizing: 'border-box'
-                }}
-              >
+              <ul className="space-y-2 w-full max-w-full overflow-hidden">
                 {mockNews.map((news) => (
-                  <li 
-                    key={news.id} 
-                    className={`${theme.textPrimary} text-sm`}
-                    style={{ 
-                      width: '100%',
-                      maxWidth: '100%',
-                      wordWrap: 'break-word',
-                      overflowWrap: 'break-word',
-                      wordBreak: 'break-word',
-                      whiteSpace: 'normal',
-                      hyphens: 'auto',
-                      boxSizing: 'border-box',
-                      overflow: 'hidden',
-                      lineHeight: '1.4'
-                    }}
-                  >
-                    <span 
-                      className="font-medium"
-                      style={{ 
-                        wordWrap: 'break-word',
-                        overflowWrap: 'break-word',
-                        wordBreak: 'break-word'
-                      }}
-                    >
-                      {news.title}:
-                    </span>{" "}
-                    <span 
-                      className={`${theme.textSecondary}`}
-                      style={{ 
-                        wordWrap: 'break-word',
-                        overflowWrap: 'break-word',
-                        wordBreak: 'break-word'
-                      }}
-                    >
-                      {news.summary}
-                    </span>{" "}
-                    <span 
-                      className={`${theme.textMuted} text-xs`}
-                      style={{ 
-                        wordWrap: 'break-word',
-                        overflowWrap: 'break-word',
-                        wordBreak: 'break-word'
-                      }}
-                    >
-                      ({news.timestamp})
-                    </span>
+                  <li key={news.id} className={`${theme.textPrimary} text-sm w-full max-w-full overflow-hidden`}>
+                    <div className="w-full max-w-full overflow-hidden">
+                      <span className="font-medium break-words">{news.title}:</span>{" "}
+                      <span className={`${theme.textSecondary} break-words`}>{news.summary}</span>{" "}
+                      <span className={`${theme.textMuted} text-xs break-words`}>({news.timestamp})</span>
+                    </div>
                   </li>
                 ))}
               </ul>
             </div>
 
             {/* Data Section */}
-            <div 
-              className="space-y-3" 
-              style={{ 
-                width: '100%',
-                maxWidth: '100%',
-                boxSizing: 'border-box'
-              }}
-            >
+            <div className="space-y-3 w-full max-w-full overflow-hidden">
               <h3 className={`${theme.textPrimary} text-sm font-medium flex items-center`}>
                 <BarChart className="h-4 w-4 mr-2 flex-shrink-0" />
-                <span style={{ 
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
-                }}>
-                  Data Insights
-                </span>
+                <span className="truncate">Data Insights</span>
               </h3>
-              <ul 
-                className="space-y-2 list-disc list-inside pl-2"
-                style={{ 
-                  width: '100%',
-                  maxWidth: '100%',
-                  boxSizing: 'border-box'
-                }}
-              >
+              <ul className="space-y-2 w-full max-w-full overflow-hidden">
                 {mockData.map((data) => (
-                  <li 
-                    key={data.id} 
-                    className={`${theme.textPrimary} text-sm`}
-                    style={{ 
-                      width: '100%',
-                      maxWidth: '100%',
-                      wordWrap: 'break-word',
-                      overflowWrap: 'break-word',
-                      wordBreak: 'break-word',
-                      whiteSpace: 'normal',
-                      hyphens: 'auto',
-                      boxSizing: 'border-box',
-                      overflow: 'hidden',
-                      lineHeight: '1.4'
-                    }}
-                  >
-                    <span 
-                      className="font-medium"
-                      style={{ 
-                        wordWrap: 'break-word',
-                        overflowWrap: 'break-word',
-                        wordBreak: 'break-word'
-                      }}
-                    >
-                      {data.metric}:
-                    </span>{" "}
-                    <span 
-                      className={`${theme.secondary} font-bold`}
-                      style={{ 
-                        wordWrap: 'break-word',
-                        overflowWrap: 'break-word',
-                        wordBreak: 'break-word'
-                      }}
-                    >
-                      {data.value}
-                    </span>{" "}
-                    <span 
-                      className={`${theme.accent} font-medium`}
-                      style={{ 
-                        wordWrap: 'break-word',
-                        overflowWrap: 'break-word',
-                        wordBreak: 'break-word'
-                      }}
-                    >
-                      ({data.trend})
-                    </span>{" "}
-                    <span 
-                      className={`${theme.textSecondary}`}
-                      style={{ 
-                        wordWrap: 'break-word',
-                        overflowWrap: 'break-word',
-                        wordBreak: 'break-word'
-                      }}
-                    >
-                      - {data.context}
-                    </span>
+                  <li key={data.id} className={`${theme.textPrimary} text-sm w-full max-w-full overflow-hidden`}>
+                    <div className="w-full max-w-full overflow-hidden">
+                      <span className="font-medium break-words">{data.metric}:</span>{" "}
+                      <span className={`${theme.secondary} font-bold break-words`}>{data.value}</span>{" "}
+                      <span className={`${theme.accent} font-medium break-words`}>({data.trend})</span>{" "}
+                      <span className={`${theme.textSecondary} break-words`}>- {data.context}</span>
+                    </div>
                   </li>
                 ))}
               </ul>
