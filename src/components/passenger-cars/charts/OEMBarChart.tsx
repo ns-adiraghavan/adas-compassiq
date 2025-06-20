@@ -12,7 +12,7 @@ interface OEMBarChartProps {
 const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
   const { data: waypointData, isLoading } = useWaypointData()
   const { theme } = useTheme()
-  const [hoveredBarIndex, setHoveredBarIndex] = useState(0)
+  const [hoveredBarIndex, setHoveredBarIndex] = useState(-1) // Changed to -1 for no manual override
   const [chartWidth, setChartWidth] = useState(800)
   const chartContainerRef = useRef<HTMLDivElement>(null)
 
@@ -111,6 +111,10 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
     setHoveredBarIndex(index)
   }
 
+  const handleBarMouseLeave = () => {
+    setHoveredBarIndex(-1) // Reset to auto mode
+  }
+
   const handleBarClick = (data: any) => {
     if (data && data.oem) {
       onOEMClick(data.oem)
@@ -141,7 +145,6 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
     )
   }
 
-  // Extract color values from theme classes for recharts
   const getPrimaryColor = () => {
     if (theme.primary.includes('blue')) return '#3B82F6'
     if (theme.primary.includes('emerald')) return '#10B981'
@@ -175,6 +178,7 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
               setHoveredBarIndex(data.activeTooltipIndex)
             }
           }}
+          onMouseLeave={handleBarMouseLeave}
         >
           <CartesianGrid strokeDasharray="3 3" stroke={getGridColor()} />
           <XAxis 
