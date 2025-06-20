@@ -71,11 +71,12 @@ const AISnippetsSidebar = () => {
         width: '100%',
         maxWidth: '100%',
         overflow: 'hidden',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        padding: '1.5rem'
       }}
     >
       <Card 
-        className={`${theme.cardBackground} ${theme.cardBorder} border-0 rounded-none h-full flex flex-col`}
+        className={`${theme.cardBackground} border-0 rounded-none h-full flex flex-col`}
         style={{ 
           width: '100%',
           maxWidth: '100%',
