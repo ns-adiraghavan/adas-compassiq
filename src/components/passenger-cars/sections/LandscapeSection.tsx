@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react"
 import { useFirstAvailableOEM, useWaypointData } from "@/hooks/useWaypointData"
 import CountryButtons from "@/components/CountryButtons"
@@ -60,11 +61,11 @@ const LandscapeSection = () => {
 
   return (
     <div className={`w-full min-h-screen flex ${theme.backgroundGradient} transition-all duration-500`} style={{ overflow: 'hidden' }}>
-      {/* Main Content Area - 60% with proper constraints */}
-      <div className="flex-shrink-0 px-8 overflow-y-auto" style={{ width: '60%', maxWidth: '60%', minWidth: '60%' }}>
-        <div className="space-y-6 pb-8">
+      {/* Main Content Area - 60% with proper alignment */}
+      <div className="flex-shrink-0 overflow-y-auto" style={{ width: '60%', maxWidth: '60%', minWidth: '60%' }}>
+        <div className="px-8 py-6 space-y-6 pb-8">
           {/* Countries Section */}
-          <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
+          <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm w-full max-w-full`}>
             <CountryButtons
               selectedCountry={selectedCountry}
               onCountryChange={handleCountryChange}
@@ -72,7 +73,7 @@ const LandscapeSection = () => {
           </div>
 
           {/* OEM Bar Chart */}
-          <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
+          <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm w-full max-w-full`}>
             <div className="mb-4">
               <h3 className={`text-xl font-medium ${theme.textPrimary} mb-2`}>OEM Feature Distribution</h3>
               <p className={`${theme.textMuted} text-sm`}>
@@ -80,7 +81,7 @@ const LandscapeSection = () => {
                 Click on any OEM bar to view detailed analysis
               </p>
             </div>
-            <div className="h-96">
+            <div className="h-96 w-full max-w-full">
               <OEMBarChart
                 selectedCountry={selectedCountry}
                 onOEMClick={handleOEMClick}
@@ -90,7 +91,7 @@ const LandscapeSection = () => {
 
           {/* Details Section - Shows below bar chart when OEM is selected */}
           {showDetails && (
-            <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
+            <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm w-full max-w-full`}>
               <div className="flex items-center justify-between mb-6">
                 <h3 className={`text-xl font-medium ${theme.textPrimary}`}>
                   {selectedOEM} - Detailed Analysis
@@ -111,7 +112,7 @@ const LandscapeSection = () => {
         </div>
       </div>
 
-      {/* AI Snippets Sidebar - 40% with absolute containment */}
+      {/* AI Snippets Sidebar - 40% with strict containment */}
       <div 
         className="flex-shrink-0 min-h-screen"
         style={{ 
@@ -132,7 +133,8 @@ const LandscapeSection = () => {
             top: 0,
             left: 0,
             right: 0,
-            bottom: 0
+            bottom: 0,
+            padding: '1.5rem'
           }}
         >
           <AISnippetsSidebar />

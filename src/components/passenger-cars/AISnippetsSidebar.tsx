@@ -84,7 +84,7 @@ const AISnippetsSidebar = () => {
           boxSizing: 'border-box'
         }}
       >
-        <CardHeader className="pb-3 flex-shrink-0 px-4" style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
+        <CardHeader className="pb-3 flex-shrink-0" style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box', padding: '0 0 0.75rem 0' }}>
           <CardTitle className={`${theme.textPrimary} text-lg flex items-center`} style={{ width: '100%', maxWidth: '100%' }}>
             <Newspaper className="h-5 w-5 mr-2 flex-shrink-0" />
             <span style={{ 
@@ -98,13 +98,14 @@ const AISnippetsSidebar = () => {
           </CardTitle>
         </CardHeader>
         <CardContent 
-          className="flex-1 px-4 pb-4" 
+          className="flex-1" 
           style={{ 
             width: '100%',
             maxWidth: '100%',
             minWidth: 0,
             overflow: 'hidden',
-            boxSizing: 'border-box'
+            boxSizing: 'border-box',
+            padding: '0'
           }}
         >
           <div 
@@ -112,7 +113,8 @@ const AISnippetsSidebar = () => {
             style={{ 
               width: '100%',
               maxWidth: '100%',
-              boxSizing: 'border-box'
+              boxSizing: 'border-box',
+              paddingRight: '0.5rem'
             }}
           >
             {/* News Section */}
@@ -155,7 +157,8 @@ const AISnippetsSidebar = () => {
                       whiteSpace: 'normal',
                       hyphens: 'auto',
                       boxSizing: 'border-box',
-                      overflow: 'hidden'
+                      overflow: 'hidden',
+                      lineHeight: '1.4'
                     }}
                   >
                     <span 
@@ -233,7 +236,8 @@ const AISnippetsSidebar = () => {
                       whiteSpace: 'normal',
                       hyphens: 'auto',
                       boxSizing: 'border-box',
-                      overflow: 'hidden'
+                      overflow: 'hidden',
+                      lineHeight: '1.4'
                     }}
                   >
                     <span 
