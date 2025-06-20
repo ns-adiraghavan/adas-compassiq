@@ -1,3 +1,4 @@
+
 import { useMemo } from "react"
 import { useWaypointData } from "./useWaypointData"
 
@@ -19,7 +20,9 @@ export function useDashboardMetrics(selectedOEM: string, selectedCountry: string
         businessModelData: [],
         countryFeatures: [],
         oemPerformance: [],
-        countryComparison: []
+        countryComparison: [],
+        marketLeaders: [],
+        competitiveAnalysis: {}
       }
     }
 
@@ -32,6 +35,13 @@ export function useDashboardMetrics(selectedOEM: string, selectedCountry: string
     const categoryCount: Record<string, number> = {}
     const countryFeatureCount: Record<string, number> = {}
     const oemFeatureCount: Record<string, number> = {}
+    const oemDetails: Record<string, {
+      total: number,
+      lighthouse: number,
+      subscription: number,
+      free: number,
+      categories: Record<string, number>
+    }> = {}
     const countryDetails: Record<string, {
       total: number,
       lighthouse: number,
@@ -51,8 +61,8 @@ export function useDashboardMetrics(selectedOEM: string, selectedCountry: string
           const rowFeature = row.Feature?.toString().trim()
           const featureAvailability = row['Feature Availability']?.toString().trim().toLowerCase()
           
-          // Apply OEM filter only
-          if (selectedOEM && rowOEM !== selectedOEM) return
+          // Apply country filter first
+          if (selectedCountry && rowCountry !== selectedCountry) return
 
           // Only count features that are "Available" - skip N/A, No, etc.
           if (featureAvailability !== 'available') return
@@ -65,6 +75,38 @@ export function useDashboardMetrics(selectedOEM: string, selectedCountry: string
             if (rowOEM && rowOEM !== '' && !rowOEM.toLowerCase().includes('merged')) {
               uniqueOEMs.add(rowOEM)
               oemFeatureCount[rowOEM] = (oemFeatureCount[rowOEM] || 0) + 1
+
+              // Initialize OEM details if not exists
+              if (!oemDetails[rowOEM]) {
+                oemDetails[rowOEM] = {
+                  total: 0,
+                  lighthouse: 0,
+                  subscription: 0,
+                  free: 0,
+                  categories: {}
+                }
+              }
+
+              oemDetails[rowOEM].total++
+
+              // Track business models by OEM
+              const businessModel = row['Business Model']?.toString().trim()
+              if (businessModel?.toLowerCase() === 'subscription') {
+                oemDetails[rowOEM].subscription++
+              } else if (businessModel?.toLowerCase() === 'free') {
+                oemDetails[rowOEM].free++
+              }
+
+              // Track lighthouse by OEM
+              if (row['Lighthouse Feature']?.toString().toLowerCase() === 'yes') {
+                oemDetails[rowOEM].lighthouse++
+              }
+
+              // Track categories by OEM
+              if (row.Category && row.Category.toString().trim() !== '') {
+                const category = row.Category.toString().trim()
+                oemDetails[rowOEM].categories[category] = (oemDetails[rowOEM].categories[category] || 0) + 1
+              }
             }
 
             // Track Countries
@@ -170,13 +212,47 @@ export function useDashboardMetrics(selectedOEM: string, selectedCountry: string
         topCategory: Object.entries(data.categories).sort(([,a], [,b]) => b - a)[0]?.[0] || 'Unknown'
       }))
 
+    // Market leaders analysis
+    const marketLeaders = Object.entries(oemDetails)
+      .sort(([,a], [,b]) => b.total - a.total)
+      .slice(0, 5)
+      .map(([name, data]) => ({
+        oem: name,
+        totalFeatures: data.total,
+        lighthouseFeatures: data.lighthouse,
+        subscriptionFeatures: data.subscription,
+        lighthouseRate: Math.round((data.lighthouse / data.total) * 100),
+        subscriptionRate: Math.round((data.subscription / data.total) * 100),
+        topCategory: Object.entries(data.categories).sort(([,a], [,b]) => b - a)[0]?.[0] || 'Unknown'
+      }))
+
+    // Competitive analysis for selected OEM vs market
+    const competitiveAnalysis = selectedOEM && oemDetails[selectedOEM] ? {
+      selectedOEM: {
+        name: selectedOEM,
+        features: oemDetails[selectedOEM].total,
+        lighthouseRate: Math.round((oemDetails[selectedOEM].lighthouse / oemDetails[selectedOEM].total) * 100),
+        subscriptionRate: Math.round((oemDetails[selectedOEM].subscription / oemDetails[selectedOEM].total) * 100)
+      },
+      marketAverage: {
+        features: Math.round(totalFeatures / uniqueOEMs.size),
+        lighthouseRate: Math.round((lighthouseFeatures / totalFeatures) * 100),
+        subscriptionRate: Math.round((subscriptionFeatures / totalFeatures) * 100)
+      },
+      marketPosition: Object.entries(oemFeatureCount)
+        .sort(([,a], [,b]) => b - a)
+        .findIndex(([name]) => name === selectedOEM) + 1
+    } : {}
+
     console.log('Calculated metrics for available features only:', {
       totalFeatures,
       totalOEMs: uniqueOEMs.size,
       totalCountries: uniqueCountries.size,
       lighthouseFeatures,
       subscriptionFeatures,
-      freeFeatures
+      freeFeatures,
+      marketLeaders: marketLeaders.length,
+      competitiveAnalysis
     })
 
     return {
@@ -190,7 +266,9 @@ export function useDashboardMetrics(selectedOEM: string, selectedCountry: string
       businessModelData,
       countryFeatures,
       oemPerformance,
-      countryComparison
+      countryComparison,
+      marketLeaders,
+      competitiveAnalysis
     }
   }, [waypointData, selectedOEM, selectedCountry])
 
