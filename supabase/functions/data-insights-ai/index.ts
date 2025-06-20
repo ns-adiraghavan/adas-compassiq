@@ -16,7 +16,7 @@ const corsHeaders = {
 const insightsCache = new Map<string, any>();
 
 const createInsightsPrompt = (oem: string, country: string, dashboardMetrics: any) => {
-  return `Generate EXACTLY 4 strategic insights for ${oem} in ${country || 'global market'}.
+  return `Generate strategic insights for ${oem} in ${country || 'global market'}.
 
 DATA SUMMARY:
 • Total Available Features: ${dashboardMetrics.totalFeatures}
@@ -26,14 +26,15 @@ DATA SUMMARY:
 • Top Category: ${dashboardMetrics.topCategories?.[0]?.name || 'N/A'}
 
 REQUIREMENTS:
+- Generate exactly 4 bullet points
 - Each bullet point: Maximum 25 words
 - Focus on available features only
 - Actionable business insights
 - Data-driven observations
 
-Format as JSON array of exactly 4 strings.
+Respond with ONLY a JSON array of exactly 4 strings. No other text or formatting.
 
-Example format: ["Short market insight", "Brief feature strategy note", "Concise business model observation", "Quick competitive advantage point"]`;
+Example: ["Short market insight about features", "Brief strategy note on innovation", "Concise business model observation", "Quick competitive advantage point"]`;
 }
 
 serve(async (req) => {
@@ -86,7 +87,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are an automotive analyst. Generate exactly 4 concise insights as a JSON array. Each insight must be under 25 words and actionable.'
+            content: 'You are an automotive analyst. Return ONLY a JSON array of exactly 4 strings. Each string must be under 25 words and contain actionable insights. No other text or formatting.'
           },
           {
             role: 'user',
@@ -103,24 +104,46 @@ serve(async (req) => {
     }
 
     const aiData = await response.json();
-    const analysis = aiData.choices[0].message.content;
+    let analysis = aiData.choices[0].message.content.trim();
+
+    // Clean up the response - remove any markdown formatting or extra text
+    analysis = analysis.replace(/```json/g, '').replace(/```/g, '').trim();
+    
+    // If the response doesn't start with [, try to extract JSON array
+    if (!analysis.startsWith('[')) {
+      const jsonMatch = analysis.match(/\[.*\]/s);
+      if (jsonMatch) {
+        analysis = jsonMatch[0];
+      }
+    }
 
     let insights: string[] = [];
     try {
       insights = JSON.parse(analysis);
       if (!Array.isArray(insights)) {
-        insights = [analysis];
+        throw new Error('Response is not an array');
       }
-    } catch {
-      insights = analysis.split('\n').filter((line: string) => line.trim().length > 0).slice(0, 4);
+      // Filter out any empty or invalid insights
+      insights = insights.filter((insight: any) => 
+        typeof insight === 'string' && insight.trim().length > 0
+      );
+    } catch (parseError) {
+      console.log('JSON parse failed, using fallback insights:', parseError);
+      // Fallback to generated insights based on data
+      insights = [
+        `${oem} offers ${dashboardMetrics.totalFeatures} available features across ${dashboardMetrics.totalCountries} markets`,
+        `${Math.round((dashboardMetrics.lighthouseFeatures / dashboardMetrics.totalFeatures) * 100)}% lighthouse features indicate strong innovation focus`,
+        `${Math.round((dashboardMetrics.subscriptionFeatures / dashboardMetrics.totalFeatures) * 100)}% subscription model shows revenue diversification`,
+        `Leading in ${dashboardMetrics.topCategories?.[0]?.name || 'key'} category with competitive feature set`
+      ];
     }
 
-    // Ensure exactly 4 concise insights
+    // Ensure exactly 4 insights
     const fallbackInsights = [
-      `${oem} offers ${dashboardMetrics.totalFeatures} available features across ${dashboardMetrics.totalCountries} markets`,
-      `${Math.round((dashboardMetrics.lighthouseFeatures / dashboardMetrics.totalFeatures) * 100)}% lighthouse features indicate strong innovation focus`,
-      `${Math.round((dashboardMetrics.subscriptionFeatures / dashboardMetrics.totalFeatures) * 100)}% subscription model adoption shows revenue diversification`,
-      `Leading in ${dashboardMetrics.topCategories?.[0]?.name || 'key'} category with competitive available feature set`
+      `${oem} demonstrates strong feature availability across ${dashboardMetrics.totalCountries} key markets`,
+      `Innovation leadership with ${Math.round((dashboardMetrics.lighthouseFeatures / dashboardMetrics.totalFeatures) * 100)}% lighthouse features`,
+      `Revenue model diversity through ${Math.round((dashboardMetrics.subscriptionFeatures / dashboardMetrics.totalFeatures) * 100)}% subscription offerings`,
+      `Market advantage in ${dashboardMetrics.topCategories?.[0]?.name || 'core'} category positioning`
     ];
 
     while (insights.length < 4) {
