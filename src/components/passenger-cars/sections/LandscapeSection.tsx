@@ -111,7 +111,7 @@ const LandscapeSection = () => {
         </div>
       </div>
 
-      {/* AI Snippets Sidebar - 40% with strict containment and no left border */}
+      {/* AI Snippets Sidebar - 40% with clean transparent container */}
       <div 
         className="flex-shrink-0 min-h-screen"
         style={{ 
@@ -122,21 +122,7 @@ const LandscapeSection = () => {
           position: 'relative'
         }}
       >
-        <div 
-          className={`h-full ${theme.cardBackground} backdrop-blur-sm`}
-          style={{ 
-            width: '100%',
-            maxWidth: '100%',
-            overflow: 'hidden',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0
-          }}
-        >
-          <AISnippetsSidebar />
-        </div>
+        <AISnippetsSidebar />
       </div>
     </div>
   )

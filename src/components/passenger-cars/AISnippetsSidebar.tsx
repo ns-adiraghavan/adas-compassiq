@@ -66,17 +66,16 @@ const AISnippetsSidebar = () => {
 
   return (
     <div 
-      className="h-full flex flex-col"
+      className="h-full p-6"
       style={{ 
         width: '100%',
         maxWidth: '100%',
         overflow: 'hidden',
-        boxSizing: 'border-box',
-        padding: '1.5rem'
+        boxSizing: 'border-box'
       }}
     >
       <Card 
-        className={`${theme.cardBackground} border-0 rounded-none h-full flex flex-col`}
+        className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl ${theme.shadowColor} shadow-lg backdrop-blur-sm h-full flex flex-col`}
         style={{ 
           width: '100%',
           maxWidth: '100%',
@@ -85,7 +84,7 @@ const AISnippetsSidebar = () => {
           boxSizing: 'border-box'
         }}
       >
-        <CardHeader className="pb-3 flex-shrink-0" style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box', padding: '0 0 0.75rem 0' }}>
+        <CardHeader className="pb-3 flex-shrink-0" style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
           <CardTitle className={`${theme.textPrimary} text-lg flex items-center`} style={{ width: '100%', maxWidth: '100%' }}>
             <Newspaper className="h-5 w-5 mr-2 flex-shrink-0" />
             <span style={{ 
@@ -105,8 +104,7 @@ const AISnippetsSidebar = () => {
             maxWidth: '100%',
             minWidth: 0,
             overflow: 'hidden',
-            boxSizing: 'border-box',
-            padding: '0'
+            boxSizing: 'border-box'
           }}
         >
           <div 
