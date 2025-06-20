@@ -12,75 +12,49 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// In-memory cache for processed data
-const processedDataCache = new Map<string, any>();
-let csvDataCache: any[] | null = null;
-let cacheTimestamp = 0;
+// In-memory cache for processed insights
+const insightsCache = new Map<string, any>();
 
-const CACHE_DURATION = 60 * 60 * 1000; // 1 hour
+const createInsightsPrompt = (oem: string, country: string, dashboardMetrics: any) => {
+  return `You are an automotive industry analyst specializing in feature analysis and competitive intelligence. 
 
-const getFilteredData = (csvData: any[], oem: string, country: string) => {
-  let filteredData: any[] = [];
-  
-  csvData.forEach(file => {
-    if (file.data && Array.isArray(file.data)) {
-      file.data.forEach((row: any) => {
-        const rowOEM = row.OEM?.trim()
-        const rowCountry = row.Country?.trim()
-        
-        // Apply filters
-        if (oem && rowOEM !== oem) return
-        if (country && country !== "Global" && rowCountry !== country) return
-        
-        filteredData.push(row)
-      })
-    }
-  })
-  
-  return filteredData
-}
+Based on the following comprehensive data analysis for ${oem} in ${country || 'global market'}:
 
-const createDataSummary = (filteredData: any[], oem: string, country: string) => {
-  const features = [...new Set(filteredData.map(row => row.Feature).filter(Boolean))]
-  const categories = [...new Set(filteredData.map(row => row.Category).filter(Boolean))]
-  const lighthouseFeatures = filteredData.filter(row => row["Lighthouse Feature"] === "Yes").length
-  const subscriptionFeatures = filteredData.filter(row => row["Business Model Type"] === "Subscription").length
-  
-  return {
-    totalRecords: filteredData.length,
-    oem,
-    country: country || "Global",
-    topFeatures: features.slice(0, 10),
-    topCategories: categories.slice(0, 8),
-    lighthouseCount: lighthouseFeatures,
-    subscriptionCount: subscriptionFeatures,
-    segments: {
-      entry: [...new Set(filteredData.map(row => row["Entry Segment"]).filter(Boolean))].length,
-      mid: [...new Set(filteredData.map(row => row["Mid Segment"]).filter(Boolean))].length,
-      luxury: [...new Set(filteredData.map(row => row["Luxury Segment"]).filter(Boolean))].length,
-      premium: [...new Set(filteredData.map(row => row["Premium Segment"]).filter(Boolean))].length,
-    }
-  }
-}
+CORE METRICS:
+- Total Features: ${dashboardMetrics.totalFeatures}
+- Lighthouse Features: ${dashboardMetrics.lighthouseFeatures} (${Math.round((dashboardMetrics.lighthouseFeatures / dashboardMetrics.totalFeatures) * 100)}%)
+- Subscription Features: ${dashboardMetrics.subscriptionFeatures} (${Math.round((dashboardMetrics.subscriptionFeatures / dashboardMetrics.totalFeatures) * 100)}%)
+- Free Features: ${dashboardMetrics.freeFeatures}
+- Total Countries: ${dashboardMetrics.totalCountries}
+- Total OEMs in dataset: ${dashboardMetrics.totalOEMs}
 
-const createInsightsPrompt = (dataSummary: any) => {
-  return `Generate exactly 3-5 concise data insights in bullet point format based on this automotive data:
+TOP CATEGORIES:
+${dashboardMetrics.topCategories?.map((cat: any) => `- ${cat.name}: ${cat.value} features`).join('\n') || 'No category data available'}
 
-OEM: ${dataSummary.oem}
-Market: ${dataSummary.country}
-Total Features: ${dataSummary.totalRecords}
-Lighthouse Features: ${dataSummary.lighthouseCount}
-Subscription Features: ${dataSummary.subscriptionCount}
-Top Categories: ${dataSummary.topCategories.slice(0, 5).join(', ')}
-Segment Coverage: Entry(${dataSummary.segments.entry}), Mid(${dataSummary.segments.mid}), Luxury(${dataSummary.segments.luxury}), Premium(${dataSummary.segments.premium})
+BUSINESS MODEL BREAKDOWN:
+${dashboardMetrics.businessModelData?.map((model: any) => `- ${model.name}: ${model.value} features`).join('\n') || 'No business model data available'}
 
-Provide 3-5 actionable business insights as bullet points focusing on:
-- Market positioning strengths
-- Feature adoption patterns  
-- Competitive advantages
-- Strategic opportunities
+OEM PERFORMANCE CONTEXT:
+${dashboardMetrics.oemPerformance?.slice(0, 3).map((oem: any) => `- ${oem.name}: ${oem.features} features`).join('\n') || 'No OEM performance data available'}
 
-Format as JSON array of strings with each insight being concise and data-driven.`;
+COUNTRY COMPARISON INSIGHTS:
+${dashboardMetrics.countryComparison?.slice(0, 3).map((country: any) => 
+  `- ${country.country}: ${country.totalFeatures} features (${country.lighthouseRate}% lighthouse, ${country.subscriptionRate}% subscription)`
+).join('\n') || 'No country comparison data available'}
+
+Generate EXACTLY 4 strategic business insights as bullet points. Each insight should be:
+- Data-driven and specific to the metrics provided
+- Actionable for automotive executives
+- Focused on competitive positioning, market opportunities, or strategic advantages
+- Concise (maximum 25 words per bullet point)
+
+Format as a JSON array of exactly 4 strings. Focus on:
+1. Market positioning strength/weakness
+2. Feature strategy opportunities  
+3. Business model insights
+4. Competitive differentiation potential
+
+Example format: ["Insight about market position", "Insight about feature strategy", "Insight about business model", "Insight about competitive advantage"]`;
 }
 
 serve(async (req) => {
@@ -89,54 +63,40 @@ serve(async (req) => {
   }
 
   try {
-    const { oem, country } = await req.json();
+    const { oem, country, dashboardMetrics } = await req.json();
     
-    const requestCacheKey = `insights-${oem}-${country}`;
+    // Create cache key based on the processed metrics
+    const requestCacheKey = `insights-${oem}-${country || 'global'}-${JSON.stringify(dashboardMetrics).slice(0, 50)}`;
     
-    if (processedDataCache.has(requestCacheKey)) {
+    if (insightsCache.has(requestCacheKey)) {
       console.log('Returning cached insights for:', requestCacheKey);
       return new Response(
-        JSON.stringify(processedDataCache.get(requestCacheKey)),
+        JSON.stringify(insightsCache.get(requestCacheKey)),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-    
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    
-    const now = Date.now();
-    if (!csvDataCache || (now - cacheTimestamp) > CACHE_DURATION) {
-      console.log('Refreshing CSV data cache...');
-      const { data: csvData, error } = await supabase
-        .from('csv_data')
-        .select('*')
-        .order('uploaded_at', { ascending: false });
 
-      if (error) {
-        throw error;
-      }
-      
-      csvDataCache = csvData;
-      cacheTimestamp = now;
-    }
-
-    const filteredData = getFilteredData(csvDataCache!, oem, country);
-    
-    if (filteredData.length === 0) {
+    // Validate that we have meaningful data to work with
+    if (!dashboardMetrics || dashboardMetrics.totalFeatures === 0) {
       const emptyResult = {
         success: true,
-        insights: [`No data available for ${oem} in ${country || 'selected market'}`],
+        insights: [
+          `No feature data available for ${oem} in ${country || 'selected market'}`,
+          "Consider expanding data collection or adjusting filters",
+          "Market analysis requires comprehensive feature tracking",
+          "Data availability is crucial for strategic insights"
+        ],
         dataPoints: 0
       };
       
-      processedDataCache.set(requestCacheKey, emptyResult);
+      insightsCache.set(requestCacheKey, emptyResult);
       return new Response(
         JSON.stringify(emptyResult),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const dataSummary = createDataSummary(filteredData, oem, country);
-    const prompt = createInsightsPrompt(dataSummary);
+    const prompt = createInsightsPrompt(oem, country, dashboardMetrics);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -149,15 +109,15 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are an automotive industry analyst. Generate exactly 3-5 concise, actionable insights as a JSON array of strings.'
+            content: 'You are an automotive industry analyst. Generate exactly 4 concise, actionable insights as a JSON array of strings. Each insight must be under 25 words and data-driven.'
           },
           {
             role: 'user',
             content: prompt
           }
         ],
-        temperature: 0.3,
-        max_tokens: 800,
+        temperature: 0.2,
+        max_tokens: 400,
       }),
     });
 
@@ -175,27 +135,40 @@ serve(async (req) => {
         insights = [analysis];
       }
     } catch {
-      insights = [analysis];
+      // Fallback to parsing if JSON fails
+      insights = analysis.split('\n').filter((line: string) => line.trim().length > 0).slice(0, 4);
     }
 
-    // Ensure we have 3-5 insights
-    insights = insights.slice(0, 5);
-    if (insights.length < 3) {
-      insights.push(`${oem} shows strong market presence with ${dataSummary.totalRecords} tracked features`);
+    // Ensure we have exactly 4 insights
+    if (insights.length < 4) {
+      const fallbackInsights = [
+        `${oem} tracks ${dashboardMetrics.totalFeatures} features across ${dashboardMetrics.totalCountries} markets`,
+        `${Math.round((dashboardMetrics.lighthouseFeatures / dashboardMetrics.totalFeatures) * 100)}% of features are lighthouse innovations`,
+        `Subscription model adoption: ${Math.round((dashboardMetrics.subscriptionFeatures / dashboardMetrics.totalFeatures) * 100)}% of total features`,
+        `Strong presence in ${dashboardMetrics.topCategories?.[0]?.name || 'key'} category with competitive feature set`
+      ];
+      
+      while (insights.length < 4) {
+        insights.push(fallbackInsights[insights.length] || `Strategic opportunity in ${country || 'global'} market`);
+      }
     }
+
+    // Limit to exactly 4 insights
+    insights = insights.slice(0, 4);
 
     const result = {
       success: true,
       insights,
-      dataPoints: filteredData.length,
+      dataPoints: dashboardMetrics.totalFeatures,
       cached: false
     };
 
-    processedDataCache.set(requestCacheKey, { ...result, cached: true });
+    insightsCache.set(requestCacheKey, { ...result, cached: true });
     
-    if (processedDataCache.size > 50) {
-      const firstKey = processedDataCache.keys().next().value;
-      processedDataCache.delete(firstKey);
+    // Clean up cache if it gets too large
+    if (insightsCache.size > 50) {
+      const firstKey = insightsCache.keys().next().value;
+      insightsCache.delete(firstKey);
     }
 
     return new Response(
@@ -208,8 +181,14 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: false, 
-        insights: ['Unable to generate insights at this time'],
-        error: error.message
+        insights: [
+          'Unable to generate insights at this time',
+          'Please check data availability and try again',
+          'Technical analysis temporarily unavailable',
+          'Contact support if issue persists'
+        ],
+        error: error.message,
+        dataPoints: 0
       }),
       {
         status: 500,
