@@ -85,6 +85,23 @@ export default {
 						height: '0'
 					}
 				},
+				'tire-jump': {
+					'0%': {
+						transform: 'translateX(var(--start-x)) translateY(0) rotate(0deg)'
+					},
+					'25%': {
+						transform: 'translateX(calc(var(--start-x) + (var(--end-x) - var(--start-x)) * 0.25)) translateY(-40px) rotate(90deg)'
+					},
+					'50%': {
+						transform: 'translateX(calc(var(--start-x) + (var(--end-x) - var(--start-x)) * 0.5)) translateY(-60px) rotate(180deg)'
+					},
+					'75%': {
+						transform: 'translateX(calc(var(--start-x) + (var(--end-x) - var(--start-x)) * 0.75)) translateY(-40px) rotate(270deg)'
+					},
+					'100%': {
+						transform: 'translateX(var(--end-x)) translateY(0) rotate(360deg)'
+					}
+				},
 				'tire-roll': {
 					'0%': {
 						transform: 'rotate(0deg)'
@@ -93,43 +110,10 @@ export default {
 						transform: 'rotate(360deg)'
 					}
 				},
-				'tire-roll-continuous': {
-					'0%': {
-						transform: 'rotate(0deg)'
-					},
-					'100%': {
-						transform: 'rotate(360deg)'
-					}
-				},
-				'tire-bounce': {
-					'0%': {
-						transform: 'translateY(-10px) rotate(0deg)'
-					},
-					'25%': {
-						transform: 'translateY(-20px) rotate(90deg)'
-					},
-					'50%': {
-						transform: 'translateY(-10px) rotate(180deg)'
-					},
-					'75%': {
-						transform: 'translateY(-20px) rotate(270deg)'
-					},
-					'100%': {
-						transform: 'translateY(-10px) rotate(360deg)'
-					}
-				},
-				'tire-move': {
-					'0%': {
-						transform: 'translateX(0)'
-					},
-					'100%': {
-						transform: 'translateX(var(--target-x))'
-					}
-				},
 				'count-fade': {
 					'0%': {
 						opacity: '0',
-						transform: 'translateY(10px)'
+						transform: 'translateY(-10px)'
 					},
 					'100%': {
 						opacity: '1',
@@ -140,10 +124,8 @@ export default {
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'tire-roll': 'tire-roll 1s linear infinite',
-				'tire-roll-continuous': 'tire-roll-continuous 2s linear infinite',
-				'tire-bounce': 'tire-bounce 1s ease-in-out',
-				'tire-move': 'tire-move 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+				'tire-jump': 'tire-jump 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+				'tire-roll': 'tire-roll 2s linear infinite',
 				'count-fade': 'count-fade 0.3s ease-out'
 			}
 		}

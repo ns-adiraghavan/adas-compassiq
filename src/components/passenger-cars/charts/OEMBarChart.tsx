@@ -12,7 +12,7 @@ interface OEMBarChartProps {
 const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
   const { data: waypointData, isLoading } = useWaypointData()
   const { theme } = useTheme()
-  const [hoveredBarIndex, setHoveredBarIndex] = useState(-1) // Changed to -1 for no manual override
+  const [hoveredBarIndex, setHoveredBarIndex] = useState(-1)
   const [chartWidth, setChartWidth] = useState(800)
   const chartContainerRef = useRef<HTMLDivElement>(null)
 
@@ -112,7 +112,7 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
   }
 
   const handleBarMouseLeave = () => {
-    setHoveredBarIndex(-1) // Reset to auto mode
+    setHoveredBarIndex(-1)
   }
 
   const handleBarClick = (data: any) => {
@@ -168,6 +168,7 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
         targetBarIndex={hoveredBarIndex}
         chartData={chartData}
         chartWidth={chartWidth}
+        onAnimationComplete={() => console.log('Animation completed')}
       />
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
