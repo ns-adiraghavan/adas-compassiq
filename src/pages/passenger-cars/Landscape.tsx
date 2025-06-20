@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react"
 import { useFirstAvailableOEM, useWaypointData } from "@/hooks/useWaypointData"
 import CountryButtons from "@/components/CountryButtons"
@@ -16,7 +15,7 @@ const LandscapeContent = () => {
   const { data: waypointData } = useWaypointData()
   const { theme } = useTheme()
 
-  // Set default country when data is loaded
+  // useEffect hooks for setting default country and OEM
   useEffect(() => {
     if (waypointData?.csvData?.length && !selectedCountry) {
       const uniqueCountries = new Set<string>()
@@ -55,26 +54,25 @@ const LandscapeContent = () => {
 
   const handleCountryChange = (country: string) => {
     setSelectedCountry(country)
-    // Hide details when country changes since no OEM is selected
     setShowDetails(false)
     setSelectedOEM("")
   }
 
   return (
-    <div className={`w-full h-full flex ${theme.backgroundGradient} transition-all duration-500`} style={{ overflow: 'hidden' }}>
+    <div className={`w-full flex ${theme.backgroundGradient} transition-all duration-500`}>
       {/* Main Content Area - 60% */}
-      <div className="flex-shrink-0" style={{ width: '60%', height: '100%', overflow: 'hidden' }}>
-        <div className="px-6 py-4 h-full flex flex-col" style={{ boxSizing: 'border-box' }}>
-          {/* Countries Section - Fixed height with proper spacing */}
-          <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm w-full flex-shrink-0 mb-4`} style={{ height: '120px' }}>
+      <div className="w-3/5 overflow-y-auto">
+        <div className="px-6 py-4 space-y-6">
+          {/* Countries Section - Fixed height */}
+          <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm`} style={{ height: '140px' }}>
             <CountryButtons
               selectedCountry={selectedCountry}
               onCountryChange={handleCountryChange}
             />
           </div>
 
-          {/* OEM Bar Chart - Adjustable height based on details visibility */}
-          <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm w-full flex-shrink-0 mb-4`} style={{ height: showDetails ? '280px' : '400px' }}>
+          {/* OEM Bar Chart - Fixed height */}
+          <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm`} style={{ height: '450px' }}>
             <div className="mb-4">
               <h3 className={`text-lg font-medium ${theme.textPrimary} mb-2`}>OEM Feature Distribution</h3>
               <p className={`${theme.textMuted} text-sm`}>
@@ -82,7 +80,7 @@ const LandscapeContent = () => {
                 Click on any OEM bar to view detailed analysis
               </p>
             </div>
-            <div className="w-full" style={{ height: 'calc(100% - 80px)' }}>
+            <div style={{ height: 'calc(100% - 80px)' }}>
               <OEMBarChart
                 selectedCountry={selectedCountry}
                 onOEMClick={handleOEMClick}
@@ -92,7 +90,7 @@ const LandscapeContent = () => {
 
           {/* Details Section - Shows when OEM is selected */}
           {showDetails && (
-            <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm w-full flex-1`} style={{ minHeight: '320px' }}>
+            <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm`} style={{ height: '400px' }}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className={`text-lg font-medium ${theme.textPrimary}`}>
                   {selectedOEM} - Detailed Analysis
@@ -116,16 +114,7 @@ const LandscapeContent = () => {
       </div>
 
       {/* AI Snippets Sidebar - 40% */}
-      <div 
-        className="flex-shrink-0"
-        style={{ 
-          width: '40%',
-          height: '100%',
-          overflow: 'hidden',
-          paddingRight: '24px',
-          paddingTop: '16px'
-        }}
-      >
+      <div className="w-2/5 p-4">
         <AISnippetsSidebar />
       </div>
     </div>

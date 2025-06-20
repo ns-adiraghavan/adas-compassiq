@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button"
 import { useWaypointData } from "@/hooks/useWaypointData"
 import { useTheme } from "@/contexts/ThemeContext"
@@ -22,7 +21,6 @@ const CountryButtons = ({ selectedCountry, onCountryChange }: CountryButtonsProp
     waypointData.csvData.forEach(file => {
       if (file.data && Array.isArray(file.data)) {
         file.data.forEach((row: any) => {
-          // Use the exact "Country" key and filter out invalid values
           if (row.Country && typeof row.Country === 'string' && 
               row.Country.trim() !== '' && 
               row.Country.toLowerCase() !== 'yes' && 
@@ -54,8 +52,8 @@ const CountryButtons = ({ selectedCountry, onCountryChange }: CountryButtonsProp
 
   return (
     <div className="h-full flex flex-col">
-      <h3 className={`${theme.textSecondary} font-medium text-sm mb-3`}>Countries/Regions</h3>
-      <div className="flex flex-wrap gap-2 items-start flex-1" style={{ maxHeight: 'calc(100% - 30px)', overflow: 'visible' }}>
+      <h3 className={`${theme.textSecondary} font-medium text-sm mb-4`}>Countries/Regions</h3>
+      <div className="flex flex-wrap gap-2 items-start" style={{ height: 'calc(100% - 35px)', overflow: 'visible' }}>
         {countries.map((country) => (
           <Button
             key={country}
