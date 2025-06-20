@@ -12,6 +12,7 @@ const LandscapeContent = () => {
   const [selectedCountry, setSelectedCountry] = useState("")
   const [selectedOEM, setSelectedOEM] = useState("")
   const [showDetails, setShowDetails] = useState(false)
+  const [oemClickedFromChart, setOemClickedFromChart] = useState(false) // Track if OEM was clicked from chart
   const { data: firstOEM } = useFirstAvailableOEM()
   const { data: waypointData } = useWaypointData()
   const { theme } = useTheme()
@@ -45,18 +46,21 @@ const LandscapeContent = () => {
   useEffect(() => {
     if (firstOEM && !selectedOEM) {
       setSelectedOEM(firstOEM)
+      // Don't set oemClickedFromChart to true here since this is automatic selection
     }
   }, [firstOEM, selectedOEM])
 
   const handleOEMClick = (oem: string) => {
     setSelectedOEM(oem)
     setShowDetails(true)
+    setOemClickedFromChart(true) // Mark that OEM was clicked from chart
   }
 
   const handleCountryChange = (country: string) => {
     setSelectedCountry(country)
     setShowDetails(false)
     setSelectedOEM("")
+    setOemClickedFromChart(false) // Reset chart click state when country changes
   }
 
   return (
@@ -118,6 +122,7 @@ const LandscapeContent = () => {
           <AISnippetsSidebar 
             selectedOEM={selectedOEM}
             selectedCountry={selectedCountry}
+            oemClickedFromChart={oemClickedFromChart}
           />
         </div>
       </div>
