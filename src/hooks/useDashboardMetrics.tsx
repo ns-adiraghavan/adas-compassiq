@@ -1,4 +1,3 @@
-
 import { useMemo } from "react"
 import { useWaypointData } from "./useWaypointData"
 
@@ -6,7 +5,7 @@ export function useDashboardMetrics(selectedOEM: string, selectedCountry: string
   const { data: waypointData, isLoading } = useWaypointData()
 
   const dashboardMetrics = useMemo(() => {
-    console.log('Processing waypoint data:', waypointData)
+    console.log('Processing waypoint data for available features only:', waypointData)
     
     if (!waypointData?.csvData || !Array.isArray(waypointData.csvData) || waypointData.csvData.length === 0) {
       return {
@@ -41,7 +40,7 @@ export function useDashboardMetrics(selectedOEM: string, selectedCountry: string
       categories: Record<string, number>
     }> = {}
 
-    // Process CSV data
+    // Process CSV data - only include available features
     waypointData.csvData.forEach(file => {
       console.log('Processing file:', file.file_name, 'with rows:', Array.isArray(file.data) ? file.data.length : 0)
       
@@ -50,9 +49,13 @@ export function useDashboardMetrics(selectedOEM: string, selectedCountry: string
           const rowOEM = row.OEM?.toString().trim()
           const rowCountry = row.Country?.toString().trim()
           const rowFeature = row.Feature?.toString().trim()
+          const featureAvailability = row['Feature Availability']?.toString().trim().toLowerCase()
           
           // Apply OEM filter only
           if (selectedOEM && rowOEM !== selectedOEM) return
+
+          // Only count features that are "Available" - skip N/A, No, etc.
+          if (featureAvailability !== 'available') return
 
           // Only count if we have a valid feature
           if (rowFeature && rowFeature !== '' && rowFeature.toLowerCase() !== 'n/a') {
@@ -167,7 +170,7 @@ export function useDashboardMetrics(selectedOEM: string, selectedCountry: string
         topCategory: Object.entries(data.categories).sort(([,a], [,b]) => b - a)[0]?.[0] || 'Unknown'
       }))
 
-    console.log('Calculated metrics:', {
+    console.log('Calculated metrics for available features only:', {
       totalFeatures,
       totalOEMs: uniqueOEMs.size,
       totalCountries: uniqueCountries.size,

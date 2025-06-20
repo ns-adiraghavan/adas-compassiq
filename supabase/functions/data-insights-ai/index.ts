@@ -16,45 +16,24 @@ const corsHeaders = {
 const insightsCache = new Map<string, any>();
 
 const createInsightsPrompt = (oem: string, country: string, dashboardMetrics: any) => {
-  return `You are an automotive industry analyst specializing in feature analysis and competitive intelligence. 
+  return `Generate EXACTLY 4 strategic insights for ${oem} in ${country || 'global market'}.
 
-Based on the following comprehensive data analysis for ${oem} in ${country || 'global market'}:
+DATA SUMMARY:
+• Total Available Features: ${dashboardMetrics.totalFeatures}
+• Lighthouse Features: ${dashboardMetrics.lighthouseFeatures} (${Math.round((dashboardMetrics.lighthouseFeatures / dashboardMetrics.totalFeatures) * 100)}%)
+• Subscription Features: ${dashboardMetrics.subscriptionFeatures} (${Math.round((dashboardMetrics.subscriptionFeatures / dashboardMetrics.totalFeatures) * 100)}%)
+• Market Coverage: ${dashboardMetrics.totalCountries} countries
+• Top Category: ${dashboardMetrics.topCategories?.[0]?.name || 'N/A'}
 
-CORE METRICS:
-- Total Features: ${dashboardMetrics.totalFeatures}
-- Lighthouse Features: ${dashboardMetrics.lighthouseFeatures} (${Math.round((dashboardMetrics.lighthouseFeatures / dashboardMetrics.totalFeatures) * 100)}%)
-- Subscription Features: ${dashboardMetrics.subscriptionFeatures} (${Math.round((dashboardMetrics.subscriptionFeatures / dashboardMetrics.totalFeatures) * 100)}%)
-- Free Features: ${dashboardMetrics.freeFeatures}
-- Total Countries: ${dashboardMetrics.totalCountries}
-- Total OEMs in dataset: ${dashboardMetrics.totalOEMs}
+REQUIREMENTS:
+- Each bullet point: Maximum 25 words
+- Focus on available features only
+- Actionable business insights
+- Data-driven observations
 
-TOP CATEGORIES:
-${dashboardMetrics.topCategories?.map((cat: any) => `- ${cat.name}: ${cat.value} features`).join('\n') || 'No category data available'}
+Format as JSON array of exactly 4 strings.
 
-BUSINESS MODEL BREAKDOWN:
-${dashboardMetrics.businessModelData?.map((model: any) => `- ${model.name}: ${model.value} features`).join('\n') || 'No business model data available'}
-
-OEM PERFORMANCE CONTEXT:
-${dashboardMetrics.oemPerformance?.slice(0, 3).map((oem: any) => `- ${oem.name}: ${oem.features} features`).join('\n') || 'No OEM performance data available'}
-
-COUNTRY COMPARISON INSIGHTS:
-${dashboardMetrics.countryComparison?.slice(0, 3).map((country: any) => 
-  `- ${country.country}: ${country.totalFeatures} features (${country.lighthouseRate}% lighthouse, ${country.subscriptionRate}% subscription)`
-).join('\n') || 'No country comparison data available'}
-
-Generate EXACTLY 4 strategic business insights as bullet points. Each insight should be:
-- Data-driven and specific to the metrics provided
-- Actionable for automotive executives
-- Focused on competitive positioning, market opportunities, or strategic advantages
-- Concise (maximum 25 words per bullet point)
-
-Format as a JSON array of exactly 4 strings. Focus on:
-1. Market positioning strength/weakness
-2. Feature strategy opportunities  
-3. Business model insights
-4. Competitive differentiation potential
-
-Example format: ["Insight about market position", "Insight about feature strategy", "Insight about business model", "Insight about competitive advantage"]`;
+Example format: ["Short market insight", "Brief feature strategy note", "Concise business model observation", "Quick competitive advantage point"]`;
 }
 
 serve(async (req) => {
@@ -65,7 +44,6 @@ serve(async (req) => {
   try {
     const { oem, country, dashboardMetrics } = await req.json();
     
-    // Create cache key based on the processed metrics
     const requestCacheKey = `insights-${oem}-${country || 'global'}-${JSON.stringify(dashboardMetrics).slice(0, 50)}`;
     
     if (insightsCache.has(requestCacheKey)) {
@@ -76,15 +54,14 @@ serve(async (req) => {
       );
     }
 
-    // Validate that we have meaningful data to work with
     if (!dashboardMetrics || dashboardMetrics.totalFeatures === 0) {
       const emptyResult = {
         success: true,
         insights: [
-          `No feature data available for ${oem} in ${country || 'selected market'}`,
-          "Consider expanding data collection or adjusting filters",
-          "Market analysis requires comprehensive feature tracking",
-          "Data availability is crucial for strategic insights"
+          `No available features found for ${oem} in ${country || 'selected market'}`,
+          "Expand data collection or adjust market filters",
+          "Feature tracking required for strategic analysis",
+          "Data availability crucial for competitive insights"
         ],
         dataPoints: 0
       };
@@ -109,15 +86,15 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are an automotive industry analyst. Generate exactly 4 concise, actionable insights as a JSON array of strings. Each insight must be under 25 words and data-driven.'
+            content: 'You are an automotive analyst. Generate exactly 4 concise insights as a JSON array. Each insight must be under 25 words and actionable.'
           },
           {
             role: 'user',
             content: prompt
           }
         ],
-        temperature: 0.2,
-        max_tokens: 400,
+        temperature: 0.3,
+        max_tokens: 300,
       }),
     });
 
@@ -135,25 +112,21 @@ serve(async (req) => {
         insights = [analysis];
       }
     } catch {
-      // Fallback to parsing if JSON fails
       insights = analysis.split('\n').filter((line: string) => line.trim().length > 0).slice(0, 4);
     }
 
-    // Ensure we have exactly 4 insights
-    if (insights.length < 4) {
-      const fallbackInsights = [
-        `${oem} tracks ${dashboardMetrics.totalFeatures} features across ${dashboardMetrics.totalCountries} markets`,
-        `${Math.round((dashboardMetrics.lighthouseFeatures / dashboardMetrics.totalFeatures) * 100)}% of features are lighthouse innovations`,
-        `Subscription model adoption: ${Math.round((dashboardMetrics.subscriptionFeatures / dashboardMetrics.totalFeatures) * 100)}% of total features`,
-        `Strong presence in ${dashboardMetrics.topCategories?.[0]?.name || 'key'} category with competitive feature set`
-      ];
-      
-      while (insights.length < 4) {
-        insights.push(fallbackInsights[insights.length] || `Strategic opportunity in ${country || 'global'} market`);
-      }
+    // Ensure exactly 4 concise insights
+    const fallbackInsights = [
+      `${oem} offers ${dashboardMetrics.totalFeatures} available features across ${dashboardMetrics.totalCountries} markets`,
+      `${Math.round((dashboardMetrics.lighthouseFeatures / dashboardMetrics.totalFeatures) * 100)}% lighthouse features indicate strong innovation focus`,
+      `${Math.round((dashboardMetrics.subscriptionFeatures / dashboardMetrics.totalFeatures) * 100)}% subscription model adoption shows revenue diversification`,
+      `Leading in ${dashboardMetrics.topCategories?.[0]?.name || 'key'} category with competitive available feature set`
+    ];
+
+    while (insights.length < 4) {
+      insights.push(fallbackInsights[insights.length] || `Strategic opportunity in ${country || 'global'} market`);
     }
 
-    // Limit to exactly 4 insights
     insights = insights.slice(0, 4);
 
     const result = {
@@ -165,7 +138,6 @@ serve(async (req) => {
 
     insightsCache.set(requestCacheKey, { ...result, cached: true });
     
-    // Clean up cache if it gets too large
     if (insightsCache.size > 50) {
       const firstKey = insightsCache.keys().next().value;
       insightsCache.delete(firstKey);
@@ -182,9 +154,9 @@ serve(async (req) => {
       JSON.stringify({ 
         success: false, 
         insights: [
-          'Unable to generate insights at this time',
-          'Please check data availability and try again',
-          'Technical analysis temporarily unavailable',
+          'Insights temporarily unavailable',
+          'Check data connectivity and retry',
+          'Technical analysis service offline',
           'Contact support if issue persists'
         ],
         error: error.message,
