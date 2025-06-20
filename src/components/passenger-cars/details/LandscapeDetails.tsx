@@ -14,22 +14,26 @@ interface LandscapeDetailsProps {
 
 const LandscapeDetails = ({ selectedOEM, selectedCountry }: LandscapeDetailsProps) => {
   return (
-    <div className="w-full h-full flex flex-col space-y-6">
-      {/* Top Row - Value Boxes */}
-      <div className="grid grid-cols-3 gap-4 h-[90px] flex-shrink-0">
+    <div className="w-full h-full flex flex-col overflow-hidden">
+      {/* Top Row - Value Boxes with fixed height */}
+      <div className="grid grid-cols-3 gap-3 h-[100px] flex-shrink-0 mb-4">
         <RankingValueBox selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
         <BigBetCategoriesBox selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
         <LighthouseFeaturesBox selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
       </div>
 
-      {/* Middle Row - Charts with proper height */}
-      <div className="grid grid-cols-2 gap-4 h-[160px] flex-shrink-0">
-        <CategoryBarChart selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
-        <BusinessModelPieChart selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
+      {/* Middle Row - Charts with proper containment */}
+      <div className="grid grid-cols-2 gap-3 h-[140px] flex-shrink-0 mb-4">
+        <div className="overflow-hidden">
+          <CategoryBarChart selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
+        </div>
+        <div className="overflow-hidden">
+          <BusinessModelPieChart selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
+        </div>
       </div>
 
-      {/* Bottom Row - Partner Ecosystem */}
-      <div className="h-[70px] flex-shrink-0">
+      {/* Bottom Row - Partner Ecosystem with proper height */}
+      <div className="h-[60px] flex-shrink-0">
         <PartnerEcosystem selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
       </div>
     </div>
