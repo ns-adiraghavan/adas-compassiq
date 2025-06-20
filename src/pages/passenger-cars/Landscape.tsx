@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react"
 import { useFirstAvailableOEM, useWaypointData } from "@/hooks/useWaypointData"
 import CountryButtons from "@/components/CountryButtons"
@@ -62,27 +61,27 @@ const LandscapeContent = () => {
 
   return (
     <div className={`w-full h-full flex ${theme.backgroundGradient} transition-all duration-500`} style={{ overflow: 'hidden' }}>
-      {/* Main Content Area - 60% with proper alignment */}
-      <div className="flex-shrink-0" style={{ width: '60%', maxWidth: '60%', minWidth: '60%', height: '100%', overflow: 'hidden' }}>
-        <div className="px-8 py-4 h-full flex flex-col" style={{ maxWidth: '100%', boxSizing: 'border-box' }}>
-          {/* Countries Section - Fixed height */}
-          <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-4 ${theme.shadowColor} shadow-lg backdrop-blur-sm w-full max-w-full flex-shrink-0`} style={{ height: '80px' }}>
+      {/* Main Content Area - 60% */}
+      <div className="flex-shrink-0" style={{ width: '60%', height: '100%', overflow: 'hidden' }}>
+        <div className="px-6 py-3 h-full flex flex-col" style={{ boxSizing: 'border-box' }}>
+          {/* Countries Section - Fixed height 15% */}
+          <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-4 ${theme.shadowColor} shadow-lg backdrop-blur-sm w-full flex-shrink-0`} style={{ height: '15%', minHeight: '80px' }}>
             <CountryButtons
               selectedCountry={selectedCountry}
               onCountryChange={handleCountryChange}
             />
           </div>
 
-          {/* OEM Bar Chart - Flexible height */}
-          <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-4 ${theme.shadowColor} shadow-lg backdrop-blur-sm w-full max-w-full mt-4 flex-1`} style={{ minHeight: showDetails ? '200px' : '300px' }}>
-            <div className="mb-3">
+          {/* OEM Bar Chart - 40% when no details, 25% when details shown */}
+          <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-4 ${theme.shadowColor} shadow-lg backdrop-blur-sm w-full mt-3 flex-shrink-0`} style={{ height: showDetails ? '25%' : '40%', minHeight: '160px' }}>
+            <div className="mb-2">
               <h3 className={`text-lg font-medium ${theme.textPrimary} mb-1`}>OEM Feature Distribution</h3>
               <p className={`${theme.textMuted} text-xs`}>
                 {selectedCountry ? `Showing feature counts for ${selectedCountry}. ` : ''}
                 Click on any OEM bar to view detailed analysis
               </p>
             </div>
-            <div className="h-full w-full max-w-full" style={{ height: showDetails ? '140px' : '240px' }}>
+            <div className="w-full" style={{ height: 'calc(100% - 60px)' }}>
               <OEMBarChart
                 selectedCountry={selectedCountry}
                 onOEMClick={handleOEMClick}
@@ -90,10 +89,10 @@ const LandscapeContent = () => {
             </div>
           </div>
 
-          {/* Details Section - Shows below bar chart when OEM is selected */}
+          {/* Details Section - 40% when shown */}
           {showDetails && (
-            <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-4 ${theme.shadowColor} shadow-lg backdrop-blur-sm w-full max-w-full mt-4 flex-1`} style={{ minHeight: '300px' }}>
-              <div className="flex items-center justify-between mb-4">
+            <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-4 ${theme.shadowColor} shadow-lg backdrop-blur-sm w-full mt-3 flex-1`} style={{ height: '40%', minHeight: '200px' }}>
+              <div className="flex items-center justify-between mb-3">
                 <h3 className={`text-lg font-medium ${theme.textPrimary}`}>
                   {selectedOEM} - Detailed Analysis
                 </h3>
@@ -103,27 +102,26 @@ const LandscapeContent = () => {
                   </div>
                 )}
               </div>
-              <LandscapeDetails
-                selectedOEM={selectedOEM}
-                selectedCountry={selectedCountry}
-                onBack={() => setShowDetails(false)}
-              />
+              <div style={{ height: 'calc(100% - 40px)' }}>
+                <LandscapeDetails
+                  selectedOEM={selectedOEM}
+                  selectedCountry={selectedCountry}
+                  onBack={() => setShowDetails(false)}
+                />
+              </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* AI Snippets Sidebar - 40% with proper alignment */}
+      {/* AI Snippets Sidebar - 40% */}
       <div 
         className="flex-shrink-0"
         style={{ 
           width: '40%',
-          maxWidth: '40%',
-          minWidth: '40%',
           height: '100%',
           overflow: 'hidden',
-          position: 'relative',
-          paddingRight: '32px'
+          paddingRight: '24px'
         }}
       >
         <AISnippetsSidebar />
