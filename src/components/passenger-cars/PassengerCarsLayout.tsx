@@ -1,0 +1,86 @@
+
+import { ArrowLeft } from "lucide-react"
+import { Link, useLocation } from "react-router-dom"
+import { ThemeProvider, useTheme } from "@/contexts/ThemeContext"
+import ThemeSelector from "@/components/ThemeSelector"
+
+interface PassengerCarsLayoutProps {
+  children: React.ReactNode
+}
+
+const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
+  const { theme } = useTheme()
+  const location = useLocation()
+
+  const sections = [
+    { id: 'landscape', name: 'Landscape', path: '/passenger-cars/landscape' },
+    { id: 'analytics', name: 'Analytics', path: '/passenger-cars/analytics' },
+    { id: 'intelligence', name: 'Intelligence', path: '/passenger-cars/intelligence' },
+    { id: 'modeling', name: 'Modeling', path: '/passenger-cars/modeling' },
+    { id: 'insights', name: 'Insights', path: '/passenger-cars/insights' },
+  ]
+
+  const getCurrentSection = () => {
+    return sections.find(section => location.pathname === section.path)?.id || 'landscape'
+  }
+
+  return (
+    <div className={`min-h-screen ${theme.backgroundGradient} ${theme.textPrimary} transition-all duration-500`}>
+      <ThemeSelector />
+      
+      {/* Header */}
+      <div className="container mx-auto px-8 py-6">
+        <Link 
+          to="/" 
+          className={`inline-flex items-center ${theme.textMuted} hover:${theme.textPrimary.replace('text-', 'text-')} transition-colors mb-4`}
+        >
+          <ArrowLeft className="h-5 w-5 mr-2" />
+          Back to Home
+        </Link>
+        
+        <h1 className={`text-4xl font-thin mb-2 ${theme.textPrimary} tracking-tight`}>
+          Passenger Cars
+        </h1>
+        <p className={`text-lg ${theme.textSecondary} font-light mb-6`}>
+          Premium Automotive Intelligence
+        </p>
+      </div>
+
+      {/* Section Navigation */}
+      <div className="w-full px-8 mb-4">
+        <div className="flex items-center justify-between w-full max-w-none">
+          {sections.map((section) => (
+            <Link
+              key={section.id}
+              to={section.path}
+              className={`flex-1 mx-1 px-6 py-3 rounded-lg text-sm font-medium transition-all duration-300 text-center ${theme.shadowColor} ${
+                getCurrentSection() === section.id
+                  ? `${theme.primary} ${theme.textPrimary} shadow-lg transform scale-105`
+                  : `${theme.cardBackground} ${theme.cardBorder} border ${theme.textSecondary} ${theme.hoverEffect}`
+              }`}
+            >
+              {section.name}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="h-[calc(100vh-280px)]">
+        {children}
+      </div>
+    </div>
+  )
+}
+
+const PassengerCarsLayout = ({ children }: PassengerCarsLayoutProps) => {
+  return (
+    <ThemeProvider>
+      <PassengerCarsLayoutContent>
+        {children}
+      </PassengerCarsLayoutContent>
+    </ThemeProvider>
+  )
+}
+
+export default PassengerCarsLayout
