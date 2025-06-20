@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react"
 import { useFirstAvailableOEM, useWaypointData } from "@/hooks/useWaypointData"
 import CountryButtons from "@/components/CountryButtons"
@@ -62,7 +61,7 @@ const LandscapeSection = () => {
   return (
     <div className={`w-full min-h-screen flex ${theme.backgroundGradient} transition-all duration-500`}>
       {/* Main Content Area - 60% with proper constraints */}
-      <div className="w-3/5 flex-shrink-0 px-8 overflow-y-auto max-w-[60%]">
+      <div className="w-3/5 flex-shrink-0 px-8 overflow-y-auto" style={{ maxWidth: '60%', minWidth: '60%' }}>
         <div className="space-y-6 pb-8">
           {/* Countries Section */}
           <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
@@ -113,8 +112,21 @@ const LandscapeSection = () => {
       </div>
 
       {/* AI Snippets Sidebar - 40% with strict width constraints */}
-      <div className="w-2/5 flex-shrink-0 min-h-screen max-w-[40%] overflow-hidden">
-        <div className={`h-full w-full ${theme.cardBackground} ${theme.cardBorder} border-l backdrop-blur-sm`}>
+      <div 
+        className="w-2/5 flex-shrink-0 min-h-screen overflow-hidden" 
+        style={{ 
+          maxWidth: '40%', 
+          minWidth: '40%',
+          boxSizing: 'border-box'
+        }}
+      >
+        <div 
+          className={`h-full w-full ${theme.cardBackground} ${theme.cardBorder} border-l backdrop-blur-sm overflow-hidden`}
+          style={{ 
+            maxWidth: '100%',
+            boxSizing: 'border-box'
+          }}
+        >
           <AISnippetsSidebar />
         </div>
       </div>
