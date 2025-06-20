@@ -59,9 +59,9 @@ const LandscapeSection = () => {
   }
 
   return (
-    <div className={`w-full min-h-screen flex ${theme.backgroundGradient} transition-all duration-500`}>
+    <div className={`w-full min-h-screen flex ${theme.backgroundGradient} transition-all duration-500`} style={{ overflow: 'hidden' }}>
       {/* Main Content Area - 60% with proper constraints */}
-      <div className="w-3/5 flex-shrink-0 px-8 overflow-y-auto" style={{ maxWidth: '60%', minWidth: '60%' }}>
+      <div className="flex-shrink-0 px-8 overflow-y-auto" style={{ width: '60%', maxWidth: '60%', minWidth: '60%' }}>
         <div className="space-y-6 pb-8">
           {/* Countries Section */}
           <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
@@ -111,20 +111,28 @@ const LandscapeSection = () => {
         </div>
       </div>
 
-      {/* AI Snippets Sidebar - 40% with strict width constraints */}
+      {/* AI Snippets Sidebar - 40% with absolute containment */}
       <div 
-        className="w-2/5 flex-shrink-0 min-h-screen overflow-hidden" 
+        className="flex-shrink-0 min-h-screen"
         style={{ 
-          maxWidth: '40%', 
+          width: '40%',
+          maxWidth: '40%',
           minWidth: '40%',
-          boxSizing: 'border-box'
+          overflow: 'hidden',
+          position: 'relative'
         }}
       >
         <div 
-          className={`h-full w-full ${theme.cardBackground} ${theme.cardBorder} border-l backdrop-blur-sm overflow-hidden`}
+          className={`h-full ${theme.cardBackground} ${theme.cardBorder} border-l backdrop-blur-sm`}
           style={{ 
+            width: '100%',
             maxWidth: '100%',
-            boxSizing: 'border-box'
+            overflow: 'hidden',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0
           }}
         >
           <AISnippetsSidebar />
