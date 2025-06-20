@@ -14,22 +14,22 @@ interface LandscapeDetailsProps {
 
 const LandscapeDetails = ({ selectedOEM, selectedCountry }: LandscapeDetailsProps) => {
   return (
-    <div className="w-full h-full flex flex-col space-y-2">
+    <div className="w-full h-full flex flex-col space-y-4">
       {/* Top Row - Value Boxes */}
-      <div className="grid grid-cols-3 gap-3 h-[70px]">
+      <div className="grid grid-cols-3 gap-4 h-[80px]">
         <RankingValueBox selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
         <BigBetCategoriesBox selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
         <LighthouseFeaturesBox selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
       </div>
 
-      {/* Middle Row - Charts */}
-      <div className="grid grid-cols-2 gap-3 h-[140px]">
+      {/* Middle Row - Charts with more height */}
+      <div className="grid grid-cols-2 gap-4 h-[180px]">
         <CategoryBarChart selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
         <BusinessModelPieChart selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
       </div>
 
       {/* Bottom Row - Partner Ecosystem */}
-      <div className="h-[50px]">
+      <div className="h-[60px]">
         <PartnerEcosystem selectedOEM={selectedOEM} selectedCountry={selectedCountry} />
       </div>
     </div>

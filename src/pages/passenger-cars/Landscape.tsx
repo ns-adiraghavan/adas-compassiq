@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react"
 import { useFirstAvailableOEM, useWaypointData } from "@/hooks/useWaypointData"
 import CountryButtons from "@/components/CountryButtons"
@@ -87,9 +88,9 @@ const LandscapeContent = () => {
           </div>
         </div>
 
-        {/* Details Section - Shows when OEM is selected */}
+        {/* Details Section - Shows when OEM is selected with increased height */}
         {showDetails && (
-          <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm h-[350px]`}>
+          <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm h-[420px]`}>
             <div className="flex items-center justify-between mb-4">
               <h3 className={`text-lg font-medium ${theme.textPrimary}`}>
                 {selectedOEM} - Detailed Analysis
@@ -100,7 +101,7 @@ const LandscapeContent = () => {
                 </div>
               )}
             </div>
-            <div className="h-[280px]">
+            <div className="h-[350px]">
               <LandscapeDetails
                 selectedOEM={selectedOEM}
                 selectedCountry={selectedCountry}
