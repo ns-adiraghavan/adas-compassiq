@@ -43,18 +43,16 @@ const DataSnippets = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {mockData.map((data) => (
-          <div key={data.id} className="p-3 bg-gray-800/50 rounded-lg border border-gray-700/50">
-            <div className="flex justify-between items-start mb-1">
-              <h4 className="text-white text-sm font-medium">{data.metric}</h4>
-              <span className="text-blue-400 text-sm font-bold">{data.value}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <p className="text-gray-400 text-xs">{data.context}</p>
-              <span className="text-green-400 text-xs font-medium">{data.trend}</span>
-            </div>
-          </div>
-        ))}
+        <ul className="space-y-2 list-disc list-inside pl-2">
+          {mockData.map((data) => (
+            <li key={data.id} className="text-white text-sm break-words">
+              <span className="font-medium">{data.metric}:</span>{" "}
+              <span className="text-blue-400 font-bold">{data.value}</span>{" "}
+              <span className="text-green-400 font-medium">({data.trend})</span>{" "}
+              <span className="text-gray-400">- {data.context}</span>
+            </li>
+          ))}
+        </ul>
       </CardContent>
     </Card>
   )

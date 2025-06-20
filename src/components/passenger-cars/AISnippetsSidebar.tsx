@@ -65,28 +65,30 @@ const AISnippetsSidebar = () => {
   ]
 
   return (
-    <div className="h-full">
-      <Card className={`${theme.cardBackground} ${theme.cardBorder} border backdrop-blur-sm`}>
-        <CardHeader className="pb-3">
+    <div className="h-full min-h-full w-full">
+      <Card className={`${theme.cardBackground} ${theme.cardBorder} border backdrop-blur-sm h-full`}>
+        <CardHeader className="pb-3 flex-shrink-0">
           <CardTitle className={`${theme.textPrimary} text-lg flex items-center`}>
             <Newspaper className="h-5 w-5 mr-2" />
             AI Snippets
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 overflow-hidden">
           {/* News Section */}
           <div className="space-y-3">
             <h3 className={`${theme.textPrimary} text-sm font-medium flex items-center`}>
               <Newspaper className="h-4 w-4 mr-2" />
               News Updates
             </h3>
-            {mockNews.map((news) => (
-              <div key={news.id} className={`p-3 ${theme.cardBackground} rounded-lg ${theme.cardBorder} border backdrop-blur-sm`}>
-                <h4 className={`${theme.textPrimary} text-sm font-medium mb-1`}>{news.title}</h4>
-                <p className={`${theme.textSecondary} text-xs mb-2`}>{news.summary}</p>
-                <div className={`${theme.textMuted} text-xs`}>{news.timestamp}</div>
-              </div>
-            ))}
+            <ul className="space-y-2 list-disc list-inside pl-2">
+              {mockNews.map((news) => (
+                <li key={news.id} className={`${theme.textPrimary} text-sm`}>
+                  <span className="font-medium break-words">{news.title}:</span>{" "}
+                  <span className={`${theme.textSecondary} break-words`}>{news.summary}</span>{" "}
+                  <span className={`${theme.textMuted} text-xs`}>({news.timestamp})</span>
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* Data Section */}
@@ -95,18 +97,16 @@ const AISnippetsSidebar = () => {
               <BarChart className="h-4 w-4 mr-2" />
               Data Insights
             </h3>
-            {mockData.map((data) => (
-              <div key={data.id} className={`p-3 ${theme.cardBackground} rounded-lg ${theme.cardBorder} border backdrop-blur-sm`}>
-                <div className="flex justify-between items-start mb-1">
-                  <h4 className={`${theme.textPrimary} text-sm font-medium`}>{data.metric}</h4>
-                  <span className={`${theme.secondary} text-sm font-bold`}>{data.value}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <p className={`${theme.textSecondary} text-xs`}>{data.context}</p>
-                  <span className={`${theme.accent} text-xs font-medium`}>{data.trend}</span>
-                </div>
-              </div>
-            ))}
+            <ul className="space-y-2 list-disc list-inside pl-2">
+              {mockData.map((data) => (
+                <li key={data.id} className={`${theme.textPrimary} text-sm break-words`}>
+                  <span className="font-medium">{data.metric}:</span>{" "}
+                  <span className={`${theme.secondary} font-bold`}>{data.value}</span>{" "}
+                  <span className={`${theme.accent} font-medium`}>({data.trend})</span>{" "}
+                  <span className={`${theme.textSecondary}`}>- {data.context}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </CardContent>
       </Card>

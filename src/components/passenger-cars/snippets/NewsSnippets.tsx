@@ -39,13 +39,15 @@ const NewsSnippets = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {mockNews.map((news) => (
-          <div key={news.id} className="p-3 bg-gray-800/50 rounded-lg border border-gray-700/50">
-            <h4 className="text-white text-sm font-medium mb-1">{news.title}</h4>
-            <p className="text-gray-400 text-xs mb-2">{news.summary}</p>
-            <div className="text-gray-500 text-xs">{news.timestamp}</div>
-          </div>
-        ))}
+        <ul className="space-y-2 list-disc list-inside pl-2">
+          {mockNews.map((news) => (
+            <li key={news.id} className="text-white text-sm break-words">
+              <span className="font-medium">{news.title}:</span>{" "}
+              <span className="text-gray-400">{news.summary}</span>{" "}
+              <span className="text-gray-500 text-xs">({news.timestamp})</span>
+            </li>
+          ))}
+        </ul>
       </CardContent>
     </Card>
   )

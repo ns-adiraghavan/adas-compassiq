@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react"
 import { useFirstAvailableOEM, useWaypointData } from "@/hooks/useWaypointData"
 import CountryButtons from "@/components/CountryButtons"
@@ -61,7 +62,7 @@ const LandscapeSection = () => {
   return (
     <div className={`w-full min-h-full flex ${theme.backgroundGradient} transition-all duration-500`}>
       {/* Main Content Area - 60% */}
-      <div className="w-[60%] px-8">
+      <div className="w-[60%] flex-shrink-0 px-8 overflow-hidden">
         <div className="space-y-6 pb-8">
           {/* Countries Section */}
           <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
@@ -112,8 +113,10 @@ const LandscapeSection = () => {
       </div>
 
       {/* AI Snippets Sidebar - 40% */}
-      <div className={`w-[40%] p-6 ${theme.cardBackground} ${theme.cardBorder} border-l backdrop-blur-sm`}>
-        <AISnippetsSidebar />
+      <div className={`w-[40%] flex-shrink-0 p-6 ${theme.cardBackground} ${theme.cardBorder} border-l backdrop-blur-sm overflow-hidden`}>
+        <div className="h-full w-full" style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+          <AISnippetsSidebar />
+        </div>
       </div>
     </div>
   )
