@@ -115,7 +115,10 @@ const LandscapeContent = () => {
       {/* AI Snippets Sidebar - 40% */}
       <div className="w-2/5">
         <div className="h-[880px]">
-          <AISnippetsSidebar />
+          <AISnippetsSidebar 
+            selectedOEM={selectedOEM}
+            selectedCountry={selectedCountry}
+          />
         </div>
       </div>
     </div>

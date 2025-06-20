@@ -1,58 +1,72 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BarChart } from "lucide-react"
+import { BarChart, Loader2 } from "lucide-react"
+import { useDataInsightsAI } from "@/hooks/useDataInsightsAI"
 
-const DataSnippets = () => {
-  const mockData = [
-    {
-      id: 1,
-      metric: "ADAS Adoption Rate",
-      value: "73%",
-      trend: "+5.2%",
-      context: "YoY growth in premium segment"
-    },
-    {
-      id: 2,
-      metric: "EV Feature Integration",
-      value: "89%",
-      trend: "+12.1%",
-      context: "New model launches"
-    },
-    {
-      id: 3,
-      metric: "OTA Update Frequency",
-      value: "2.3x",
-      trend: "+15%",
-      context: "Monthly average per OEM"
-    },
-    {
-      id: 4,
-      metric: "Connected Services",
-      value: "91%",
-      trend: "+8.7%",
-      context: "Market penetration rate"
+interface DataSnippetsProps {
+  selectedOEM: string
+  selectedCountry: string
+}
+
+const DataSnippets = ({ selectedOEM, selectedCountry }: DataSnippetsProps) => {
+  const { data: aiInsights, isLoading, error } = useDataInsightsAI({
+    selectedOEM,
+    selectedCountry,
+    enabled: !!selectedOEM
+  })
+
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-blue-400 mr-2" />
+          <span className="text-white/60">Generating AI insights...</span>
+        </div>
+      )
     }
-  ]
+
+    if (error) {
+      return (
+        <div className="py-4">
+          <p className="text-red-400 text-sm">Unable to generate insights</p>
+        </div>
+      )
+    }
+
+    if (!aiInsights?.insights?.length) {
+      return (
+        <div className="py-4">
+          <p className="text-white/60 text-sm">No insights available for current selection</p>
+        </div>
+      )
+    }
+
+    return (
+      <ul className="space-y-3 list-disc list-inside pl-2">
+        {aiInsights.insights.map((insight: string, index: number) => (
+          <li key={index} className="text-white text-sm break-words leading-relaxed">
+            {insight}
+          </li>
+        ))}
+      </ul>
+    )
+  }
 
   return (
     <Card className="bg-gray-900/50 border-gray-700">
       <CardHeader className="pb-3">
         <CardTitle className="text-white text-lg flex items-center">
           <BarChart className="h-5 w-5 mr-2" />
-          Data Snippets - From AI
+          Data Insights - From AI
         </CardTitle>
+        {selectedOEM && (
+          <p className="text-white/60 text-xs">
+            {selectedOEM} • {selectedCountry || 'Global'} • {aiInsights?.dataPoints || 0} data points
+          </p>
+        )}
       </CardHeader>
       <CardContent className="space-y-3">
-        <ul className="space-y-2 list-disc list-inside pl-2">
-          {mockData.map((data) => (
-            <li key={data.id} className="text-white text-sm break-words">
-              <span className="font-medium">{data.metric}:</span>{" "}
-              <span className="text-blue-400 font-bold">{data.value}</span>{" "}
-              <span className="text-green-400 font-medium">({data.trend})</span>{" "}
-              <span className="text-gray-400">- {data.context}</span>
-            </li>
-          ))}
-        </ul>
+        {renderContent()}
       </CardContent>
     </Card>
   )
