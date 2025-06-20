@@ -9,6 +9,13 @@ interface DataInsightsAIProps {
   enabled?: boolean
 }
 
+interface DataInsightsResponse {
+  success: boolean
+  insights: string[]
+  dataPoints: number
+  cached?: boolean
+}
+
 // Debounce helper
 const useDebounce = (callback: Function, delay: number) => {
   const timeoutRef = useRef<NodeJS.Timeout>()
@@ -23,7 +30,7 @@ const useDebounce = (callback: Function, delay: number) => {
 
 export function useDataInsightsAI({ selectedOEM, selectedCountry, enabled = true }: DataInsightsAIProps) {
   // Debounced query function
-  const debouncedQuery = useDebounce(async () => {
+  const debouncedQuery = useDebounce(async (): Promise<DataInsightsResponse> => {
     console.log('Requesting Data Insights AI for:', { selectedOEM, selectedCountry })
     
     const { data, error } = await supabase.functions.invoke('data-insights-ai', {
@@ -39,10 +46,10 @@ export function useDataInsightsAI({ selectedOEM, selectedCountry, enabled = true
     }
 
     console.log('Data Insights AI result:', data)
-    return data
+    return data as DataInsightsResponse
   }, 500)
 
-  return useQuery({
+  return useQuery<DataInsightsResponse>({
     queryKey: ['data-insights-ai', selectedOEM, selectedCountry],
     queryFn: debouncedQuery,
     enabled: enabled && !!selectedOEM,
