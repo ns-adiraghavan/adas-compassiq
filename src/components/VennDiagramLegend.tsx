@@ -11,9 +11,8 @@ const VennDiagramLegend = ({ entities, colors }: VennDiagramLegendProps) => {
   const { theme } = useTheme()
 
   return (
-    <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-lg p-4 ${theme.shadowColor} shadow-lg backdrop-blur-sm min-w-[200px]`}>
-      <h3 className={`text-sm font-medium ${theme.textPrimary} mb-3`}>Entities</h3>
-      <div className="space-y-2">
+    <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-lg p-4 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
+      <div className="flex items-center gap-6">
         {entities.map((entity, index) => {
           const color = colors[index] || colors[0]
           return (
