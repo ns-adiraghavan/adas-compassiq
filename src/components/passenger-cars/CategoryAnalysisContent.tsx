@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useWaypointData } from "@/hooks/useWaypointData"
 import CountryButtons from "@/components/CountryButtons"
 import OEMSelector from "./OEMSelector"
@@ -69,6 +69,76 @@ const CategoryAnalysisContent = () => {
       setSelectedOEMs([availableOEMs[0]])
     }
   }, [availableOEMs, selectedOEMs.length])
+
+  // Generate category analysis context for AI insights
+  const categoryAnalysisContext = useMemo(() => {
+    if (!waypointData?.csvData?.length || !selectedCountry || selectedOEMs.length === 0) {
+      return null
+    }
+
+    const categoryData: Record<string, { features: any[], oemCounts: Record<string, number>, businessModels: Record<string, number> }> = {}
+    let totalFeatures = 0
+
+    waypointData.csvData.forEach(file => {
+      if (file.data && Array.isArray(file.data)) {
+        file.data.forEach((row: any) => {
+          if (row.Country === selectedCountry && 
+              selectedOEMs.includes(row.OEM) &&
+              row['Feature Availability']?.toString().trim().toLowerCase() === 'available' &&
+              row.Feature && row.Feature.toString().trim() !== '') {
+            
+            const category = row.Category?.toString().trim() || 'Unknown'
+            const oem = row.OEM?.toString().trim()
+            const businessModel = row['Business Model Type']?.toString().trim() || 'Unknown'
+            
+            if (!categoryData[category]) {
+              categoryData[category] = { features: [], oemCounts: {}, businessModels: {} }
+            }
+            
+            categoryData[category].features.push(row)
+            categoryData[category].oemCounts[oem] = (categoryData[category].oemCounts[oem] || 0) + 1
+            categoryData[category].businessModels[businessModel] = (categoryData[category].businessModels[businessModel] || 0) + 1
+            totalFeatures++
+          }
+        })
+      }
+    })
+
+    // Calculate category insights
+    const categoryBreakdown = Object.entries(categoryData).map(([category, data]) => {
+      const totalInCategory = data.features.length
+      const leadingOEM = Object.entries(data.oemCounts).sort(([,a], [,b]) => b - a)[0]
+      const topBusinessModel = Object.entries(data.businessModels).sort(([,a], [,b]) => b - a)[0]
+      
+      return {
+        category,
+        total: totalInCategory,
+        leader: leadingOEM?.[0] || 'Unknown',
+        leaderCount: leadingOEM?.[1] || 0,
+        topBusinessModel: topBusinessModel?.[0] || 'Unknown',
+        businessModelCount: topBusinessModel?.[1] || 0,
+        oemDistribution: data.oemCounts,
+        businessModelDistribution: data.businessModels
+      }
+    }).sort((a, b) => b.total - a.total)
+
+    // Calculate OEM totals across categories
+    const oemTotals: Record<string, number> = {}
+    selectedOEMs.forEach(oem => {
+      oemTotals[oem] = Object.values(categoryData).reduce((sum, data) => sum + (data.oemCounts[oem] || 0), 0)
+    })
+
+    return {
+      totalFeatures,
+      selectedOEMs,
+      selectedCountry,
+      categoryBreakdown,
+      oemTotals,
+      expandedCategory,
+      topCategories: categoryBreakdown.slice(0, 5),
+      analysisType: 'category-analysis'
+    }
+  }, [waypointData, selectedCountry, selectedOEMs, expandedCategory])
 
   const handleCountryChange = (country: string) => {
     setSelectedCountry(country)
@@ -147,6 +217,7 @@ const CategoryAnalysisContent = () => {
             selectedOEM={selectedOEMs.length === 1 ? selectedOEMs[0] : ""}
             selectedCountry={selectedCountry}
             oemClickedFromChart={false}
+            businessModelAnalysisContext={categoryAnalysisContext}
           />
         </div>
       </div>

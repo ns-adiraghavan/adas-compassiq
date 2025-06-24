@@ -1,13 +1,13 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BarChart, Loader2, Lightbulb, TrendingUp } from "lucide-react"
+import { BarChart, Loader2, Lightbulb, TrendingUp, Grid } from "lucide-react"
 import { useDataInsightsAI } from "@/hooks/useDataInsightsAI"
 
 interface DataSnippetsProps {
   selectedOEM: string
   selectedCountry: string
   oemClickedFromChart?: boolean
-  businessModelAnalysisContext?: any // New prop for business model analysis context
+  businessModelAnalysisContext?: any // Business model or category analysis context
 }
 
 const DataSnippets = ({ 
@@ -19,19 +19,22 @@ const DataSnippets = ({
   // Only show OEM-specific insights if OEM was actually clicked from chart
   const showOEMInsights = oemClickedFromChart && selectedOEM && selectedOEM.trim() !== ""
   
-  // Use business model context if available, otherwise fall back to regular dashboard metrics
+  // Use business model or category analysis context if available, otherwise fall back to regular dashboard metrics
   const contextData = businessModelAnalysisContext || null
   
   const { data: aiInsights, isLoading, error } = useDataInsightsAI({
     selectedOEM: showOEMInsights ? selectedOEM : "",
     selectedCountry,
     enabled: true,
-    contextData // Pass the business model analysis context
+    contextData // Pass the analysis context
   })
 
   const getTitle = () => {
-    if (businessModelAnalysisContext) {
+    if (businessModelAnalysisContext?.analysisType === 'business-model-analysis') {
       return "Business Model Strategic Insights"
+    }
+    if (businessModelAnalysisContext?.analysisType === 'category-analysis') {
+      return "Category Strategic Insights"
     }
     if (showOEMInsights) {
       return `Strategic Insights - ${selectedOEM}`
@@ -40,14 +43,31 @@ const DataSnippets = ({
   }
 
   const getSubtitle = () => {
-    if (businessModelAnalysisContext) {
+    if (businessModelAnalysisContext?.analysisType === 'business-model-analysis') {
       const { selectedOEMs, totalFeatures, selectedCountry: country } = businessModelAnalysisContext
       return `${selectedOEMs.join(', ')} • ${country} • ${totalFeatures} features analyzed`
+    }
+    if (businessModelAnalysisContext?.analysisType === 'category-analysis') {
+      const { selectedOEMs, totalFeatures, selectedCountry: country, topCategories } = businessModelAnalysisContext
+      return `${selectedOEMs.join(', ')} • ${country} • ${totalFeatures} features • ${topCategories.length} categories`
     }
     if (showOEMInsights) {
       return `${selectedOEM} • ${selectedCountry || 'Global'} • ${aiInsights?.dataPoints || 0} data points analyzed`
     }
     return `Market Overview • ${selectedCountry || 'Global'} • ${aiInsights?.dataPoints || 0} features analyzed`
+  }
+
+  const getIcon = () => {
+    if (businessModelAnalysisContext?.analysisType === 'category-analysis') {
+      return <Grid className="h-4 w-4 text-purple-400 mt-0.5 flex-shrink-0" />
+    }
+    if (businessModelAnalysisContext?.analysisType === 'business-model-analysis') {
+      return <BarChart className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
+    }
+    if (showOEMInsights) {
+      return <Lightbulb className="h-4 w-4 text-yellow-400 mt-0.5 flex-shrink-0" />
+    }
+    return <TrendingUp className="h-4 w-4 text-blue-400 mt-0.5 flex-shrink-0" />
   }
 
   const renderContent = () => {
@@ -56,11 +76,13 @@ const DataSnippets = ({
         <div className="flex items-center justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-blue-400 mr-2" />
           <span className="text-white/60">
-            {businessModelAnalysisContext 
+            {businessModelAnalysisContext?.analysisType === 'business-model-analysis' 
               ? 'Analyzing business model patterns...'
-              : showOEMInsights 
-                ? 'Analyzing OEM performance...' 
-                : 'Analyzing market landscape...'
+              : businessModelAnalysisContext?.analysisType === 'category-analysis'
+                ? 'Analyzing category distribution...'
+                : showOEMInsights 
+                  ? 'Analyzing OEM performance...' 
+                  : 'Analyzing market landscape...'
             }
           </span>
         </div>
@@ -91,13 +113,7 @@ const DataSnippets = ({
       <div className="space-y-3">
         {aiInsights.insights.map((insight: string, index: number) => (
           <div key={index} className="flex items-start space-x-3 p-3 bg-gray-800/30 rounded-lg border border-gray-700/50">
-            {businessModelAnalysisContext ? (
-              <BarChart className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
-            ) : showOEMInsights ? (
-              <Lightbulb className="h-4 w-4 text-yellow-400 mt-0.5 flex-shrink-0" />
-            ) : (
-              <TrendingUp className="h-4 w-4 text-blue-400 mt-0.5 flex-shrink-0" />
-            )}
+            {getIcon()}
             <p className="text-white text-sm leading-relaxed flex-1">
               {insight}
             </p>
