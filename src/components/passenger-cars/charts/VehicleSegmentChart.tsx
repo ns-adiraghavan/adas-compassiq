@@ -29,18 +29,68 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
 
     console.log('Processing chart data for:', { selectedCountry, selectedOEMs })
 
-    // Define standard vehicle segments
-    const vehicleSegments = ['Entry', 'Mid', 'Luxury', 'Premium']
-    
-    // Collect all unique categories
+    // Collect all unique categories and segments from the actual data
     const uniqueCategories = new Set<string>()
+    const uniqueSegments = new Set<string>()
     const segmentCategoryData = new Map<string, Map<string, { features: string[], oemCounts: Map<string, number> }>>()
     
-    // Initialize data structure
-    vehicleSegments.forEach(segment => {
+    // First pass: collect all unique segments and categories from the data
+    waypointData.csvData.forEach(file => {
+      if (file.data && Array.isArray(file.data)) {
+        file.data.forEach((row: any) => {
+          if (row.Country === selectedCountry && 
+              selectedOEMs.includes(row.OEM) &&
+              row['Feature Availability']?.toString().trim().toLowerCase() === 'available' &&
+              row.Category && row.Category.toString().trim() !== '' &&
+              row.Feature && row.Feature.toString().trim() !== '') {
+            
+            const category = row.Category.toString().trim()
+            uniqueCategories.add(category)
+            
+            // Try to find the segment in various possible column names
+            const possibleKeys = ['Vehicle Segment', 'Segment', 'segment', 'vehicle_segment', 'VehicleSegment', 'Vehicle_Segment']
+            let segment = null
+            
+            for (const key of possibleKeys) {
+              if (row[key] && row[key].toString().trim() !== '') {
+                segment = row[key].toString().trim()
+                break
+              }
+            }
+            
+            // If no segment found, check if there are any other columns that might contain segment info
+            if (!segment) {
+              // Look for any column that might contain segment-like values
+              const segmentLikeValues = ['Entry', 'Mid', 'Luxury', 'Premium', 'Basic', 'Standard', 'High-end', 'Executive']
+              for (const [key, value] of Object.entries(row)) {
+                if (value && typeof value === 'string' && segmentLikeValues.includes(value.trim())) {
+                  segment = value.toString().trim()
+                  break
+                }
+              }
+            }
+            
+            // If still no segment found, use a default but log the row structure
+            if (!segment) {
+              console.log('No segment found for row:', Object.keys(row))
+              segment = 'Unspecified'
+            }
+            
+            uniqueSegments.add(segment)
+          }
+        })
+      }
+    })
+
+    console.log('Found unique segments:', Array.from(uniqueSegments))
+    console.log('Found unique categories:', Array.from(uniqueCategories))
+
+    // Initialize data structure for all found segments
+    Array.from(uniqueSegments).forEach(segment => {
       segmentCategoryData.set(segment, new Map())
     })
 
+    // Second pass: populate the data structure
     waypointData.csvData.forEach(file => {
       if (file.data && Array.isArray(file.data)) {
         file.data.forEach((row: any) => {
@@ -54,22 +104,31 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
             const feature = row.Feature.toString().trim()
             const oem = row.OEM.toString().trim()
             
-            // Map to standard segments or use a default
-            let segment = 'Mid' // Default segment
-            const possibleKeys = ['Vehicle Segment', 'Segment', 'segment', 'vehicle_segment', 'VehicleSegment']
+            // Find segment using the same logic as above
+            const possibleKeys = ['Vehicle Segment', 'Segment', 'segment', 'vehicle_segment', 'VehicleSegment', 'Vehicle_Segment']
+            let segment = null
             
             for (const key of possibleKeys) {
-              if (row[key]) {
-                const segmentValue = row[key].toString().trim()
-                if (vehicleSegments.includes(segmentValue)) {
-                  segment = segmentValue
+              if (row[key] && row[key].toString().trim() !== '') {
+                segment = row[key].toString().trim()
+                break
+              }
+            }
+            
+            if (!segment) {
+              const segmentLikeValues = ['Entry', 'Mid', 'Luxury', 'Premium', 'Basic', 'Standard', 'High-end', 'Executive']
+              for (const [key, value] of Object.entries(row)) {
+                if (value && typeof value === 'string' && segmentLikeValues.includes(value.trim())) {
+                  segment = value.toString().trim()
                   break
                 }
               }
             }
-
-            uniqueCategories.add(category)
             
+            if (!segment) {
+              segment = 'Unspecified'
+            }
+
             const segmentData = segmentCategoryData.get(segment)!
             if (!segmentData.has(category)) {
               segmentData.set(category, { features: [], oemCounts: new Map() })
@@ -90,9 +149,10 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
     })
 
     const categoriesArray = Array.from(uniqueCategories).sort()
+    const segmentsArray = Array.from(uniqueSegments).sort()
     
     // Build chart data
-    const chartData = vehicleSegments.map(segment => {
+    const chartData = segmentsArray.map(segment => {
       const segmentItem: any = { segment }
       
       categoriesArray.forEach(category => {
@@ -111,7 +171,7 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
     })
 
     // Build table data
-    const tableData = vehicleSegments.map(segment => {
+    const tableData = segmentsArray.map(segment => {
       const segmentData = segmentCategoryData.get(segment)
       const segmentFeatures: any = { segment }
       
