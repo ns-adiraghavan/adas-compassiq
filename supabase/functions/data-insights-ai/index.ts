@@ -1,3 +1,4 @@
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0'
@@ -14,79 +15,73 @@ const corsHeaders = {
 // In-memory cache for processed insights
 const insightsCache = new Map<string, any>();
 
-const createInsightsPrompt = (oem: string, country: string, dashboardMetrics: any, isMarketOverview: boolean) => {
+const createVehicleSegmentInsightsPrompt = (oem: string, country: string, dashboardMetrics: any, isMarketOverview: boolean) => {
   const topCategory = dashboardMetrics.topCategories?.[0]?.name || 'Unknown';
   const secondCategory = dashboardMetrics.topCategories?.[1]?.name || 'Unknown';
+  const thirdCategory = dashboardMetrics.topCategories?.[2]?.name || 'Unknown';
   const lighthouseRate = Math.round((dashboardMetrics.lighthouseFeatures / dashboardMetrics.totalFeatures) * 100);
   const subscriptionRate = Math.round((dashboardMetrics.subscriptionFeatures / dashboardMetrics.totalFeatures) * 100);
   const freeRate = Math.round((dashboardMetrics.freeFeatures / dashboardMetrics.totalFeatures) * 100);
   
-  // Determine most common business model with proper logic
-  let dominantBusinessModel = 'Free';
-  let dominantRate = freeRate;
-  let customerPaymentWillingness = 'low';
-  
-  if (subscriptionRate > freeRate) {
-    dominantBusinessModel = 'Subscription';
-    dominantRate = subscriptionRate;
-    customerPaymentWillingness = 'moderate to high';
-  }
+  // Get market leaders for comparison
+  const marketLeaders = dashboardMetrics.marketLeaders || [];
+  const topOEM = marketLeaders[0]?.oem || 'Unknown';
+  const secondOEM = marketLeaders[1]?.oem || 'Unknown';
+  const topOEMFeatures = marketLeaders[0]?.totalFeatures || 0;
+  const secondOEMFeatures = marketLeaders[1]?.totalFeatures || 0;
 
   if (isMarketOverview || oem === "Market Overview") {
-    return `Generate exactly 3 strategic market insights for ${country || 'global market'} based on automotive feature data.
+    return `Generate exactly 3 strategic insights for Vehicle Segment Analysis in ${country || 'global market'} focusing on OEM and segment comparisons.
 
-MARKET DATA CONTEXT:
-• Country: ${country || 'Global'}
-• Total Features: ${dashboardMetrics.totalFeatures}
+VEHICLE SEGMENT ANALYSIS CONTEXT:
+• Market: ${country || 'Global'}
+• Total Features Analyzed: ${dashboardMetrics.totalFeatures}
 • Active OEMs: ${dashboardMetrics.totalOEMs}
-• Top Categories: ${topCategory} (${dashboardMetrics.topCategories?.[0]?.value || 0}), ${secondCategory} (${dashboardMetrics.topCategories?.[1]?.value || 0})
-• Lighthouse Features: ${dashboardMetrics.lighthouseFeatures} (${lighthouseRate}%)
-• Business Models: Subscription ${subscriptionRate}%, Free ${freeRate}%
-• Dominant Model: ${dominantBusinessModel} (${dominantRate}%)
+• Leading Categories: ${topCategory} (${dashboardMetrics.topCategories?.[0]?.value || 0}), ${secondCategory} (${dashboardMetrics.topCategories?.[1]?.value || 0}), ${thirdCategory} (${dashboardMetrics.topCategories?.[2]?.value || 0})
+• Market Leaders: ${topOEM} (${topOEMFeatures} features), ${secondOEM} (${secondOEMFeatures} features)
+• Lighthouse Adoption: ${lighthouseRate}% across all segments
+• Business Model Split: ${subscriptionRate}% Subscription, ${freeRate}% Free
 
-GENERATE EXACTLY 3 INSIGHTS following these patterns:
+GENERATE EXACTLY 3 COMPARATIVE INSIGHTS:
 
-1. Category Dynamics - Most OEMs in ${country || 'the market'} are betting big on ${topCategory} category (top by count) owing to emphasis on [specific reason like utility, comfort, safety, technology advancement based on category type]
+1. Segment Leadership Analysis - ${topOEM} dominates ${country || 'the market'} with ${topOEMFeatures} features across vehicle segments, outpacing ${secondOEM} by ${topOEMFeatures - secondOEMFeatures} features, particularly strong in ${topCategory} category
 
-2. Lighthouse Features - Lighthouse features can be considered as an indication of what features customers love in ${country || 'the market'} and with ${lighthouseRate}% adoption rate, [provide specific insight about customer preferences and market maturity]
+2. Category Distribution Comparison - ${topCategory} emerges as the most competitive category with ${dashboardMetrics.topCategories?.[0]?.value || 0} features, followed by ${secondCategory} (${dashboardMetrics.topCategories?.[1]?.value || 0}), indicating OEMs prioritize customer experience and technology differentiation
 
-3. Monetization Dynamics - In ${country || 'the market'} most OEMs seem to follow ${dominantBusinessModel} business model (${dominantRate}%) indicating ${customerPaymentWillingness} customer openness to pay for automotive services
+3. Lighthouse Feature Penetration - With ${lighthouseRate}% lighthouse feature adoption across segments in ${country || 'the market'}, leading OEMs are setting premium standards that define customer expectations for next-generation automotive experiences
 
-Each insight should be a complete sentence without "Box-1:", "Box-2:" prefixes. Focus on logical conclusions that make business sense.
-
-Respond with ONLY a JSON array of exactly 3 strings. No other text.`;
+Each insight should focus on comparative analysis between OEMs and segments. Respond with ONLY a JSON array of exactly 3 strings.`;
   }
 
   const selectedOEMData = dashboardMetrics.competitiveAnalysis?.selectedOEM;
   const marketAverage = dashboardMetrics.competitiveAnalysis?.marketAverage;
+  const marketPosition = dashboardMetrics.competitiveAnalysis?.marketPosition || 'N/A';
   
-  // OEM-specific business model analysis
-  const oemSubscriptionRate = selectedOEMData?.subscriptionRate || 0;
-  const oemDominantModel = oemSubscriptionRate > 50 ? 'Subscription' : 'Free';
-  const oemVsMarketComparison = oemSubscriptionRate > (marketAverage?.subscriptionRate || 0) ? 'above' : 'below';
+  // Calculate competitive gaps
+  const featureGap = (selectedOEMData?.features || 0) - (marketAverage?.features || 0);
+  const lighthouseGap = (selectedOEMData?.lighthouseRate || 0) - (marketAverage?.lighthouseRate || 0);
+  const subscriptionGap = (selectedOEMData?.subscriptionRate || 0) - (marketAverage?.subscriptionRate || 0);
 
-  return `Generate exactly 3 strategic insights for ${oem} in ${country || 'global market'} based on competitive positioning.
+  return `Generate exactly 3 strategic insights for ${oem} Vehicle Segment Analysis in ${country || 'global market'} with competitive comparisons.
 
-OEM DATA CONTEXT:
+OEM COMPETITIVE ANALYSIS CONTEXT:
 • OEM: ${oem}
-• Country: ${country || 'Global'}
-• OEM Features: ${selectedOEMData?.features || 0}
-• Market Position: #${dashboardMetrics.competitiveAnalysis?.marketPosition || 'N/A'}
-• OEM Lighthouse Rate: ${selectedOEMData?.lighthouseRate || 0}% vs Market ${marketAverage?.lighthouseRate || 0}%
-• OEM Subscription Rate: ${oemSubscriptionRate}% vs Market ${marketAverage?.subscriptionRate || 0}%
-• Top Market Category: ${topCategory}
+• Market: ${country || 'Global'}
+• Market Position: #${marketPosition} of ${dashboardMetrics.totalOEMs} OEMs
+• ${oem} Features: ${selectedOEMData?.features || 0} vs Market Average ${marketAverage?.features || 0} (${featureGap > 0 ? '+' : ''}${featureGap} difference)
+• ${oem} Lighthouse Rate: ${selectedOEMData?.lighthouseRate || 0}% vs Market ${marketAverage?.lighthouseRate || 0}% (${lighthouseGap > 0 ? '+' : ''}${lighthouseGap}pp difference)
+• ${oem} Subscription Rate: ${selectedOEMData?.subscriptionRate || 0}% vs Market ${marketAverage?.subscriptionRate || 0}% (${subscriptionGap > 0 ? '+' : ''}${subscriptionGap}pp difference)
+• Leading Market Category: ${topCategory} (${dashboardMetrics.topCategories?.[0]?.value || 0} total features)
 
-GENERATE EXACTLY 3 INSIGHTS following these patterns:
+GENERATE EXACTLY 3 COMPETITIVE INSIGHTS:
 
-1. Category Dynamics - ${oem} in ${country || 'the market'} focuses on ${topCategory} category with [competitive positioning insight - whether leading, following, or differentiating]
+1. Segment Positioning Analysis - ${oem} ranks #${marketPosition} in ${country || 'the market'} with ${selectedOEMData?.features || 0} features, ${featureGap > 0 ? 'leading market average by ' + featureGap + ' features' : 'trailing market average by ' + Math.abs(featureGap) + ' features'}, particularly ${featureGap > 0 ? 'strong' : 'developing'} in competitive segments
 
-2. Lighthouse Features - ${oem}'s lighthouse rate of ${selectedOEMData?.lighthouseRate || 0}% vs market ${marketAverage?.lighthouseRate || 0}% shows [specific competitive advantage or gap in customer satisfaction]
+2. Lighthouse Feature Strategy - ${oem}'s ${selectedOEMData?.lighthouseRate || 0}% lighthouse adoption ${lighthouseGap > 0 ? 'exceeds' : 'lags'} market benchmark of ${marketAverage?.lighthouseRate || 0}%, ${lighthouseGap > 0 ? 'positioning them as innovation leaders' : 'indicating opportunity to enhance premium feature leadership'} across vehicle segments
 
-3. Monetization Dynamics - ${oem} primarily uses ${oemDominantModel} model (${oemSubscriptionRate}%) positioning them ${oemVsMarketComparison} market trend, indicating [strategic revenue positioning insight]
+3. Revenue Model Comparison - ${oem}'s ${selectedOEMData?.subscriptionRate || 0}% subscription strategy ${subscriptionGap > 0 ? 'outpaces' : 'trails'} market trend of ${marketAverage?.subscriptionRate || 0}%, ${subscriptionGap > 0 ? 'capitalizing on' : 'potentially missing'} monetization opportunities in ${country || 'target'} automotive segments
 
-Each insight should be a complete sentence without "Box-1:", "Box-2:" prefixes. Make logical business conclusions.
-
-Respond with ONLY a JSON array of exactly 3 strings. No other text.`;
+Each insight should provide specific competitive comparisons. Respond with ONLY a JSON array of exactly 3 strings.`;
 }
 
 serve(async (req) => {
@@ -98,10 +93,10 @@ serve(async (req) => {
     const { oem, country, dashboardMetrics, isMarketOverview } = await req.json();
     
     const analysisType = isMarketOverview ? 'market-overview' : oem;
-    const requestCacheKey = `insights-${analysisType}-${country || 'global'}-${JSON.stringify(dashboardMetrics).slice(0, 50)}`;
+    const requestCacheKey = `vehicle-segment-insights-${analysisType}-${country || 'global'}-${JSON.stringify(dashboardMetrics).slice(0, 50)}`;
     
     if (insightsCache.has(requestCacheKey)) {
-      console.log('Returning cached insights for:', requestCacheKey);
+      console.log('Returning cached vehicle segment insights for:', requestCacheKey);
       return new Response(
         JSON.stringify(insightsCache.get(requestCacheKey)),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -112,13 +107,13 @@ serve(async (req) => {
       const emptyResult = {
         success: true,
         insights: isMarketOverview ? [
-          `No category data available for analysis in ${country || 'selected region'}`,
-          `Insufficient lighthouse feature data found for meaningful insights in ${country || 'selected region'}`,
-          `No business model data available for monetization analysis in ${country || 'selected region'}`
+          `No segment comparison data available for analysis in ${country || 'selected region'}`,
+          `Insufficient OEM competitive data found for meaningful segment insights in ${country || 'selected region'}`,
+          `No lighthouse feature data available for segment leadership analysis in ${country || 'selected region'}`
         ] : [
-          `${oem} category positioning data unavailable for ${country || 'selected market'}`,
-          `${oem} lighthouse feature performance data insufficient for analysis in ${country || 'selected market'}`,
-          `${oem} business model data unavailable for competitive analysis in ${country || 'selected market'}`
+          `${oem} segment positioning data unavailable for competitive analysis in ${country || 'selected market'}`,
+          `${oem} lighthouse feature performance insufficient for segment comparison in ${country || 'selected market'}`,
+          `${oem} lacks sufficient segment data for competitive benchmarking in ${country || 'selected market'}`
         ],
         dataPoints: 0
       };
@@ -130,7 +125,7 @@ serve(async (req) => {
       );
     }
 
-    const prompt = createInsightsPrompt(oem, country, dashboardMetrics, isMarketOverview);
+    const prompt = createVehicleSegmentInsightsPrompt(oem, country, dashboardMetrics, isMarketOverview);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -143,7 +138,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are an automotive market analyst. Return ONLY a JSON array of exactly 3 strings. Each string should be a complete business insight without Box- prefixes. Focus on logical conclusions that make business sense based on the data provided.'
+            content: 'You are an automotive segment analysis expert. Return ONLY a JSON array of exactly 3 strings. Each insight must focus on comparative analysis between OEMs and vehicle segments, highlighting competitive positioning, feature leadership, and market differentiation. Make insights specific and actionable for vehicle segment strategy.'
           },
           {
             role: 'user',
@@ -151,7 +146,7 @@ serve(async (req) => {
           }
         ],
         temperature: 0.3,
-        max_tokens: 500,
+        max_tokens: 600,
       }),
     });
 
@@ -162,10 +157,9 @@ serve(async (req) => {
     const aiData = await response.json();
     let analysis = aiData.choices[0].message.content.trim();
 
-    // Clean up the response - remove any markdown formatting or extra text
+    // Clean up the response
     analysis = analysis.replace(/```json/g, '').replace(/```/g, '').trim();
     
-    // If the response doesn't start with [, try to extract JSON array
     if (!analysis.startsWith('[')) {
       const jsonMatch = analysis.match(/\[.*\]/s);
       if (jsonMatch) {
@@ -179,52 +173,52 @@ serve(async (req) => {
       if (!Array.isArray(insights)) {
         throw new Error('Response is not an array');
       }
-      // Filter out any empty or invalid insights
       insights = insights.filter((insight: any) => 
         typeof insight === 'string' && insight.trim().length > 0
       );
     } catch (parseError) {
-      console.log('JSON parse failed, using fallback insights:', parseError);
-      // Fallback to structured insights based on data
+      console.log('JSON parse failed, using vehicle segment fallback insights:', parseError);
+      
+      // Fallback insights specific to vehicle segment analysis
       const topCategory = dashboardMetrics.topCategories?.[0]?.name || 'connectivity';
       const lighthouseRate = Math.round((dashboardMetrics.lighthouseFeatures / dashboardMetrics.totalFeatures) * 100);
-      const subscriptionRate = Math.round((dashboardMetrics.subscriptionFeatures / dashboardMetrics.totalFeatures) * 100);
-      const freeRate = Math.round((dashboardMetrics.freeFeatures / dashboardMetrics.totalFeatures) * 100);
-      const dominantModel = subscriptionRate > freeRate ? 'Subscription' : 'Free';
-      const dominantRate = subscriptionRate > freeRate ? subscriptionRate : freeRate;
-      const paymentWillingness = subscriptionRate > freeRate ? 'moderate to high' : 'low';
+      const marketLeaders = dashboardMetrics.marketLeaders || [];
+      const topOEM = marketLeaders[0]?.oem || 'Leading OEM';
+      const secondOEM = marketLeaders[1]?.oem || 'Second OEM';
 
       if (isMarketOverview) {
         insights = [
-          `Most OEMs in ${country || 'the market'} are betting big on ${topCategory} category owing to emphasis on enhanced user experience and technological advancement`,
-          `Lighthouse features indicate strong customer preferences in ${country || 'the market'} with ${lighthouseRate}% adoption showing mature market expectations for premium automotive experiences`,
-          `In ${country || 'the market'} most OEMs follow ${dominantModel} business model (${dominantRate}%) indicating ${paymentWillingness} customer openness to pay for automotive services`
+          `${topOEM} leads vehicle segment competition in ${country || 'the market'} with strongest feature portfolio across ${topCategory} category, setting benchmark for segment excellence`,
+          `Lighthouse feature adoption at ${lighthouseRate}% indicates premium segment maturity in ${country || 'the market'}, with leading OEMs defining next-generation automotive standards`,
+          `${topCategory} emerges as most competitive category with OEMs like ${topOEM} and ${secondOEM} driving innovation through comprehensive segment coverage and feature differentiation`
         ];
       } else {
         const selectedOEMData = dashboardMetrics.competitiveAnalysis?.selectedOEM;
-        const marketAverage = dashboardMetrics.competitiveAnalysis?.marketAverage;
-        const oemVsMarket = (selectedOEMData?.lighthouseRate || 0) > (marketAverage?.lighthouseRate || 0) ? 'leading' : 'trailing';
+        const marketPosition = dashboardMetrics.competitiveAnalysis?.marketPosition || 'N/A';
+        const featureCount = selectedOEMData?.features || 0;
+        const lighthouseOEMRate = selectedOEMData?.lighthouseRate || 0;
+        
         insights = [
-          `${oem} in ${country || 'the market'} focuses on ${topCategory} category with competitive positioning that aligns with market leadership trends`,
-          `${oem}'s lighthouse rate of ${selectedOEMData?.lighthouseRate || 0}% vs market ${marketAverage?.lighthouseRate || 0}% shows ${oemVsMarket} customer satisfaction strategy`,
-          `${oem} uses ${selectedOEMData?.subscriptionRate > 50 ? 'Subscription' : 'Free'} model positioning them strategically for revenue optimization in the evolving automotive market`
+          `${oem} holds #${marketPosition} position in ${country || 'the market'} vehicle segments with ${featureCount} features, demonstrating ${featureCount > 100 ? 'strong' : 'developing'} competitive presence across automotive categories`,
+          `${oem}'s ${lighthouseOEMRate}% lighthouse feature rate ${lighthouseOEMRate > lighthouseRate ? 'exceeds' : 'trails'} market average, ${lighthouseOEMRate > lighthouseRate ? 'establishing premium leadership' : 'indicating growth opportunity'} in segment innovation`,
+          `${oem} focuses on ${topCategory} category positioning with strategic emphasis on segment-specific feature development and competitive differentiation in ${country || 'target'} automotive market`
         ];
       }
     }
 
     // Ensure exactly 3 insights
-    const fallbackInsights = isMarketOverview ? [
-      `Market demonstrates strategic focus on innovation with diverse category investments across ${dashboardMetrics.totalOEMs} active OEMs`,
-      `Customer engagement patterns show evolving preferences for premium automotive experiences and connected services`,
-      `Business model diversity indicates market experimentation with revenue strategies to match customer payment behaviors`
+    const vehicleSegmentFallbacks = isMarketOverview ? [
+      `Vehicle segment analysis reveals competitive dynamics with leading OEMs establishing market benchmarks through comprehensive feature portfolios`,
+      `Lighthouse feature distribution across segments indicates premium market evolution with customers demanding advanced automotive experiences`,
+      `Category competition demonstrates strategic focus areas where OEMs compete for segment leadership and customer preference`
     ] : [
-      `${oem} demonstrates strategic market positioning through focused category investments and competitive differentiation`,
-      `Feature development strategy shows customer-centric approach to automotive innovation and user experience`,
-      `Revenue model positioning aligns with long-term market trends and customer value proposition strategy`
+      `${oem} demonstrates vehicle segment positioning through strategic feature investments and competitive differentiation across automotive categories`,
+      `Feature leadership analysis shows ${oem}'s approach to segment-specific innovation and premium experience development`,
+      `Revenue strategy positioning aligns with vehicle segment trends and customer value proposition in automotive market evolution`
     ];
 
     while (insights.length < 3) {
-      insights.push(fallbackInsights[insights.length] || `Strategic opportunity identified in ${country || 'target'} automotive market`);
+      insights.push(vehicleSegmentFallbacks[insights.length] || `Strategic vehicle segment opportunity identified for ${country || 'target'} automotive market`);
     }
 
     insights = insights.slice(0, 3);
@@ -249,14 +243,14 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Error in data-insights-ai function:', error);
+    console.error('Error in vehicle segment data-insights-ai function:', error);
     return new Response(
       JSON.stringify({ 
         success: false, 
         insights: [
-          'Market insights temporarily unavailable due to technical issues',
-          'Feature analysis service currently offline, please retry shortly',
-          'Business model insights unavailable, system maintenance in progress'
+          'Vehicle segment insights temporarily unavailable due to technical issues',
+          'OEM comparison analysis service currently offline, please retry shortly',
+          'Segment competitive analysis unavailable, system maintenance in progress'
         ],
         error: error.message,
         dataPoints: 0
