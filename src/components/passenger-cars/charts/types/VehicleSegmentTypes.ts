@@ -26,5 +26,5 @@ export interface ChartControlsProps {
 
 export interface BarClickData {
   name: string
-  type: 'oem' | 'segment' | 'category'
+  type: 'oem' | 'segment'
 }
