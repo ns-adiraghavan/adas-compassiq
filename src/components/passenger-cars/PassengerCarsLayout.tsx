@@ -14,7 +14,7 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
   const sections = [
     { id: 'landscape', name: 'Landscape', path: '/passenger-cars/landscape' },
     { id: 'analytics', name: 'Category Analysis', path: '/passenger-cars/analytics' },
-    { id: 'intelligence', name: 'Intelligence', path: '/passenger-cars/intelligence' },
+    { id: 'intelligence', name: 'Vehicle Segment Analysis', path: '/passenger-cars/intelligence' },
     { id: 'modeling', name: 'Modeling', path: '/passenger-cars/modeling' },
     { id: 'insights', name: 'Insights', path: '/passenger-cars/insights' },
   ]
