@@ -74,12 +74,12 @@ const InsightsContent = () => {
   }
 
   return (
-    <div className={`min-h-screen ${theme.backgroundGradient} transition-all duration-500`}>
-      <div className="flex min-h-screen">
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col">
+    <div className={`w-full min-h-screen flex ${theme.backgroundGradient} transition-all duration-500`} style={{ overflow: 'hidden' }}>
+      {/* Main Content Area - 60% with proper alignment */}
+      <div className="flex-shrink-0 overflow-y-auto" style={{ width: '60%', maxWidth: '60%', minWidth: '60%' }}>
+        <div className="px-8 py-6 space-y-6 pb-8" style={{ maxWidth: '100%', boxSizing: 'border-box' }}>
           {/* Controls Section */}
-          <div className="px-8 py-6 space-y-6">
+          <div className="space-y-6">
             {/* Country Selection */}
             <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
               <CountryButtons
@@ -99,33 +99,41 @@ const InsightsContent = () => {
           </div>
 
           {/* Venn Diagram Section */}
-          <div className="px-8 pb-8">
-            <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
-              <h2 className={`text-2xl font-light mb-6 ${theme.textPrimary}`}>
-                Feature Overlap Analysis
-              </h2>
-              {isLoading ? (
-                <div className="flex items-center justify-center h-96">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-                </div>
-              ) : vennData ? (
-                <VennDiagram data={vennData} />
-              ) : (
-                <div className={`flex items-center justify-center h-96 ${theme.textMuted}`}>
-                  <p>Select OEMs to view feature overlap analysis</p>
-                </div>
-              )}
-            </div>
+          <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
+            <h2 className={`text-2xl font-light mb-6 ${theme.textPrimary}`}>
+              Feature Overlap Analysis
+            </h2>
+            {isLoading ? (
+              <div className="flex items-center justify-center h-96">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+              </div>
+            ) : vennData ? (
+              <VennDiagram data={vennData} />
+            ) : (
+              <div className={`flex items-center justify-center h-96 ${theme.textMuted}`}>
+                <p>Select OEMs to view feature overlap analysis</p>
+              </div>
+            )}
           </div>
         </div>
+      </div>
 
-        {/* AI Sidebar */}
-        <div className="w-96 border-l border-gray-700 flex-shrink-0">
-          <AISnippetsSidebar
-            selectedOEM={selectedOEMs.join(", ")}
-            selectedCountry={selectedCountry}
-          />
-        </div>
+      {/* AI Snippets Sidebar - 40% with proper alignment */}
+      <div 
+        className="flex-shrink-0 min-h-screen"
+        style={{ 
+          width: '40%',
+          maxWidth: '40%',
+          minWidth: '40%',
+          overflow: 'hidden',
+          position: 'relative',
+          paddingRight: '32px' // Match the 8*4 = 32px right padding from main content
+        }}
+      >
+        <AISnippetsSidebar
+          selectedOEM={selectedOEMs.join(", ")}
+          selectedCountry={selectedCountry}
+        />
       </div>
     </div>
   )
