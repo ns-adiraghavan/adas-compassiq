@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react"
 import { useWaypointData } from "@/hooks/useWaypointData"
 import CountryButtons from "@/components/CountryButtons"
@@ -116,19 +115,17 @@ const VehicleSegmentAnalysisContent = () => {
         <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
           <div className="mb-4">
             <h3 className={`text-lg font-medium ${theme.textPrimary} mb-2`}>
-              Features by Vehicle Segment and OEM
+              Features by Vehicle Segment and Category
             </h3>
             <p className={`${theme.textMuted} text-sm`}>
-              Distribution of available features across selected OEMs for each vehicle segment in {selectedCountry}
+              Distribution of available features across categories for each vehicle segment in {selectedCountry}. Click on a segment bar to view detailed features.
             </p>
           </div>
 
-          <div className="h-[400px]">
-            <VehicleSegmentChart
-              selectedCountry={selectedCountry}
-              selectedOEMs={selectedOEMs}
-            />
-          </div>
+          <VehicleSegmentChart
+            selectedCountry={selectedCountry}
+            selectedOEMs={selectedOEMs}
+          />
         </div>
       </div>
 
