@@ -1,5 +1,5 @@
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import PassengerCarsLayout from "@/components/passenger-cars/PassengerCarsLayout"
 import CountryButtons from "@/components/CountryButtons"
 import OEMSelector from "@/components/passenger-cars/OEMSelector"
@@ -7,11 +7,45 @@ import AISnippetsSidebar from "@/components/passenger-cars/AISnippetsSidebar"
 import VennDiagram from "@/components/VennDiagram"
 import { useVennDiagramData } from "@/hooks/useVennDiagramData"
 import { useTheme } from "@/contexts/ThemeContext"
+import { useWaypointData } from "@/hooks/useWaypointData"
 
 const InsightsContent = () => {
   const { theme } = useTheme()
   const [selectedCountry, setSelectedCountry] = useState("Germany")
   const [selectedOEMs, setSelectedOEMs] = useState<string[]>([])
+  const { data: waypointData } = useWaypointData()
+
+  // Get available OEMs for the selected country
+  const getAvailableOEMs = (country: string) => {
+    if (!waypointData?.csvData?.length || !country) return []
+
+    const uniqueOEMs = new Set<string>()
+    
+    waypointData.csvData.forEach(file => {
+      if (file.data && Array.isArray(file.data)) {
+        file.data.forEach((row: any) => {
+          if (row.Country === country &&
+              row.OEM && typeof row.OEM === 'string' && 
+              row.OEM.trim() !== '' && 
+              !row.OEM.toLowerCase().includes('merged') &&
+              !row.OEM.toLowerCase().includes('monitoring') &&
+              row['Feature Availability']?.toString().trim().toLowerCase() === 'available') {
+            uniqueOEMs.add(row.OEM.trim())
+          }
+        })
+      }
+    })
+
+    return Array.from(uniqueOEMs).sort()
+  }
+
+  // Auto-select all OEMs when country changes
+  useEffect(() => {
+    if (waypointData?.csvData?.length) {
+      const availableOEMs = getAvailableOEMs(selectedCountry)
+      setSelectedOEMs(availableOEMs)
+    }
+  }, [selectedCountry, waypointData])
 
   const { vennData, isLoading } = useVennDiagramData(selectedCountry, selectedOEMs)
 
@@ -24,12 +58,17 @@ const InsightsContent = () => {
   }
 
   const handleSelectAll = () => {
-    // This would be populated by available OEMs for the country
-    setSelectedOEMs([])
+    const availableOEMs = getAvailableOEMs(selectedCountry)
+    setSelectedOEMs(availableOEMs)
   }
 
   const handleClearAll = () => {
     setSelectedOEMs([])
+  }
+
+  const handleCountryChange = (country: string) => {
+    setSelectedCountry(country)
+    // OEMs will be auto-selected via useEffect
   }
 
   return (
@@ -43,7 +82,7 @@ const InsightsContent = () => {
             <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
               <CountryButtons
                 selectedCountry={selectedCountry}
-                onCountryChange={setSelectedCountry}
+                onCountryChange={handleCountryChange}
               />
             </div>
 

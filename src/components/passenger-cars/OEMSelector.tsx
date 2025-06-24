@@ -47,6 +47,10 @@ const OEMSelector = ({
     return Array.from(uniqueOEMs).sort()
   })()
 
+  const handleSelectAll = () => {
+    onSelectAll()
+  }
+
   return (
     <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
       <div className="flex items-center justify-between mb-4">
@@ -55,7 +59,7 @@ const OEMSelector = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={onSelectAll}
+            onClick={handleSelectAll}
             className={`${theme.textSecondary} border-gray-600 hover:bg-gray-800`}
           >
             Select All
