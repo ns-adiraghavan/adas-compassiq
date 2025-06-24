@@ -143,10 +143,13 @@ const CategoryAnalysisContent = () => {
     return Object.entries(categoryOEMCount)
       .map(([category, oemCounts]) => ({
         category,
-        ...oemCounts,
-        total: Object.values(oemCounts).reduce((sum, count) => sum + count, 0)
+        ...oemCounts
       }))
-      .sort((a, b) => b.total - a.total)
+      .sort((a, b) => {
+        const totalA = Object.values(a).filter(v => typeof v === 'number').reduce((sum: number, count) => sum + (count as number), 0)
+        const totalB = Object.values(b).filter(v => typeof v === 'number').reduce((sum: number, count) => sum + (count as number), 0)
+        return totalB - totalA
+      })
   })()
 
   // Generate features matrix for expanded category
@@ -278,7 +281,6 @@ const CategoryAnalysisContent = () => {
                           {oem.length > 12 ? oem.substring(0, 12) + '...' : oem}
                         </TableHead>
                       ))}
-                      <TableHead className={`${theme.textSecondary} font-medium text-center`}>Total</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -305,9 +307,6 @@ const CategoryAnalysisContent = () => {
                             {row[oem] || 0}
                           </TableCell>
                         ))}
-                        <TableCell className={`${theme.textPrimary} text-center font-medium`}>
-                          {row.total}
-                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -370,6 +369,19 @@ const CategoryAnalysisContent = () => {
               }
             </div>
           )}
+        </div>
+
+        {/* Strategic Insights Section */}
+        <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
+          <h3 className={`text-lg font-medium ${theme.textPrimary} mb-4`}>Strategic Insights</h3>
+          <div className="h-96">
+            <AISnippetsSidebar 
+              selectedOEM={selectedOEMs.length === 1 ? selectedOEMs[0] : ""}
+              selectedCountry={selectedCountry}
+              oemClickedFromChart={false}
+              compact={true}
+            />
+          </div>
         </div>
       </div>
 
