@@ -29,12 +29,26 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
 
     console.log('Processing chart data for:', { selectedCountry, selectedOEMs })
 
+    // First, let's examine the actual structure of the data to find segment-related columns
+    let sampleRow = null
+    waypointData.csvData.forEach(file => {
+      if (file.data && Array.isArray(file.data) && file.data.length > 0 && !sampleRow) {
+        sampleRow = file.data[0]
+      }
+    })
+
+    if (sampleRow) {
+      console.log('Sample row keys:', Object.keys(sampleRow))
+      console.log('Sample row:', sampleRow)
+    }
+
     // Collect all unique categories and segments from the actual data
     const uniqueCategories = new Set<string>()
-    const uniqueSegments = new Set<string>()
-    const segmentCategoryData = new Map<string, Map<string, { features: string[], oemCounts: Map<string, number> }>>()
+    const segmentData = new Map<string, Map<string, { features: string[], oemCounts: Map<string, number> }>>()
     
-    // First pass: collect all unique segments and categories from the data
+    // Look for segment-related columns in the data
+    const segmentColumns = new Set<string>()
+    
     waypointData.csvData.forEach(file => {
       if (file.data && Array.isArray(file.data)) {
         file.data.forEach((row: any) => {
@@ -47,50 +61,28 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
             const category = row.Category.toString().trim()
             uniqueCategories.add(category)
             
-            // Try to find the segment in various possible column names
-            const possibleKeys = ['Vehicle Segment', 'Segment', 'segment', 'vehicle_segment', 'VehicleSegment', 'Vehicle_Segment']
-            let segment = null
-            
-            for (const key of possibleKeys) {
-              if (row[key] && row[key].toString().trim() !== '') {
-                segment = row[key].toString().trim()
-                break
-              }
-            }
-            
-            // If no segment found, check if there are any other columns that might contain segment info
-            if (!segment) {
-              // Look for any column that might contain segment-like values
-              const segmentLikeValues = ['Entry', 'Mid', 'Luxury', 'Premium', 'Basic', 'Standard', 'High-end', 'Executive']
-              for (const [key, value] of Object.entries(row)) {
-                if (value && typeof value === 'string' && segmentLikeValues.includes(value.trim())) {
-                  segment = value.toString().trim()
-                  break
+            // Look for all columns that might contain segment information
+            // Check each column for segment-like values
+            Object.keys(row).forEach(key => {
+              const value = row[key]
+              if (value && typeof value === 'string') {
+                const trimmedValue = value.trim()
+                // Check if this looks like a segment value
+                if (['Entry', 'Mid', 'Luxury', 'Premium', 'Basic', 'Standard', 'High-end', 'Executive', 'Economy', 'Compact'].includes(trimmedValue)) {
+                  segmentColumns.add(key)
+                  console.log(`Found segment column: ${key} with value: ${trimmedValue}`)
                 }
               }
-            }
-            
-            // If still no segment found, use a default but log the row structure
-            if (!segment) {
-              console.log('No segment found for row:', Object.keys(row))
-              segment = 'Unspecified'
-            }
-            
-            uniqueSegments.add(segment)
+            })
           }
         })
       }
     })
 
-    console.log('Found unique segments:', Array.from(uniqueSegments))
+    console.log('Found segment columns:', Array.from(segmentColumns))
     console.log('Found unique categories:', Array.from(uniqueCategories))
 
-    // Initialize data structure for all found segments
-    Array.from(uniqueSegments).forEach(segment => {
-      segmentCategoryData.set(segment, new Map())
-    })
-
-    // Second pass: populate the data structure
+    // Now process the data using the identified segment columns
     waypointData.csvData.forEach(file => {
       if (file.data && Array.isArray(file.data)) {
         file.data.forEach((row: any) => {
@@ -104,37 +96,45 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
             const feature = row.Feature.toString().trim()
             const oem = row.OEM.toString().trim()
             
-            // Find segment using the same logic as above
-            const possibleKeys = ['Vehicle Segment', 'Segment', 'segment', 'vehicle_segment', 'VehicleSegment', 'Vehicle_Segment']
-            let segment = null
+            // Find segment value from any of the identified segment columns
+            let segment = 'Unspecified'
             
-            for (const key of possibleKeys) {
-              if (row[key] && row[key].toString().trim() !== '') {
-                segment = row[key].toString().trim()
-                break
-              }
-            }
-            
-            if (!segment) {
-              const segmentLikeValues = ['Entry', 'Mid', 'Luxury', 'Premium', 'Basic', 'Standard', 'High-end', 'Executive']
-              for (const [key, value] of Object.entries(row)) {
-                if (value && typeof value === 'string' && segmentLikeValues.includes(value.trim())) {
-                  segment = value.toString().trim()
+            for (const segmentCol of segmentColumns) {
+              const segmentValue = row[segmentCol]
+              if (segmentValue && typeof segmentValue === 'string') {
+                const trimmedSegment = segmentValue.trim()
+                if (['Entry', 'Mid', 'Luxury', 'Premium', 'Basic', 'Standard', 'High-end', 'Executive', 'Economy', 'Compact'].includes(trimmedSegment)) {
+                  segment = trimmedSegment
                   break
                 }
               }
             }
-            
-            if (!segment) {
-              segment = 'Unspecified'
+
+            // If no segment found in dedicated columns, check all columns for segment-like values
+            if (segment === 'Unspecified') {
+              for (const [key, value] of Object.entries(row)) {
+                if (value && typeof value === 'string') {
+                  const trimmedValue = value.trim()
+                  if (['Entry', 'Mid', 'Luxury', 'Premium', 'Basic', 'Standard', 'High-end', 'Executive', 'Economy', 'Compact'].includes(trimmedValue)) {
+                    segment = trimmedValue
+                    break
+                  }
+                }
+              }
             }
 
-            const segmentData = segmentCategoryData.get(segment)!
-            if (!segmentData.has(category)) {
-              segmentData.set(category, { features: [], oemCounts: new Map() })
+            console.log(`Row processed - Segment: ${segment}, Category: ${category}, Feature: ${feature}`)
+
+            if (!segmentData.has(segment)) {
+              segmentData.set(segment, new Map())
             }
             
-            const categoryData = segmentData.get(category)!
+            const segmentCategories = segmentData.get(segment)!
+            if (!segmentCategories.has(category)) {
+              segmentCategories.set(category, { features: [], oemCounts: new Map() })
+            }
+            
+            const categoryData = segmentCategories.get(category)!
             if (!categoryData.features.includes(feature)) {
               categoryData.features.push(feature)
             }
@@ -149,15 +149,18 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
     })
 
     const categoriesArray = Array.from(uniqueCategories).sort()
-    const segmentsArray = Array.from(uniqueSegments).sort()
+    const segmentsArray = Array.from(segmentData.keys()).sort()
+    
+    console.log('Final segments found:', segmentsArray)
+    console.log('Segment data structure:', segmentData)
     
     // Build chart data
     const chartData = segmentsArray.map(segment => {
       const segmentItem: any = { segment }
       
       categoriesArray.forEach(category => {
-        const segmentData = segmentCategoryData.get(segment)
-        const categoryData = segmentData?.get(category)
+        const segmentCategories = segmentData.get(segment)
+        const categoryData = segmentCategories?.get(category)
         
         if (categoryData) {
           // Sum up feature counts across all selected OEMs for this category
@@ -172,11 +175,11 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
 
     // Build table data
     const tableData = segmentsArray.map(segment => {
-      const segmentData = segmentCategoryData.get(segment)
+      const segmentCategories = segmentData.get(segment)
       const segmentFeatures: any = { segment }
       
       categoriesArray.forEach(category => {
-        const categoryData = segmentData?.get(category)
+        const categoryData = segmentCategories?.get(category)
         segmentFeatures[category] = categoryData ? categoryData.features : []
       })
       
