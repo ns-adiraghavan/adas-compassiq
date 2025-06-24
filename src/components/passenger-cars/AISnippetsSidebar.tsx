@@ -6,15 +6,22 @@ interface AISnippetsSidebarProps {
   selectedOEM?: string
   selectedCountry?: string
   oemClickedFromChart?: boolean
-  businessModelAnalysisContext?: any // New prop for business model analysis context
+  businessModelAnalysisContext?: any
+  selectedOEMs?: string[]
+  analysisType?: string
 }
 
 const AISnippetsSidebar = ({ 
   selectedOEM = "", 
   selectedCountry = "", 
   oemClickedFromChart = false,
-  businessModelAnalysisContext
+  businessModelAnalysisContext,
+  selectedOEMs = [],
+  analysisType = "general"
 }: AISnippetsSidebarProps) => {
+  // Convert selectedOEM string to array format for NewsSnippets
+  const oemsArray = selectedOEMs.length > 0 ? selectedOEMs : (selectedOEM ? [selectedOEM] : [])
+
   return (
     <div className="h-full bg-gradient-to-b from-gray-800/30 to-gray-900/50 p-6 space-y-6 overflow-y-auto">
       <div className="space-y-6">
@@ -24,7 +31,11 @@ const AISnippetsSidebar = ({
           oemClickedFromChart={oemClickedFromChart}
           businessModelAnalysisContext={businessModelAnalysisContext}
         />
-        <NewsSnippets />
+        <NewsSnippets 
+          selectedOEMs={oemsArray}
+          selectedCountry={selectedCountry}
+          analysisType={analysisType}
+        />
       </div>
     </div>
   )

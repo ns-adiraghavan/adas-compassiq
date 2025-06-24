@@ -1,34 +1,27 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Newspaper } from "lucide-react"
+import { Newspaper, Loader2 } from "lucide-react"
+import { useNewsSnippetsAI } from "@/hooks/useNewsSnippetsAI"
 
-const NewsSnippets = () => {
-  const mockNews = [
-    {
-      id: 1,
-      title: "Tesla's FSD Beta Expansion",
-      summary: "Tesla expands Full Self-Driving beta to more markets",
-      timestamp: "2 hours ago"
-    },
-    {
-      id: 2,
-      title: "BMW's Electric Strategy",
-      summary: "BMW announces new electric vehicle platform",
-      timestamp: "4 hours ago"
-    },
-    {
-      id: 3,
-      title: "Waymo Partnership",
-      summary: "Waymo partners with automotive suppliers",
-      timestamp: "6 hours ago"
-    },
-    {
-      id: 4,
-      title: "Ford's Software Updates",
-      summary: "Ford releases major over-the-air updates",
-      timestamp: "8 hours ago"
-    }
-  ]
+interface NewsSnippetsProps {
+  selectedOEMs?: string[]
+  selectedCountry?: string
+  analysisType?: string
+}
+
+const NewsSnippets = ({ 
+  selectedOEMs = [], 
+  selectedCountry = "", 
+  analysisType = "general" 
+}: NewsSnippetsProps) => {
+  const { data: newsData, isLoading, error } = useNewsSnippetsAI({
+    selectedOEMs,
+    selectedCountry,
+    analysisType,
+    enabled: Boolean(selectedCountry && analysisType)
+  })
+
+  const newsSnippets = newsData?.newsSnippets || []
 
   return (
     <Card className="bg-gray-900/50 border-gray-700">
@@ -36,18 +29,34 @@ const NewsSnippets = () => {
         <CardTitle className="text-white text-lg flex items-center">
           <Newspaper className="h-5 w-5 mr-2" />
           News Snippets - From AI
+          {isLoading && <Loader2 className="h-4 w-4 ml-2 animate-spin" />}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <ul className="space-y-2 list-disc list-inside pl-2">
-          {mockNews.map((news) => (
-            <li key={news.id} className="text-white text-sm break-words">
-              <span className="font-medium">{news.title}:</span>{" "}
-              <span className="text-gray-400">{news.summary}</span>{" "}
-              <span className="text-gray-500 text-xs">({news.timestamp})</span>
-            </li>
-          ))}
-        </ul>
+        {isLoading ? (
+          <div className="space-y-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="animate-pulse">
+                <div className="h-4 bg-gray-700 rounded w-3/4 mb-1"></div>
+                <div className="h-3 bg-gray-800 rounded w-1/2"></div>
+              </div>
+            ))}
+          </div>
+        ) : error ? (
+          <p className="text-gray-400 text-sm">Unable to load news updates</p>
+        ) : (
+          <ul className="space-y-2 list-disc list-inside pl-2">
+            {newsSnippets.map((news) => (
+              <li key={news.id} className="text-white text-sm break-words">
+                <span className="font-medium">{news.title}:</span>{" "}
+                <span className="text-gray-400">{news.summary}</span>{" "}
+                <div className="text-gray-500 text-xs mt-1">
+                  <span className="italic">{news.source}</span> • <span>{news.timestamp}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </CardContent>
     </Card>
   )

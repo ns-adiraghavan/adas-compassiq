@@ -135,6 +135,8 @@ const InsightsContent = () => {
         <AISnippetsSidebar
           selectedOEM={selectedOEMs.join(", ")}
           selectedCountry={selectedCountry}
+          selectedOEMs={selectedOEMs}
+          analysisType="insights"
         />
       </div>
     </div>

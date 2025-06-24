@@ -218,6 +218,8 @@ const CategoryAnalysisContent = () => {
             selectedCountry={selectedCountry}
             oemClickedFromChart={false}
             businessModelAnalysisContext={categoryAnalysisContext}
+            selectedOEMs={selectedOEMs}
+            analysisType="category-analysis"
           />
         </div>
       </div>

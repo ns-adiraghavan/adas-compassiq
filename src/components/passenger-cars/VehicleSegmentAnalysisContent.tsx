@@ -136,6 +136,8 @@ const VehicleSegmentAnalysisContent = () => {
             selectedOEM={selectedOEMs.length === 1 ? selectedOEMs[0] : ""}
             selectedCountry={selectedCountry}
             oemClickedFromChart={false}
+            selectedOEMs={selectedOEMs}
+            analysisType="vehicle-segment"
           />
         </div>
       </div>
