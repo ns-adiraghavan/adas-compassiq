@@ -27,34 +27,32 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
 
   return (
     <div className={`${theme.backgroundGradient} ${theme.textPrimary} transition-all duration-500`}>
-      <ThemeSelector />
+      {/* Logo positioned above Themes button in top right */}
+      <div className="fixed top-4 right-4 z-50 flex flex-col items-end space-y-2">
+        <WaypointLogo />
+        <ThemeSelector />
+      </div>
       
-      {/* Header - Fixed height */}
+      {/* Header - Realigned to left top */}
       <div className="container mx-auto px-8 py-4">
-        <div className="flex items-center justify-between mb-3">
-          {/* Logo on the left */}
-          <div>
-            <WaypointLogo />
-          </div>
+        <div className="flex flex-col items-start">
+          {/* Back to Home button at top left */}
+          <Link 
+            to="/" 
+            className={`inline-flex items-center ${theme.textMuted} hover:${theme.textPrimary.replace('text-', 'text-')} transition-colors mb-3`}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Home
+          </Link>
           
-          {/* Back to Home button aligned with navigation tabs */}
-          <div className="flex-1 flex justify-start" style={{ paddingLeft: '32px' }}>
-            <Link 
-              to="/" 
-              className={`inline-flex items-center ${theme.textMuted} hover:${theme.textPrimary.replace('text-', 'text-')} transition-colors`}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Home
-            </Link>
-          </div>
+          {/* Title and subtitle aligned to left */}
+          <h1 className={`text-3xl font-thin mb-1 ${theme.textPrimary} tracking-tight`}>
+            Passenger Cars
+          </h1>
+          <p className={`text-base ${theme.textSecondary} font-light mb-4`}>
+            Premium Automotive Intelligence
+          </p>
         </div>
-        
-        <h1 className={`text-3xl font-thin mb-1 ${theme.textPrimary} tracking-tight`}>
-          Passenger Cars
-        </h1>
-        <p className={`text-base ${theme.textSecondary} font-light mb-4`}>
-          Premium Automotive Intelligence
-        </p>
       </div>
 
       {/* Section Navigation - Fixed height */}
