@@ -17,9 +17,9 @@ const VennDiagramStats = ({ data, entities }: VennDiagramStatsProps) => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Overall Statistics */}
-      <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-lg p-4 ${theme.shadowColor} shadow-sm`}>
+    <div className="flex gap-6">
+      {/* Overview Box */}
+      <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-lg p-4 ${theme.shadowColor} shadow-sm flex-1`}>
         <h3 className={`text-lg font-medium ${theme.textPrimary} mb-4`}>Overview</h3>
         <div className="space-y-3">
           <div className="flex justify-between">
@@ -41,8 +41,8 @@ const VennDiagramStats = ({ data, entities }: VennDiagramStatsProps) => {
         </div>
       </div>
 
-      {/* Top Features */}
-      <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-lg p-4 ${theme.shadowColor} shadow-sm`}>
+      {/* Most Common Features Box */}
+      <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-lg p-4 ${theme.shadowColor} shadow-sm flex-1`}>
         <h3 className={`text-lg font-medium ${theme.textPrimary} mb-4`}>Most Common Features</h3>
         <div className="space-y-2">
           {data.mostCommonFeatures.slice(0, 5).map((feature, index) => (

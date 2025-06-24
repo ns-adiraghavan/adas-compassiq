@@ -47,25 +47,30 @@ const VennDiagram = ({ data }: VennDiagramProps) => {
 
   return (
     <div className="h-full flex flex-col space-y-6">
-      {/* Main diagram area */}
-      <div className="flex">
-        <div className="flex-1 relative">
-          <VennDiagramSVG
-            data={data}
-            entities={displayEntities}
-            colors={colors}
-            onIntersectionSelect={handleIntersectionSelect}
-          />
+      {/* Top section with legend and stats */}
+      <div className="flex gap-6">
+        {/* Legend */}
+        <div className="flex-shrink-0">
           <VennDiagramLegend
             entities={displayEntities}
             colors={colors}
           />
         </div>
         
-        {/* Stats sidebar */}
-        <div className="w-80 pl-6">
+        {/* Stats boxes */}
+        <div className="flex-1">
           <VennDiagramStats data={data} entities={displayEntities} />
         </div>
+      </div>
+
+      {/* Main diagram area */}
+      <div className="flex-1 relative">
+        <VennDiagramSVG
+          data={data}
+          entities={displayEntities}
+          colors={colors}
+          onIntersectionSelect={handleIntersectionSelect}
+        />
       </div>
 
       {/* Feature Distribution Table */}
