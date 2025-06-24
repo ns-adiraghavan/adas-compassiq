@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from "react"
 import { useFirstAvailableOEM, useWaypointData } from "@/hooks/useWaypointData"
 import CountryButtons from "@/components/CountryButtons"
 import PassengerCarsLayout from "@/components/passenger-cars/PassengerCarsLayout"
+import AISnippetsSidebar from "@/components/passenger-cars/AISnippetsSidebar"
 import { useTheme } from "@/contexts/ThemeContext"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -194,180 +194,194 @@ const CategoryAnalysisContent = () => {
   }
 
   return (
-    <div className="w-full px-6 py-4 space-y-6">
-      {/* Countries Section */}
-      <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm h-[120px]`}>
-        <CountryButtons
-          selectedCountry={selectedCountry}
-          onCountryChange={handleCountryChange}
-        />
-      </div>
-
-      {/* OEM Selector */}
-      <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className={`text-lg font-medium ${theme.textPrimary}`}>Select OEMs</h3>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={selectAllOEMs}
-              className={`${theme.textSecondary} border-gray-600 hover:bg-gray-800`}
-            >
-              Select All
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearAllOEMs}
-              className={`${theme.textSecondary} border-gray-600 hover:bg-gray-800`}
-            >
-              Clear All
-            </Button>
-          </div>
+    <div className="w-full flex">
+      {/* Main Content Area - 60% */}
+      <div className="w-3/5 px-6 py-4 space-y-6">
+        {/* Countries Section */}
+        <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm h-[120px]`}>
+          <CountryButtons
+            selectedCountry={selectedCountry}
+            onCountryChange={handleCountryChange}
+          />
         </div>
-        
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-32 overflow-y-auto">
-          {availableOEMs.map((oem) => (
-            <div key={oem} className="flex items-center space-x-2">
-              <Checkbox
-                id={oem}
-                checked={selectedOEMs.includes(oem)}
-                onCheckedChange={() => handleOEMToggle(oem)}
-              />
-              <label
-                htmlFor={oem}
-                className={`text-sm ${theme.textSecondary} cursor-pointer truncate`}
-                title={oem}
+
+        {/* OEM Selector */}
+        <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className={`text-lg font-medium ${theme.textPrimary}`}>Select OEMs</h3>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={selectAllOEMs}
+                className={`${theme.textSecondary} border-gray-600 hover:bg-gray-800`}
               >
-                {oem}
-              </label>
+                Select All
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearAllOEMs}
+                className={`${theme.textSecondary} border-gray-600 hover:bg-gray-800`}
+              >
+                Clear All
+              </Button>
             </div>
-          ))}
-        </div>
-        
-        {selectedOEMs.length > 0 && (
-          <div className={`mt-3 text-sm ${theme.textMuted}`}>
-            Selected: {selectedOEMs.length} OEM{selectedOEMs.length !== 1 ? 's' : ''}
           </div>
-        )}
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-32 overflow-y-auto">
+            {availableOEMs.map((oem) => (
+              <div key={oem} className="flex items-center space-x-2">
+                <Checkbox
+                  id={oem}
+                  checked={selectedOEMs.includes(oem)}
+                  onCheckedChange={() => handleOEMToggle(oem)}
+                />
+                <label
+                  htmlFor={oem}
+                  className={`text-sm ${theme.textSecondary} cursor-pointer truncate`}
+                  title={oem}
+                >
+                  {oem}
+                </label>
+              </div>
+            ))}
+          </div>
+          
+          {selectedOEMs.length > 0 && (
+            <div className={`mt-3 text-sm ${theme.textMuted}`}>
+              Selected: {selectedOEMs.length} OEM{selectedOEMs.length !== 1 ? 's' : ''}
+            </div>
+          )}
+        </div>
+
+        {/* Category Analysis Table */}
+        <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
+          <div className="mb-4">
+            <h3 className={`text-lg font-medium ${theme.textPrimary} mb-2`}>
+              Category Analysis - Feature Availability
+            </h3>
+            <p className={`${theme.textMuted} text-sm`}>
+              Showing available feature counts by category for selected OEMs in {selectedCountry}. Click on a category to view detailed features.
+            </p>
+          </div>
+
+          {tableData.length > 0 ? (
+            <div className="space-y-4">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className={`${theme.cardBorder} border-b`}>
+                      <TableHead className={`${theme.textSecondary} font-medium`}>Category</TableHead>
+                      {selectedOEMs.map((oem) => (
+                        <TableHead key={oem} className={`${theme.textSecondary} font-medium text-center`}>
+                          {oem.length > 12 ? oem.substring(0, 12) + '...' : oem}
+                        </TableHead>
+                      ))}
+                      <TableHead className={`${theme.textSecondary} font-medium text-center`}>Total</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {tableData.map((row) => (
+                      <TableRow 
+                        key={row.category} 
+                        className={`${theme.cardBorder} border-b hover:bg-gray-800/30 cursor-pointer transition-colors ${
+                          expandedCategory === row.category ? 'bg-gray-800/20' : ''
+                        }`}
+                        onClick={() => handleCategoryClick(row.category)}
+                      >
+                        <TableCell className={`${theme.textPrimary} font-medium`}>
+                          <div className="flex items-center gap-2">
+                            {expandedCategory === row.category ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                            {row.category}
+                          </div>
+                        </TableCell>
+                        {selectedOEMs.map((oem) => (
+                          <TableCell key={oem} className={`${theme.textSecondary} text-center`}>
+                            {row[oem] || 0}
+                          </TableCell>
+                        ))}
+                        <TableCell className={`${theme.textPrimary} text-center font-medium`}>
+                          {row.total}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Expanded Features Matrix Table */}
+              {expandedCategory && (
+                <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-lg p-4 mt-4`}>
+                  <h4 className={`text-md font-medium ${theme.textPrimary} mb-3`}>
+                    Available Features in {expandedCategory}
+                  </h4>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className={`${theme.cardBorder} border-b`}>
+                          <TableHead className={`${theme.textSecondary} font-medium`}>Feature</TableHead>
+                          {selectedOEMs.map((oem) => (
+                            <TableHead key={oem} className={`${theme.textSecondary} font-medium text-center`}>
+                              {oem.length > 12 ? oem.substring(0, 12) + '...' : oem}
+                            </TableHead>
+                          ))}
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {(() => {
+                          const { features, matrix } = getFeaturesMatrix(expandedCategory)
+                          return features.map((feature) => (
+                            <TableRow key={feature} className={`${theme.cardBorder} border-b hover:bg-gray-800/20`}>
+                              <TableCell className={`${theme.textPrimary} font-medium`}>
+                                {feature}
+                              </TableCell>
+                              {selectedOEMs.map((oem) => (
+                                <TableCell key={oem} className="text-center">
+                                  {matrix[feature]?.[oem] ? (
+                                    matrix[feature][oem].lighthouse ? (
+                                      <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
+                                    ) : (
+                                      <Circle className="h-5 w-5 text-green-500 fill-green-500 mx-auto" />
+                                    )
+                                  ) : (
+                                    <div className="h-5 w-5 mx-auto" />
+                                  )}
+                                </TableCell>
+                              ))}
+                            </TableRow>
+                          ))
+                        })()}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className={`text-center py-8 ${theme.textMuted}`}>
+              {selectedOEMs.length === 0 
+                ? "Please select at least one OEM to view the analysis"
+                : "No data available for the selected filters"
+              }
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Category Analysis Table */}
-      <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
-        <div className="mb-4">
-          <h3 className={`text-lg font-medium ${theme.textPrimary} mb-2`}>
-            Category Analysis - Feature Availability
-          </h3>
-          <p className={`${theme.textMuted} text-sm`}>
-            Showing available feature counts by category for selected OEMs in {selectedCountry}. Click on a category to view detailed features.
-          </p>
+      {/* AI Snippets Sidebar - 40% */}
+      <div className="w-2/5">
+        <div className="h-[880px]">
+          <AISnippetsSidebar 
+            selectedOEM={selectedOEMs.length === 1 ? selectedOEMs[0] : ""}
+            selectedCountry={selectedCountry}
+            oemClickedFromChart={false}
+          />
         </div>
-
-        {tableData.length > 0 ? (
-          <div className="space-y-4">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className={`${theme.cardBorder} border-b`}>
-                    <TableHead className={`${theme.textSecondary} font-medium`}>Category</TableHead>
-                    {selectedOEMs.map((oem) => (
-                      <TableHead key={oem} className={`${theme.textSecondary} font-medium text-center`}>
-                        {oem.length > 12 ? oem.substring(0, 12) + '...' : oem}
-                      </TableHead>
-                    ))}
-                    <TableHead className={`${theme.textSecondary} font-medium text-center`}>Total</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {tableData.map((row) => (
-                    <TableRow 
-                      key={row.category} 
-                      className={`${theme.cardBorder} border-b hover:bg-gray-800/30 cursor-pointer transition-colors ${
-                        expandedCategory === row.category ? 'bg-gray-800/20' : ''
-                      }`}
-                      onClick={() => handleCategoryClick(row.category)}
-                    >
-                      <TableCell className={`${theme.textPrimary} font-medium`}>
-                        <div className="flex items-center gap-2">
-                          {expandedCategory === row.category ? (
-                            <ChevronDown className="h-4 w-4" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4" />
-                          )}
-                          {row.category}
-                        </div>
-                      </TableCell>
-                      {selectedOEMs.map((oem) => (
-                        <TableCell key={oem} className={`${theme.textSecondary} text-center`}>
-                          {row[oem] || 0}
-                        </TableCell>
-                      ))}
-                      <TableCell className={`${theme.textPrimary} text-center font-medium`}>
-                        {row.total}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-
-            {/* Expanded Features Matrix Table */}
-            {expandedCategory && (
-              <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-lg p-4 mt-4`}>
-                <h4 className={`text-md font-medium ${theme.textPrimary} mb-3`}>
-                  Available Features in {expandedCategory}
-                </h4>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className={`${theme.cardBorder} border-b`}>
-                        <TableHead className={`${theme.textSecondary} font-medium`}>Feature</TableHead>
-                        {selectedOEMs.map((oem) => (
-                          <TableHead key={oem} className={`${theme.textSecondary} font-medium text-center`}>
-                            {oem.length > 12 ? oem.substring(0, 12) + '...' : oem}
-                          </TableHead>
-                        ))}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {(() => {
-                        const { features, matrix } = getFeaturesMatrix(expandedCategory)
-                        return features.map((feature) => (
-                          <TableRow key={feature} className={`${theme.cardBorder} border-b hover:bg-gray-800/20`}>
-                            <TableCell className={`${theme.textPrimary} font-medium`}>
-                              {feature}
-                            </TableCell>
-                            {selectedOEMs.map((oem) => (
-                              <TableCell key={oem} className="text-center">
-                                {matrix[feature]?.[oem] ? (
-                                  matrix[feature][oem].lighthouse ? (
-                                    <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
-                                  ) : (
-                                    <Circle className="h-5 w-5 text-green-500 fill-green-500 mx-auto" />
-                                  )
-                                ) : (
-                                  <div className="h-5 w-5 mx-auto" />
-                                )}
-                              </TableCell>
-                            ))}
-                          </TableRow>
-                        ))
-                      })()}
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className={`text-center py-8 ${theme.textMuted}`}>
-            {selectedOEMs.length === 0 
-              ? "Please select at least one OEM to view the analysis"
-              : "No data available for the selected filters"
-            }
-          </div>
-        )}
       </div>
     </div>
   )
