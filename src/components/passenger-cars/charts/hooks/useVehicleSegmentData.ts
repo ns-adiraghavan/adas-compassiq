@@ -1,3 +1,4 @@
+
 import { useMemo } from "react"
 import { useWaypointData } from "@/hooks/useWaypointData"
 import type { ProcessedData, GroupingMode } from "../types/VehicleSegmentTypes"
@@ -26,7 +27,7 @@ export function useVehicleSegmentData(
 
     const segmentFeatureMap = new Map<string, Map<string, number>>()
     const oemFeatureMap = new Map<string, Map<string, number>>()
-    const detailedFeatureData = new Map<string, Array<{ oem: string; category: string; feature: string }>>()
+    const detailedFeatureData = new Map<string, Array<{ oem: string; category: string; feature: string; segment: string; isLighthouse: boolean }>>()
     const availableSegments = new Set<string>()
     
     let detectedSegmentColumns: string[] = []
@@ -80,6 +81,7 @@ export function useVehicleSegmentData(
             const oem = row.OEM.toString().trim()
             const feature = row.Feature.toString().trim()
             const category = row.Category?.toString().trim() || 'General'
+            const isLighthouse = row['Lighthouse Feature']?.toString().trim().toLowerCase() === 'yes'
             
             // Check segment columns
             if (detectedSegmentColumns.length > 0) {
@@ -117,13 +119,13 @@ export function useVehicleSegmentData(
                   if (!detailedFeatureData.has(oem)) {
                     detailedFeatureData.set(oem, [])
                   }
-                  detailedFeatureData.get(oem)!.push({ oem, category, feature })
+                  detailedFeatureData.get(oem)!.push({ oem, category, feature, segment: segmentName, isLighthouse })
                   
                   // Store detailed feature data for segments
                   if (!detailedFeatureData.has(segmentName)) {
                     detailedFeatureData.set(segmentName, [])
                   }
-                  detailedFeatureData.get(segmentName)!.push({ oem, category, feature })
+                  detailedFeatureData.get(segmentName)!.push({ oem, category, feature, segment: segmentName, isLighthouse })
                 }
               })
             } else {
@@ -147,12 +149,12 @@ export function useVehicleSegmentData(
               if (!detailedFeatureData.has(oem)) {
                 detailedFeatureData.set(oem, [])
               }
-              detailedFeatureData.get(oem)!.push({ oem, category, feature })
+              detailedFeatureData.get(oem)!.push({ oem, category, feature, segment: category, isLighthouse })
               
               if (!detailedFeatureData.has(category)) {
                 detailedFeatureData.set(category, [])
               }
-              detailedFeatureData.get(category)!.push({ oem, category, feature })
+              detailedFeatureData.get(category)!.push({ oem, category, feature, segment: category, isLighthouse })
             }
           }
         })

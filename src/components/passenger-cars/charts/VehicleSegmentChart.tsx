@@ -99,6 +99,7 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
           selectedItem={selectedBarItem.name}
           itemType={selectedBarItem.type}
           detailedData={getDetailedData()}
+          groupingMode={groupingMode}
           onClose={handleCloseDetail}
         />
       )}
