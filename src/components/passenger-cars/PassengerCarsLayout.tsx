@@ -1,3 +1,4 @@
+
 import { ArrowLeft } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext"
@@ -15,7 +16,7 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
     { id: 'landscape', name: 'Landscape', path: '/passenger-cars/landscape' },
     { id: 'analytics', name: 'Category Analysis', path: '/passenger-cars/analytics' },
     { id: 'intelligence', name: 'Vehicle Segment Analysis', path: '/passenger-cars/intelligence' },
-    { id: 'modeling', name: 'Modeling', path: '/passenger-cars/modeling' },
+    { id: 'modeling', name: 'Business Model Analysis', path: '/passenger-cars/modeling' },
     { id: 'insights', name: 'Insights', path: '/passenger-cars/insights' },
   ]
 
