@@ -1,22 +1,42 @@
 
 export function buildSearchQuery(selectedOEMs: string[], selectedCountry: string, analysisType: string): string {
-  const baseOEMs = selectedOEMs.length > 0 ? selectedOEMs.slice(0, 3).join(' OR ') : 'automotive';
+  // Start with simpler, more effective queries
+  const primaryOEM = selectedOEMs.length > 0 ? selectedOEMs[0] : '';
+  const countryFilter = selectedCountry ? ` ${selectedCountry}` : '';
+  
+  // Base automotive terms for better matching
+  const automotiveTerms = 'automotive OR car OR vehicle OR auto';
   
   switch (analysisType) {
     case 'landscape':
-      return `(${baseOEMs}) AND (market share OR competitive landscape OR market position) AND ${selectedCountry} automotive`;
+      if (primaryOEM) {
+        return `${primaryOEM}${countryFilter} (${automotiveTerms}) (market OR competition OR sales)`;
+      }
+      return `${automotiveTerms}${countryFilter} market analysis`;
     
     case 'category-analysis':
-      return `(${baseOEMs}) AND (features OR technology categories OR automotive innovation) AND ${selectedCountry}`;
+      if (primaryOEM) {
+        return `${primaryOEM}${countryFilter} (${automotiveTerms}) (technology OR features OR innovation)`;
+      }
+      return `${automotiveTerms}${countryFilter} technology features`;
     
     case 'business-model':
-      return `(${baseOEMs}) AND (business model OR revenue model OR subscription OR partnership) AND ${selectedCountry} automotive`;
+      if (primaryOEM) {
+        return `${primaryOEM}${countryFilter} (${automotiveTerms}) (business OR revenue OR strategy)`;
+      }
+      return `${automotiveTerms}${countryFilter} business model`;
     
     case 'vehicle-segment':
-      return `(${baseOEMs}) AND (vehicle segments OR SUV OR sedan OR electric vehicles) AND ${selectedCountry} automotive`;
+      if (primaryOEM) {
+        return `${primaryOEM}${countryFilter} (${automotiveTerms}) (SUV OR sedan OR electric OR EV)`;
+      }
+      return `${automotiveTerms}${countryFilter} vehicle segments`;
     
     case 'general':
     default:
-      return `(${baseOEMs}) AND automotive AND ${selectedCountry} AND (market OR industry OR news)`;
+      if (primaryOEM) {
+        return `${primaryOEM}${countryFilter} ${automotiveTerms}`;
+      }
+      return `${automotiveTerms}${countryFilter} news`;
   }
 }

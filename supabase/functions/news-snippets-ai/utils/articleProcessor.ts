@@ -1,28 +1,26 @@
 
 import { NewsSnippet } from './fallbackData.ts';
 
-// List of reputable news domains for validation
+// Expanded list of reputable news domains - much more inclusive
 const REPUTABLE_DOMAINS = [
-  'reuters.com',
-  'bloomberg.com',
-  'autonews.com',
-  'automotive-news.com',
-  'cnn.com',
-  'bbc.com',
-  'theguardian.com',
-  'wsj.com',
-  'financialtimes.com',
-  'techcrunch.com',
-  'forbes.com',
-  'motortrend.com',
-  'caranddriver.com',
-  'autoblog.com',
-  'electrek.co',
-  'insideevs.com',
-  'abc.net.au',
-  'news.com.au',
-  'smh.com.au',
-  'theage.com.au'
+  // Automotive specific
+  'reuters.com', 'bloomberg.com', 'autonews.com', 'automotive-news.com',
+  'motortrend.com', 'caranddriver.com', 'autoblog.com', 'electrek.co', 'insideevs.com',
+  
+  // Major news outlets
+  'cnn.com', 'bbc.com', 'theguardian.com', 'wsj.com', 'financialtimes.com',
+  'techcrunch.com', 'forbes.com', 'businessinsider.com', 'cnbc.com', 'axios.com',
+  
+  // Regional news
+  'abc.net.au', 'news.com.au', 'smh.com.au', 'theage.com.au',
+  'nytimes.com', 'washingtonpost.com', 'usatoday.com',
+  
+  // Industry publications
+  'automotive-fleet.com', 'fleet-magazine.com', 'wardsauto.com',
+  'just-auto.com', 'automotive-logistics.com',
+  
+  // Technology focused
+  'theverge.com', 'wired.com', 'arstechnica.com', 'engadget.com'
 ];
 
 function isValidNewsURL(url: string): boolean {
@@ -34,17 +32,23 @@ function isValidNewsURL(url: string): boolean {
       return false;
     }
     
-    // Check if domain is from a reputable source
     const domain = urlObj.hostname.toLowerCase();
+    
+    // Check if domain is from expanded reputable source list
     const isReputableDomain = REPUTABLE_DOMAINS.some(reputableDomain => 
       domain === reputableDomain || domain.endsWith('.' + reputableDomain)
     );
     
-    // Allow other domains but exclude obvious spam/invalid ones
+    // More lenient validation - allow other domains but exclude obvious spam
     const hasValidPath = urlObj.pathname && urlObj.pathname !== '/';
-    const notSpamDomain = !domain.includes('spam') && !domain.includes('fake');
+    const notSpamDomain = !domain.includes('spam') && !domain.includes('fake') && 
+                         !domain.includes('malware') && !domain.includes('virus');
     
-    return isReputableDomain || (hasValidPath && notSpamDomain);
+    // Accept if reputable OR (has valid path AND not spam AND reasonable domain)
+    const reasonableDomain = domain.length > 4 && domain.includes('.') && 
+                           !domain.startsWith('localhost') && !domain.includes('127.0.0.1');
+    
+    return isReputableDomain || (hasValidPath && notSpamDomain && reasonableDomain);
   } catch (error) {
     console.log('Invalid URL detected:', url);
     return false;
@@ -54,19 +58,21 @@ function isValidNewsURL(url: string): boolean {
 export function processNewsArticles(articles: any[], selectedOEMs: string[]): NewsSnippet[] {
   console.log('Processing articles, initial count:', articles.length);
   
-  return articles
+  const processedArticles = articles
     .filter((article: any) => {
       // Basic article quality checks
       if (!article.url || !article.title || !article.description) {
+        console.log('Filtered out: Missing basic fields');
         return false;
       }
       
       // Check for removed content
       if (article.title.includes('[removed]') || article.description === '[Removed]') {
+        console.log('Filtered out: Removed content');
         return false;
       }
       
-      // Validate URL
+      // Validate URL - more lenient now
       if (!isValidNewsURL(article.url)) {
         console.log('Filtered out article with invalid URL:', article.url);
         return false;
@@ -76,40 +82,56 @@ export function processNewsArticles(articles: any[], selectedOEMs: string[]): Ne
       const description = article.description?.toLowerCase() || '';
       const content = `${title} ${description}`;
       
-      // More lenient automotive relevance check
+      // Much more lenient automotive relevance check
       const automotiveKeywords = [
-        'automotive', 'car', 'vehicle', 'auto', 'oem', 'manufacturer', 
-        'electric vehicle', 'ev', 'hybrid', 'battery', 'charging',
-        'tesla', 'ford', 'gm', 'toyota', 'honda', 'bmw', 'mercedes',
-        'volkswagen', 'audi', 'porsche', 'ferrari', 'lamborghini',
-        'suv', 'sedan', 'truck', 'motorcycle', 'scooter', 'bike',
-        'autonomous', 'self-driving', 'mobility', 'transport',
-        'dealership', 'sales', 'recall', 'safety', 'crash test'
+        // Core automotive
+        'automotive', 'car', 'vehicle', 'auto', 'oem', 'manufacturer',
+        // Electric/Future
+        'electric vehicle', 'ev', 'hybrid', 'battery', 'charging', 'autonomous', 'self-driving',
+        // Vehicle types
+        'suv', 'sedan', 'truck', 'motorcycle', 'scooter',
+        // Brands - major OEMs
+        'tesla', 'ford', 'gm', 'toyota', 'honda', 'bmw', 'mercedes', 'volkswagen', 
+        'audi', 'porsche', 'hyundai', 'kia', 'nissan', 'mazda', 'subaru', 'volvo',
+        'jaguar', 'ferrari', 'lamborghini', 'byd', 'nio', 'xpeng', 'rivian', 'lucid',
+        // Industry terms
+        'mobility', 'transport', 'dealership', 'sales', 'recall', 'safety', 'crash test',
+        'market share', 'revenue', 'profit', 'earnings', 'production', 'manufacturing'
       ];
       
       const hasAutomotiveContent = automotiveKeywords.some(keyword => 
         content.includes(keyword)
       );
       
-      // More lenient OEM relevance check
-      let hasOEMRelevance = true;
+      // Very lenient OEM relevance check
+      let hasOEMRelevance = true; // Default to true
       if (selectedOEMs.length > 0) {
-        hasOEMRelevance = selectedOEMs.some(oem => 
-          content.includes(oem.toLowerCase()) ||
-          // Also check for partial matches and common abbreviations
-          content.includes(oem.toLowerCase().substring(0, 3))
-        );
+        hasOEMRelevance = selectedOEMs.some(oem => {
+          const oemLower = oem.toLowerCase();
+          return content.includes(oemLower) ||
+                 // Check for partial matches for compound names
+                 content.includes(oemLower.split(' ')[0]) ||
+                 // Common abbreviations
+                 (oemLower.includes('general motors') && content.includes('gm')) ||
+                 (oemLower.includes('volkswagen') && content.includes('vw')) ||
+                 // Allow if automotive content is strong even without exact OEM match
+                 (hasAutomotiveContent && (
+                   content.includes('automotive') || 
+                   content.includes('vehicle') || 
+                   content.includes('car manufacturer')
+                 ));
+        });
       }
       
-      const isRelevant = hasAutomotiveContent && hasOEMRelevance;
+      const isRelevant = hasAutomotiveContent || hasOEMRelevance;
       
       if (!isRelevant) {
-        console.log('Filtered out article:', article.title, 'Automotive:', hasAutomotiveContent, 'OEM:', hasOEMRelevance);
+        console.log('Filtered out article (not relevant):', article.title.substring(0, 50));
       }
       
       return isRelevant;
     })
-    .slice(0, 3)
+    .slice(0, 6) // Get more articles initially
     .map((article: any, index: number) => {
       // Calculate time ago
       const publishedDate = new Date(article.publishedAt);
@@ -127,5 +149,9 @@ export function processNewsArticles(articles: any[], selectedOEMs: string[]): Ne
         timestamp: timeAgo,
         url: article.url
       };
-    });
+    })
+    .slice(0, 3); // Final limit to 3 best articles
+
+  console.log('Final processed articles count:', processedArticles.length);
+  return processedArticles;
 }

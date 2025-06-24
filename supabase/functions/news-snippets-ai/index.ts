@@ -13,6 +13,69 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+async function searchNews(query: string, pageSize: number = 20): Promise<any> {
+  console.log(`Searching NewsAPI with query: "${query}"`);
+  
+  const response = await fetch(
+    `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&language=en&sortBy=publishedAt&pageSize=${pageSize}&apiKey=${newsApiKey}`
+  );
+
+  if (!response.ok) {
+    throw new Error(`NewsAPI error: ${response.status} - ${response.statusText}`);
+  }
+
+  return await response.json();
+}
+
+async function getNewsWithFallback(selectedOEMs: string[], selectedCountry: string, analysisType: string): Promise<any[]> {
+  // Try multiple search strategies
+  const searchStrategies = [
+    // Strategy 1: Primary query
+    buildSearchQuery(selectedOEMs, selectedCountry, analysisType),
+    
+    // Strategy 2: Broader automotive search if primary fails
+    selectedOEMs.length > 0 
+      ? `${selectedOEMs[0]} automotive ${selectedCountry}`.trim()
+      : `automotive ${selectedCountry} news`.trim(),
+    
+    // Strategy 3: Even broader if still no results
+    `automotive news ${selectedCountry}`.trim(),
+    
+    // Strategy 4: Just automotive news
+    'automotive industry news'
+  ];
+
+  for (let i = 0; i < searchStrategies.length; i++) {
+    try {
+      const query = searchStrategies[i];
+      console.log(`Trying search strategy ${i + 1}: "${query}"`);
+      
+      const newsData = await searchNews(query, i === 0 ? 20 : 30); // More articles for broader searches
+      
+      if (newsData.status === 'ok' && newsData.articles && newsData.articles.length > 0) {
+        console.log(`Strategy ${i + 1} found ${newsData.articles.length} articles`);
+        
+        const processedArticles = processNewsArticles(newsData.articles, selectedOEMs);
+        
+        if (processedArticles.length > 0) {
+          console.log(`Strategy ${i + 1} successful with ${processedArticles.length} relevant articles`);
+          return processedArticles;
+        } else {
+          console.log(`Strategy ${i + 1} had articles but none were relevant after processing`);
+        }
+      } else {
+        console.log(`Strategy ${i + 1} returned no articles`);
+      }
+    } catch (error) {
+      console.error(`Strategy ${i + 1} failed:`, error.message);
+      // Continue to next strategy
+    }
+  }
+
+  console.log('All search strategies failed, using fallback');
+  return [];
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -32,7 +95,7 @@ serve(async (req) => {
         JSON.stringify({ 
           success: true, 
           newsSnippets: fallbackNews,
-          context: { selectedOEMs, selectedCountry, analysisType, source: 'fallback' }
+          context: { selectedOEMs, selectedCountry, analysisType, source: 'fallback_no_api_key' }
         }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -40,45 +103,19 @@ serve(async (req) => {
       );
     }
 
-    // Build contextual search query based on analysis type
-    const searchQuery = buildSearchQuery(selectedOEMs, selectedCountry, analysisType);
+    // Use enhanced search with fallback strategies
+    const newsSnippets = await getNewsWithFallback(selectedOEMs, selectedCountry, analysisType);
 
-    console.log('Searching NewsAPI with contextual query:', searchQuery);
-
-    // Fetch real news from NewsAPI
-    const newsResponse = await fetch(
-      `https://newsapi.org/v2/everything?q=${encodeURIComponent(searchQuery)}&language=en&sortBy=publishedAt&pageSize=20&apiKey=${newsApiKey}`
-    );
-
-    if (!newsResponse.ok) {
-      console.error(`NewsAPI error: ${newsResponse.status} - ${newsResponse.statusText}`);
-      throw new Error(`NewsAPI error: ${newsResponse.status}`);
-    }
-
-    const newsData = await newsResponse.json();
-    console.log('NewsAPI response status:', newsData.status);
-    console.log('NewsAPI articles found:', newsData.totalResults);
-
-    if (newsData.status !== 'ok') {
-      console.error('NewsAPI error:', newsData.message);
-      throw new Error(`NewsAPI error: ${newsData.message}`);
-    }
-
-    // Transform NewsAPI articles to our format with improved filtering
-    const newsSnippets = processNewsArticles(newsData.articles, selectedOEMs);
-
-    console.log('Processed contextual news snippets:', newsSnippets.length);
-
-    // If no relevant articles found, provide contextual fallback
+    // If no relevant articles found with any strategy, provide contextual fallback
     if (newsSnippets.length === 0) {
-      console.log('No relevant articles found after filtering, using contextual fallback');
+      console.log('No relevant articles found with any search strategy, using contextual fallback');
       const fallbackNews = generateContextualFallback(selectedOEMs, selectedCountry, analysisType);
       
       return new Response(
         JSON.stringify({ 
           success: true, 
           newsSnippets: fallbackNews,
-          context: { selectedOEMs, selectedCountry, analysisType, source: 'fallback_no_articles' }
+          context: { selectedOEMs, selectedCountry, analysisType, source: 'fallback_no_relevant_articles' }
         }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -90,7 +127,7 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         newsSnippets: newsSnippets,
-        context: { selectedOEMs, selectedCountry, analysisType, source: 'newsapi' }
+        context: { selectedOEMs, selectedCountry, analysisType, source: 'newsapi_enhanced' }
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

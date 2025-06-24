@@ -20,23 +20,23 @@ export function generateContextualFallback(selectedOEMs: string[], selectedCount
           summary: `Competitive positioning and market share trends among ${oemsText} in ${selectedCountry}`,
           source: 'Automotive News',
           timestamp: '2 hours ago',
-          url: 'https://www.autonews.com/manufacturing/automakers-face-challenges-global-markets'
+          url: 'https://www.autonews.com/'
         },
         {
           id: 2,
-          title: 'OEM Competitive Strategies Update',
+          title: 'Global OEM Competitive Strategies Update',
           summary: `Latest strategic moves and market positioning by leading automotive manufacturers`,
-          source: 'Reuters',
+          source: 'Reuters Business',
           timestamp: '4 hours ago',
           url: 'https://www.reuters.com/business/autos-transportation/'
         },
         {
           id: 3,
-          title: `${selectedCountry} Auto Industry Market Share Report`,
+          title: `${selectedCountry} Auto Industry Market Dynamics`,
           summary: 'Regional market dynamics and competitive landscape analysis',
           source: 'Bloomberg',
           timestamp: '6 hours ago',
-          url: 'https://www.bloomberg.com/news/articles/2024-01-15/global-auto-industry-outlook'
+          url: 'https://www.bloomberg.com/automotive'
         }
       ];
     
@@ -44,11 +44,11 @@ export function generateContextualFallback(selectedOEMs: string[], selectedCount
       return [
         {
           id: 1,
-          title: 'Automotive Feature Innovation Trends',
+          title: 'Automotive Feature Innovation Trends 2024',
           summary: `Technology category developments and feature availability across ${oemsText}`,
           source: 'TechCrunch',
           timestamp: '1 hour ago',
-          url: 'https://techcrunch.com/2024/01/15/automotive-technology-trends/'
+          url: 'https://techcrunch.com/category/transportation/'
         },
         {
           id: 2,
@@ -56,15 +56,15 @@ export function generateContextualFallback(selectedOEMs: string[], selectedCount
           summary: 'Analysis of technology adoption and feature distribution by category',
           source: 'Motor Trend',
           timestamp: '3 hours ago',
-          url: 'https://www.motortrend.com/news/automotive-technology-features-2024/'
+          url: 'https://www.motortrend.com/news/'
         },
         {
           id: 3,
-          title: 'OEM Feature Differentiation Study',
+          title: 'OEM Feature Differentiation Analysis',
           summary: 'How automotive brands differentiate through technology categories',
           source: 'Car and Driver',
           timestamp: '5 hours ago',
-          url: 'https://www.caranddriver.com/news/automotive-technology-comparison/'
+          url: 'https://www.caranddriver.com/news/'
         }
       ];
     
@@ -72,27 +72,27 @@ export function generateContextualFallback(selectedOEMs: string[], selectedCount
       return [
         {
           id: 1,
-          title: 'Automotive Business Model Transformation',
+          title: 'Automotive Business Model Evolution 2024',
           summary: `Revenue model evolution and subscription services by ${oemsText}`,
           source: 'Forbes',
           timestamp: '1 hour ago',
-          url: 'https://www.forbes.com/sites/transportation/automotive-business-models/'
+          url: 'https://www.forbes.com/business/'
         },
         {
           id: 2,
-          title: `${selectedCountry} Auto Industry Revenue Strategies`,
+          title: `${selectedCountry} Auto Industry Revenue Innovation`,
           summary: 'Partnership models and monetization strategies in automotive sector',
           source: 'Financial Times',
           timestamp: '4 hours ago',
-          url: 'https://www.ft.com/companies/automobiles'
+          url: 'https://www.ft.com/'
         },
         {
           id: 3,
-          title: 'OEM Partnership and Service Models',
+          title: 'Next-Gen OEM Partnership Models',
           summary: 'New business approaches and collaborative strategies',
-          source: 'WSJ',
+          source: 'Wall Street Journal',
           timestamp: '6 hours ago',
-          url: 'https://www.wsj.com/news/business/autos'
+          url: 'https://www.wsj.com/'
         }
       ];
     
@@ -100,27 +100,27 @@ export function generateContextualFallback(selectedOEMs: string[], selectedCount
       return [
         {
           id: 1,
-          title: `${selectedCountry} Vehicle Segment Performance`,
+          title: `${selectedCountry} Vehicle Segment Performance 2024`,
           summary: `SUV, sedan, and EV segment analysis for ${oemsText}`,
           source: 'Electrek',
           timestamp: '2 hours ago',
-          url: 'https://electrek.co/2024/01/15/electric-vehicle-market-segments/'
+          url: 'https://electrek.co/'
         },
         {
           id: 2,
-          title: 'Electric Vehicle Segment Growth',
+          title: 'Electric Vehicle Segment Growth Trends',
           summary: 'EV adoption trends and segment distribution across manufacturers',
           source: 'InsideEVs',
           timestamp: '3 hours ago',
-          url: 'https://insideevs.com/news/ev-market-analysis-2024/'
+          url: 'https://insideevs.com/'
         },
         {
           id: 3,
-          title: 'Luxury vs Mass Market Segments',
+          title: 'Luxury vs Mass Market Segment Analysis',
           summary: 'Feature distribution and positioning across vehicle segments',
           source: 'Autoblog',
           timestamp: '5 hours ago',
-          url: 'https://www.autoblog.com/2024/01/15/vehicle-segment-analysis/'
+          url: 'https://www.autoblog.com/'
         }
       ];
     
@@ -136,19 +136,19 @@ export function generateContextualFallback(selectedOEMs: string[], selectedCount
         },
         {
           id: 2,
-          title: 'Global Automotive Technology Trends',
+          title: 'Global Automotive Technology Developments',
           summary: 'Innovation and technology adoption across automotive manufacturers',
           source: 'Automotive News',
           timestamp: '3 hours ago',
-          url: 'https://www.autonews.com/technology'
+          url: 'https://www.autonews.com/'
         },
         {
           id: 3,
-          title: 'Automotive Industry Analysis',
+          title: 'Automotive Industry Market Analysis',
           summary: 'Regional market insights and competitive developments',
           source: 'Bloomberg',
           timestamp: '5 hours ago',
-          url: 'https://www.bloomberg.com/news/articles/2024-01-15/automotive-industry-outlook'
+          url: 'https://www.bloomberg.com/automotive'
         }
       ];
   }
