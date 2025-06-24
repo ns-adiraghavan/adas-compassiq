@@ -20,8 +20,71 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
 
     console.log('Processing chart data for:', { selectedCountry, selectedOEMs })
 
-    // Define vehicle segments
-    const segments = ['Entry', 'Mid', 'Premium', 'Luxury']
+    // First, let's discover what vehicle segment values exist in the data
+    const uniqueSegments = new Set<string>()
+    
+    waypointData.csvData.forEach(file => {
+      if (file.data && Array.isArray(file.data)) {
+        file.data.forEach((row: any) => {
+          if (row.Country === selectedCountry && 
+              selectedOEMs.includes(row.OEM) &&
+              row['Feature Availability']?.toString().trim().toLowerCase() === 'available') {
+            
+            // Check all possible keys that might contain segment data
+            const possibleKeys = ['Vehicle Segment', 'Segment', 'segment', 'vehicle_segment', 'VehicleSegment']
+            
+            for (const key of possibleKeys) {
+              if (row[key] && row[key].toString().trim() !== '') {
+                uniqueSegments.add(row[key].toString().trim())
+              }
+            }
+          }
+        })
+      }
+    })
+
+    console.log('Unique segments found in data:', Array.from(uniqueSegments))
+
+    // If no segments found, let's use a fallback approach - group by feature categories
+    if (uniqueSegments.size === 0) {
+      console.log('No vehicle segments found, using feature categories instead')
+      
+      const categoryData = new Map<string, any>()
+      
+      waypointData.csvData.forEach(file => {
+        if (file.data && Array.isArray(file.data)) {
+          file.data.forEach((row: any) => {
+            if (row.Country === selectedCountry && 
+                selectedOEMs.includes(row.OEM) &&
+                row['Feature Availability']?.toString().trim().toLowerCase() === 'available' &&
+                row.Category && row.Category.toString().trim() !== '') {
+              
+              const category = row.Category.toString().trim()
+              
+              if (!categoryData.has(category)) {
+                const categoryItem: any = { segment: category }
+                selectedOEMs.forEach(oem => {
+                  categoryItem[oem] = 0
+                })
+                categoryData.set(category, categoryItem)
+              }
+              
+              const categoryItem = categoryData.get(category)
+              if (categoryItem[row.OEM] !== undefined) {
+                categoryItem[row.OEM]++
+              }
+            }
+          })
+        }
+      })
+
+      const result = Array.from(categoryData.values())
+      console.log('Category-based chart data:', result)
+      return result
+    }
+
+    // Use the actual segments found in the data
+    const segments = Array.from(uniqueSegments).sort()
     
     const segmentData = segments.map(segment => {
       const segmentItem: any = { segment }
@@ -32,13 +95,20 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
         waypointData.csvData.forEach(file => {
           if (file.data && Array.isArray(file.data)) {
             file.data.forEach((row: any) => {
-              // Check for exact matches and case variations
-              const vehicleSegment = row['Vehicle Segment']?.toString().trim()
-              const isSegmentMatch = vehicleSegment?.toLowerCase() === segment.toLowerCase()
+              // Check all possible segment keys
+              const possibleKeys = ['Vehicle Segment', 'Segment', 'segment', 'vehicle_segment', 'VehicleSegment']
+              let segmentValue = ''
+              
+              for (const key of possibleKeys) {
+                if (row[key]) {
+                  segmentValue = row[key].toString().trim()
+                  break
+                }
+              }
               
               if (row.Country === selectedCountry &&
                   row.OEM === oem &&
-                  isSegmentMatch &&
+                  segmentValue === segment &&
                   row['Feature Availability']?.toString().trim().toLowerCase() === 'available') {
                 featureCount++
               }
