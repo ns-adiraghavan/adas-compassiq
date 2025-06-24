@@ -24,23 +24,19 @@ const VehicleSegmentCategoryTable = ({
   const { data: waypointData } = useWaypointData()
   const { theme } = useTheme()
 
-  // Get column headers based on grouping mode
-  const columnHeaders = (() => {
-    if (groupingMode === 'by-oem') {
-      return selectedOEMs.map(oem => oem.length > 12 ? oem.substring(0, 12) + '...' : oem)
-    } else {
-      return extractVehicleSegments(waypointData, selectedCountry, selectedOEMs)
-    }
-  })()
+  // Get available segments and OEMs
+  const availableSegments = extractVehicleSegments(waypointData, selectedCountry, selectedOEMs)
+  const availableOEMs = selectedOEMs
 
-  // Generate table data - transposed structure
-  const tableData = (() => {
+  // Generate table data structure based on grouping mode
+  const getTableStructure = () => {
     if (!waypointData?.csvData?.length || !selectedCountry || selectedOEMs.length === 0) {
-      return []
+      return { categories: [], mainColumns: [], subColumns: [] }
     }
 
-    const categoryData: Record<string, Record<string, number>> = {}
+    const categoryData: Record<string, Record<string, Record<string, number>>> = {}
     
+    // Process data to count features
     waypointData.csvData.forEach(file => {
       if (file.data && Array.isArray(file.data)) {
         file.data.forEach((row: any) => {
@@ -56,76 +52,61 @@ const VehicleSegmentCategoryTable = ({
             
             if (!categoryData[rowCategory]) {
               categoryData[rowCategory] = {}
-              // Initialize all columns to 0
-              if (groupingMode === 'by-oem') {
-                selectedOEMs.forEach(oem => {
-                  categoryData[rowCategory][oem] = 0
-                })
-              } else {
-                extractVehicleSegments(waypointData, selectedCountry, selectedOEMs).forEach(segment => {
-                  categoryData[rowCategory][segment] = 0
-                })
-              }
             }
             
-            if (groupingMode === 'by-oem') {
-              // Count by OEM - OEMs as columns
-              categoryData[rowCategory][rowOEM]++
-            } else {
-              // Count by segment - segments as columns
-              const firstRow = file.data[0]
-              const allColumns = Object.keys(firstRow)
-              const segmentPatterns = [
-                /segment/i, /entry/i, /mid/i, /premium/i, /luxury/i, /basic/i, /standard/i, /high/i, /executive/i
-              ]
+            // Detect segments for this row
+            const firstRow = file.data[0]
+            const allColumns = Object.keys(firstRow)
+            const segmentPatterns = [
+              /segment/i, /entry/i, /mid/i, /premium/i, /luxury/i, /basic/i, /standard/i, /high/i, /executive/i
+            ]
+            
+            const segmentColumns = allColumns.filter(column => 
+              segmentPatterns.some(pattern => pattern.test(column))
+            )
+            
+            segmentColumns.forEach(segmentCol => {
+              const segmentValue = row[segmentCol]?.toString().trim().toLowerCase()
               
-              const segmentColumns = allColumns.filter(column => 
-                segmentPatterns.some(pattern => pattern.test(column))
-              )
-              
-              segmentColumns.forEach(segmentCol => {
-                const segmentValue = row[segmentCol]?.toString().trim().toLowerCase()
+              if (segmentValue && segmentValue !== 'n/a' && segmentValue !== '' && 
+                  (segmentValue === 'yes' || segmentValue === 'y' || segmentValue === '1' || 
+                   segmentValue === 'true' || segmentValue === 'available')) {
                 
-                if (segmentValue && segmentValue !== 'n/a' && segmentValue !== '' && 
-                    (segmentValue === 'yes' || segmentValue === 'y' || segmentValue === '1' || 
-                     segmentValue === 'true' || segmentValue === 'available')) {
-                  
-                  let segmentName = segmentCol.replace(/segment/i, '').trim()
-                  if (segmentName.toLowerCase().includes('entry')) segmentName = 'Entry'
-                  else if (segmentName.toLowerCase().includes('mid')) segmentName = 'Mid'
-                  else if (segmentName.toLowerCase().includes('premium')) segmentName = 'Premium'
-                  else if (segmentName.toLowerCase().includes('luxury')) segmentName = 'Luxury'
-                  else segmentName = segmentCol
-                  
-                  if (categoryData[rowCategory][segmentName] !== undefined) {
-                    categoryData[rowCategory][segmentName]++
+                let segmentName = segmentCol.replace(/segment/i, '').trim()
+                if (segmentName.toLowerCase().includes('entry')) segmentName = 'Entry'
+                else if (segmentName.toLowerCase().includes('mid')) segmentName = 'Mid'
+                else if (segmentName.toLowerCase().includes('premium')) segmentName = 'Premium'
+                else if (segmentName.toLowerCase().includes('luxury')) segmentName = 'Luxury'
+                else segmentName = segmentCol
+                
+                if (groupingMode === 'by-segment') {
+                  // Segment -> OEM structure
+                  if (!categoryData[rowCategory][segmentName]) {
+                    categoryData[rowCategory][segmentName] = {}
                   }
+                  categoryData[rowCategory][segmentName][rowOEM] = (categoryData[rowCategory][segmentName][rowOEM] || 0) + 1
+                } else {
+                  // OEM -> Segment structure
+                  if (!categoryData[rowCategory][rowOEM]) {
+                    categoryData[rowCategory][rowOEM] = {}
+                  }
+                  categoryData[rowCategory][rowOEM][segmentName] = (categoryData[rowCategory][rowOEM][segmentName] || 0) + 1
                 }
-              })
-            }
+              }
+            })
           }
         })
       }
     })
 
-    // Convert to array format with category as first column, then OEMs/segments as data columns
-    return Object.entries(categoryData)
-      .map(([category, counts]) => {
-        const row: any = { category }
-        columnHeaders.forEach(header => {
-          const originalHeader = groupingMode === 'by-oem' 
-            ? selectedOEMs.find(oem => (oem.length > 12 ? oem.substring(0, 12) + '...' : oem) === header) || header
-            : header
-          row[header] = counts[originalHeader] || 0
-        })
-        return row
-      })
-      .sort((a, b) => {
-        const totalA = columnHeaders.reduce((sum, header) => sum + (a[header] || 0), 0)
-        const totalB = columnHeaders.reduce((sum, header) => sum + (b[header] || 0), 0)
-        return totalB - totalA
-      })
-  })()
+    const categories = Object.keys(categoryData).sort()
+    const mainColumns = groupingMode === 'by-segment' ? availableSegments : availableOEMs
+    const subColumns = groupingMode === 'by-segment' ? availableOEMs : availableSegments
+
+    return { categories, mainColumns, subColumns, categoryData }
+  }
+
+  const { categories, mainColumns, subColumns, categoryData } = getTableStructure()
 
   // Generate features matrix for expanded category
   const getFeaturesMatrix = (category: string) => {
@@ -133,7 +114,7 @@ const VehicleSegmentCategoryTable = ({
       return { features: [], matrix: {} }
     }
 
-    const featureMatrix: Record<string, Record<string, { available: boolean, lighthouse: boolean }>> = {}
+    const featureMatrix: Record<string, Record<string, Record<string, { available: boolean, lighthouse: boolean }>>> = {}
     const uniqueFeatures = new Set<string>()
     
     waypointData.csvData.forEach(file => {
@@ -158,45 +139,50 @@ const VehicleSegmentCategoryTable = ({
               featureMatrix[rowFeature] = {}
             }
             
-            if (groupingMode === 'by-oem') {
-              const displayHeader = rowOEM.length > 12 ? rowOEM.substring(0, 12) + '...' : rowOEM
-              featureMatrix[rowFeature][displayHeader] = {
-                available: true,
-                lighthouse: lighthouseFeature
-              }
-            } else {
-              // For by-segment grouping, map to segments
-              const firstRow = file.data[0]
-              const allColumns = Object.keys(firstRow)
-              const segmentPatterns = [
-                /segment/i, /entry/i, /mid/i, /premium/i, /luxury/i, /basic/i, /standard/i, /high/i, /executive/i
-              ]
+            // Map to segments and OEMs
+            const firstRow = file.data[0]
+            const allColumns = Object.keys(firstRow)
+            const segmentPatterns = [
+              /segment/i, /entry/i, /mid/i, /premium/i, /luxury/i, /basic/i, /standard/i, /high/i, /executive/i
+            ]
+            
+            const segmentColumns = allColumns.filter(column => 
+              segmentPatterns.some(pattern => pattern.test(column))
+            )
+            
+            segmentColumns.forEach(segmentCol => {
+              const segmentValue = row[segmentCol]?.toString().trim().toLowerCase()
               
-              const segmentColumns = allColumns.filter(column => 
-                segmentPatterns.some(pattern => pattern.test(column))
-              )
-              
-              segmentColumns.forEach(segmentCol => {
-                const segmentValue = row[segmentCol]?.toString().trim().toLowerCase()
+              if (segmentValue && segmentValue !== 'n/a' && segmentValue !== '' && 
+                  (segmentValue === 'yes' || segmentValue === 'y' || segmentValue === '1' || 
+                   segmentValue === 'true' || segmentValue === 'available')) {
                 
-                if (segmentValue && segmentValue !== 'n/a' && segmentValue !== '' && 
-                    (segmentValue === 'yes' || segmentValue === 'y' || segmentValue === '1' || 
-                     segmentValue === 'true' || segmentValue === 'available')) {
-                  
-                  let segmentName = segmentCol.replace(/segment/i, '').trim()
-                  if (segmentName.toLowerCase().includes('entry')) segmentName = 'Entry'
-                  else if (segmentName.toLowerCase().includes('mid')) segmentName = 'Mid'
-                  else if (segmentName.toLowerCase().includes('premium')) segmentName = 'Premium'
-                  else if (segmentName.toLowerCase().includes('luxury')) segmentName = 'Luxury'
-                  else segmentName = segmentCol
-                  
-                  featureMatrix[rowFeature][segmentName] = {
+                let segmentName = segmentCol.replace(/segment/i, '').trim()
+                if (segmentName.toLowerCase().includes('entry')) segmentName = 'Entry'
+                else if (segmentName.toLowerCase().includes('mid')) segmentName = 'Mid'
+                else if (segmentName.toLowerCase().includes('premium')) segmentName = 'Premium'
+                else if (segmentName.toLowerCase().includes('luxury')) segmentName = 'Luxury'
+                else segmentName = segmentCol
+                
+                if (groupingMode === 'by-segment') {
+                  if (!featureMatrix[rowFeature][segmentName]) {
+                    featureMatrix[rowFeature][segmentName] = {}
+                  }
+                  featureMatrix[rowFeature][segmentName][rowOEM] = {
+                    available: true,
+                    lighthouse: lighthouseFeature
+                  }
+                } else {
+                  if (!featureMatrix[rowFeature][rowOEM]) {
+                    featureMatrix[rowFeature][rowOEM] = {}
+                  }
+                  featureMatrix[rowFeature][rowOEM][segmentName] = {
                     available: true,
                     lighthouse: lighthouseFeature
                   }
                 }
-              })
-            }
+              }
+            })
           }
         })
       }
@@ -206,7 +192,7 @@ const VehicleSegmentCategoryTable = ({
     return { features: sortedFeatures, matrix: featureMatrix }
   }
 
-  if (tableData.length === 0) {
+  if (categories.length === 0) {
     return (
       <div className={`text-center py-8 ${theme.textMuted}`}>
         {selectedOEMs.length === 0 
@@ -223,38 +209,59 @@ const VehicleSegmentCategoryTable = ({
         <Table>
           <TableHeader>
             <TableRow className={`${theme.cardBorder} border-b`}>
-              <TableHead className={`${theme.textSecondary} font-medium`}>Category</TableHead>
-              {columnHeaders.map((header) => (
-                <TableHead key={header} className={`${theme.textSecondary} font-medium text-center`}>
-                  {header}
+              <TableHead className={`${theme.textSecondary} font-medium`} rowSpan={2}>Category</TableHead>
+              {mainColumns.map((mainCol) => (
+                <TableHead 
+                  key={mainCol} 
+                  className={`${theme.textSecondary} font-medium text-center border-l ${theme.cardBorder}`}
+                  colSpan={subColumns.length}
+                >
+                  {mainCol}
                 </TableHead>
               ))}
             </TableRow>
+            <TableRow className={`${theme.cardBorder} border-b`}>
+              {mainColumns.map((mainCol) => 
+                subColumns.map((subCol) => (
+                  <TableHead 
+                    key={`${mainCol}-${subCol}`} 
+                    className={`${theme.textSecondary} font-medium text-center text-xs border-l ${theme.cardBorder}`}
+                  >
+                    {subCol}
+                  </TableHead>
+                ))
+              )}
+            </TableRow>
           </TableHeader>
           <TableBody>
-            {tableData.map((row) => (
+            {categories.map((category) => (
               <TableRow 
-                key={row.category} 
+                key={category} 
                 className={`${theme.cardBorder} border-b hover:bg-gray-800/30 cursor-pointer transition-colors ${
-                  expandedCategory === row.category ? 'bg-gray-800/20' : ''
+                  expandedCategory === category ? 'bg-gray-800/20' : ''
                 }`}
-                onClick={() => onCategoryClick(row.category)}
+                onClick={() => onCategoryClick(category)}
               >
                 <TableCell className={`${theme.textPrimary} font-medium`}>
                   <div className="flex items-center gap-2">
-                    {expandedCategory === row.category ? (
+                    {expandedCategory === category ? (
                       <ChevronDown className="h-4 w-4" />
                     ) : (
                       <ChevronRight className="h-4 w-4" />
                     )}
-                    {row.category}
+                    {category}
                   </div>
                 </TableCell>
-                {columnHeaders.map((header) => (
-                  <TableCell key={header} className={`${theme.textSecondary} text-center`}>
-                    {row[header] || 0}
-                  </TableCell>
-                ))}
+                {mainColumns.map((mainCol) => 
+                  subColumns.map((subCol) => (
+                    <TableCell 
+                      key={`${mainCol}-${subCol}`} 
+                      className={`${theme.textSecondary} text-center border-l ${theme.cardBorder}`}
+                    >
+                      {categoryData?.[category]?.[mainCol]?.[subCol] || 0}
+                    </TableCell>
+                  ))
+                )}
               </TableRow>
             ))}
           </TableBody>
@@ -271,12 +278,28 @@ const VehicleSegmentCategoryTable = ({
             <Table>
               <TableHeader>
                 <TableRow className={`${theme.cardBorder} border-b`}>
-                  <TableHead className={`${theme.textSecondary} font-medium`}>Feature</TableHead>
-                  {columnHeaders.map((header) => (
-                    <TableHead key={header} className={`${theme.textSecondary} font-medium text-center`}>
-                      {header}
+                  <TableHead className={`${theme.textSecondary} font-medium`} rowSpan={2}>Feature</TableHead>
+                  {mainColumns.map((mainCol) => (
+                    <TableHead 
+                      key={mainCol} 
+                      className={`${theme.textSecondary} font-medium text-center border-l ${theme.cardBorder}`}
+                      colSpan={subColumns.length}
+                    >
+                      {mainCol}
                     </TableHead>
                   ))}
+                </TableRow>
+                <TableRow className={`${theme.cardBorder} border-b`}>
+                  {mainColumns.map((mainCol) => 
+                    subColumns.map((subCol) => (
+                      <TableHead 
+                        key={`${mainCol}-${subCol}`} 
+                        className={`${theme.textSecondary} font-medium text-center text-xs border-l ${theme.cardBorder}`}
+                      >
+                        {subCol}
+                      </TableHead>
+                    ))
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -287,19 +310,21 @@ const VehicleSegmentCategoryTable = ({
                       <TableCell className={`${theme.textPrimary} font-medium`}>
                         {feature}
                       </TableCell>
-                      {columnHeaders.map((header) => (
-                        <TableCell key={header} className="text-center">
-                          {matrix[feature]?.[header] ? (
-                            matrix[feature][header].lighthouse ? (
-                              <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
+                      {mainColumns.map((mainCol) => 
+                        subColumns.map((subCol) => (
+                          <TableCell key={`${mainCol}-${subCol}`} className={`text-center border-l ${theme.cardBorder}`}>
+                            {matrix[feature]?.[mainCol]?.[subCol] ? (
+                              matrix[feature][mainCol][subCol].lighthouse ? (
+                                <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
+                              ) : (
+                                <Circle className="h-5 w-5 text-green-500 fill-green-500 mx-auto" />
+                              )
                             ) : (
-                              <Circle className="h-5 w-5 text-green-500 fill-green-500 mx-auto" />
-                            )
-                          ) : (
-                            <div className="h-5 w-5 mx-auto" />
-                          )}
-                        </TableCell>
-                      ))}
+                              <div className="h-5 w-5 mx-auto" />
+                            )}
+                          </TableCell>
+                        ))
+                      )}
                     </TableRow>
                   ))
                 })()}
