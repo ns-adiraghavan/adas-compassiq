@@ -34,9 +34,9 @@ const InsightsContent = () => {
 
   return (
     <div className={`min-h-screen ${theme.backgroundGradient} transition-all duration-500`}>
-      <div className="flex h-screen">
+      <div className="flex min-h-screen">
         {/* Main Content */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col">
           {/* Controls Section */}
           <div className="px-8 py-6 space-y-6">
             {/* Country Selection */}
@@ -58,8 +58,8 @@ const InsightsContent = () => {
           </div>
 
           {/* Venn Diagram Section */}
-          <div className="flex-1 px-8 pb-8">
-            <div className={`h-full ${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
+          <div className="px-8 pb-8">
+            <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
               <h2 className={`text-2xl font-light mb-6 ${theme.textPrimary}`}>
                 Feature Overlap Analysis
               </h2>
@@ -79,7 +79,7 @@ const InsightsContent = () => {
         </div>
 
         {/* AI Sidebar */}
-        <div className="w-96 border-l border-gray-700">
+        <div className="w-96 border-l border-gray-700 flex-shrink-0">
           <AISnippetsSidebar
             selectedOEM={selectedOEMs.join(", ")}
             selectedCountry={selectedCountry}

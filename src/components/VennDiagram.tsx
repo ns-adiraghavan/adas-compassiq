@@ -46,7 +46,7 @@ const VennDiagram = ({ data }: VennDiagramProps) => {
   }
 
   return (
-    <div className="h-full flex flex-col space-y-6">
+    <div className="space-y-6">
       {/* Top section with legend and stats */}
       <div className="flex gap-6">
         {/* Legend */}
@@ -64,7 +64,7 @@ const VennDiagram = ({ data }: VennDiagramProps) => {
       </div>
 
       {/* Main diagram area */}
-      <div className="flex-1 relative">
+      <div className="w-full">
         <VennDiagramSVG
           data={data}
           entities={displayEntities}
