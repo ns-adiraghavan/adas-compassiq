@@ -6,6 +6,7 @@ import VehicleSegmentControls from "./components/VehicleSegmentControls"
 import VehicleSegmentBarChart from "./components/VehicleSegmentBarChart"
 import VehicleSegmentTable from "./components/VehicleSegmentTable"
 import VehicleSegmentDetailTable from "./components/VehicleSegmentDetailTable"
+import VehicleSegmentCategoryTable from "./components/VehicleSegmentCategoryTable"
 import type { VehicleSegmentChartProps, ViewMode, GroupingMode, BarClickData } from "./types/VehicleSegmentTypes"
 
 const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentChartProps) => {
@@ -13,6 +14,7 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
   const [viewMode, setViewMode] = useState<ViewMode>('grouped')
   const [groupingMode, setGroupingMode] = useState<GroupingMode>('by-oem')
   const [selectedBarItem, setSelectedBarItem] = useState<BarClickData | null>(null)
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
 
   const { chartData, availableSegments, hasData, debugInfo, segmentFeatureMap, oemFeatureMap, detailedFeatureData } = 
     useVehicleSegmentData(selectedCountry, selectedOEMs, groupingMode)
@@ -23,6 +25,10 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
 
   const handleCloseDetail = () => {
     setSelectedBarItem(null)
+  }
+
+  const handleCategoryClick = (category: string) => {
+    setExpandedCategory(expandedCategory === category ? null : category)
   }
 
   const getDetailedData = () => {
@@ -62,12 +68,17 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
       {/* Title */}
       <div>
         <h4 className={`text-lg font-medium ${theme.textPrimary} mb-2`}>
-          Features {groupingMode === 'by-oem' ? 'by OEM and Vehicle Segment' : 'by Vehicle Segment and OEM'}
+          {viewMode === 'table' 
+            ? `Category Analysis - ${groupingMode === 'by-oem' ? 'by OEM' : 'by Segment'}`
+            : `Features ${groupingMode === 'by-oem' ? 'by OEM and Vehicle Segment' : 'by Vehicle Segment and OEM'}`
+          }
         </h4>
         <p className={`${theme.textMuted} text-sm`}>
-          {groupingMode === 'by-oem' 
-            ? 'Number of features for each OEM, grouped by vehicle segments. Click on any bar to see detailed features.'
-            : 'Number of features for each vehicle segment, grouped by OEM manufacturers. Click on any bar to see detailed features.'
+          {viewMode === 'table'
+            ? `Showing available feature counts by category for selected ${groupingMode === 'by-oem' ? 'OEMs' : 'segments'} in ${selectedCountry}. Click on a category to view detailed features.`
+            : groupingMode === 'by-oem' 
+              ? 'Number of features for each OEM, grouped by vehicle segments. Click on any bar to see detailed features.'
+              : 'Number of features for each vehicle segment, grouped by OEM manufacturers. Click on any bar to see detailed features.'
           }
         </p>
       </div>
@@ -82,6 +93,14 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
             groupingMode={groupingMode}
             onBarClick={handleBarClick}
           />
+        ) : viewMode === 'table' && chartData.length > 0 ? (
+          <VehicleSegmentCategoryTable
+            selectedCountry={selectedCountry}
+            selectedOEMs={selectedOEMs}
+            groupingMode={groupingMode}
+            expandedCategory={expandedCategory}
+            onCategoryClick={handleCategoryClick}
+          />
         ) : (
           <VehicleSegmentTable
             availableSegments={availableSegments}
@@ -93,8 +112,8 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
         )}
       </div>
 
-      {/* Detailed Feature Table */}
-      {selectedBarItem && (
+      {/* Detailed Feature Table (only for chart view) */}
+      {viewMode === 'grouped' && selectedBarItem && (
         <VehicleSegmentDetailTable
           selectedItem={selectedBarItem.name}
           itemType={selectedBarItem.type}
