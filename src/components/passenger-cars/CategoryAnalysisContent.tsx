@@ -181,7 +181,7 @@ const CategoryAnalysisContent = () => {
           />
         </div>
 
-        {/* OEM Selector */}
+        {/* OEM Selector - No limits for Category Analysis */}
         <OEMSelector
           selectedCountry={selectedCountry}
           selectedOEMs={selectedOEMs}

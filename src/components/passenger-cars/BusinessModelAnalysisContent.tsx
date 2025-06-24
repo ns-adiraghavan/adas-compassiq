@@ -216,7 +216,7 @@ const BusinessModelAnalysisContent = () => {
           />
         </div>
 
-        {/* OEM Selector */}
+        {/* OEM Selector - No limits for Business Model Analysis */}
         <OEMSelector
           selectedCountry={selectedCountry}
           selectedOEMs={selectedOEMs}

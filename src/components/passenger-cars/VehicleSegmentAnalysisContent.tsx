@@ -102,7 +102,7 @@ const VehicleSegmentAnalysisContent = () => {
           />
         </div>
 
-        {/* OEM Selector */}
+        {/* OEM Selector - No limits for Vehicle Segment Analysis */}
         <OEMSelector
           selectedCountry={selectedCountry}
           selectedOEMs={selectedOEMs}

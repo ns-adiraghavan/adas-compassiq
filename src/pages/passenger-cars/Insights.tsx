@@ -88,13 +88,15 @@ const InsightsContent = () => {
               />
             </div>
 
-            {/* OEM Selection */}
+            {/* OEM Selection with 3-OEM limit */}
             <OEMSelector
               selectedCountry={selectedCountry}
               selectedOEMs={selectedOEMs}
               onOEMToggle={handleOEMToggle}
               onSelectAll={handleSelectAll}
               onClearAll={handleClearAll}
+              maxOEMs={3}
+              showSelectFirst3={true}
             />
           </div>
 
