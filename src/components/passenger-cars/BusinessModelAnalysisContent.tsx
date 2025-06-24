@@ -121,7 +121,7 @@ const BusinessModelAnalysisContent = () => {
         <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
           <h2 className={`text-2xl font-light ${theme.textPrimary} mb-2`}>Business Model Analysis</h2>
           <p className={`${theme.textMuted} text-sm`}>
-            Analyze feature distribution across different business models and OEMs
+            Analyze feature distribution across different business model types and OEMs
           </p>
         </div>
 
@@ -172,10 +172,10 @@ const BusinessModelAnalysisContent = () => {
         <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
           <div className="mb-4">
             <h3 className={`text-lg font-medium ${theme.textPrimary} mb-2`}>
-              Features by Business Model & OEM
+              Features by Business Model Type & OEM
             </h3>
             <p className={`${theme.textMuted} text-sm`}>
-              {showGraphical ? 'Click on bars to see category breakdown' : 'Business model distribution matrix'}
+              {showGraphical ? 'Click on bars to see category breakdown' : 'Business model type distribution matrix'}
             </p>
           </div>
 
@@ -202,7 +202,7 @@ const BusinessModelAnalysisContent = () => {
                 Category Analysis - {selectedBusinessModel} Features
               </h3>
               <p className={`${theme.textMuted} text-sm`}>
-                Feature breakdown by category for {selectedBusinessModel} business model. Click on a category to view detailed features.
+                Feature breakdown by category for {selectedBusinessModel} business model type. Click on a category to view detailed features.
               </p>
             </div>
 

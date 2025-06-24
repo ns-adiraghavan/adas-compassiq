@@ -22,13 +22,14 @@ const CategoryAnalysisTable = ({
   const { data: waypointData } = useWaypointData()
   const { theme } = useTheme()
 
-  const { categoryData, featureData } = useMemo(() => {
+  const { categoryData, expandedFeatures } = useMemo(() => {
     if (!waypointData?.csvData?.length || !selectedCountry || selectedOEMs.length === 0) {
-      return { categoryData: [], featureData: new Map() }
+      return { categoryData: [], expandedFeatures: [] }
     }
 
-    const categoryCount: Record<string, Record<string, number>> = {}
-    const detailedFeatures = new Map<string, Array<{ feature: string, oem: string, businessModel: string, isLighthouse: boolean }>>()
+    const categoryFeatureData: Record<string, Record<string, number>> = {}
+    const categoryFeatures: Record<string, any[]> = {}
+    const allCategories = new Set<string>()
 
     waypointData.csvData.forEach(file => {
       if (file.data && Array.isArray(file.data)) {
@@ -38,38 +39,36 @@ const CategoryAnalysisTable = ({
               row['Feature Availability']?.toString().trim().toLowerCase() === 'available' &&
               row.Feature && row.Feature.toString().trim() !== '') {
             
-            const category = row.Category?.toString().trim() || 'General'
+            // Filter by business model type if provided
+            if (businessModelFilter) {
+              const businessModelType = row['Business Model Type']?.toString().trim() || 'Unknown'
+              if (businessModelType !== businessModelFilter) {
+                return
+              }
+            }
+            
+            const category = row.Category?.toString().trim() || 'Unknown'
             const oem = row.OEM?.toString().trim()
-            const feature = row.Feature?.toString().trim()
-            const businessModel = row['Business Model']?.toString().trim() || 'Unknown'
-            const isLighthouse = row['Lighthouse Feature']?.toString().toLowerCase() === 'yes'
             
-            // Apply business model filter if provided
-            if (businessModelFilter && businessModel !== businessModelFilter) {
-              return
+            allCategories.add(category)
+            
+            if (!categoryFeatureData[category]) {
+              categoryFeatureData[category] = {}
+              categoryFeatures[category] = []
             }
             
-            if (!categoryCount[category]) {
-              categoryCount[category] = {}
-            }
-            
-            categoryCount[category][oem] = (categoryCount[category][oem] || 0) + 1
-            
-            // Store detailed feature information
-            if (!detailedFeatures.has(category)) {
-              detailedFeatures.set(category, [])
-            }
-            detailedFeatures.get(category)!.push({ feature, oem, businessModel, isLighthouse })
+            categoryFeatureData[category][oem] = (categoryFeatureData[category][oem] || 0) + 1
+            categoryFeatures[category].push(row)
           }
         })
       }
     })
 
-    const categoryData = Object.entries(categoryCount).map(([category, oemCounts]) => {
-      const row: any = { category }
+    const categoryData = Array.from(allCategories).map(category => {
+      const row: any = { name: category }
       let total = 0
       selectedOEMs.forEach(oem => {
-        const count = oemCounts[oem] || 0
+        const count = categoryFeatureData[category]?.[oem] || 0
         row[oem] = count
         total += count
       })
@@ -77,30 +76,31 @@ const CategoryAnalysisTable = ({
       return row
     }).filter(row => row.total > 0).sort((a, b) => b.total - a.total)
 
-    return { categoryData, featureData: detailedFeatures }
-  }, [waypointData, selectedCountry, selectedOEMs, businessModelFilter])
+    // Get features for expanded category
+    const expandedFeatures = expandedCategory ? (categoryFeatures[expandedCategory] || []) : []
+
+    return { categoryData, expandedFeatures }
+  }, [waypointData, selectedCountry, selectedOEMs, businessModelFilter, expandedCategory])
 
   const getCellColor = (value: number, maxInRow: number) => {
     if (value === 0) return 'transparent'
     const intensity = value / maxInRow
-    if (intensity > 0.7) return 'rgba(16, 185, 129, 0.8)' // Strong green
-    if (intensity > 0.4) return 'rgba(16, 185, 129, 0.5)' // Medium green
-    return 'rgba(16, 185, 129, 0.3)' // Light green
+    if (intensity > 0.7) return 'rgba(59, 130, 246, 0.8)'
+    if (intensity > 0.4) return 'rgba(59, 130, 246, 0.5)'
+    return 'rgba(59, 130, 246, 0.3)'
   }
 
   if (categoryData.length === 0) {
     return (
       <div className="p-8 text-center">
-        <p className={`${theme.textMuted}`}>
-          No data available for selected filters
-          {businessModelFilter && ` and business model: ${businessModelFilter}`}
-        </p>
+        <p className={`${theme.textMuted}`}>No data available for selected filters</p>
       </div>
     )
   }
 
   return (
     <div className="space-y-4">
+      {/* Category Summary Table */}
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
@@ -115,76 +115,43 @@ const CategoryAnalysisTable = ({
             </tr>
           </thead>
           <tbody>
-            {categoryData.map((row) => {
+            {categoryData.map((row, index) => {
               const maxInRow = Math.max(...selectedOEMs.map(oem => row[oem] || 0))
-              const isExpanded = expandedCategory === row.category
+              const isExpanded = expandedCategory === row.name
               
               return (
-                <tr key={row.category}>
-                  <td colSpan={selectedOEMs.length + 2} className="p-0">
-                    <div 
-                      className={`flex items-center p-3 ${theme.cardBorder} border-b hover:${theme.cardBackground} cursor-pointer transition-colors`}
-                      onClick={() => onCategoryClick(row.category)}
-                    >
-                      <div className="flex items-center flex-1">
-                        {isExpanded ? (
-                          <ChevronDown className="h-4 w-4 mr-2 text-gray-400" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4 mr-2 text-gray-400" />
-                        )}
-                        <span className={`${theme.textSecondary} font-medium`}>
-                          {row.category}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-4">
-                        {selectedOEMs.map(oem => {
-                          const value = row[oem] || 0
-                          return (
-                            <div 
-                              key={oem} 
-                              className="text-center font-semibold min-w-[80px] px-2 py-1 rounded"
-                              style={{ 
-                                backgroundColor: getCellColor(value, maxInRow),
-                                color: value > 0 ? 'white' : 'rgba(255,255,255,0.4)'
-                              }}
-                            >
-                              {value > 0 ? value : '-'}
-                            </div>
-                          )
-                        })}
-                        <div className={`text-center font-bold ${theme.textPrimary} min-w-[60px]`}>
-                          {row.total}
-                        </div>
-                      </div>
+                <tr 
+                  key={row.name} 
+                  className={`${theme.cardBorder} border-b hover:${theme.cardBackground} cursor-pointer transition-colors ${isExpanded ? theme.cardBackground : ''}`}
+                  onClick={() => onCategoryClick(row.name)}
+                >
+                  <td className={`p-3 ${theme.textSecondary} font-medium`}>
+                    <div className="flex items-center gap-2">
+                      {isExpanded ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                      {row.name}
                     </div>
-                    
-                    {/* Expanded Feature Details */}
-                    {isExpanded && featureData.has(row.category) && (
-                      <div className={`${theme.cardBackground} border-l-4 border-green-500 ml-6 mr-2 mb-2`}>
-                        <div className="p-4">
-                          <h4 className={`text-sm font-medium ${theme.textPrimary} mb-3`}>
-                            Features in {row.category}
-                            {businessModelFilter && ` (${businessModelFilter})`}
-                          </h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 max-h-48 overflow-y-auto">
-                            {featureData.get(row.category)!.map((item, index) => (
-                              <div 
-                                key={index} 
-                                className={`text-xs p-2 rounded ${theme.cardBorder} border flex justify-between items-center`}
-                              >
-                                <div>
-                                  <div className={`${theme.textSecondary} font-medium`}>{item.feature}</div>
-                                  <div className={`${theme.textMuted} text-xs`}>{item.oem}</div>
-                                </div>
-                                {item.isLighthouse && (
-                                  <div className="text-yellow-400 text-xs font-semibold">★</div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                  </td>
+                  {selectedOEMs.map(oem => {
+                    const value = row[oem] || 0
+                    return (
+                      <td 
+                        key={oem} 
+                        className="p-3 text-center font-semibold"
+                        style={{ 
+                          backgroundColor: getCellColor(value, maxInRow),
+                          color: value > 0 ? 'white' : 'rgba(255,255,255,0.4)'
+                        }}
+                      >
+                        {value > 0 ? value : '-'}
+                      </td>
+                    )
+                  })}
+                  <td className={`p-3 text-center font-bold ${theme.textPrimary}`}>
+                    {row.total}
                   </td>
                 </tr>
               )
@@ -192,6 +159,46 @@ const CategoryAnalysisTable = ({
           </tbody>
         </table>
       </div>
+
+      {/* Expanded Features Table */}
+      {expandedCategory && expandedFeatures.length > 0 && (
+        <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-lg p-4`}>
+          <h4 className={`text-lg font-medium ${theme.textPrimary} mb-3`}>
+            Features in {expandedCategory} Category
+            {businessModelFilter && ` (${businessModelFilter})`}
+          </h4>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className={`${theme.cardBorder} border-b`}>
+                  <th className={`text-left p-2 ${theme.textPrimary} font-medium`}>Feature</th>
+                  <th className={`text-left p-2 ${theme.textPrimary} font-medium`}>OEM</th>
+                  <th className={`text-left p-2 ${theme.textPrimary} font-medium`}>Business Model Type</th>
+                  <th className={`text-left p-2 ${theme.textPrimary} font-medium`}>Segment</th>
+                </tr>
+              </thead>
+              <tbody>
+                {expandedFeatures.map((feature, index) => (
+                  <tr key={index} className={`${theme.cardBorder} border-b hover:${theme.cardBackground} transition-colors`}>
+                    <td className={`p-2 ${theme.textSecondary}`}>
+                      {feature.Feature}
+                    </td>
+                    <td className={`p-2 ${theme.textSecondary}`}>
+                      {feature.OEM}
+                    </td>
+                    <td className={`p-2 ${theme.textSecondary}`}>
+                      {feature['Business Model Type'] || 'Unknown'}
+                    </td>
+                    <td className={`p-2 ${theme.textSecondary}`}>
+                      {feature.Segment || 'Unknown'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

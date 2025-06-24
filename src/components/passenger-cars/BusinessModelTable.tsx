@@ -30,16 +30,16 @@ const BusinessModelTable = ({ selectedCountry, selectedOEMs, onBusinessModelClic
               row['Feature Availability']?.toString().trim().toLowerCase() === 'available' &&
               row.Feature && row.Feature.toString().trim() !== '') {
             
-            const businessModel = row['Business Model']?.toString().trim() || 'Unknown'
+            const businessModelType = row['Business Model Type']?.toString().trim() || 'Unknown'
             const oem = row.OEM?.toString().trim()
             
-            allBusinessModels.add(businessModel)
+            allBusinessModels.add(businessModelType)
             
-            if (!businessModelData[businessModel]) {
-              businessModelData[businessModel] = {}
+            if (!businessModelData[businessModelType]) {
+              businessModelData[businessModelType] = {}
             }
             
-            businessModelData[businessModel][oem] = (businessModelData[businessModel][oem] || 0) + 1
+            businessModelData[businessModelType][oem] = (businessModelData[businessModelType][oem] || 0) + 1
             oemTotals[oem] = (oemTotals[oem] || 0) + 1
           }
         })
@@ -82,7 +82,7 @@ const BusinessModelTable = ({ selectedCountry, selectedOEMs, onBusinessModelClic
       <table className="w-full border-collapse">
         <thead>
           <tr className={`${theme.cardBorder} border-b`}>
-            <th className={`text-left p-3 ${theme.textPrimary} font-medium`}>Business Model</th>
+            <th className={`text-left p-3 ${theme.textPrimary} font-medium`}>Business Model Type</th>
             {selectedOEMs.map(oem => (
               <th key={oem} className={`text-center p-3 ${theme.textPrimary} font-medium min-w-[100px]`}>
                 {oem}

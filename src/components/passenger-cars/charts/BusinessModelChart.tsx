@@ -10,14 +10,12 @@ interface BusinessModelChartProps {
   onBusinessModelClick: (businessModel: string) => void
 }
 
-const BUSINESS_MODEL_COLORS = {
-  'Free': '#10B981',
-  'Subscription': '#3B82F6', 
-  'Subscription - Free Trial': '#8B5CF6',
-  'Freemium': '#F59E0B',
-  'Flatrate': '#EF4444',
-  'Free | Add - On': '#06B6D4',
-  'Free | Flatrate': '#84CC16'
+const OEM_COLORS = {
+  'BYD': '#3B82F6',
+  'GM': '#F59E0B', 
+  'Hyundai': '#10B981',
+  'Nio': '#EF4444',
+  'Zeekr': '#8B5CF6'
 }
 
 const BusinessModelChart = ({ selectedCountry, selectedOEMs, onBusinessModelClick }: BusinessModelChartProps) => {
@@ -40,21 +38,23 @@ const BusinessModelChart = ({ selectedCountry, selectedOEMs, onBusinessModelClic
               row['Feature Availability']?.toString().trim().toLowerCase() === 'available' &&
               row.Feature && row.Feature.toString().trim() !== '') {
             
-            const businessModel = row['Business Model']?.toString().trim() || 'Unknown'
-            allBusinessModels.add(businessModel)
+            const businessModelType = row['Business Model Type']?.toString().trim() || 'Unknown'
+            const oem = row.OEM?.toString().trim()
             
-            if (!businessModelData[businessModel]) {
-              businessModelData[businessModel] = {}
+            allBusinessModels.add(businessModelType)
+            
+            if (!businessModelData[businessModelType]) {
+              businessModelData[businessModelType] = {}
             }
             
-            selectedOEMs.forEach(oem => {
-              if (!businessModelData[businessModel][oem]) {
-                businessModelData[businessModel][oem] = 0
+            selectedOEMs.forEach(selectedOem => {
+              if (!businessModelData[businessModelType][selectedOem]) {
+                businessModelData[businessModelType][selectedOem] = 0
               }
             })
             
-            if (row.OEM === row.OEM) {
-              businessModelData[businessModel][row.OEM] = (businessModelData[businessModel][row.OEM] || 0) + 1
+            if (oem && selectedOEMs.includes(oem)) {
+              businessModelData[businessModelType][oem] = (businessModelData[businessModelType][oem] || 0) + 1
             }
           }
         })
@@ -105,14 +105,18 @@ const BusinessModelChart = ({ selectedCountry, selectedOEMs, onBusinessModelClic
               borderRadius: '8px',
               color: 'white'
             }}
+            formatter={(value: any, name: string) => [
+              `${value} features`,
+              name
+            ]}
           />
           <Legend />
-          {selectedOEMs.map((oem, index) => (
+          {selectedOEMs.map((oem) => (
             <Bar 
               key={oem} 
               dataKey={oem} 
               stackId="a" 
-              fill={Object.values(BUSINESS_MODEL_COLORS)[index % Object.values(BUSINESS_MODEL_COLORS).length]}
+              fill={OEM_COLORS[oem as keyof typeof OEM_COLORS] || '#6B7280'}
               name={oem}
             />
           ))}
