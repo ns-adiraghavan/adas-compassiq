@@ -1,5 +1,6 @@
 
 import { ArrowRight } from "lucide-react"
+import WaypointLogo from "./WaypointLogo"
 
 interface HeroSectionProps {
   scrollY: number
@@ -14,6 +15,17 @@ const HeroSection = ({ scrollY }: HeroSectionProps) => {
           transform: `translateY(${scrollY * 0.5}px)`,
         }}
       />
+      
+      {/* Logo in top-left corner */}
+      <div 
+        className="absolute top-6 left-6 z-20"
+        style={{
+          opacity: Math.max(0, 1 - scrollY / 400)
+        }}
+      >
+        <WaypointLogo />
+      </div>
+
       <div className="relative z-10 text-center max-w-4xl mx-auto px-6">
         <h1 
           className="text-7xl md:text-9xl font-bold mb-6 bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent"

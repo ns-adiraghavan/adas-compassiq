@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext"
 import ThemeSelector from "@/components/ThemeSelector"
+import WaypointLogo from "@/components/WaypointLogo"
 
 interface PassengerCarsLayoutProps {
   children: React.ReactNode
@@ -30,14 +31,22 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
       
       {/* Header - Fixed height */}
       <div className="container mx-auto px-8 py-4">
-        <div className="px-8">
-          <Link 
-            to="/" 
-            className={`inline-flex items-center ${theme.textMuted} hover:${theme.textPrimary.replace('text-', 'text-')} transition-colors mb-3`}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Home
-          </Link>
+        <div className="flex items-center justify-between mb-3">
+          {/* Logo on the left */}
+          <div>
+            <WaypointLogo />
+          </div>
+          
+          {/* Back to Home button aligned with navigation tabs */}
+          <div className="flex-1 flex justify-start" style={{ paddingLeft: '32px' }}>
+            <Link 
+              to="/" 
+              className={`inline-flex items-center ${theme.textMuted} hover:${theme.textPrimary.replace('text-', 'text-')} transition-colors`}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Home
+            </Link>
+          </div>
         </div>
         
         <h1 className={`text-3xl font-thin mb-1 ${theme.textPrimary} tracking-tight`}>
