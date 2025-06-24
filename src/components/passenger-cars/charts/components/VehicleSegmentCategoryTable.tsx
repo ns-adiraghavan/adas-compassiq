@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useTheme } from "@/contexts/ThemeContext"
 import { ChevronDown, ChevronRight, Circle, CheckCircle } from "lucide-react"
 import { useWaypointData } from "@/hooks/useWaypointData"
+import { extractVehicleSegments } from "../utils/segmentDetection"
 import type { GroupingMode } from "../types/VehicleSegmentTypes"
 
 interface VehicleSegmentCategoryTableProps {
@@ -23,7 +24,16 @@ const VehicleSegmentCategoryTable = ({
   const { data: waypointData } = useWaypointData()
   const { theme } = useTheme()
 
-  // Generate table data based on grouping mode
+  // Get column headers based on grouping mode
+  const columnHeaders = (() => {
+    if (groupingMode === 'by-oem') {
+      return selectedOEMs.map(oem => oem.length > 12 ? oem.substring(0, 12) + '...' : oem)
+    } else {
+      return extractVehicleSegments(waypointData, selectedCountry, selectedOEMs)
+    }
+  })()
+
+  // Generate table data - simplified structure matching CategoryAnalysisTable
   const tableData = (() => {
     if (!waypointData?.csvData?.length || !selectedCountry || selectedOEMs.length === 0) {
       return []
@@ -48,13 +58,45 @@ const VehicleSegmentCategoryTable = ({
               categoryData[rowCategory] = {}
             }
             
-            const groupKey = groupingMode === 'by-oem' ? rowOEM : rowCategory
-            
-            if (!categoryData[rowCategory][groupKey]) {
-              categoryData[rowCategory][groupKey] = 0
+            if (groupingMode === 'by-oem') {
+              // Count by OEM
+              if (!categoryData[rowCategory][rowOEM]) {
+                categoryData[rowCategory][rowOEM] = 0
+              }
+              categoryData[rowCategory][rowOEM]++
+            } else {
+              // Count by segment - check segment columns
+              const firstRow = file.data[0]
+              const allColumns = Object.keys(firstRow)
+              const segmentPatterns = [
+                /segment/i, /entry/i, /mid/i, /premium/i, /luxury/i, /basic/i, /standard/i, /high/i, /executive/i
+              ]
+              
+              const segmentColumns = allColumns.filter(column => 
+                segmentPatterns.some(pattern => pattern.test(column))
+              )
+              
+              segmentColumns.forEach(segmentCol => {
+                const segmentValue = row[segmentCol]?.toString().trim().toLowerCase()
+                
+                if (segmentValue && segmentValue !== 'n/a' && segmentValue !== '' && 
+                    (segmentValue === 'yes' || segmentValue === 'y' || segmentValue === '1' || 
+                     segmentValue === 'true' || segmentValue === 'available')) {
+                  
+                  let segmentName = segmentCol.replace(/segment/i, '').trim()
+                  if (segmentName.toLowerCase().includes('entry')) segmentName = 'Entry'
+                  else if (segmentName.toLowerCase().includes('mid')) segmentName = 'Mid'
+                  else if (segmentName.toLowerCase().includes('premium')) segmentName = 'Premium'
+                  else if (segmentName.toLowerCase().includes('luxury')) segmentName = 'Luxury'
+                  else segmentName = segmentCol
+                  
+                  if (!categoryData[rowCategory][segmentName]) {
+                    categoryData[rowCategory][segmentName] = 0
+                  }
+                  categoryData[rowCategory][segmentName]++
+                }
+              })
             }
-            
-            categoryData[rowCategory][groupKey]++
           }
         })
       }
@@ -103,10 +145,43 @@ const VehicleSegmentCategoryTable = ({
               featureMatrix[rowFeature] = {}
             }
             
-            const matrixKey = groupingMode === 'by-oem' ? rowOEM : rowCategory
-            featureMatrix[rowFeature][matrixKey] = {
-              available: true,
-              lighthouse: lighthouseFeature
+            if (groupingMode === 'by-oem') {
+              featureMatrix[rowFeature][rowOEM] = {
+                available: true,
+                lighthouse: lighthouseFeature
+              }
+            } else {
+              // For by-segment grouping, map to segments
+              const firstRow = file.data[0]
+              const allColumns = Object.keys(firstRow)
+              const segmentPatterns = [
+                /segment/i, /entry/i, /mid/i, /premium/i, /luxury/i, /basic/i, /standard/i, /high/i, /executive/i
+              ]
+              
+              const segmentColumns = allColumns.filter(column => 
+                segmentPatterns.some(pattern => pattern.test(column))
+              )
+              
+              segmentColumns.forEach(segmentCol => {
+                const segmentValue = row[segmentCol]?.toString().trim().toLowerCase()
+                
+                if (segmentValue && segmentValue !== 'n/a' && segmentValue !== '' && 
+                    (segmentValue === 'yes' || segmentValue === 'y' || segmentValue === '1' || 
+                     segmentValue === 'true' || segmentValue === 'available')) {
+                  
+                  let segmentName = segmentCol.replace(/segment/i, '').trim()
+                  if (segmentName.toLowerCase().includes('entry')) segmentName = 'Entry'
+                  else if (segmentName.toLowerCase().includes('mid')) segmentName = 'Mid'
+                  else if (segmentName.toLowerCase().includes('premium')) segmentName = 'Premium'
+                  else if (segmentName.toLowerCase().includes('luxury')) segmentName = 'Luxury'
+                  else segmentName = segmentCol
+                  
+                  featureMatrix[rowFeature][segmentName] = {
+                    available: true,
+                    lighthouse: lighthouseFeature
+                  }
+                }
+              })
             }
           }
         })
@@ -116,29 +191,6 @@ const VehicleSegmentCategoryTable = ({
     const sortedFeatures = Array.from(uniqueFeatures).sort()
     return { features: sortedFeatures, matrix: featureMatrix }
   }
-
-  // Get column headers based on grouping mode
-  const getColumnHeaders = () => {
-    if (groupingMode === 'by-oem') {
-      return selectedOEMs.map(oem => oem.length > 12 ? oem.substring(0, 12) + '...' : oem)
-    } else {
-      // For by-segment grouping, we need to get available segments
-      const segments = new Set<string>()
-      waypointData?.csvData?.forEach(file => {
-        if (file.data && Array.isArray(file.data)) {
-          file.data.forEach((row: any) => {
-            if (row.Country === selectedCountry && selectedOEMs.includes(row.OEM)) {
-              // Extract segment information (this would need to be adapted based on your segment detection logic)
-              if (row.Category) segments.add(row.Category)
-            }
-          })
-        }
-      })
-      return Array.from(segments).sort()
-    }
-  }
-
-  const columnHeaders = getColumnHeaders()
 
   if (tableData.length === 0) {
     return (
