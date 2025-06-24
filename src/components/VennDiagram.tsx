@@ -3,7 +3,6 @@ import { useState } from "react"
 import { VennDiagramData } from "@/utils/vennDiagramUtils"
 import VennDiagramSVG from "@/components/VennDiagramSVG"
 import VennDiagramLegend from "@/components/VennDiagramLegend"
-import VennDiagramStats from "@/components/VennDiagramStats"
 import VennDiagramTable from "@/components/VennDiagramTable"
 import { useTheme } from "@/contexts/ThemeContext"
 
@@ -47,20 +46,12 @@ const VennDiagram = ({ data }: VennDiagramProps) => {
 
   return (
     <div className="space-y-6">
-      {/* Top section with legend and stats */}
-      <div className="flex gap-6">
-        {/* Legend */}
-        <div className="flex-shrink-0">
-          <VennDiagramLegend
-            entities={displayEntities}
-            colors={colors}
-          />
-        </div>
-        
-        {/* Stats boxes */}
-        <div className="flex-1">
-          <VennDiagramStats data={data} entities={displayEntities} />
-        </div>
+      {/* Only show legend above the diagram */}
+      <div className="flex justify-center">
+        <VennDiagramLegend
+          entities={displayEntities}
+          colors={colors}
+        />
       </div>
 
       {/* Main diagram area */}
