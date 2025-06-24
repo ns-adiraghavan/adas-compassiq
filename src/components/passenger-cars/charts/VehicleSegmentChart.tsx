@@ -15,25 +15,25 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
   const [selectedOEM, setSelectedOEM] = useState<string | null>(null)
   const [selectedSegment, setSelectedSegment] = useState<string | null>(null)
 
-  const { oemChartData, segmentChartData, availableSegments } = useMemo(() => {
+  const processVehicleSegmentData = () => {
     if (!waypointData?.csvData?.length || !selectedCountry || selectedOEMs.length === 0) {
       return { oemChartData: [], segmentChartData: [], availableSegments: [] }
     }
 
-    console.log('Processing chart data for:', { selectedCountry, selectedOEMs })
+    console.log('Processing vehicle segment data for:', { selectedCountry, selectedOEMs })
 
-    // First, let's examine the data structure to find segment columns
-    const sampleRow = waypointData.csvData[0]?.data?.[0]
-    console.log('Sample row keys:', sampleRow ? Object.keys(sampleRow) : 'No sample data')
+    // Dual mapping: OEM → Segments → Feature Count and Segments → OEM → Feature Count
+    const oemSegmentMap = new Map<string, Map<string, number>>() // OEM → Segment → Count
+    const segmentOemMap = new Map<string, Map<string, number>>() // Segment → OEM → Count
+    const availableSegments = new Set<string>()
 
-    // Collect segment data from CSV
-    const segmentData = new Map<string, Map<string, number>>() // OEM -> Segment -> Count
-    const oemData = new Map<string, Map<string, number>>() // Segment -> OEM -> Count
-    const uniqueSegments = new Set<string>()
+    // Define the vehicle segments we're looking for
+    const vehicleSegments = ['Entry', 'Mid', 'Premium', 'Luxury']
 
     waypointData.csvData.forEach(file => {
       if (file.data && Array.isArray(file.data)) {
         file.data.forEach((row: any) => {
+          // Data Filtering: Filter by selected country and availability status
           if (row.Country === selectedCountry && 
               selectedOEMs.includes(row.OEM) &&
               row['Feature Availability']?.toString().trim().toLowerCase() === 'available' &&
@@ -42,74 +42,45 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
             const oem = row.OEM.toString().trim()
             const feature = row.Feature.toString().trim()
             
-            // Look for all possible segment columns in the data
-            const allKeys = Object.keys(row)
-            const segmentColumns = allKeys.filter(key => 
-              ['entry', 'mid', 'luxury', 'premium', 'basic', 'standard', 'executive'].includes(key.toLowerCase()) ||
-              key.toLowerCase().includes('segment') ||
-              key.toLowerCase().includes('tier')
-            )
-            
-            console.log('Found potential segment columns:', segmentColumns)
-            
-            // If no predefined segments found, check for any column with 'yes' values
-            if (segmentColumns.length === 0) {
-              const yesColumns = allKeys.filter(key => {
-                const value = row[key]?.toString().trim().toLowerCase()
-                return value === 'yes' && 
-                       !['feature availability', 'lighthouse', 'subscription'].includes(key.toLowerCase())
-              })
-              segmentColumns.push(...yesColumns)
-              console.log('Found YES columns as segments:', yesColumns)
-            }
-            
-            let foundSegment = null
-            
-            // Check each potential segment column
-            for (const segmentCol of segmentColumns) {
-              const value = row[segmentCol]?.toString().trim().toLowerCase()
-              if (value === 'yes' || value === 'true' || value === '1') {
-                foundSegment = segmentCol.toLowerCase()
-                uniqueSegments.add(foundSegment)
-                break
+            console.log('Processing feature:', feature, 'for OEM:', oem)
+
+            // Feature Counting: Check which segments apply for this feature
+            vehicleSegments.forEach(segment => {
+              // Check if this segment column exists and has 'yes' value
+              if (row[segment]?.toString().trim().toLowerCase() === 'yes') {
+                availableSegments.add(segment)
+                
+                // Update OEM → Segment mapping
+                if (!oemSegmentMap.has(oem)) {
+                  oemSegmentMap.set(oem, new Map())
+                }
+                const oemSegments = oemSegmentMap.get(oem)!
+                oemSegments.set(segment, (oemSegments.get(segment) || 0) + 1)
+                
+                // Update Segment → OEM mapping
+                if (!segmentOemMap.has(segment)) {
+                  segmentOemMap.set(segment, new Map())
+                }
+                const segmentOEMs = segmentOemMap.get(segment)!
+                segmentOEMs.set(oem, (segmentOEMs.get(oem) || 0) + 1)
+                
+                console.log(`Feature ${feature} applies to ${segment} segment for ${oem}`)
               }
-            }
-            
-            // If still no segment found, create a default 'unspecified' segment
-            if (!foundSegment) {
-              foundSegment = 'unspecified'
-              uniqueSegments.add(foundSegment)
-            }
-            
-            console.log('Feature:', feature, 'OEM:', oem, 'Segment:', foundSegment)
-            
-            // For OEM chart data (OEM on x-axis, segments stacked)
-            if (!segmentData.has(oem)) {
-              segmentData.set(oem, new Map())
-            }
-            const oemSegments = segmentData.get(oem)!
-            oemSegments.set(foundSegment, (oemSegments.get(foundSegment) || 0) + 1)
-            
-            // For Segment chart data (Segment on x-axis, OEMs stacked)
-            if (!oemData.has(foundSegment)) {
-              oemData.set(foundSegment, new Map())
-            }
-            const segmentOEMs = oemData.get(foundSegment)!
-            segmentOEMs.set(oem, (segmentOEMs.get(oem) || 0) + 1)
+            })
           }
         })
       }
     })
 
-    const segments = Array.from(uniqueSegments).sort()
-    console.log('Found segments:', segments)
-    console.log('Segment data:', Array.from(segmentData.entries()))
-    console.log('OEM data:', Array.from(oemData.entries()))
+    const segments = Array.from(availableSegments).sort()
+    console.log('Available segments:', segments)
+    console.log('OEM Segment Map:', Array.from(oemSegmentMap.entries()))
+    console.log('Segment OEM Map:', Array.from(segmentOemMap.entries()))
 
-    // Build OEM chart data (Features by OEM and Vehicle Segment)
+    // Build "Features by OEM and Vehicle Segment" chart data
     const oemChartData = selectedOEMs.map(oem => {
       const oemItem: any = { oem }
-      const oemSegments = segmentData.get(oem) || new Map()
+      const oemSegments = oemSegmentMap.get(oem) || new Map()
       
       segments.forEach(segment => {
         oemItem[segment] = oemSegments.get(segment) || 0
@@ -118,10 +89,10 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
       return oemItem
     }).filter(item => segments.some(segment => item[segment] > 0))
 
-    // Build Segment chart data (Features by Vehicle Segment and OEM)
+    // Build "Features by Vehicle Segment and OEM" chart data
     const segmentChartData = segments.map(segment => {
       const segmentItem: any = { segment }
-      const segmentOEMs = oemData.get(segment) || new Map()
+      const segmentOEMs = segmentOemMap.get(segment) || new Map()
       
       selectedOEMs.forEach(oem => {
         segmentItem[oem] = segmentOEMs.get(oem) || 0
@@ -138,9 +109,21 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
       segmentChartData, 
       availableSegments: segments 
     }
+  }
+
+  const { oemChartData, segmentChartData, availableSegments } = useMemo(() => {
+    return processVehicleSegmentData()
   }, [waypointData, selectedCountry, selectedOEMs])
 
-  const segmentColors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#10b981', '#06b6d4', '#8b5cf6', '#ec4899']
+  // Colors for vehicle segments
+  const segmentColors = {
+    'Entry': '#ef4444',
+    'Mid': '#f97316', 
+    'Premium': '#eab308',
+    'Luxury': '#10b981'
+  }
+
+  // Colors for OEMs
   const oemColors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#10b981', '#06b6d4', '#8b5cf6', '#ec4899']
 
   const handleOEMBarClick = (data: any) => {
@@ -175,7 +158,7 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
               Features by OEM and Vehicle Segment
             </h4>
             <p className={`${theme.textMuted} text-sm`}>
-              Distribution of available features across vehicle segments for each OEM
+              Number of features for each OEM, broken down by vehicle segments (Entry, Mid, Premium, Luxury)
             </p>
           </div>
           
@@ -205,17 +188,17 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
                 }}
                 formatter={(value: any, name: string) => [
                   `${value} features`,
-                  name
+                  `${name} Segment`
                 ]}
                 labelFormatter={(label) => `${label}`}
               />
               <Legend />
-              {availableSegments.map((segment, index) => (
+              {availableSegments.map((segment) => (
                 <Bar
                   key={segment}
                   dataKey={segment}
                   stackId="a"
-                  fill={segmentColors[index % segmentColors.length]}
+                  fill={segmentColors[segment as keyof typeof segmentColors] || '#6b7280'}
                   name={segment}
                   style={{ backgroundColor: 'transparent' }}
                 />
@@ -233,7 +216,7 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
               Features by Vehicle Segment and OEM
             </h4>
             <p className={`${theme.textMuted} text-sm`}>
-              Distribution of available features across OEMs for each vehicle segment
+              Number of features for each vehicle segment, broken down by OEM manufacturers
             </p>
           </div>
           
