@@ -18,33 +18,27 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
       return []
     }
 
-    // Define vehicle segments
-    const segments = ['entry', 'mid', 'premium', 'luxury']
-    
-    // OEM colors for consistent visualization
-    const oemColors = [
-      '#ef4444', // red-500
-      '#f97316', // orange-500
-      '#eab308', // yellow-500
-      '#22c55e', // green-500
-      '#3b82f6', // blue-500
-      '#8b5cf6', // violet-500
-      '#ec4899', // pink-500
-      '#06b6d4', // cyan-500
-    ]
+    console.log('Processing chart data for:', { selectedCountry, selectedOEMs })
 
+    // Define vehicle segments
+    const segments = ['Entry', 'Mid', 'Premium', 'Luxury']
+    
     const segmentData = segments.map(segment => {
       const segmentItem: any = { segment }
       
-      selectedOEMs.forEach((oem, index) => {
+      selectedOEMs.forEach((oem) => {
         let featureCount = 0
         
         waypointData.csvData.forEach(file => {
           if (file.data && Array.isArray(file.data)) {
             file.data.forEach((row: any) => {
+              // Check for exact matches and case variations
+              const vehicleSegment = row['Vehicle Segment']?.toString().trim()
+              const isSegmentMatch = vehicleSegment?.toLowerCase() === segment.toLowerCase()
+              
               if (row.Country === selectedCountry &&
                   row.OEM === oem &&
-                  row['Vehicle Segment']?.toLowerCase() === segment &&
+                  isSegmentMatch &&
                   row['Feature Availability']?.toString().trim().toLowerCase() === 'available') {
                 featureCount++
               }
@@ -55,12 +49,17 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
         segmentItem[oem] = featureCount
       })
       
+      console.log(`Segment ${segment} data:`, segmentItem)
       return segmentItem
     })
 
-    return segmentData.filter(item => 
+    // Filter out segments with no data
+    const filteredData = segmentData.filter(item => 
       selectedOEMs.some(oem => item[oem] > 0)
     )
+
+    console.log('Final chart data:', filteredData)
+    return filteredData
   }, [waypointData, selectedCountry, selectedOEMs])
 
   const oemColors = [
