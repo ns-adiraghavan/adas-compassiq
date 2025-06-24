@@ -27,60 +27,163 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
     const segmentOemMap = new Map<string, Map<string, number>>() // Segment → OEM → Count
     const availableSegments = new Set<string>()
 
-    // Define the vehicle segments we're looking for
-    const vehicleSegments = ['Entry', 'Mid', 'Premium', 'Luxury']
-
+    // Let's first detect what segment-related columns are actually available
+    let detectedSegmentColumns: string[] = []
+    
     waypointData.csvData.forEach(file => {
-      if (file.data && Array.isArray(file.data)) {
-        // First, let's check what columns are available in the first row
-        if (file.data.length > 0) {
-          const firstRow = file.data[0]
-          console.log('Available columns in CSV:', Object.keys(firstRow))
+      if (file.data && Array.isArray(file.data) && file.data.length > 0) {
+        const firstRow = file.data[0]
+        const allColumns = Object.keys(firstRow)
+        console.log('All available columns in CSV:', allColumns)
+        
+        // Look for segment-related columns with various possible names
+        const segmentPatterns = [
+          /^entry$/i, /^mid$/i, /^premium$/i, /^luxury$/i,
+          /entry.?level/i, /mid.?range/i, /premium.?segment/i, /luxury.?segment/i,
+          /segment.?entry/i, /segment.?mid/i, /segment.?premium/i, /segment.?luxury/i,
+          /^e$/i, /^m$/i, /^p$/i, /^l$/i, // Single letter variants
+          /basic/i, /standard/i, /high.?end/i, /executive/i
+        ]
+        
+        const segmentMappings: Record<string, string> = {
+          'entry': 'Entry',
+          'e': 'Entry', 
+          'basic': 'Entry',
+          'mid': 'Mid',
+          'm': 'Mid',
+          'standard': 'Mid',
+          'premium': 'Premium', 
+          'p': 'Premium',
+          'luxury': 'Luxury',
+          'l': 'Luxury',
+          'executive': 'Luxury',
+          'high-end': 'Luxury'
         }
-
-        file.data.forEach((row: any) => {
-          // Data Filtering: Filter by selected country and availability status
-          if (row.Country === selectedCountry && 
-              selectedOEMs.includes(row.OEM) &&
-              row['Feature Availability']?.toString().trim().toLowerCase() === 'available' &&
-              row.Feature && row.Feature.toString().trim() !== '') {
-            
-            const oem = row.OEM.toString().trim()
-            const feature = row.Feature.toString().trim()
-            
-            console.log('Processing feature:', feature, 'for OEM:', oem)
-            console.log('Row data for segments:', { Entry: row.Entry, Mid: row.Mid, Premium: row.Premium, Luxury: row.Luxury })
-
-            // Feature Counting: Check which segments apply for this feature
-            vehicleSegments.forEach(segment => {
-              // Check if this segment column exists and has 'yes' value
-              const segmentValue = row[segment]?.toString().trim().toLowerCase()
-              console.log(`Checking ${segment} for ${feature}: value = "${segmentValue}"`)
-              
-              if (segmentValue === 'yes' || segmentValue === 'y' || segmentValue === '1') {
-                availableSegments.add(segment)
-                
-                // Update OEM → Segment mapping
-                if (!oemSegmentMap.has(oem)) {
-                  oemSegmentMap.set(oem, new Map())
-                }
-                const oemSegments = oemSegmentMap.get(oem)!
-                oemSegments.set(segment, (oemSegments.get(segment) || 0) + 1)
-                
-                // Update Segment → OEM mapping
-                if (!segmentOemMap.has(segment)) {
-                  segmentOemMap.set(segment, new Map())
-                }
-                const segmentOEMs = segmentOemMap.get(segment)!
-                segmentOEMs.set(oem, (segmentOEMs.get(oem) || 0) + 1)
-                
-                console.log(`Feature ${feature} applies to ${segment} segment for ${oem}`)
-              }
-            })
+        
+        allColumns.forEach(column => {
+          const columnLower = column.toLowerCase().trim()
+          
+          // Direct mapping check
+          if (segmentMappings[columnLower]) {
+            if (!detectedSegmentColumns.includes(column)) {
+              detectedSegmentColumns.push(column)
+            }
           }
+          
+          // Pattern matching for more complex column names
+          segmentPatterns.forEach(pattern => {
+            if (pattern.test(column)) {
+              if (!detectedSegmentColumns.includes(column)) {
+                detectedSegmentColumns.push(column)
+              }
+            }
+          })
         })
       }
     })
+
+    console.log('Detected segment columns:', detectedSegmentColumns)
+
+    // If no specific segment columns found, look for category-based segmentation
+    if (detectedSegmentColumns.length === 0) {
+      console.log('No specific segment columns found, looking for Category-based segmentation')
+      
+      // Try to use Category column to infer segments
+      waypointData.csvData.forEach(file => {
+        if (file.data && Array.isArray(file.data)) {
+          file.data.forEach((row: any) => {
+            if (row.Country === selectedCountry && 
+                selectedOEMs.includes(row.OEM) &&
+                row['Feature Availability']?.toString().trim().toLowerCase() === 'available' &&
+                row.Feature && row.Feature.toString().trim() !== '') {
+              
+              const oem = row.OEM.toString().trim()
+              const feature = row.Feature.toString().trim()
+              const category = row.Category?.toString().trim() || 'Unspecified'
+              
+              // Use category as segment for now
+              availableSegments.add(category)
+              
+              // Update OEM → Segment mapping
+              if (!oemSegmentMap.has(oem)) {
+                oemSegmentMap.set(oem, new Map())
+              }
+              const oemSegments = oemSegmentMap.get(oem)!
+              oemSegments.set(category, (oemSegments.get(category) || 0) + 1)
+              
+              // Update Segment → OEM mapping
+              if (!segmentOemMap.has(category)) {
+                segmentOemMap.set(category, new Map())
+              }
+              const segmentOEMs = segmentOemMap.get(category)!
+              segmentOEMs.set(oem, (segmentOEMs.get(oem) || 0) + 1)
+              
+              console.log(`Feature ${feature} categorized as ${category} for ${oem}`)
+            }
+          })
+        }
+      })
+    } else {
+      // Process with detected segment columns
+      waypointData.csvData.forEach(file => {
+        if (file.data && Array.isArray(file.data)) {
+          file.data.forEach((row: any) => {
+            if (row.Country === selectedCountry && 
+                selectedOEMs.includes(row.OEM) &&
+                row['Feature Availability']?.toString().trim().toLowerCase() === 'available' &&
+                row.Feature && row.Feature.toString().trim() !== '') {
+              
+              const oem = row.OEM.toString().trim()
+              const feature = row.Feature.toString().trim()
+              
+              console.log('Processing feature:', feature, 'for OEM:', oem)
+              
+              // Check each detected segment column
+              detectedSegmentColumns.forEach(segmentColumn => {
+                const segmentValue = row[segmentColumn]?.toString().trim().toLowerCase()
+                console.log(`Checking ${segmentColumn} for ${feature}: value = "${segmentValue}"`)
+                
+                if (segmentValue === 'yes' || segmentValue === 'y' || segmentValue === '1' || 
+                    segmentValue === 'true' || segmentValue === 'available') {
+                  
+                  // Map column name to standard segment name
+                  const columnLower = segmentColumn.toLowerCase().trim()
+                  let standardSegment = segmentColumn // Default to original name
+                  
+                  if (columnLower.includes('entry') || columnLower === 'e' || columnLower.includes('basic')) {
+                    standardSegment = 'Entry'
+                  } else if (columnLower.includes('mid') || columnLower === 'm' || columnLower.includes('standard')) {
+                    standardSegment = 'Mid'
+                  } else if (columnLower.includes('premium') || columnLower === 'p') {
+                    standardSegment = 'Premium'
+                  } else if (columnLower.includes('luxury') || columnLower === 'l' || columnLower.includes('executive')) {
+                    standardSegment = 'Luxury'
+                  }
+                  
+                  availableSegments.add(standardSegment)
+                  
+                  // Update OEM → Segment mapping
+                  if (!oemSegmentMap.has(oem)) {
+                    oemSegmentMap.set(oem, new Map())
+                  }
+                  const oemSegments = oemSegmentMap.get(oem)!
+                  oemSegments.set(standardSegment, (oemSegments.get(standardSegment) || 0) + 1)
+                  
+                  // Update Segment → OEM mapping
+                  if (!segmentOemMap.has(standardSegment)) {
+                    segmentOemMap.set(standardSegment, new Map())
+                  }
+                  const segmentOEMs = segmentOemMap.get(standardSegment)!
+                  segmentOEMs.set(oem, (segmentOEMs.get(oem) || 0) + 1)
+                  
+                  console.log(`Feature ${feature} applies to ${standardSegment} segment for ${oem}`)
+                }
+              })
+            }
+          })
+        }
+      })
+    }
 
     const segments = Array.from(availableSegments).sort()
     console.log('Available segments:', segments)
@@ -180,6 +283,9 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
           <p className="text-sm mt-2">Selected Country: {selectedCountry}</p>
           <p className="text-sm">Selected OEMs: {selectedOEMs.join(', ')}</p>
           <p className="text-sm mt-2">Available segments detected: {availableSegments.join(', ') || 'None'}</p>
+          <p className="text-sm mt-1 text-orange-400">
+            Tip: Check console logs to see what columns are available in your CSV data
+          </p>
         </div>
       </div>
     )
@@ -195,7 +301,7 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
               Features by OEM and Vehicle Segment
             </h4>
             <p className={`${theme.textMuted} text-sm`}>
-              Number of features for each OEM, broken down by vehicle segments (Entry, Mid, Premium, Luxury)
+              Number of features for each OEM, broken down by vehicle segments
             </p>
           </div>
           
@@ -230,12 +336,12 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
                 labelFormatter={(label) => `${label}`}
               />
               <Legend />
-              {availableSegments.map((segment) => (
+              {availableSegments.map((segment, index) => (
                 <Bar
                   key={segment}
                   dataKey={segment}
                   stackId="a"
-                  fill={segmentColors[segment as keyof typeof segmentColors] || '#6b7280'}
+                  fill={segmentColors[segment as keyof typeof segmentColors] || oemColors[index % oemColors.length]}
                   name={segment}
                   style={{ backgroundColor: 'transparent' }}
                 />
