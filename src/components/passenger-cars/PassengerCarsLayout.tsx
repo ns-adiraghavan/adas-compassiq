@@ -36,18 +36,20 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
       <div className="container mx-auto px-8 py-4">
         <div className="flex flex-col items-start">
           {/* Themes button at extreme top left */}
-          <div className="mb-2">
+          <div className="absolute top-4 left-8 z-50">
             <ThemeSelector />
           </div>
           
-          {/* Back to Home button */}
-          <Link 
-            to="/" 
-            className={`inline-flex items-center ${theme.textMuted} hover:${theme.textPrimary.replace('text-', 'text-')} transition-colors mb-3`}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Home
-          </Link>
+          {/* Back to Home button - with top margin to account for themes button */}
+          <div className="mt-12">
+            <Link 
+              to="/" 
+              className={`inline-flex items-center ${theme.textMuted} hover:${theme.textPrimary.replace('text-', 'text-')} transition-colors mb-3`}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Home
+            </Link>
+          </div>
           
           {/* Title and subtitle aligned to left */}
           <h1 className={`text-3xl font-thin mb-1 ${theme.textPrimary} tracking-tight`}>
