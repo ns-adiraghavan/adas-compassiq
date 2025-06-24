@@ -216,7 +216,10 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
               borderRadius: '8px',
               color: theme.textPrimary.includes('text-white') ? '#ffffff' : '#000000',
             }}
-            formatter={(value: any, name: string) => [`${value} features`, name]}
+            formatter={(value: any, name: string) => [
+              typeof value === 'number' ? `${value} features` : String(value), 
+              name
+            ]}
           />
           <Legend />
           {dataKeys.map((key, index) => (
