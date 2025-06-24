@@ -8,11 +8,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
+import { ChevronDown, ChevronRight } from "lucide-react"
 
 const CategoryAnalysisContent = () => {
   const [selectedCountry, setSelectedCountry] = useState("")
   const [selectedOEMs, setSelectedOEMs] = useState<string[]>([])
   const [showOEMSelector, setShowOEMSelector] = useState(false)
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
   const { data: firstOEM } = useFirstAvailableOEM()
   const { data: waypointData } = useWaypointData()
   const { theme } = useTheme()
@@ -77,6 +79,7 @@ const CategoryAnalysisContent = () => {
   const handleCountryChange = (country: string) => {
     setSelectedCountry(country)
     setSelectedOEMs([])
+    setExpandedCategory(null)
   }
 
   const handleOEMToggle = (oem: string) => {
@@ -85,14 +88,21 @@ const CategoryAnalysisContent = () => {
         ? prev.filter(o => o !== oem)
         : [...prev, oem]
     )
+    setExpandedCategory(null)
   }
 
   const selectAllOEMs = () => {
     setSelectedOEMs(availableOEMs)
+    setExpandedCategory(null)
   }
 
   const clearAllOEMs = () => {
     setSelectedOEMs([])
+    setExpandedCategory(null)
+  }
+
+  const handleCategoryClick = (category: string) => {
+    setExpandedCategory(expandedCategory === category ? null : category)
   }
 
   // Generate table data
@@ -139,6 +149,48 @@ const CategoryAnalysisContent = () => {
       }))
       .sort((a, b) => b.total - a.total)
   })()
+
+  // Generate features data for expanded category
+  const getFeaturesForCategory = (category: string) => {
+    if (!waypointData?.csvData?.length || !selectedCountry || selectedOEMs.length === 0) {
+      return []
+    }
+
+    const features: Array<{
+      feature: string
+      oem: string
+      businessModel?: string
+      lighthouseFeature?: string
+    }> = []
+    
+    waypointData.csvData.forEach(file => {
+      if (file.data && Array.isArray(file.data)) {
+        file.data.forEach((row: any) => {
+          const rowCountry = row.Country?.toString().trim()
+          const rowOEM = row.OEM?.toString().trim()
+          const rowCategory = row.Category?.toString().trim()
+          const rowFeature = row.Feature?.toString().trim()
+          const featureAvailability = row['Feature Availability']?.toString().trim().toLowerCase()
+          
+          if (rowCountry === selectedCountry &&
+              rowOEM && selectedOEMs.includes(rowOEM) &&
+              rowCategory === category &&
+              rowFeature && rowFeature !== '' &&
+              featureAvailability === 'available') {
+            
+            features.push({
+              feature: rowFeature,
+              oem: rowOEM,
+              businessModel: row['Business Model']?.toString().trim() || '',
+              lighthouseFeature: row['Lighthouse Feature']?.toString().trim() || ''
+            })
+          }
+        })
+      }
+    })
+
+    return features.sort((a, b) => a.feature.localeCompare(b.feature))
+  }
 
   return (
     <div className="w-full px-6 py-4 space-y-6">
@@ -207,42 +259,96 @@ const CategoryAnalysisContent = () => {
             Category Analysis - Feature Availability
           </h3>
           <p className={`${theme.textMuted} text-sm`}>
-            Showing available feature counts by category for selected OEMs in {selectedCountry}
+            Showing available feature counts by category for selected OEMs in {selectedCountry}. Click on a category to view detailed features.
           </p>
         </div>
 
         {tableData.length > 0 ? (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className={`${theme.cardBorder} border-b`}>
-                  <TableHead className={`${theme.textSecondary} font-medium`}>Category</TableHead>
-                  {selectedOEMs.map((oem) => (
-                    <TableHead key={oem} className={`${theme.textSecondary} font-medium text-center`}>
-                      {oem.length > 12 ? oem.substring(0, 12) + '...' : oem}
-                    </TableHead>
-                  ))}
-                  <TableHead className={`${theme.textSecondary} font-medium text-center`}>Total</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {tableData.map((row) => (
-                  <TableRow key={row.category} className={`${theme.cardBorder} border-b hover:bg-gray-800/30`}>
-                    <TableCell className={`${theme.textPrimary} font-medium`}>
-                      {row.category}
-                    </TableCell>
+          <div className="space-y-4">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className={`${theme.cardBorder} border-b`}>
+                    <TableHead className={`${theme.textSecondary} font-medium`}>Category</TableHead>
                     {selectedOEMs.map((oem) => (
-                      <TableCell key={oem} className={`${theme.textSecondary} text-center`}>
-                        {row[oem] || 0}
-                      </TableCell>
+                      <TableHead key={oem} className={`${theme.textSecondary} font-medium text-center`}>
+                        {oem.length > 12 ? oem.substring(0, 12) + '...' : oem}
+                      </TableHead>
                     ))}
-                    <TableCell className={`${theme.textPrimary} text-center font-medium`}>
-                      {row.total}
-                    </TableCell>
+                    <TableHead className={`${theme.textSecondary} font-medium text-center`}>Total</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {tableData.map((row) => (
+                    <TableRow 
+                      key={row.category} 
+                      className={`${theme.cardBorder} border-b hover:bg-gray-800/30 cursor-pointer transition-colors ${
+                        expandedCategory === row.category ? 'bg-gray-800/20' : ''
+                      }`}
+                      onClick={() => handleCategoryClick(row.category)}
+                    >
+                      <TableCell className={`${theme.textPrimary} font-medium`}>
+                        <div className="flex items-center gap-2">
+                          {expandedCategory === row.category ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
+                          {row.category}
+                        </div>
+                      </TableCell>
+                      {selectedOEMs.map((oem) => (
+                        <TableCell key={oem} className={`${theme.textSecondary} text-center`}>
+                          {row[oem] || 0}
+                        </TableCell>
+                      ))}
+                      <TableCell className={`${theme.textPrimary} text-center font-medium`}>
+                        {row.total}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Expanded Features Table */}
+            {expandedCategory && (
+              <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-lg p-4 mt-4`}>
+                <h4 className={`text-md font-medium ${theme.textPrimary} mb-3`}>
+                  Available Features in {expandedCategory}
+                </h4>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className={`${theme.cardBorder} border-b`}>
+                        <TableHead className={`${theme.textSecondary} font-medium`}>Feature</TableHead>
+                        <TableHead className={`${theme.textSecondary} font-medium`}>OEM</TableHead>
+                        <TableHead className={`${theme.textSecondary} font-medium`}>Business Model</TableHead>
+                        <TableHead className={`${theme.textSecondary} font-medium`}>Lighthouse</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {getFeaturesForCategory(expandedCategory).map((feature, index) => (
+                        <TableRow key={index} className={`${theme.cardBorder} border-b hover:bg-gray-800/20`}>
+                          <TableCell className={`${theme.textPrimary}`}>
+                            {feature.feature}
+                          </TableCell>
+                          <TableCell className={`${theme.textSecondary}`}>
+                            {feature.oem}
+                          </TableCell>
+                          <TableCell className={`${theme.textSecondary}`}>
+                            {feature.businessModel || 'N/A'}
+                          </TableCell>
+                          <TableCell className={`${theme.textSecondary}`}>
+                            {feature.lighthouseFeature?.toLowerCase() === 'yes' ? 'Yes' : 'No'}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className={`text-center py-8 ${theme.textMuted}`}>
