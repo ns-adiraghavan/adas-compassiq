@@ -62,6 +62,11 @@ export function useDataInsightsAI({
     return data as DataInsightsResponse
   }, [selectedOEM, selectedCountry, dashboardMetrics, contextData])
 
+  // Fix the enabled logic to ensure it always returns a boolean
+  const shouldEnable = enabled && (
+    contextData ? true : (!isMetricsLoading && !!dashboardMetrics)
+  )
+
   return useQuery<DataInsightsResponse>({
     queryKey: [
       'data-insights-ai', 
@@ -71,7 +76,7 @@ export function useDataInsightsAI({
       contextData || dashboardMetrics
     ],
     queryFn: queryFn,
-    enabled: enabled && (contextData || (!isMetricsLoading && !!dashboardMetrics)),
+    enabled: Boolean(shouldEnable),
     staleTime: 15 * 60 * 1000, // Cache for 15 minutes
     gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
     refetchOnWindowFocus: false,
