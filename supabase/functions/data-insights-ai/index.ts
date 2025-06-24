@@ -16,50 +16,63 @@ const corsHeaders = {
 const insightsCache = new Map<string, any>();
 
 const createInsightsPrompt = (oem: string, country: string, dashboardMetrics: any, isMarketOverview: boolean) => {
-  if (isMarketOverview || oem === "Market Overview") {
-    return `Generate market strategic insights for ${country || 'global market'}.
-
-MARKET DATA SUMMARY:
-• Total Available Features: ${dashboardMetrics.totalFeatures}
-• Active OEMs: ${dashboardMetrics.totalOEMs}
-• Countries Covered: ${dashboardMetrics.totalCountries}
-• Lighthouse Features: ${dashboardMetrics.lighthouseFeatures} (${Math.round((dashboardMetrics.lighthouseFeatures / dashboardMetrics.totalFeatures) * 100)}%)
-• Subscription Features: ${dashboardMetrics.subscriptionFeatures} (${Math.round((dashboardMetrics.subscriptionFeatures / dashboardMetrics.totalFeatures) * 100)}%)
-• Market Leaders: ${dashboardMetrics.marketLeaders?.slice(0, 3).map(leader => `${leader.oem} (${leader.totalFeatures} features)`).join(', ') || 'N/A'}
-• Top Category: ${dashboardMetrics.topCategories?.[0]?.name || 'N/A'}
-
-REQUIREMENTS:
-- Generate exactly 4 bullet points about the OVERALL MARKET (not any specific OEM)
-- Each bullet point: Maximum 25 words
-- Focus on market trends, opportunities, and competitive landscape
-- Actionable market-level insights for the automotive industry
-- Data-driven observations about market dynamics
-
-Respond with ONLY a JSON array of exactly 4 strings. No other text or formatting.
-
-Example: ["${country || 'Global'} market shows strong innovation with ${Math.round((dashboardMetrics.lighthouseFeatures / dashboardMetrics.totalFeatures) * 100)}% lighthouse features across ${dashboardMetrics.totalOEMs} OEMs", "Subscription model adoption creates new revenue opportunities in automotive tech", "Market leaders concentrate in ${dashboardMetrics.topCategories?.[0]?.name || 'key'} category with competitive advantages", "Feature availability gaps present expansion opportunities for new entrants"]`;
+  const topCategory = dashboardMetrics.topCategories?.[0]?.name || 'Unknown';
+  const secondCategory = dashboardMetrics.topCategories?.[1]?.name || 'Unknown';
+  const lighthouseRate = Math.round((dashboardMetrics.lighthouseFeatures / dashboardMetrics.totalFeatures) * 100);
+  const subscriptionRate = Math.round((dashboardMetrics.subscriptionFeatures / dashboardMetrics.totalFeatures) * 100);
+  const freeRate = Math.round((dashboardMetrics.freeFeatures / dashboardMetrics.totalFeatures) * 100);
+  
+  // Determine most common business model
+  let dominantBusinessModel = 'Subscription';
+  if (freeRate > subscriptionRate) {
+    dominantBusinessModel = 'Free';
   }
 
-  return `Generate strategic insights for ${oem} in ${country || 'global market'}.
+  if (isMarketOverview || oem === "Market Overview") {
+    return `Generate exactly 3 strategic market insight boxes for ${country || 'global market'}.
 
-OEM DATA SUMMARY:
-• ${oem} Features: ${dashboardMetrics.competitiveAnalysis?.selectedOEM?.features || 0}
-• Market Position: #${dashboardMetrics.competitiveAnalysis?.marketPosition || 'N/A'} out of ${dashboardMetrics.totalOEMs}
-• Lighthouse Rate: ${dashboardMetrics.competitiveAnalysis?.selectedOEM?.lighthouseRate || 0}% vs Market Avg ${dashboardMetrics.competitiveAnalysis?.marketAverage?.lighthouseRate || 0}%
-• Subscription Rate: ${dashboardMetrics.competitiveAnalysis?.selectedOEM?.subscriptionRate || 0}% vs Market Avg ${dashboardMetrics.competitiveAnalysis?.marketAverage?.subscriptionRate || 0}%
-• Market Context: ${dashboardMetrics.totalFeatures} total features, ${dashboardMetrics.totalOEMs} competitors
-• Top Category: ${dashboardMetrics.topCategories?.[0]?.name || 'N/A'}
+MARKET DATA CONTEXT:
+• Country: ${country || 'Global'}
+• Total Features: ${dashboardMetrics.totalFeatures}
+• Active OEMs: ${dashboardMetrics.totalOEMs}
+• Top Categories: ${topCategory} (${dashboardMetrics.topCategories?.[0]?.value || 0}), ${secondCategory} (${dashboardMetrics.topCategories?.[1]?.value || 0})
+• Lighthouse Features: ${dashboardMetrics.lighthouseFeatures} (${lighthouseRate}%)
+• Business Models: Subscription ${subscriptionRate}%, Free ${freeRate}%
 
-REQUIREMENTS:
-- Generate exactly 4 bullet points about ${oem} specifically
-- Each bullet point: Maximum 25 words
-- Focus on competitive positioning and performance gaps
-- Actionable business insights for this specific OEM
-- Data-driven observations comparing against market
+GENERATE EXACTLY 3 INSIGHTS in this specific format:
 
-Respond with ONLY a JSON array of exactly 4 strings. No other text or formatting.
+Box-1: Category Dynamics - Most OEMs in ${country || 'the market'} are betting big on ${topCategory} category (top by count) owing to emphasis on [reason based on category type]
 
-Example: ["${oem} ranks #${dashboardMetrics.competitiveAnalysis?.marketPosition || 'X'} with ${dashboardMetrics.competitiveAnalysis?.selectedOEM?.features || 'Y'} features, ${dashboardMetrics.competitiveAnalysis?.selectedOEM?.features > dashboardMetrics.competitiveAnalysis?.marketAverage?.features ? 'above' : 'below'} market average", "Innovation ${dashboardMetrics.competitiveAnalysis?.selectedOEM?.lighthouseRate > dashboardMetrics.competitiveAnalysis?.marketAverage?.lighthouseRate ? 'leadership' : 'gap'}: ${dashboardMetrics.competitiveAnalysis?.selectedOEM?.lighthouseRate || 0}% lighthouse vs ${dashboardMetrics.competitiveAnalysis?.marketAverage?.lighthouseRate || 0}% market rate", "Revenue model opportunity in subscription features for increased monetization", "Category ${dashboardMetrics.competitiveAnalysis?.selectedOEM?.features > 10 ? 'leadership' : 'expansion'} potential in ${dashboardMetrics.topCategories?.[0]?.name || 'core'} segments"]`;
+Box-2: Lighthouse Features - Lighthouse features indicate what customers love in ${country || 'the market'} with ${lighthouseRate}% of features being lighthouse, showing [customer preference insight]
+
+Box-3: Monetization Dynamics - In ${country || 'the market'} most OEMs follow ${dominantBusinessModel} business model (${dominantBusinessModel === 'Subscription' ? subscriptionRate : freeRate}%) indicating [customer payment willingness insight]
+
+Respond with ONLY a JSON array of exactly 3 strings following the above format. No other text.`;
+  }
+
+  const selectedOEMData = dashboardMetrics.competitiveAnalysis?.selectedOEM;
+  const marketAverage = dashboardMetrics.competitiveAnalysis?.marketAverage;
+
+  return `Generate exactly 3 strategic insights for ${oem} in ${country || 'global market'}.
+
+OEM DATA CONTEXT:
+• OEM: ${oem}
+• Country: ${country || 'Global'}
+• OEM Features: ${selectedOEMData?.features || 0}
+• Market Position: #${dashboardMetrics.competitiveAnalysis?.marketPosition || 'N/A'}
+• OEM Lighthouse Rate: ${selectedOEMData?.lighthouseRate || 0}% vs Market ${marketAverage?.lighthouseRate || 0}%
+• OEM Subscription Rate: ${selectedOEMData?.subscriptionRate || 0}% vs Market ${marketAverage?.subscriptionRate || 0}%
+• Top Market Category: ${topCategory}
+
+GENERATE EXACTLY 3 INSIGHTS in this specific format:
+
+Box-1: Category Dynamics - ${oem} in ${country || 'the market'} focuses on ${topCategory} category [competitive positioning vs market]
+
+Box-2: Lighthouse Features - ${oem}'s lighthouse rate of ${selectedOEMData?.lighthouseRate || 0}% vs market ${marketAverage?.lighthouseRate || 0}% shows [competitive advantage/gap]
+
+Box-3: Monetization Dynamics - ${oem} uses ${selectedOEMData?.subscriptionRate > 50 ? 'Subscription' : 'Free'} model primarily (${selectedOEMData?.subscriptionRate || 0}%) vs market trend [competitive insight]
+
+Respond with ONLY a JSON array of exactly 3 strings following the above format. No other text.`;
 }
 
 serve(async (req) => {
@@ -85,15 +98,13 @@ serve(async (req) => {
       const emptyResult = {
         success: true,
         insights: isMarketOverview ? [
-          `No market data found for ${country || 'selected region'}`,
-          "Expand data collection or adjust country filters",
-          "Market analysis requires available feature data",
-          "Consider broader geographic scope for insights"
+          `Box-1: Category Dynamics - No category data available for ${country || 'selected region'}`,
+          `Box-2: Lighthouse Features - No lighthouse feature data found for ${country || 'selected region'}`,
+          `Box-3: Monetization Dynamics - No business model data available for ${country || 'selected region'}`
         ] : [
-          `No available features found for ${oem} in ${country || 'selected market'}`,
-          "Expand data collection or adjust market filters",
-          "Feature tracking required for strategic analysis",
-          "Data availability crucial for competitive insights"
+          `Box-1: Category Dynamics - No category data available for ${oem} in ${country || 'selected market'}`,
+          `Box-2: Lighthouse Features - No lighthouse data found for ${oem} in ${country || 'selected market'}`,
+          `Box-3: Monetization Dynamics - No business model data available for ${oem} in ${country || 'selected market'}`
         ],
         dataPoints: 0
       };
@@ -118,7 +129,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are an automotive market analyst. Return ONLY a JSON array of exactly 4 strings. Each string must be under 25 words and contain actionable insights. No other text or formatting.'
+            content: 'You are an automotive market analyst. Return ONLY a JSON array of exactly 3 strings in the specified Box format. Each string must follow the exact format provided. No other text or formatting.'
           },
           {
             role: 'user',
@@ -126,7 +137,7 @@ serve(async (req) => {
           }
         ],
         temperature: 0.3,
-        max_tokens: 300,
+        max_tokens: 400,
       }),
     });
 
@@ -160,42 +171,46 @@ serve(async (req) => {
       );
     } catch (parseError) {
       console.log('JSON parse failed, using fallback insights:', parseError);
-      // Fallback to generated insights based on data
+      // Fallback to structured insights based on data
+      const topCategory = dashboardMetrics.topCategories?.[0]?.name || 'Unknown';
+      const lighthouseRate = Math.round((dashboardMetrics.lighthouseFeatures / dashboardMetrics.totalFeatures) * 100);
+      const subscriptionRate = Math.round((dashboardMetrics.subscriptionFeatures / dashboardMetrics.totalFeatures) * 100);
+      const freeRate = Math.round((dashboardMetrics.freeFeatures / dashboardMetrics.totalFeatures) * 100);
+      const dominantModel = subscriptionRate > freeRate ? 'Subscription' : 'Free';
+      const dominantRate = subscriptionRate > freeRate ? subscriptionRate : freeRate;
+
       if (isMarketOverview) {
         insights = [
-          `${country || 'Global'} market demonstrates ${dashboardMetrics.totalFeatures} available features across ${dashboardMetrics.totalOEMs} active OEMs`,
-          `${Math.round((dashboardMetrics.lighthouseFeatures / dashboardMetrics.totalFeatures) * 100)}% lighthouse features indicate strong market innovation momentum`,
-          `Subscription adoption at ${Math.round((dashboardMetrics.subscriptionFeatures / dashboardMetrics.totalFeatures) * 100)}% signals revenue model transformation opportunity`,
-          `${dashboardMetrics.topCategories?.[0]?.name || 'Key'} category dominance creates competitive differentiation opportunities`
+          `Box-1: Category Dynamics - Most OEMs in ${country || 'the market'} are betting big on ${topCategory} category (top by count) owing to emphasis on innovation and customer utility`,
+          `Box-2: Lighthouse Features - Lighthouse features indicate what customers love in ${country || 'the market'} with ${lighthouseRate}% of features being lighthouse, showing strong customer preference for premium experiences`,
+          `Box-3: Monetization Dynamics - In ${country || 'the market'} most OEMs follow ${dominantModel} business model (${dominantRate}%) indicating ${dominantModel === 'Free' ? 'low' : 'moderate'} customer openness to pay`
         ];
       } else {
+        const selectedOEMData = dashboardMetrics.competitiveAnalysis?.selectedOEM;
         insights = [
-          `${oem} offers ${dashboardMetrics.competitiveAnalysis?.selectedOEM?.features || 0} features, ranking #${dashboardMetrics.competitiveAnalysis?.marketPosition || 'N/A'}`,
-          `Innovation rate: ${dashboardMetrics.competitiveAnalysis?.selectedOEM?.lighthouseRate || 0}% vs ${dashboardMetrics.competitiveAnalysis?.marketAverage?.lighthouseRate || 0}% market average`,
-          `Subscription opportunity: ${dashboardMetrics.competitiveAnalysis?.selectedOEM?.subscriptionRate || 0}% vs ${dashboardMetrics.competitiveAnalysis?.marketAverage?.subscriptionRate || 0}% market rate`,
-          `Leading position potential in ${dashboardMetrics.topCategories?.[0]?.name || 'key'} category segment`
+          `Box-1: Category Dynamics - ${oem} in ${country || 'the market'} focuses on ${topCategory} category with competitive positioning in the market`,
+          `Box-2: Lighthouse Features - ${oem}'s lighthouse rate of ${selectedOEMData?.lighthouseRate || 0}% shows ${selectedOEMData?.lighthouseRate > 20 ? 'strong customer focus' : 'opportunity for premium features'}`,
+          `Box-3: Monetization Dynamics - ${oem} primarily uses ${selectedOEMData?.subscriptionRate > 50 ? 'Subscription' : 'Free'} model indicating strategic revenue approach`
         ];
       }
     }
 
-    // Ensure exactly 4 insights
+    // Ensure exactly 3 insights
     const fallbackInsights = isMarketOverview ? [
-      `${country || 'Global'} market demonstrates ${dashboardMetrics.totalFeatures} available features with strong competition`,
-      `Innovation leadership with ${Math.round((dashboardMetrics.lighthouseFeatures / dashboardMetrics.totalFeatures) * 100)}% lighthouse feature adoption rate`,
-      `Revenue transformation through ${Math.round((dashboardMetrics.subscriptionFeatures / dashboardMetrics.totalFeatures) * 100)}% subscription model penetration`,
-      `Category concentration in ${dashboardMetrics.topCategories?.[0]?.name || 'core'} segment creates market focus opportunities`
+      `Box-1: Category Dynamics - Market shows diverse category focus with ${dashboardMetrics.topCategories?.[0]?.name || 'various'} leading the innovation`,
+      `Box-2: Lighthouse Features - Customer preferences indicated by lighthouse adoption across ${dashboardMetrics.totalOEMs} OEMs`,
+      `Box-3: Monetization Dynamics - Business model trends show mixed approach to customer monetization strategies`
     ] : [
-      `${oem} demonstrates competitive positioning with available feature portfolio`,
-      `Innovation opportunity exists in lighthouse feature development`,
-      `Revenue diversification potential through subscription offerings`,
-      `Market advantage achievable in ${dashboardMetrics.topCategories?.[0]?.name || 'core'} category positioning`
+      `Box-1: Category Dynamics - ${oem} demonstrates strategic category positioning in competitive market`,
+      `Box-2: Lighthouse Features - Feature strategy shows customer-focused development approach`,
+      `Box-3: Monetization Dynamics - Revenue model aligns with market positioning and customer base`
     ];
 
-    while (insights.length < 4) {
-      insights.push(fallbackInsights[insights.length] || `Strategic opportunity in ${country || 'target'} market`);
+    while (insights.length < 3) {
+      insights.push(fallbackInsights[insights.length] || `Box-${insights.length + 1}: Strategic opportunity in ${country || 'target'} market`);
     }
 
-    insights = insights.slice(0, 4);
+    insights = insights.slice(0, 3);
 
     const result = {
       success: true,
@@ -222,10 +237,9 @@ serve(async (req) => {
       JSON.stringify({ 
         success: false, 
         insights: [
-          'Insights temporarily unavailable',
-          'Check data connectivity and retry',
-          'Technical analysis service offline',
-          'Contact support if issue persists'
+          'Box-1: Category Dynamics - Insights temporarily unavailable due to technical issues',
+          'Box-2: Lighthouse Features - Feature analysis service currently offline',
+          'Box-3: Monetization Dynamics - Business model insights unavailable, please retry'
         ],
         error: error.message,
         dataPoints: 0
