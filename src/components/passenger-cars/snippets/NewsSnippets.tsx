@@ -34,8 +34,10 @@ const NewsSnippets = ({
       }
     } catch (error) {
       console.error('Invalid URL:', url, error)
-      // For demo purposes, show an alert to the user
-      alert('This is a demo news snippet. In a real implementation, this would redirect to the actual news source.')
+      // Only show alert for obviously invalid URLs
+      if (!url.startsWith('http')) {
+        alert('Invalid news URL. Please try again.')
+      }
     }
   }
 
@@ -44,7 +46,7 @@ const NewsSnippets = ({
       <CardHeader className="pb-3">
         <CardTitle className="text-white text-lg flex items-center">
           <Newspaper className="h-5 w-5 mr-2" />
-          News Snippets - From AI
+          News Snippets - Real Time
           {isLoading && <Loader2 className="h-4 w-4 ml-2 animate-spin" />}
         </CardTitle>
       </CardHeader>
