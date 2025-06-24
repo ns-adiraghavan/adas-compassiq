@@ -32,7 +32,7 @@ serve(async (req) => {
         JSON.stringify({ 
           success: true, 
           newsSnippets: fallbackNews,
-          context: { selectedOEMs, selectedCountry, analysisType }
+          context: { selectedOEMs, selectedCountry, analysisType, source: 'fallback' }
         }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -47,7 +47,7 @@ serve(async (req) => {
 
     // Fetch real news from NewsAPI
     const newsResponse = await fetch(
-      `https://newsapi.org/v2/everything?q=${encodeURIComponent(searchQuery)}&language=en&sortBy=publishedAt&pageSize=15&apiKey=${newsApiKey}`
+      `https://newsapi.org/v2/everything?q=${encodeURIComponent(searchQuery)}&language=en&sortBy=publishedAt&pageSize=20&apiKey=${newsApiKey}`
     );
 
     if (!newsResponse.ok) {
@@ -64,21 +64,21 @@ serve(async (req) => {
       throw new Error(`NewsAPI error: ${newsData.message}`);
     }
 
-    // Transform NewsAPI articles to our format with better filtering
+    // Transform NewsAPI articles to our format with improved filtering
     const newsSnippets = processNewsArticles(newsData.articles, selectedOEMs);
 
     console.log('Processed contextual news snippets:', newsSnippets.length);
 
     // If no relevant articles found, provide contextual fallback
     if (newsSnippets.length === 0) {
-      console.log('No relevant articles found, using contextual fallback');
+      console.log('No relevant articles found after filtering, using contextual fallback');
       const fallbackNews = generateContextualFallback(selectedOEMs, selectedCountry, analysisType);
       
       return new Response(
         JSON.stringify({ 
           success: true, 
           newsSnippets: fallbackNews,
-          context: { selectedOEMs, selectedCountry, analysisType }
+          context: { selectedOEMs, selectedCountry, analysisType, source: 'fallback_no_articles' }
         }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -90,7 +90,7 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         newsSnippets: newsSnippets,
-        context: { selectedOEMs, selectedCountry, analysisType }
+        context: { selectedOEMs, selectedCountry, analysisType, source: 'newsapi' }
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -107,7 +107,8 @@ serve(async (req) => {
       JSON.stringify({ 
         success: false, 
         newsSnippets: fallbackNews,
-        error: error.message
+        error: error.message,
+        context: { source: 'fallback_error' }
       }),
       {
         status: 200, // Return 200 to provide fallback data
