@@ -2,6 +2,7 @@
 import { VennDiagramData, EntityFeatureData } from "@/utils/vennDiagramUtils"
 import { SelectedIntersection } from "@/components/VennDiagram"
 import { useTheme } from "@/contexts/ThemeContext"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 interface VennDiagramTableProps {
   data: VennDiagramData
@@ -45,7 +46,7 @@ const VennDiagramTable = ({ data, entities, selectedIntersection }: VennDiagramT
       </h3>
       
       <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-lg p-4`}>
-        <div className="flex justify-between items-center mb-3">
+        <div className="flex justify-between items-center mb-4">
           <h4 className={`text-lg font-medium ${theme.textPrimary}`}>
             {getIntersectionLabel()}
           </h4>
@@ -55,19 +56,46 @@ const VennDiagramTable = ({ data, entities, selectedIntersection }: VennDiagramT
         </div>
         
         {selectedIntersection.features.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-            {selectedIntersection.features.map((feature, featureIndex) => (
-              <div
-                key={featureIndex}
-                className={`text-sm ${theme.textSecondary} bg-gray-500/10 px-3 py-2 rounded border`}
-              >
-                {feature}
-              </div>
-            ))}
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className={`${theme.cardBorder} border-b`}>
+                  <TableHead className={`text-left ${theme.textPrimary} font-medium`}>
+                    #
+                  </TableHead>
+                  <TableHead className={`text-left ${theme.textPrimary} font-medium`}>
+                    Feature Name
+                  </TableHead>
+                  <TableHead className={`text-center ${theme.textPrimary} font-medium`}>
+                    Availability
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {selectedIntersection.features.map((feature, index) => (
+                  <TableRow 
+                    key={index}
+                    className={`${theme.cardBorder} border-b hover:${theme.cardBackground} transition-colors`}
+                  >
+                    <TableCell className={`${theme.textSecondary} font-medium w-16`}>
+                      {index + 1}
+                    </TableCell>
+                    <TableCell className={`${theme.textSecondary} font-medium`}>
+                      {feature}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/30">
+                        Available
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         ) : (
-          <div className={`${theme.textMuted} text-center py-4`}>
-            No features found for this intersection
+          <div className={`${theme.textMuted} text-center py-8`}>
+            <p>No features found for this intersection</p>
           </div>
         )}
       </div>
