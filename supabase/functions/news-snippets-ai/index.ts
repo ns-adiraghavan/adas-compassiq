@@ -21,6 +21,7 @@ interface NewsSnippet {
   summary: string;
   source: string;
   timestamp: string;
+  url: string;
 }
 
 serve(async (req) => {
@@ -43,6 +44,7 @@ serve(async (req) => {
     2. A brief summary (1-2 sentences, max 100 characters)
     3. A credible source name
     4. Recent timestamp (within last 2 weeks)
+    5. A realistic URL to the article
     
     Focus on: business models, feature launches, market expansion, partnerships, technology developments, or regulatory changes.
     
@@ -52,7 +54,8 @@ serve(async (req) => {
         "title": "headline here",
         "summary": "brief summary here",
         "source": "source name",
-        "timestamp": "X hours/days ago"
+        "timestamp": "X hours/days ago",
+        "url": "https://example.com/article-url"
       }
     ]`;
 
@@ -67,7 +70,7 @@ serve(async (req) => {
         messages: [
           { 
             role: 'system', 
-            content: 'You are an automotive industry news analyst. Generate realistic, relevant automotive news snippets based on the given context. Always return valid JSON array format.' 
+            content: 'You are an automotive industry news analyst. Generate realistic, relevant automotive news snippets based on the given context. Always return valid JSON array format with realistic URLs.' 
           },
           { role: 'user', content: contextPrompt }
         ],
@@ -94,7 +97,8 @@ serve(async (req) => {
         title: item.title || `News Update ${index + 1}`,
         summary: item.summary || 'Industry update available',
         source: item.source || 'Industry Source',
-        timestamp: item.timestamp || `${Math.floor(Math.random() * 24)} hours ago`
+        timestamp: item.timestamp || `${Math.floor(Math.random() * 24)} hours ago`,
+        url: item.url || `https://example.com/news-${index + 1}`
       }));
     } catch (parseError) {
       console.error('Failed to parse AI response:', parseError);
@@ -105,21 +109,24 @@ serve(async (req) => {
           title: `${oemsText} Market Update`,
           summary: `Latest developments in ${selectedCountry} automotive market`,
           source: 'Automotive News',
-          timestamp: '2 hours ago'
+          timestamp: '2 hours ago',
+          url: 'https://autonews.com/market-update'
         },
         {
           id: 2,
           title: 'Industry Analysis',
           summary: `${analysisType} trends and market insights`,
           source: 'Reuters',
-          timestamp: '4 hours ago'
+          timestamp: '4 hours ago',
+          url: 'https://reuters.com/automotive-analysis'
         },
         {
           id: 3,
           title: 'Technology Advancement',
           summary: 'New automotive technology partnerships announced',
           source: 'TechCrunch',
-          timestamp: '6 hours ago'
+          timestamp: '6 hours ago',
+          url: 'https://techcrunch.com/automotive-tech'
         }
       ];
     }
@@ -145,21 +152,24 @@ serve(async (req) => {
         title: 'Automotive Market Update',
         summary: 'Latest industry developments and trends',
         source: 'Industry Report',
-        timestamp: '1 hour ago'
+        timestamp: '1 hour ago',
+        url: 'https://example.com/market-update'
       },
       {
         id: 2,
         title: 'Technology Innovation',
         summary: 'New automotive technology announcements',
         source: 'Tech News',
-        timestamp: '3 hours ago'
+        timestamp: '3 hours ago',
+        url: 'https://example.com/tech-innovation'
       },
       {
         id: 3,
         title: 'Market Analysis',
         summary: 'Regional automotive market insights',
         source: 'Market Research',
-        timestamp: '5 hours ago'
+        timestamp: '5 hours ago',
+        url: 'https://example.com/market-analysis'
       }
     ];
 

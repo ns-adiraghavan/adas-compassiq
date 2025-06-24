@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Newspaper, Loader2 } from "lucide-react"
+import { Newspaper, Loader2, ExternalLink } from "lucide-react"
 import { useNewsSnippetsAI } from "@/hooks/useNewsSnippetsAI"
 
 interface NewsSnippetsProps {
@@ -22,6 +22,10 @@ const NewsSnippets = ({
   })
 
   const newsSnippets = newsData?.newsSnippets || []
+
+  const handleNewsClick = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
 
   return (
     <Card className="bg-gray-900/50 border-gray-700">
@@ -45,17 +49,32 @@ const NewsSnippets = ({
         ) : error ? (
           <p className="text-gray-400 text-sm">Unable to load news updates</p>
         ) : (
-          <ul className="space-y-2 list-disc list-inside pl-2">
+          <div className="space-y-2">
             {newsSnippets.map((news) => (
-              <li key={news.id} className="text-white text-sm break-words">
-                <span className="font-medium">{news.title}:</span>{" "}
-                <span className="text-gray-400">{news.summary}</span>{" "}
-                <div className="text-gray-500 text-xs mt-1">
-                  <span className="italic">{news.source}</span> • <span>{news.timestamp}</span>
+              <div 
+                key={news.id} 
+                className="cursor-pointer hover:bg-gray-800/50 p-3 rounded-lg transition-colors group border border-transparent hover:border-gray-600"
+                onClick={() => handleNewsClick(news.url)}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center mb-1">
+                      <span className="font-medium text-white text-sm group-hover:text-blue-400 transition-colors">
+                        {news.title}
+                      </span>
+                      <ExternalLink className="h-3 w-3 ml-2 text-gray-500 group-hover:text-blue-400 transition-colors" />
+                    </div>
+                    <p className="text-gray-400 text-xs mb-2 leading-relaxed">
+                      {news.summary}
+                    </p>
+                    <div className="text-gray-500 text-xs">
+                      <span className="italic">{news.source}</span> • <span>{news.timestamp}</span>
+                    </div>
+                  </div>
                 </div>
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         )}
       </CardContent>
     </Card>

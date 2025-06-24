@@ -9,6 +9,7 @@ interface NewsSnippet {
   summary: string
   source: string
   timestamp: string
+  url: string
 }
 
 interface NewsSnippetsAIProps {
