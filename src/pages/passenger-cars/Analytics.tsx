@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react"
 import { useFirstAvailableOEM, useWaypointData } from "@/hooks/useWaypointData"
 import CountryButtons from "@/components/CountryButtons"
@@ -379,7 +380,6 @@ const CategoryAnalysisContent = () => {
               selectedOEM={selectedOEMs.length === 1 ? selectedOEMs[0] : ""}
               selectedCountry={selectedCountry}
               oemClickedFromChart={false}
-              compact={true}
             />
           </div>
         </div>
