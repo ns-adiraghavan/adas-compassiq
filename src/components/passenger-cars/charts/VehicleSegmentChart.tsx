@@ -162,8 +162,8 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
         />
         <Tooltip 
           contentStyle={{
-            backgroundColor: 'transparent',
-            border: 'none',
+            backgroundColor: theme.cardBackground.includes('bg-gray-800') ? '#1f2937' : '#ffffff',
+            border: `1px solid ${theme.cardBorder.includes('border-gray-700') ? '#374151' : '#e5e7eb'}`,
             borderRadius: '8px',
             color: theme.textPrimary.includes('text-white') ? '#ffffff' : '#000000',
             boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
