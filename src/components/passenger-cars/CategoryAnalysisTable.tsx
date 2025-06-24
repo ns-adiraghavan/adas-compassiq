@@ -22,9 +22,9 @@ const CategoryAnalysisTable = ({
   const { data: waypointData } = useWaypointData()
   const { theme } = useTheme()
 
-  const { categoryData, expandedFeatures } = useMemo(() => {
+  const { categoryData, expandedFeaturesData } = useMemo(() => {
     if (!waypointData?.csvData?.length || !selectedCountry || selectedOEMs.length === 0) {
-      return { categoryData: [], expandedFeatures: [] }
+      return { categoryData: [], expandedFeaturesData: {} }
     }
 
     const categoryFeatureData: Record<string, Record<string, number>> = {}
@@ -66,20 +66,33 @@ const CategoryAnalysisTable = ({
 
     const categoryData = Array.from(allCategories).map(category => {
       const row: any = { name: category }
-      let total = 0
       selectedOEMs.forEach(oem => {
         const count = categoryFeatureData[category]?.[oem] || 0
         row[oem] = count
-        total += count
       })
-      row.total = total
       return row
-    }).filter(row => row.total > 0).sort((a, b) => b.total - a.total)
+    }).filter(row => selectedOEMs.some(oem => row[oem] > 0)).sort((a, b) => {
+      const totalA = selectedOEMs.reduce((sum, oem) => sum + (a[oem] || 0), 0)
+      const totalB = selectedOEMs.reduce((sum, oem) => sum + (b[oem] || 0), 0)
+      return totalB - totalA
+    })
 
-    // Get features for expanded category
-    const expandedFeatures = expandedCategory ? (categoryFeatures[expandedCategory] || []) : []
+    // Process features for expanded category
+    const expandedFeaturesData: Record<string, Record<string, string>> = {}
+    if (expandedCategory && categoryFeatures[expandedCategory]) {
+      categoryFeatures[expandedCategory].forEach((feature: any) => {
+        const featureName = feature.Feature?.toString().trim()
+        const oem = feature.OEM?.toString().trim()
+        const businessModelType = feature['Business Model Type']?.toString().trim() || 'Unknown'
+        
+        if (!expandedFeaturesData[featureName]) {
+          expandedFeaturesData[featureName] = {}
+        }
+        expandedFeaturesData[featureName][oem] = businessModelType
+      })
+    }
 
-    return { categoryData, expandedFeatures }
+    return { categoryData, expandedFeaturesData }
   }, [waypointData, selectedCountry, selectedOEMs, businessModelFilter, expandedCategory])
 
   const getCellColor = (value: number, maxInRow: number) => {
@@ -157,7 +170,7 @@ const CategoryAnalysisTable = ({
       </div>
 
       {/* Expanded Features Table */}
-      {expandedCategory && expandedFeatures.length > 0 && (
+      {expandedCategory && Object.keys(expandedFeaturesData).length > 0 && (
         <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-lg p-6`}>
           <h4 className={`text-xl font-semibold ${theme.textPrimary} mb-4`}>
             Features in {expandedCategory} Category{businessModelFilter && ` (${businessModelFilter})`}
@@ -167,22 +180,24 @@ const CategoryAnalysisTable = ({
               <thead>
                 <tr className={`${theme.cardBorder} border-b`}>
                   <th className={`text-left p-4 ${theme.textPrimary} font-medium`}>Feature</th>
-                  <th className={`text-left p-4 ${theme.textPrimary} font-medium`}>OEM</th>
-                  <th className={`text-left p-4 ${theme.textPrimary} font-medium`}>Business Model Type</th>
+                  {selectedOEMs.map(oem => (
+                    <th key={oem} className={`text-center p-4 ${theme.textPrimary} font-medium min-w-[120px]`}>
+                      {oem}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {expandedFeatures.map((feature, index) => (
+                {Object.entries(expandedFeaturesData).map(([featureName, oemData], index) => (
                   <tr key={index} className={`${theme.cardBorder} border-b hover:${theme.cardBackground} transition-colors`}>
-                    <td className={`p-4 ${theme.textSecondary}`}>
-                      {feature.Feature}
+                    <td className={`p-4 ${theme.textSecondary} font-medium`}>
+                      {featureName}
                     </td>
-                    <td className={`p-4 ${theme.textSecondary}`}>
-                      {feature.OEM}
-                    </td>
-                    <td className={`p-4 ${theme.textSecondary}`}>
-                      {feature['Business Model Type'] || 'Unknown'}
-                    </td>
+                    {selectedOEMs.map(oem => (
+                      <td key={oem} className={`p-4 text-center ${theme.textSecondary}`}>
+                        {oemData[oem] || '-'}
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
