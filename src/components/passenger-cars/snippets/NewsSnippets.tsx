@@ -88,7 +88,10 @@ const NewsSnippets = ({
           News Snippets - Real Time
           {isLoading && <Loader2 className="h-4 w-4 ml-2 animate-spin" />}
           {!isRealContent && !isLoading && (
-            <AlertCircle className="h-4 w-4 ml-2 text-yellow-500" title="Demo content - real URLs will show with live data" />
+            <div className="relative">
+              <AlertCircle className="h-4 w-4 ml-2 text-yellow-500" />
+              <span className="sr-only">Demo content - real URLs will show with live data</span>
+            </div>
           )}
         </CardTitle>
       </CardHeader>
@@ -128,7 +131,10 @@ const NewsSnippets = ({
                       </span>
                       <ExternalLink className="h-3 w-3 ml-2 text-gray-500 group-hover:text-blue-400 transition-colors" />
                       {failedUrls.has(news.url) && (
-                        <AlertCircle className="h-3 w-3 ml-1 text-red-400" title="Link unavailable" />
+                        <div className="relative">
+                          <AlertCircle className="h-3 w-3 ml-1 text-red-400" />
+                          <span className="sr-only">Link unavailable</span>
+                        </div>
                       )}
                     </div>
                     <p className="text-gray-400 text-xs mb-2 leading-relaxed">
