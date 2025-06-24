@@ -33,7 +33,7 @@ const VehicleSegmentCategoryTable = ({
     }
   })()
 
-  // Generate table data - simplified structure matching CategoryAnalysisTable
+  // Generate table data - transposed structure
   const tableData = (() => {
     if (!waypointData?.csvData?.length || !selectedCountry || selectedOEMs.length === 0) {
       return []
@@ -56,16 +56,23 @@ const VehicleSegmentCategoryTable = ({
             
             if (!categoryData[rowCategory]) {
               categoryData[rowCategory] = {}
+              // Initialize all columns to 0
+              if (groupingMode === 'by-oem') {
+                selectedOEMs.forEach(oem => {
+                  categoryData[rowCategory][oem] = 0
+                })
+              } else {
+                extractVehicleSegments(waypointData, selectedCountry, selectedOEMs).forEach(segment => {
+                  categoryData[rowCategory][segment] = 0
+                })
+              }
             }
             
             if (groupingMode === 'by-oem') {
-              // Count by OEM
-              if (!categoryData[rowCategory][rowOEM]) {
-                categoryData[rowCategory][rowOEM] = 0
-              }
+              // Count by OEM - OEMs as columns
               categoryData[rowCategory][rowOEM]++
             } else {
-              // Count by segment - check segment columns
+              // Count by segment - segments as columns
               const firstRow = file.data[0]
               const allColumns = Object.keys(firstRow)
               const segmentPatterns = [
@@ -90,10 +97,9 @@ const VehicleSegmentCategoryTable = ({
                   else if (segmentName.toLowerCase().includes('luxury')) segmentName = 'Luxury'
                   else segmentName = segmentCol
                   
-                  if (!categoryData[rowCategory][segmentName]) {
-                    categoryData[rowCategory][segmentName] = 0
+                  if (categoryData[rowCategory][segmentName] !== undefined) {
+                    categoryData[rowCategory][segmentName]++
                   }
-                  categoryData[rowCategory][segmentName]++
                 }
               })
             }
@@ -102,14 +108,21 @@ const VehicleSegmentCategoryTable = ({
       }
     })
 
+    // Convert to array format with category as first column, then OEMs/segments as data columns
     return Object.entries(categoryData)
-      .map(([category, counts]) => ({
-        category,
-        ...counts
-      }))
+      .map(([category, counts]) => {
+        const row: any = { category }
+        columnHeaders.forEach(header => {
+          const originalHeader = groupingMode === 'by-oem' 
+            ? selectedOEMs.find(oem => (oem.length > 12 ? oem.substring(0, 12) + '...' : oem) === header) || header
+            : header
+          row[header] = counts[originalHeader] || 0
+        })
+        return row
+      })
       .sort((a, b) => {
-        const totalA = Object.values(a).filter(v => typeof v === 'number').reduce((sum: number, count) => sum + (count as number), 0)
-        const totalB = Object.values(b).filter(v => typeof v === 'number').reduce((sum: number, count) => sum + (count as number), 0)
+        const totalA = columnHeaders.reduce((sum, header) => sum + (a[header] || 0), 0)
+        const totalB = columnHeaders.reduce((sum, header) => sum + (b[header] || 0), 0)
         return totalB - totalA
       })
   })()
@@ -146,7 +159,8 @@ const VehicleSegmentCategoryTable = ({
             }
             
             if (groupingMode === 'by-oem') {
-              featureMatrix[rowFeature][rowOEM] = {
+              const displayHeader = rowOEM.length > 12 ? rowOEM.substring(0, 12) + '...' : rowOEM
+              featureMatrix[rowFeature][displayHeader] = {
                 available: true,
                 lighthouse: lighthouseFeature
               }
