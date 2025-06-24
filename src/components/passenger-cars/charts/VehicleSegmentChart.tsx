@@ -1,6 +1,9 @@
 
 import { useMemo, useState } from "react"
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend } from "recharts"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { Button } from "@/components/ui/button"
 import { useWaypointData } from "@/hooks/useWaypointData"
 import { useTheme } from "@/contexts/ThemeContext"
 
@@ -9,244 +12,178 @@ interface VehicleSegmentChartProps {
   selectedOEMs: string[]
 }
 
+type ViewMode = 'grouped' | 'table'
+type GroupingMode = 'by-oem' | 'by-segment'
+
 const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentChartProps) => {
   const { data: waypointData } = useWaypointData()
   const { theme } = useTheme()
-  const [selectedOEM, setSelectedOEM] = useState<string | null>(null)
-  const [selectedSegment, setSelectedSegment] = useState<string | null>(null)
+  const [viewMode, setViewMode] = useState<ViewMode>('grouped')
+  const [groupingMode, setGroupingMode] = useState<GroupingMode>('by-oem')
 
   const processVehicleSegmentData = () => {
     if (!waypointData?.csvData?.length || !selectedCountry || selectedOEMs.length === 0) {
-      return { oemChartData: [], segmentChartData: [], availableSegments: [] }
+      return { chartData: [], availableSegments: [], hasData: false, debugInfo: {} }
     }
 
     console.log('Processing vehicle segment data for:', { selectedCountry, selectedOEMs })
 
-    // Dual mapping: OEM → Segments → Feature Count and Segments → OEM → Feature Count
-    const oemSegmentMap = new Map<string, Map<string, number>>() // OEM → Segment → Count
-    const segmentOemMap = new Map<string, Map<string, number>>() // Segment → OEM → Count
+    const segmentFeatureMap = new Map<string, Map<string, number>>()
+    const oemFeatureMap = new Map<string, Map<string, number>>()
     const availableSegments = new Set<string>()
-
-    // Let's first detect what segment-related columns are actually available
-    let detectedSegmentColumns: string[] = []
     
+    let detectedSegmentColumns: string[] = []
+    let debugInfo: any = {
+      totalRows: 0,
+      processedRows: 0,
+      availableColumns: [],
+      segmentColumns: [],
+      sampleData: []
+    }
+
+    // Analyze available columns
     waypointData.csvData.forEach(file => {
       if (file.data && Array.isArray(file.data) && file.data.length > 0) {
         const firstRow = file.data[0]
         const allColumns = Object.keys(firstRow)
-        console.log('All available columns in CSV:', allColumns)
+        debugInfo.availableColumns = allColumns
         
-        // Look for segment-related columns with various possible names
+        console.log('All available columns:', allColumns)
+        
+        // Look for segment-related columns
         const segmentPatterns = [
-          /^entry$/i, /^mid$/i, /^premium$/i, /^luxury$/i,
-          /entry.?level/i, /mid.?range/i, /premium.?segment/i, /luxury.?segment/i,
-          /segment.?entry/i, /segment.?mid/i, /segment.?premium/i, /segment.?luxury/i,
-          /^e$/i, /^m$/i, /^p$/i, /^l$/i, // Single letter variants
-          /basic/i, /standard/i, /high.?end/i, /executive/i
+          /segment/i, /entry/i, /mid/i, /premium/i, /luxury/i, /basic/i, /standard/i, /high/i, /executive/i
         ]
         
-        const segmentMappings: Record<string, string> = {
-          'entry': 'Entry',
-          'e': 'Entry', 
-          'basic': 'Entry',
-          'mid': 'Mid',
-          'm': 'Mid',
-          'standard': 'Mid',
-          'premium': 'Premium', 
-          'p': 'Premium',
-          'luxury': 'Luxury',
-          'l': 'Luxury',
-          'executive': 'Luxury',
-          'high-end': 'Luxury'
-        }
-        
         allColumns.forEach(column => {
-          const columnLower = column.toLowerCase().trim()
-          
-          // Direct mapping check
-          if (segmentMappings[columnLower]) {
-            if (!detectedSegmentColumns.includes(column)) {
-              detectedSegmentColumns.push(column)
-            }
+          if (segmentPatterns.some(pattern => pattern.test(column))) {
+            detectedSegmentColumns.push(column)
           }
-          
-          // Pattern matching for more complex column names
-          segmentPatterns.forEach(pattern => {
-            if (pattern.test(column)) {
-              if (!detectedSegmentColumns.includes(column)) {
-                detectedSegmentColumns.push(column)
-              }
-            }
-          })
         })
+        
+        debugInfo.segmentColumns = detectedSegmentColumns
+        debugInfo.sampleData = file.data.slice(0, 3)
       }
     })
 
     console.log('Detected segment columns:', detectedSegmentColumns)
 
-    // If no specific segment columns found, look for category-based segmentation
-    if (detectedSegmentColumns.length === 0) {
-      console.log('No specific segment columns found, looking for Category-based segmentation')
-      
-      // Try to use Category column to infer segments
-      waypointData.csvData.forEach(file => {
-        if (file.data && Array.isArray(file.data)) {
-          file.data.forEach((row: any) => {
-            if (row.Country === selectedCountry && 
-                selectedOEMs.includes(row.OEM) &&
-                row['Feature Availability']?.toString().trim().toLowerCase() === 'available' &&
-                row.Feature && row.Feature.toString().trim() !== '') {
-              
-              const oem = row.OEM.toString().trim()
-              const feature = row.Feature.toString().trim()
-              const category = row.Category?.toString().trim() || 'Unspecified'
-              
-              // Use category as segment for now
-              availableSegments.add(category)
-              
-              // Update OEM → Segment mapping
-              if (!oemSegmentMap.has(oem)) {
-                oemSegmentMap.set(oem, new Map())
-              }
-              const oemSegments = oemSegmentMap.get(oem)!
-              oemSegments.set(category, (oemSegments.get(category) || 0) + 1)
-              
-              // Update Segment → OEM mapping
-              if (!segmentOemMap.has(category)) {
-                segmentOemMap.set(category, new Map())
-              }
-              const segmentOEMs = segmentOemMap.get(category)!
-              segmentOEMs.set(oem, (segmentOEMs.get(oem) || 0) + 1)
-              
-              console.log(`Feature ${feature} categorized as ${category} for ${oem}`)
-            }
-          })
-        }
-      })
-    } else {
-      // Process with detected segment columns
-      waypointData.csvData.forEach(file => {
-        if (file.data && Array.isArray(file.data)) {
-          file.data.forEach((row: any) => {
-            if (row.Country === selectedCountry && 
-                selectedOEMs.includes(row.OEM) &&
-                row['Feature Availability']?.toString().trim().toLowerCase() === 'available' &&
-                row.Feature && row.Feature.toString().trim() !== '') {
-              
-              const oem = row.OEM.toString().trim()
-              const feature = row.Feature.toString().trim()
-              
-              console.log('Processing feature:', feature, 'for OEM:', oem)
-              
-              // Check each detected segment column
-              detectedSegmentColumns.forEach(segmentColumn => {
-                const segmentValue = row[segmentColumn]?.toString().trim().toLowerCase()
-                console.log(`Checking ${segmentColumn} for ${feature}: value = "${segmentValue}"`)
+    // Process data
+    waypointData.csvData.forEach(file => {
+      if (file.data && Array.isArray(file.data)) {
+        file.data.forEach((row: any) => {
+          debugInfo.totalRows++
+          
+          if (row.Country === selectedCountry && 
+              selectedOEMs.includes(row.OEM) &&
+              row['Feature Availability']?.toString().trim().toLowerCase() === 'available' &&
+              row.Feature && row.Feature.toString().trim() !== '') {
+            
+            debugInfo.processedRows++
+            const oem = row.OEM.toString().trim()
+            const feature = row.Feature.toString().trim()
+            
+            // Check segment columns
+            if (detectedSegmentColumns.length > 0) {
+              detectedSegmentColumns.forEach(segmentCol => {
+                const segmentValue = row[segmentCol]?.toString().trim().toLowerCase()
                 
-                if (segmentValue === 'yes' || segmentValue === 'y' || segmentValue === '1' || 
-                    segmentValue === 'true' || segmentValue === 'available') {
+                if (segmentValue && segmentValue !== 'n/a' && segmentValue !== '' && 
+                    (segmentValue === 'yes' || segmentValue === 'y' || segmentValue === '1' || 
+                     segmentValue === 'true' || segmentValue === 'available')) {
                   
-                  // Map column name to standard segment name
-                  const columnLower = segmentColumn.toLowerCase().trim()
-                  let standardSegment = segmentColumn // Default to original name
+                  let segmentName = segmentCol.replace(/segment/i, '').trim()
+                  if (segmentName.toLowerCase().includes('entry')) segmentName = 'Entry'
+                  else if (segmentName.toLowerCase().includes('mid')) segmentName = 'Mid'
+                  else if (segmentName.toLowerCase().includes('premium')) segmentName = 'Premium'
+                  else if (segmentName.toLowerCase().includes('luxury')) segmentName = 'Luxury'
+                  else segmentName = segmentCol
                   
-                  if (columnLower.includes('entry') || columnLower === 'e' || columnLower.includes('basic')) {
-                    standardSegment = 'Entry'
-                  } else if (columnLower.includes('mid') || columnLower === 'm' || columnLower.includes('standard')) {
-                    standardSegment = 'Mid'
-                  } else if (columnLower.includes('premium') || columnLower === 'p') {
-                    standardSegment = 'Premium'
-                  } else if (columnLower.includes('luxury') || columnLower === 'l' || columnLower.includes('executive')) {
-                    standardSegment = 'Luxury'
+                  availableSegments.add(segmentName)
+                  
+                  // Update segment → OEM mapping
+                  if (!segmentFeatureMap.has(segmentName)) {
+                    segmentFeatureMap.set(segmentName, new Map())
                   }
-                  
-                  availableSegments.add(standardSegment)
-                  
-                  // Update OEM → Segment mapping
-                  if (!oemSegmentMap.has(oem)) {
-                    oemSegmentMap.set(oem, new Map())
-                  }
-                  const oemSegments = oemSegmentMap.get(oem)!
-                  oemSegments.set(standardSegment, (oemSegments.get(standardSegment) || 0) + 1)
-                  
-                  // Update Segment → OEM mapping
-                  if (!segmentOemMap.has(standardSegment)) {
-                    segmentOemMap.set(standardSegment, new Map())
-                  }
-                  const segmentOEMs = segmentOemMap.get(standardSegment)!
+                  const segmentOEMs = segmentFeatureMap.get(segmentName)!
                   segmentOEMs.set(oem, (segmentOEMs.get(oem) || 0) + 1)
                   
-                  console.log(`Feature ${feature} applies to ${standardSegment} segment for ${oem}`)
+                  // Update OEM → segment mapping
+                  if (!oemFeatureMap.has(oem)) {
+                    oemFeatureMap.set(oem, new Map())
+                  }
+                  const oemSegments = oemFeatureMap.get(oem)!
+                  oemSegments.set(segmentName, (oemSegments.get(segmentName) || 0) + 1)
                 }
               })
+            } else {
+              // Fallback to category-based segmentation
+              const category = row.Category?.toString().trim() || 'General'
+              availableSegments.add(category)
+              
+              if (!segmentFeatureMap.has(category)) {
+                segmentFeatureMap.set(category, new Map())
+              }
+              const segmentOEMs = segmentFeatureMap.get(category)!
+              segmentOEMs.set(oem, (segmentOEMs.get(oem) || 0) + 1)
+              
+              if (!oemFeatureMap.has(oem)) {
+                oemFeatureMap.set(oem, new Map())
+              }
+              const oemSegments = oemFeatureMap.get(oem)!
+              oemSegments.set(category, (oemSegments.get(category) || 0) + 1)
             }
-          })
-        }
-      })
-    }
+          }
+        })
+      }
+    })
 
     const segments = Array.from(availableSegments).sort()
-    console.log('Available segments:', segments)
-    console.log('OEM Segment Map:', Array.from(oemSegmentMap.entries()))
-    console.log('Segment OEM Map:', Array.from(segmentOemMap.entries()))
+    console.log('Final processing results:', { segments, debugInfo })
 
-    // Build "Features by OEM and Vehicle Segment" chart data
-    const oemChartData = selectedOEMs.map(oem => {
-      const oemItem: any = { oem }
-      const oemSegments = oemSegmentMap.get(oem) || new Map()
-      
-      segments.forEach(segment => {
-        oemItem[segment] = oemSegments.get(segment) || 0
-      })
-      
-      // Calculate total for this OEM
-      const total = segments.reduce((sum, segment) => sum + (oemItem[segment] || 0), 0)
-      console.log(`OEM ${oem} total features across segments:`, total, oemItem)
-      
-      return oemItem
-    }).filter(item => {
-      // Only include OEMs that have at least one feature in any segment
-      const hasFeatures = segments.some(segment => item[segment] > 0)
-      console.log(`OEM ${item.oem} has features:`, hasFeatures)
-      return hasFeatures
-    })
-
-    // Build "Features by Vehicle Segment and OEM" chart data
-    const segmentChartData = segments.map(segment => {
-      const segmentItem: any = { segment }
-      const segmentOEMs = segmentOemMap.get(segment) || new Map()
-      
-      selectedOEMs.forEach(oem => {
-        segmentItem[oem] = segmentOEMs.get(oem) || 0
-      })
-      
-      // Calculate total for this segment
-      const total = selectedOEMs.reduce((sum, oem) => sum + (segmentItem[oem] || 0), 0)
-      console.log(`Segment ${segment} total features across OEMs:`, total, segmentItem)
-      
-      return segmentItem
-    }).filter(item => {
-      // Only include segments that have at least one feature from any OEM
-      const hasFeatures = selectedOEMs.some(oem => item[oem] > 0)
-      console.log(`Segment ${item.segment} has features:`, hasFeatures)
-      return hasFeatures
-    })
-
-    console.log('Final OEM Chart Data:', oemChartData)
-    console.log('Final Segment Chart Data:', segmentChartData)
+    // Build chart data based on grouping mode
+    let chartData: any[] = []
     
+    if (groupingMode === 'by-oem') {
+      // Group by OEM (OEMs on X-axis, segments as separate bars)
+      chartData = selectedOEMs.map(oem => {
+        const item: any = { name: oem }
+        const oemSegments = oemFeatureMap.get(oem) || new Map()
+        
+        segments.forEach(segment => {
+          item[segment] = oemSegments.get(segment) || 0
+        })
+        
+        return item
+      }).filter(item => segments.some(segment => item[segment] > 0))
+    } else {
+      // Group by segment (Segments on X-axis, OEMs as separate bars)
+      chartData = segments.map(segment => {
+        const item: any = { name: segment }
+        const segmentOEMs = segmentFeatureMap.get(segment) || new Map()
+        
+        selectedOEMs.forEach(oem => {
+          item[oem] = segmentOEMs.get(oem) || 0
+        })
+        
+        return item
+      }).filter(item => selectedOEMs.some(oem => item[oem] > 0))
+    }
+
     return { 
-      oemChartData, 
-      segmentChartData, 
-      availableSegments: segments 
+      chartData, 
+      availableSegments: segments, 
+      hasData: chartData.length > 0,
+      debugInfo,
+      segmentFeatureMap,
+      oemFeatureMap
     }
   }
 
-  const { oemChartData, segmentChartData, availableSegments } = useMemo(() => {
+  const { chartData, availableSegments, hasData, debugInfo, segmentFeatureMap, oemFeatureMap } = useMemo(() => {
     return processVehicleSegmentData()
-  }, [waypointData, selectedCountry, selectedOEMs])
+  }, [waypointData, selectedCountry, selectedOEMs, groupingMode])
 
-  // Colors for vehicle segments
   const segmentColors = {
     'Entry': '#ef4444',
     'Mid': '#f97316', 
@@ -254,160 +191,184 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
     'Luxury': '#10b981'
   }
 
-  // Colors for OEMs
   const oemColors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#10b981', '#06b6d4', '#8b5cf6', '#ec4899']
 
-  const handleOEMBarClick = (data: any) => {
-    setSelectedOEM(data.oem === selectedOEM ? null : data.oem)
-    setSelectedSegment(null)
+  const renderGroupedBarChart = () => {
+    const dataKeys = groupingMode === 'by-oem' ? availableSegments : selectedOEMs
+    const colors = groupingMode === 'by-oem' ? segmentColors : oemColors
+
+    return (
+      <ResponsiveContainer width="100%" height={400}>
+        <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+          <XAxis 
+            dataKey="name" 
+            tick={{ fill: theme.textSecondary.includes('text-gray-400') ? '#9ca3af' : '#6b7280' }}
+            axisLine={{ stroke: theme.cardBorder.includes('border-gray-700') ? '#374151' : '#e5e7eb' }}
+          />
+          <YAxis 
+            tick={{ fill: theme.textSecondary.includes('text-gray-400') ? '#9ca3af' : '#6b7280' }}
+            axisLine={{ stroke: theme.cardBorder.includes('border-gray-700') ? '#374151' : '#e5e7eb' }}
+          />
+          <Tooltip 
+            contentStyle={{
+              backgroundColor: theme.cardBackground.includes('bg-gray-800') ? '#1f2937' : '#ffffff',
+              border: `1px solid ${theme.cardBorder.includes('border-gray-700') ? '#374151' : '#e5e7eb'}`,
+              borderRadius: '8px',
+              color: theme.textPrimary.includes('text-white') ? '#ffffff' : '#000000',
+            }}
+            formatter={(value: any, name: string) => [`${value} features`, name]}
+          />
+          <Legend />
+          {dataKeys.map((key, index) => (
+            <Bar
+              key={key}
+              dataKey={key}
+              fill={colors[key as keyof typeof colors] || oemColors[index % oemColors.length]}
+              name={key}
+            />
+          ))}
+        </BarChart>
+      </ResponsiveContainer>
+    )
   }
 
-  const handleSegmentBarClick = (data: any) => {
-    setSelectedSegment(data.segment === selectedSegment ? null : data.segment)
-    setSelectedOEM(null)
+  const renderTable = () => {
+    if (groupingMode === 'by-oem') {
+      return (
+        <div className="overflow-x-auto">
+          <table className={`w-full ${theme.cardBorder} border rounded-lg`}>
+            <thead className={`${theme.cardBackground}`}>
+              <tr>
+                <th className={`px-4 py-2 text-left ${theme.textPrimary}`}>OEM</th>
+                {availableSegments.map(segment => (
+                  <th key={segment} className={`px-4 py-2 text-center ${theme.textPrimary}`}>
+                    {segment}
+                  </th>
+                ))}
+                <th className={`px-4 py-2 text-center ${theme.textPrimary}`}>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {selectedOEMs.map(oem => {
+                const oemSegments = oemFeatureMap?.get(oem) || new Map()
+                const total = availableSegments.reduce((sum, segment) => sum + (oemSegments.get(segment) || 0), 0)
+                return (
+                  <tr key={oem} className={`${theme.cardBorder} border-t`}>
+                    <td className={`px-4 py-2 font-medium ${theme.textPrimary}`}>{oem}</td>
+                    {availableSegments.map(segment => (
+                      <td key={segment} className={`px-4 py-2 text-center ${theme.textSecondary}`}>
+                        {oemSegments.get(segment) || 0}
+                      </td>
+                    ))}
+                    <td className={`px-4 py-2 text-center font-medium ${theme.textPrimary}`}>
+                      {total}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      )
+    } else {
+      return (
+        <div className="overflow-x-auto">
+          <table className={`w-full ${theme.cardBorder} border rounded-lg`}>
+            <thead className={`${theme.cardBackground}`}>
+              <tr>
+                <th className={`px-4 py-2 text-left ${theme.textPrimary}`}>Segment</th>
+                {selectedOEMs.map(oem => (
+                  <th key={oem} className={`px-4 py-2 text-center ${theme.textPrimary}`}>
+                    {oem}
+                  </th>
+                ))}
+                <th className={`px-4 py-2 text-center ${theme.textPrimary}`}>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {availableSegments.map(segment => {
+                const segmentOEMs = segmentFeatureMap?.get(segment) || new Map()
+                const total = selectedOEMs.reduce((sum, oem) => sum + (segmentOEMs.get(oem) || 0), 0)
+                return (
+                  <tr key={segment} className={`${theme.cardBorder} border-t`}>
+                    <td className={`px-4 py-2 font-medium ${theme.textPrimary}`}>{segment}</td>
+                    {selectedOEMs.map(oem => (
+                      <td key={oem} className={`px-4 py-2 text-center ${theme.textSecondary}`}>
+                        {segmentOEMs.get(oem) || 0}
+                      </td>
+                    ))}
+                    <td className={`px-4 py-2 text-center font-medium ${theme.textPrimary}`}>
+                      {total}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      )
+    }
   }
 
-  console.log('Final render check:', { 
-    oemChartDataLength: oemChartData.length, 
-    segmentChartDataLength: segmentChartData.length,
-    availableSegments,
-    selectedCountry,
-    selectedOEMs 
-  })
-
-  if (!oemChartData.length && !segmentChartData.length) {
+  if (!hasData) {
     return (
       <div className={`h-full flex items-center justify-center ${theme.textMuted}`}>
         <div className="text-center">
           <p>No vehicle segment data available for the selected filters</p>
           <p className="text-sm mt-2">Selected Country: {selectedCountry}</p>
           <p className="text-sm">Selected OEMs: {selectedOEMs.join(', ')}</p>
-          <p className="text-sm mt-2">Available segments detected: {availableSegments.join(', ') || 'None'}</p>
-          <p className="text-sm mt-1 text-orange-400">
-            Tip: Check console logs to see what columns are available in your CSV data
-          </p>
+          <div className="mt-4 text-xs">
+            <p>Debug Info:</p>
+            <p>Total rows: {debugInfo.totalRows}</p>
+            <p>Processed rows: {debugInfo.processedRows}</p>
+            <p>Available segments: {availableSegments.join(', ')}</p>
+            <p>Detected columns: {debugInfo.segmentColumns?.join(', ')}</p>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-8">
-      {/* Features by OEM and Vehicle Segment */}
-      {oemChartData.length > 0 && (
-        <div className="space-y-4">
-          <div>
-            <h4 className={`text-lg font-medium ${theme.textPrimary} mb-2`}>
-              Features by OEM and Vehicle Segment
-            </h4>
-            <p className={`${theme.textMuted} text-sm`}>
-              Number of features for each OEM, broken down by vehicle segments
-            </p>
+    <div className="space-y-6">
+      {/* Controls */}
+      <div className="flex flex-wrap gap-4 items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className={`text-sm ${theme.textSecondary}`}>View:</span>
+            <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value as ViewMode)}>
+              <ToggleGroupItem value="grouped">Chart</ToggleGroupItem>
+              <ToggleGroupItem value="table">Table</ToggleGroupItem>
+            </ToggleGroup>
           </div>
           
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart
-              data={oemChartData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-              style={{ backgroundColor: 'transparent' }}
-              onClick={handleOEMBarClick}
-            >
-              <XAxis 
-                dataKey="oem" 
-                tick={{ fill: theme.textSecondary.includes('text-gray-400') ? '#9ca3af' : '#6b7280' }}
-                axisLine={{ stroke: theme.cardBorder.includes('border-gray-700') ? '#374151' : '#e5e7eb' }}
-              />
-              <YAxis 
-                tick={{ fill: theme.textSecondary.includes('text-gray-400') ? '#9ca3af' : '#6b7280' }}
-                axisLine={{ stroke: theme.cardBorder.includes('border-gray-700') ? '#374151' : '#e5e7eb' }}
-              />
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: theme.cardBackground.includes('bg-gray-800') ? '#1f2937' : '#ffffff',
-                  border: `1px solid ${theme.cardBorder.includes('border-gray-700') ? '#374151' : '#e5e7eb'}`,
-                  borderRadius: '8px',
-                  color: theme.textPrimary.includes('text-white') ? '#ffffff' : '#000000',
-                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
-                }}
-                formatter={(value: any, name: string) => [
-                  `${value} features`,
-                  `${name} Segment`
-                ]}
-                labelFormatter={(label) => `${label}`}
-              />
-              <Legend />
-              {availableSegments.map((segment, index) => (
-                <Bar
-                  key={segment}
-                  dataKey={segment}
-                  stackId="a"
-                  fill={segmentColors[segment as keyof typeof segmentColors] || oemColors[index % oemColors.length]}
-                  name={segment}
-                  style={{ backgroundColor: 'transparent' }}
-                />
-              ))}
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="flex items-center gap-2">
+            <span className={`text-sm ${theme.textSecondary}`}>Group by:</span>
+            <ToggleGroup type="single" value={groupingMode} onValueChange={(value) => value && setGroupingMode(value as GroupingMode)}>
+              <ToggleGroupItem value="by-oem">OEM</ToggleGroupItem>
+              <ToggleGroupItem value="by-segment">Segment</ToggleGroupItem>
+            </ToggleGroup>
+          </div>
         </div>
-      )}
+      </div>
 
-      {/* Features by Vehicle Segment and OEM */}
-      {segmentChartData.length > 0 && (
-        <div className="space-y-4">
-          <div>
-            <h4 className={`text-lg font-medium ${theme.textPrimary} mb-2`}>
-              Features by Vehicle Segment and OEM
-            </h4>
-            <p className={`${theme.textMuted} text-sm`}>
-              Number of features for each vehicle segment, broken down by OEM manufacturers
-            </p>
-          </div>
-          
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart
-              data={segmentChartData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-              style={{ backgroundColor: 'transparent' }}
-              onClick={handleSegmentBarClick}
-            >
-              <XAxis 
-                dataKey="segment" 
-                tick={{ fill: theme.textSecondary.includes('text-gray-400') ? '#9ca3af' : '#6b7280' }}
-                axisLine={{ stroke: theme.cardBorder.includes('border-gray-700') ? '#374151' : '#e5e7eb' }}
-              />
-              <YAxis 
-                tick={{ fill: theme.textSecondary.includes('text-gray-400') ? '#9ca3af' : '#6b7280' }}
-                axisLine={{ stroke: theme.cardBorder.includes('border-gray-700') ? '#374151' : '#e5e7eb' }}
-              />
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: theme.cardBackground.includes('bg-gray-800') ? '#1f2937' : '#ffffff',
-                  border: `1px solid ${theme.cardBorder.includes('border-gray-700') ? '#374151' : '#e5e7eb'}`,
-                  borderRadius: '8px',
-                  color: theme.textPrimary.includes('text-white') ? '#ffffff' : '#000000',
-                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
-                }}
-                formatter={(value: any, name: string) => [
-                  `${value} features`,
-                  name
-                ]}
-                labelFormatter={(label) => `${label} Segment`}
-              />
-              <Legend />
-              {selectedOEMs.map((oem, index) => (
-                <Bar
-                  key={oem}
-                  dataKey={oem}
-                  stackId="a"
-                  fill={oemColors[index % oemColors.length]}
-                  name={oem}
-                  style={{ backgroundColor: 'transparent' }}
-                />
-              ))}
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      )}
+      {/* Title */}
+      <div>
+        <h4 className={`text-lg font-medium ${theme.textPrimary} mb-2`}>
+          Features {groupingMode === 'by-oem' ? 'by OEM and Vehicle Segment' : 'by Vehicle Segment and OEM'}
+        </h4>
+        <p className={`${theme.textMuted} text-sm`}>
+          {groupingMode === 'by-oem' 
+            ? 'Number of features for each OEM, grouped by vehicle segments'
+            : 'Number of features for each vehicle segment, grouped by OEM manufacturers'
+          }
+        </p>
+      </div>
+
+      {/* Visualization */}
+      <div className="min-h-[400px]">
+        {viewMode === 'grouped' ? renderGroupedBarChart() : renderTable()}
+      </div>
     </div>
   )
 }
