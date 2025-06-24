@@ -32,6 +32,12 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
 
     waypointData.csvData.forEach(file => {
       if (file.data && Array.isArray(file.data)) {
+        // First, let's check what columns are available in the first row
+        if (file.data.length > 0) {
+          const firstRow = file.data[0]
+          console.log('Available columns in CSV:', Object.keys(firstRow))
+        }
+
         file.data.forEach((row: any) => {
           // Data Filtering: Filter by selected country and availability status
           if (row.Country === selectedCountry && 
@@ -43,11 +49,15 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
             const feature = row.Feature.toString().trim()
             
             console.log('Processing feature:', feature, 'for OEM:', oem)
+            console.log('Row data for segments:', { Entry: row.Entry, Mid: row.Mid, Premium: row.Premium, Luxury: row.Luxury })
 
             // Feature Counting: Check which segments apply for this feature
             vehicleSegments.forEach(segment => {
               // Check if this segment column exists and has 'yes' value
-              if (row[segment]?.toString().trim().toLowerCase() === 'yes') {
+              const segmentValue = row[segment]?.toString().trim().toLowerCase()
+              console.log(`Checking ${segment} for ${feature}: value = "${segmentValue}"`)
+              
+              if (segmentValue === 'yes' || segmentValue === 'y' || segmentValue === '1') {
                 availableSegments.add(segment)
                 
                 // Update OEM → Segment mapping
@@ -86,8 +96,17 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
         oemItem[segment] = oemSegments.get(segment) || 0
       })
       
+      // Calculate total for this OEM
+      const total = segments.reduce((sum, segment) => sum + (oemItem[segment] || 0), 0)
+      console.log(`OEM ${oem} total features across segments:`, total, oemItem)
+      
       return oemItem
-    }).filter(item => segments.some(segment => item[segment] > 0))
+    }).filter(item => {
+      // Only include OEMs that have at least one feature in any segment
+      const hasFeatures = segments.some(segment => item[segment] > 0)
+      console.log(`OEM ${item.oem} has features:`, hasFeatures)
+      return hasFeatures
+    })
 
     // Build "Features by Vehicle Segment and OEM" chart data
     const segmentChartData = segments.map(segment => {
@@ -98,8 +117,17 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
         segmentItem[oem] = segmentOEMs.get(oem) || 0
       })
       
+      // Calculate total for this segment
+      const total = selectedOEMs.reduce((sum, oem) => sum + (segmentItem[oem] || 0), 0)
+      console.log(`Segment ${segment} total features across OEMs:`, total, segmentItem)
+      
       return segmentItem
-    }).filter(item => selectedOEMs.some(oem => item[oem] > 0))
+    }).filter(item => {
+      // Only include segments that have at least one feature from any OEM
+      const hasFeatures = selectedOEMs.some(oem => item[oem] > 0)
+      console.log(`Segment ${item.segment} has features:`, hasFeatures)
+      return hasFeatures
+    })
 
     console.log('Final OEM Chart Data:', oemChartData)
     console.log('Final Segment Chart Data:', segmentChartData)
@@ -136,13 +164,22 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
     setSelectedOEM(null)
   }
 
+  console.log('Final render check:', { 
+    oemChartDataLength: oemChartData.length, 
+    segmentChartDataLength: segmentChartData.length,
+    availableSegments,
+    selectedCountry,
+    selectedOEMs 
+  })
+
   if (!oemChartData.length && !segmentChartData.length) {
     return (
       <div className={`h-full flex items-center justify-center ${theme.textMuted}`}>
         <div className="text-center">
-          <p>No data available for the selected filters</p>
+          <p>No vehicle segment data available for the selected filters</p>
           <p className="text-sm mt-2">Selected Country: {selectedCountry}</p>
           <p className="text-sm">Selected OEMs: {selectedOEMs.join(', ')}</p>
+          <p className="text-sm mt-2">Available segments detected: {availableSegments.join(', ') || 'None'}</p>
         </div>
       </div>
     )
