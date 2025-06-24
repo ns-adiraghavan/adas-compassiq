@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react"
 import { useWaypointData } from "@/hooks/useWaypointData"
 import CountryButtons from "@/components/CountryButtons"
@@ -138,18 +137,6 @@ const CategoryAnalysisContent = () => {
             expandedCategory={expandedCategory}
             onCategoryClick={handleCategoryClick}
           />
-        </div>
-
-        {/* Strategic Insights Section */}
-        <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
-          <h3 className={`text-lg font-medium ${theme.textPrimary} mb-4`}>Strategic Insights</h3>
-          <div className="h-96">
-            <AISnippetsSidebar 
-              selectedOEM={selectedOEMs.length === 1 ? selectedOEMs[0] : ""}
-              selectedCountry={selectedCountry}
-              oemClickedFromChart={false}
-            />
-          </div>
         </div>
       </div>
 
