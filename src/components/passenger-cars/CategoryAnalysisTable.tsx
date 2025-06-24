@@ -111,7 +111,6 @@ const CategoryAnalysisTable = ({
                   {oem}
                 </th>
               ))}
-              <th className={`text-center p-3 ${theme.textPrimary} font-medium`}>Total</th>
             </tr>
           </thead>
           <tbody>
@@ -150,9 +149,6 @@ const CategoryAnalysisTable = ({
                       </td>
                     )
                   })}
-                  <td className={`p-3 text-center font-bold ${theme.textPrimary}`}>
-                    {row.total}
-                  </td>
                 </tr>
               )
             })}
@@ -162,34 +158,33 @@ const CategoryAnalysisTable = ({
 
       {/* Expanded Features Table */}
       {expandedCategory && expandedFeatures.length > 0 && (
-        <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-lg p-4`}>
-          <h4 className={`text-lg font-medium ${theme.textPrimary} mb-3`}>
-            Features in {expandedCategory} Category
-            {businessModelFilter && ` (${businessModelFilter})`}
+        <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-lg p-6`}>
+          <h4 className={`text-xl font-semibold ${theme.textPrimary} mb-4`}>
+            Features in {expandedCategory} Category{businessModelFilter && ` (${businessModelFilter})`}
           </h4>
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-sm">
+            <table className="w-full border-collapse">
               <thead>
                 <tr className={`${theme.cardBorder} border-b`}>
-                  <th className={`text-left p-2 ${theme.textPrimary} font-medium`}>Feature</th>
-                  <th className={`text-left p-2 ${theme.textPrimary} font-medium`}>OEM</th>
-                  <th className={`text-left p-2 ${theme.textPrimary} font-medium`}>Business Model Type</th>
-                  <th className={`text-left p-2 ${theme.textPrimary} font-medium`}>Segment</th>
+                  <th className={`text-left p-4 ${theme.textPrimary} font-medium`}>Feature</th>
+                  <th className={`text-left p-4 ${theme.textPrimary} font-medium`}>OEM</th>
+                  <th className={`text-left p-4 ${theme.textPrimary} font-medium`}>Business Model Type</th>
+                  <th className={`text-left p-4 ${theme.textPrimary} font-medium`}>Segment</th>
                 </tr>
               </thead>
               <tbody>
                 {expandedFeatures.map((feature, index) => (
                   <tr key={index} className={`${theme.cardBorder} border-b hover:${theme.cardBackground} transition-colors`}>
-                    <td className={`p-2 ${theme.textSecondary}`}>
+                    <td className={`p-4 ${theme.textSecondary}`}>
                       {feature.Feature}
                     </td>
-                    <td className={`p-2 ${theme.textSecondary}`}>
+                    <td className={`p-4 ${theme.textSecondary}`}>
                       {feature.OEM}
                     </td>
-                    <td className={`p-2 ${theme.textSecondary}`}>
+                    <td className={`p-4 ${theme.textSecondary}`}>
                       {feature['Business Model Type'] || 'Unknown'}
                     </td>
-                    <td className={`p-2 ${theme.textSecondary}`}>
+                    <td className={`p-4 ${theme.textSecondary}`}>
                       {feature.Segment || 'Unknown'}
                     </td>
                   </tr>
