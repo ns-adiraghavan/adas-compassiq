@@ -39,11 +39,11 @@ const InsightsContent = () => {
     return Array.from(uniqueOEMs).sort()
   }
 
-  // Auto-select all OEMs when country changes
+  // Auto-select first 3 OEMs when country changes
   useEffect(() => {
     if (waypointData?.csvData?.length) {
       const availableOEMs = getAvailableOEMs(selectedCountry)
-      setSelectedOEMs(availableOEMs)
+      setSelectedOEMs(availableOEMs.slice(0, 3))
     }
   }, [selectedCountry, waypointData])
 
@@ -53,13 +53,15 @@ const InsightsContent = () => {
     setSelectedOEMs(prev => 
       prev.includes(oem) 
         ? prev.filter(o => o !== oem)
-        : [...prev, oem]
+        : prev.length < 3 
+          ? [...prev, oem]
+          : prev
     )
   }
 
   const handleSelectAll = () => {
     const availableOEMs = getAvailableOEMs(selectedCountry)
-    setSelectedOEMs(availableOEMs)
+    setSelectedOEMs(availableOEMs.slice(0, 3))
   }
 
   const handleClearAll = () => {
