@@ -27,16 +27,20 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
 
   return (
     <div className={`${theme.backgroundGradient} ${theme.textPrimary} transition-all duration-500`}>
-      {/* Logo positioned above Themes button in top right */}
-      <div className="fixed top-4 right-4 z-50 flex flex-col items-end space-y-2">
+      {/* Logo positioned in top right */}
+      <div className="fixed top-4 right-4 z-50">
         <WaypointLogo />
-        <ThemeSelector />
       </div>
       
       {/* Header - Realigned to left top */}
       <div className="container mx-auto px-8 py-4">
         <div className="flex flex-col items-start">
-          {/* Back to Home button at top left */}
+          {/* Themes button at extreme top left */}
+          <div className="mb-2">
+            <ThemeSelector />
+          </div>
+          
+          {/* Back to Home button */}
           <Link 
             to="/" 
             className={`inline-flex items-center ${theme.textMuted} hover:${theme.textPrimary.replace('text-', 'text-')} transition-colors mb-3`}
