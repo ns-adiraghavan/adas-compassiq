@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from "react"
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
@@ -217,7 +216,7 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
               color: theme.textPrimary.includes('text-white') ? '#ffffff' : '#000000',
             }}
             formatter={(value: any, name: string) => [
-              typeof value === 'number' ? `${value} features` : String(value), 
+              `${Number(value)} features`,
               name
             ]}
           />
