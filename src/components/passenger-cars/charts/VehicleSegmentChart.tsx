@@ -133,8 +133,8 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
   }, [waypointData, selectedCountry, selectedOEMs])
 
   const oemColors = [
-    '#ef4444', '#f97316', '#eab308', '#22c55e', 
-    '#3b82f6', '#8b5cf6', '#ec4899', '#06b6d4'
+    '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', 
+    '#ef4444', '#ec4899', '#84cc16', '#6366f1'
   ]
 
   if (!chartData.length) {
@@ -162,10 +162,11 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
         />
         <Tooltip 
           contentStyle={{
-            backgroundColor: theme.cardBackground.includes('bg-gray-800') ? '#1f2937' : '#ffffff',
-            border: `1px solid ${theme.cardBorder.includes('border-gray-700') ? '#374151' : '#e5e7eb'}`,
+            backgroundColor: 'transparent',
+            border: 'none',
             borderRadius: '8px',
-            color: theme.textPrimary.includes('text-white') ? '#ffffff' : '#000000'
+            color: theme.textPrimary.includes('text-white') ? '#ffffff' : '#000000',
+            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
           }}
         />
         <Legend />
