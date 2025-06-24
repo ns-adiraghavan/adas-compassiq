@@ -6,20 +6,33 @@ import { useDataInsightsAI } from "@/hooks/useDataInsightsAI"
 interface DataSnippetsProps {
   selectedOEM: string
   selectedCountry: string
-  oemClickedFromChart?: boolean // New prop to track if OEM was clicked from chart
+  oemClickedFromChart?: boolean
+  businessModelAnalysisContext?: any // New prop for business model analysis context
 }
 
-const DataSnippets = ({ selectedOEM, selectedCountry, oemClickedFromChart = false }: DataSnippetsProps) => {
+const DataSnippets = ({ 
+  selectedOEM, 
+  selectedCountry, 
+  oemClickedFromChart = false,
+  businessModelAnalysisContext
+}: DataSnippetsProps) => {
   // Only show OEM-specific insights if OEM was actually clicked from chart
   const showOEMInsights = oemClickedFromChart && selectedOEM && selectedOEM.trim() !== ""
   
+  // Use business model context if available, otherwise fall back to regular dashboard metrics
+  const contextData = businessModelAnalysisContext || null
+  
   const { data: aiInsights, isLoading, error } = useDataInsightsAI({
-    selectedOEM: showOEMInsights ? selectedOEM : "", // Pass empty string for market overview
+    selectedOEM: showOEMInsights ? selectedOEM : "",
     selectedCountry,
-    enabled: true
+    enabled: true,
+    contextData // Pass the business model analysis context
   })
 
   const getTitle = () => {
+    if (businessModelAnalysisContext) {
+      return "Business Model Strategic Insights"
+    }
     if (showOEMInsights) {
       return `Strategic Insights - ${selectedOEM}`
     }
@@ -27,6 +40,10 @@ const DataSnippets = ({ selectedOEM, selectedCountry, oemClickedFromChart = fals
   }
 
   const getSubtitle = () => {
+    if (businessModelAnalysisContext) {
+      const { selectedOEMs, totalFeatures, selectedCountry: country } = businessModelAnalysisContext
+      return `${selectedOEMs.join(', ')} • ${country} • ${totalFeatures} features analyzed`
+    }
     if (showOEMInsights) {
       return `${selectedOEM} • ${selectedCountry || 'Global'} • ${aiInsights?.dataPoints || 0} data points analyzed`
     }
@@ -39,7 +56,12 @@ const DataSnippets = ({ selectedOEM, selectedCountry, oemClickedFromChart = fals
         <div className="flex items-center justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-blue-400 mr-2" />
           <span className="text-white/60">
-            {showOEMInsights ? 'Analyzing OEM performance...' : 'Analyzing market landscape...'}
+            {businessModelAnalysisContext 
+              ? 'Analyzing business model patterns...'
+              : showOEMInsights 
+                ? 'Analyzing OEM performance...' 
+                : 'Analyzing market landscape...'
+            }
           </span>
         </div>
       )
@@ -69,7 +91,9 @@ const DataSnippets = ({ selectedOEM, selectedCountry, oemClickedFromChart = fals
       <div className="space-y-3">
         {aiInsights.insights.map((insight: string, index: number) => (
           <div key={index} className="flex items-start space-x-3 p-3 bg-gray-800/30 rounded-lg border border-gray-700/50">
-            {showOEMInsights ? (
+            {businessModelAnalysisContext ? (
+              <BarChart className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
+            ) : showOEMInsights ? (
               <Lightbulb className="h-4 w-4 text-yellow-400 mt-0.5 flex-shrink-0" />
             ) : (
               <TrendingUp className="h-4 w-4 text-blue-400 mt-0.5 flex-shrink-0" />

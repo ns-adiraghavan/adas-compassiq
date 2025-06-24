@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useWaypointData } from "@/hooks/useWaypointData"
 import CountryButtons from "@/components/CountryButtons"
 import OEMSelector from "./OEMSelector"
@@ -17,6 +17,89 @@ const BusinessModelAnalysisContent = () => {
   const [showGraphical, setShowGraphical] = useState(true)
   const { data: waypointData } = useWaypointData()
   const { theme } = useTheme()
+
+  // Calculate business model analysis context data
+  const businessModelAnalysisContext = useMemo(() => {
+    if (!waypointData?.csvData?.length || !selectedCountry || selectedOEMs.length === 0) {
+      return null
+    }
+
+    const businessModelData: Record<string, Record<string, number>> = {}
+    const categoryData: Record<string, Record<string, number>> = {}
+    const oemTotals: Record<string, number> = {}
+    const businessModelTypes = new Set<string>()
+    let totalFeatures = 0
+
+    waypointData.csvData.forEach(file => {
+      if (file.data && Array.isArray(file.data)) {
+        file.data.forEach((row: any) => {
+          if (row.Country === selectedCountry && 
+              selectedOEMs.includes(row.OEM) &&
+              row['Feature Availability']?.toString().trim().toLowerCase() === 'available' &&
+              row.Feature && row.Feature.toString().trim() !== '') {
+            
+            const businessModelType = row['Business Model Type']?.toString().trim() || 'Unknown'
+            const category = row.Category?.toString().trim() || 'Unknown'
+            const oem = row.OEM?.toString().trim()
+            
+            totalFeatures++
+            businessModelTypes.add(businessModelType)
+            
+            // Track business model distribution by OEM
+            if (!businessModelData[businessModelType]) {
+              businessModelData[businessModelType] = {}
+            }
+            businessModelData[businessModelType][oem] = (businessModelData[businessModelType][oem] || 0) + 1
+            
+            // Track category distribution
+            if (!categoryData[category]) {
+              categoryData[category] = {}
+            }
+            categoryData[category][oem] = (categoryData[category][oem] || 0) + 1
+            
+            // Track OEM totals
+            oemTotals[oem] = (oemTotals[oem] || 0) + 1
+          }
+        })
+      }
+    })
+
+    // Calculate comparative metrics
+    const businessModelComparison = Array.from(businessModelTypes).map(businessModel => {
+      const total = selectedOEMs.reduce((sum, oem) => sum + (businessModelData[businessModel]?.[oem] || 0), 0)
+      const oemBreakdown = selectedOEMs.map(oem => ({
+        oem,
+        count: businessModelData[businessModel]?.[oem] || 0,
+        percentage: oemTotals[oem] > 0 ? Math.round(((businessModelData[businessModel]?.[oem] || 0) / oemTotals[oem]) * 100) : 0
+      }))
+      return {
+        businessModel,
+        total,
+        oemBreakdown: oemBreakdown.sort((a, b) => b.count - a.count)
+      }
+    }).sort((a, b) => b.total - a.total)
+
+    const topCategories = Object.entries(categoryData)
+      .map(([category, oemCounts]) => ({
+        category,
+        total: selectedOEMs.reduce((sum, oem) => sum + (oemCounts[oem] || 0), 0),
+        leader: selectedOEMs.reduce((leader, oem) => 
+          (oemCounts[oem] || 0) > (oemCounts[leader] || 0) ? oem : leader, selectedOEMs[0])
+      }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 5)
+
+    return {
+      totalFeatures,
+      selectedOEMs,
+      selectedCountry,
+      businessModelComparison,
+      topCategories,
+      oemTotals,
+      selectedBusinessModel,
+      expandedCategory
+    }
+  }, [waypointData, selectedCountry, selectedOEMs, selectedBusinessModel, expandedCategory])
 
   // Set default country when data is loaded
   useEffect(() => {
@@ -224,6 +307,7 @@ const BusinessModelAnalysisContent = () => {
             selectedOEM={selectedOEMs.length === 1 ? selectedOEMs[0] : ""}
             selectedCountry={selectedCountry}
             oemClickedFromChart={false}
+            businessModelAnalysisContext={businessModelAnalysisContext}
           />
         </div>
       </div>

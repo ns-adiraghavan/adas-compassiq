@@ -24,13 +24,15 @@ serve(async (req) => {
   }
 
   try {
-    const { oem, country, dashboardMetrics, isMarketOverview } = await req.json();
+    const { oem, country, dashboardMetrics, isMarketOverview, analysisType, contextData } = await req.json();
     
-    const requestCacheKey = InsightsCache.generateCacheKey(oem, country, dashboardMetrics, isMarketOverview);
+    // Create cache key that includes context data type
+    const contextType = analysisType || 'general';
+    const requestCacheKey = InsightsCache.generateCacheKey(oem, country, dashboardMetrics, isMarketOverview, contextType);
     
     // Check cache first
     if (InsightsCache.has(requestCacheKey)) {
-      console.log('Returning cached vehicle segment insights for:', requestCacheKey);
+      console.log('Returning cached insights for:', requestCacheKey);
       return new Response(
         JSON.stringify(InsightsCache.get(requestCacheKey)),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -38,7 +40,10 @@ serve(async (req) => {
     }
 
     // Handle empty data case
-    if (!dashboardMetrics || dashboardMetrics.totalFeatures === 0) {
+    const dataMetrics = contextData || dashboardMetrics;
+    const totalFeatures = dataMetrics?.totalFeatures || 0;
+    
+    if (!dataMetrics || totalFeatures === 0) {
       const emptyInsights = generateEmptyDataInsights(isMarketOverview, oem, country);
       const emptyResult = createSuccessResponse(emptyInsights, 0);
       
@@ -49,8 +54,15 @@ serve(async (req) => {
       );
     }
 
-    // Generate AI insights
-    const prompt = createVehicleSegmentInsightsPrompt(oem, country, dashboardMetrics, isMarketOverview);
+    // Generate AI insights with context-aware prompts
+    const prompt = createVehicleSegmentInsightsPrompt(
+      oem, 
+      country, 
+      dashboardMetrics, 
+      isMarketOverview, 
+      analysisType, 
+      contextData
+    );
     
     let insights: string[] = [];
     try {
@@ -58,14 +70,14 @@ serve(async (req) => {
       insights = parseAIResponse(aiResponse);
     } catch (parseError) {
       console.log('AI response parsing failed, using fallback insights:', parseError);
-      insights = generateFallbackInsights(isMarketOverview, oem, country, dashboardMetrics);
+      insights = generateFallbackInsights(isMarketOverview, oem, country, dataMetrics);
     }
 
     // Ensure exactly 3 insights
-    const fallbackInsights = generateFallbackInsights(isMarketOverview, oem, country, dashboardMetrics);
+    const fallbackInsights = generateFallbackInsights(isMarketOverview, oem, country, dataMetrics);
     const finalInsights = ensureThreeInsights(insights, fallbackInsights);
 
-    const result = createSuccessResponse(finalInsights, dashboardMetrics.totalFeatures);
+    const result = createSuccessResponse(finalInsights, totalFeatures);
     InsightsCache.set(requestCacheKey, { ...result, cached: true });
 
     return new Response(
@@ -74,7 +86,7 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Error in vehicle segment data-insights-ai function:', error);
+    console.error('Error in data-insights-ai function:', error);
     const errorResponse = createErrorResponse(error);
     
     return new Response(

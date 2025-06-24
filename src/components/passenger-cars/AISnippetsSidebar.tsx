@@ -5,13 +5,15 @@ import NewsSnippets from "./snippets/NewsSnippets"
 interface AISnippetsSidebarProps {
   selectedOEM?: string
   selectedCountry?: string
-  oemClickedFromChart?: boolean // New prop to track chart interactions
+  oemClickedFromChart?: boolean
+  businessModelAnalysisContext?: any // New prop for business model analysis context
 }
 
 const AISnippetsSidebar = ({ 
   selectedOEM = "", 
   selectedCountry = "", 
-  oemClickedFromChart = false 
+  oemClickedFromChart = false,
+  businessModelAnalysisContext
 }: AISnippetsSidebarProps) => {
   return (
     <div className="h-full bg-gradient-to-b from-gray-800/30 to-gray-900/50 p-6 space-y-6 overflow-y-auto">
@@ -20,6 +22,7 @@ const AISnippetsSidebar = ({
           selectedOEM={selectedOEM} 
           selectedCountry={selectedCountry}
           oemClickedFromChart={oemClickedFromChart}
+          businessModelAnalysisContext={businessModelAnalysisContext}
         />
         <NewsSnippets />
       </div>

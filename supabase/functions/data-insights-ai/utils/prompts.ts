@@ -4,8 +4,15 @@ export function createVehicleSegmentInsightsPrompt(
   oem: string, 
   country: string, 
   dashboardMetrics: any, 
-  isMarketOverview: boolean
+  isMarketOverview: boolean,
+  analysisType?: string,
+  contextData?: any
 ): string {
+  // Handle Business Model Analysis context
+  if (analysisType === "business-model-analysis" && contextData) {
+    return createBusinessModelAnalysisPrompt(country, contextData);
+  }
+
   const topCategory = dashboardMetrics.topCategories?.[0]?.name || 'Unknown';
   const secondCategory = dashboardMetrics.topCategories?.[1]?.name || 'Unknown';
   const thirdCategory = dashboardMetrics.topCategories?.[2]?.name || 'Unknown';
@@ -37,6 +44,70 @@ export function createVehicleSegmentInsightsPrompt(
     dashboardMetrics, 
     topCategory
   );
+}
+
+function createBusinessModelAnalysisPrompt(
+  country: string,
+  contextData: any
+): string {
+  const { 
+    totalFeatures, 
+    selectedOEMs, 
+    businessModelComparison, 
+    topCategories, 
+    oemTotals,
+    selectedBusinessModel,
+    expandedCategory
+  } = contextData;
+
+  // Get top business models and their leaders
+  const topBusinessModel = businessModelComparison[0];
+  const secondBusinessModel = businessModelComparison[1];
+  const topBusinessModelLeader = topBusinessModel?.oemBreakdown[0];
+  const secondBusinessModelLeader = secondBusinessModel?.oemBreakdown[0];
+
+  // Get category insights
+  const topCategory = topCategories[0];
+  const secondCategory = topCategories[1];
+
+  // Calculate OEM performance comparison
+  const oemPerformance = selectedOEMs.map(oem => ({
+    oem,
+    total: oemTotals[oem] || 0,
+    strongestBusinessModel: businessModelComparison.find(bm => 
+      bm.oemBreakdown.find(breakdown => breakdown.oem === oem && breakdown.count > 0)
+    )?.businessModel || 'Unknown'
+  })).sort((a, b) => b.total - a.total);
+
+  const leadingOEM = oemPerformance[0];
+  const secondOEM = oemPerformance[1];
+
+  return `Generate exactly 3 comparative strategic insights for Business Model Analysis in ${country} focusing on business model distribution and OEM performance.
+
+BUSINESS MODEL ANALYSIS CONTEXT:
+• Market: ${country}
+• Selected OEMs: ${selectedOEMs.join(', ')}
+• Total Features Analyzed: ${totalFeatures}
+• Business Models: ${businessModelComparison.map(bm => `${bm.businessModel} (${bm.total})`).join(', ')}
+• Top Business Model: ${topBusinessModel?.businessModel} with ${topBusinessModel?.total} features, led by ${topBusinessModelLeader?.oem} (${topBusinessModelLeader?.count})
+• Second Business Model: ${secondBusinessModel?.businessModel} with ${secondBusinessModel?.total} features, led by ${secondBusinessModelLeader?.oem} (${secondBusinessModelLeader?.count})
+• Leading OEM: ${leadingOEM?.oem} (${leadingOEM?.total} features), strongest in ${leadingOEM?.strongestBusinessModel}
+• Second OEM: ${secondOEM?.oem} (${secondOEM?.total} features), strongest in ${secondOEM?.strongestBusinessModel}
+• Top Categories: ${topCategory?.category} (${topCategory?.total}, led by ${topCategory?.leader}), ${secondCategory?.category} (${secondCategory?.total}, led by ${secondCategory?.leader})
+${selectedBusinessModel ? `• Focus: ${selectedBusinessModel} business model` : ''}
+${expandedCategory ? `• Category Deep-dive: ${expandedCategory}` : ''}
+
+IMPORTANT: Focus on comparative analysis between business models and OEMs using absolute feature counts, not percentages.
+
+GENERATE EXACTLY 3 BUSINESS MODEL COMPARATIVE INSIGHTS:
+
+1. Business Model Leadership - ${topBusinessModel?.businessModel} dominates ${country} market with ${topBusinessModel?.total} features, where ${topBusinessModelLeader?.oem} leads with ${topBusinessModelLeader?.count} features, while ${secondBusinessModel?.businessModel} shows ${secondBusinessModel?.total} features with ${secondBusinessModelLeader?.oem} contributing ${secondBusinessModelLeader?.count}
+
+2. OEM Strategy Comparison - ${leadingOEM?.oem} leads overall deployment with ${leadingOEM?.total} features, showing strength in ${leadingOEM?.strongestBusinessModel} model, compared to ${secondOEM?.oem} with ${secondOEM?.total} features focusing on ${secondOEM?.strongestBusinessModel}, indicating different monetization strategies
+
+3. Category-Business Model Alignment - ${topCategory?.category} emerges as top category with ${topCategory?.total} features led by ${topCategory?.leader}, while ${secondCategory?.category} shows ${secondCategory?.total} features under ${secondCategory?.leader} leadership, revealing how OEMs align category investments with business model strategies
+
+Each insight should provide specific comparative analysis using actual feature counts and business model distributions. Respond with ONLY a JSON array of exactly 3 strings.`;
 }
 
 function createMarketOverviewPrompt(

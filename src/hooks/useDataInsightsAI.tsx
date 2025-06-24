@@ -8,6 +8,7 @@ interface DataInsightsAIProps {
   selectedOEM: string
   selectedCountry: string
   enabled?: boolean
+  contextData?: any // New prop for page-specific context data
 }
 
 interface DataInsightsResponse {
@@ -17,28 +18,38 @@ interface DataInsightsResponse {
   cached?: boolean
 }
 
-export function useDataInsightsAI({ selectedOEM, selectedCountry, enabled = true }: DataInsightsAIProps) {
-  // Use the same data processing logic from the Landscape page
+export function useDataInsightsAI({ 
+  selectedOEM, 
+  selectedCountry, 
+  enabled = true, 
+  contextData 
+}: DataInsightsAIProps) {
+  // Use the same data processing logic from the Landscape page as fallback
   const { dashboardMetrics, isLoading: isMetricsLoading } = useDashboardMetrics(selectedOEM, selectedCountry)
   
   const queryFn = useCallback(async (): Promise<DataInsightsResponse> => {
-    // Determine if this is market overview or OEM-specific analysis
+    // Use context data if available, otherwise fall back to dashboard metrics
+    const analysisData = contextData || dashboardMetrics
+    const analysisType = contextData ? "Business Model Analysis" : (selectedOEM ? selectedOEM : "Market Overview")
     const isMarketOverview = !selectedOEM || selectedOEM.trim() === ""
-    const analysisType = isMarketOverview ? "Market Overview" : selectedOEM
     
     console.log('Requesting Data Insights AI for:', { 
       selectedOEM: analysisType, 
       selectedCountry, 
-      isMarketOverview 
+      isMarketOverview,
+      hasContextData: !!contextData,
+      contextData: contextData ? 'Business Model Analysis Context' : 'Dashboard Metrics'
     })
-    console.log('Using dashboard metrics:', dashboardMetrics)
+    console.log('Using analysis data:', analysisData)
     
     const { data, error } = await supabase.functions.invoke('data-insights-ai', {
       body: {
         oem: analysisType,
         country: selectedCountry,
-        dashboardMetrics: dashboardMetrics,
-        isMarketOverview: isMarketOverview
+        dashboardMetrics: analysisData,
+        isMarketOverview: isMarketOverview,
+        analysisType: contextData ? "business-model-analysis" : "general",
+        contextData: contextData
       }
     })
 
@@ -49,12 +60,18 @@ export function useDataInsightsAI({ selectedOEM, selectedCountry, enabled = true
 
     console.log('Data Insights AI result:', data)
     return data as DataInsightsResponse
-  }, [selectedOEM, selectedCountry, dashboardMetrics])
+  }, [selectedOEM, selectedCountry, dashboardMetrics, contextData])
 
   return useQuery<DataInsightsResponse>({
-    queryKey: ['data-insights-ai', selectedOEM || 'market-overview', selectedCountry, dashboardMetrics],
+    queryKey: [
+      'data-insights-ai', 
+      selectedOEM || 'market-overview', 
+      selectedCountry, 
+      contextData ? 'business-model-context' : 'dashboard-metrics',
+      contextData || dashboardMetrics
+    ],
     queryFn: queryFn,
-    enabled: enabled && !isMetricsLoading && !!dashboardMetrics,
+    enabled: enabled && (contextData || (!isMetricsLoading && !!dashboardMetrics)),
     staleTime: 15 * 60 * 1000, // Cache for 15 minutes
     gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
     refetchOnWindowFocus: false,
