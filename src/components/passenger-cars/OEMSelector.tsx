@@ -1,4 +1,3 @@
-
 import { useEffect } from "react"
 import { useWaypointData } from "@/hooks/useWaypointData"
 import { useTheme } from "@/contexts/ThemeContext"
@@ -11,6 +10,7 @@ interface OEMSelectorProps {
   onOEMToggle: (oem: string) => void
   onSelectAll: () => void
   onClearAll: () => void
+  showSelectFirst3?: boolean
 }
 
 const OEMSelector = ({ 
@@ -18,7 +18,8 @@ const OEMSelector = ({
   selectedOEMs, 
   onOEMToggle, 
   onSelectAll, 
-  onClearAll 
+  onClearAll,
+  showSelectFirst3 = false
 }: OEMSelectorProps) => {
   const { data: waypointData } = useWaypointData()
   const { theme } = useTheme()
@@ -69,14 +70,16 @@ const OEMSelector = ({
           <p className={`text-sm ${theme.textMuted} mt-1`}>Maximum 3 OEMs can be selected</p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleSelectAll}
-            className={`${theme.textSecondary} border-gray-600 hover:bg-gray-800`}
-          >
-            Select First 3
-          </Button>
+          {showSelectFirst3 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSelectAll}
+              className={`${theme.textSecondary} border-gray-600 hover:bg-gray-800`}
+            >
+              Select First 3
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"

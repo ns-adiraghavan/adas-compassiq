@@ -13,7 +13,6 @@ const CategoryAnalysisContent = () => {
   const { data: waypointData } = useWaypointData()
   const { theme } = useTheme()
 
-  // Set default country when data is loaded
   useEffect(() => {
     if (waypointData?.csvData?.length && !selectedCountry) {
       const uniqueCountries = new Set<string>()
@@ -39,7 +38,6 @@ const CategoryAnalysisContent = () => {
     }
   }, [waypointData, selectedCountry])
 
-  // Get available OEMs for the selected country
   const availableOEMs = (() => {
     if (!waypointData?.csvData?.length || !selectedCountry) return []
 
@@ -63,14 +61,12 @@ const CategoryAnalysisContent = () => {
     return Array.from(uniqueOEMs).sort()
   })()
 
-  // Auto-select first OEM if none selected
   useEffect(() => {
     if (availableOEMs.length > 0 && selectedOEMs.length === 0) {
       setSelectedOEMs([availableOEMs[0]])
     }
   }, [availableOEMs, selectedOEMs.length])
 
-  // Generate category analysis context for AI insights
   const categoryAnalysisContext = useMemo(() => {
     if (!waypointData?.csvData?.length || !selectedCountry || selectedOEMs.length === 0) {
       return null
@@ -104,7 +100,6 @@ const CategoryAnalysisContent = () => {
       }
     })
 
-    // Calculate category insights
     const categoryBreakdown = Object.entries(categoryData).map(([category, data]) => {
       const totalInCategory = data.features.length
       const leadingOEM = Object.entries(data.oemCounts).sort(([,a], [,b]) => b - a)[0]
@@ -122,7 +117,6 @@ const CategoryAnalysisContent = () => {
       }
     }).sort((a, b) => b.total - a.total)
 
-    // Calculate OEM totals across categories
     const oemTotals: Record<string, number> = {}
     selectedOEMs.forEach(oem => {
       oemTotals[oem] = Object.values(categoryData).reduce((sum, data) => sum + (data.oemCounts[oem] || 0), 0)
@@ -181,7 +175,7 @@ const CategoryAnalysisContent = () => {
           />
         </div>
 
-        {/* OEM Selector */}
+        {/* OEM Selector - WITHOUT showSelectFirst3 prop (defaults to false) */}
         <OEMSelector
           selectedCountry={selectedCountry}
           selectedOEMs={selectedOEMs}

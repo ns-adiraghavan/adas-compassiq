@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react"
 import PassengerCarsLayout from "@/components/passenger-cars/PassengerCarsLayout"
 import CountryButtons from "@/components/CountryButtons"
 import OEMSelector from "@/components/passenger-cars/OEMSelector"
-import AISnippetsSidebar from "@/components/passenger-cars/AISnippetsSidebar"
+import AISnippetsSidebar from "@/components/AISnippetsSidebar"
 import VennDiagram from "@/components/VennDiagram"
 import { useVennDiagramData } from "@/hooks/useVennDiagramData"
 import { useTheme } from "@/contexts/ThemeContext"
@@ -15,7 +14,6 @@ const InsightsContent = () => {
   const [selectedOEMs, setSelectedOEMs] = useState<string[]>([])
   const { data: waypointData } = useWaypointData()
 
-  // Get available OEMs for the selected country
   const getAvailableOEMs = (country: string) => {
     if (!waypointData?.csvData?.length || !country) return []
 
@@ -39,7 +37,6 @@ const InsightsContent = () => {
     return Array.from(uniqueOEMs).sort()
   }
 
-  // Auto-select first 3 OEMs when country changes
   useEffect(() => {
     if (waypointData?.csvData?.length) {
       const availableOEMs = getAvailableOEMs(selectedCountry)
@@ -70,7 +67,6 @@ const InsightsContent = () => {
 
   const handleCountryChange = (country: string) => {
     setSelectedCountry(country)
-    // OEMs will be auto-selected via useEffect
   }
 
   return (
@@ -88,17 +84,17 @@ const InsightsContent = () => {
               />
             </div>
 
-            {/* OEM Selection */}
+            {/* OEM Selection - WITH showSelectFirst3 prop set to true */}
             <OEMSelector
               selectedCountry={selectedCountry}
               selectedOEMs={selectedOEMs}
               onOEMToggle={handleOEMToggle}
               onSelectAll={handleSelectAll}
               onClearAll={handleClearAll}
+              showSelectFirst3={true}
             />
           </div>
 
-          {/* Venn Diagram Section */}
           <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
             <h2 className={`text-2xl font-light mb-6 ${theme.textPrimary}`}>
               Feature Overlap Analysis
@@ -127,7 +123,7 @@ const InsightsContent = () => {
           minWidth: '40%',
           overflow: 'hidden',
           position: 'relative',
-          paddingRight: '32px' // Match the 8*4 = 32px right padding from main content
+          paddingRight: '32px'
         }}
       >
         <AISnippetsSidebar

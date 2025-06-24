@@ -12,7 +12,6 @@ const VehicleSegmentAnalysisContent = () => {
   const { data: waypointData } = useWaypointData()
   const { theme } = useTheme()
 
-  // Set default country when data is loaded
   useEffect(() => {
     if (waypointData?.csvData?.length && !selectedCountry) {
       const uniqueCountries = new Set<string>()
@@ -38,7 +37,6 @@ const VehicleSegmentAnalysisContent = () => {
     }
   }, [waypointData, selectedCountry])
 
-  // Get available OEMs for the selected country
   const availableOEMs = (() => {
     if (!waypointData?.csvData?.length || !selectedCountry) return []
 
@@ -62,7 +60,6 @@ const VehicleSegmentAnalysisContent = () => {
     return Array.from(uniqueOEMs).sort()
   })()
 
-  // Auto-select first few OEMs if none selected
   useEffect(() => {
     if (availableOEMs.length > 0 && selectedOEMs.length === 0) {
       setSelectedOEMs(availableOEMs.slice(0, Math.min(3, availableOEMs.length)))
@@ -102,7 +99,7 @@ const VehicleSegmentAnalysisContent = () => {
           />
         </div>
 
-        {/* OEM Selector */}
+        {/* OEM Selector - WITHOUT showSelectFirst3 prop (defaults to false) */}
         <OEMSelector
           selectedCountry={selectedCountry}
           selectedOEMs={selectedOEMs}
