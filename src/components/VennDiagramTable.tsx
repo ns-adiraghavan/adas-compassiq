@@ -37,31 +37,44 @@ const VennDiagramTable = ({ data, entities, selectedIntersection }: VennDiagramT
     )
   }
 
-  // Process features to group by categories (mock categories for demo)
+  // Process features to group by categories using actual feature data
   const processFeaturesByCategories = (): CategoryData[] => {
     const categories = ['Mobility', 'Health', 'Work', 'Energy', 'Shopping', 'Enabler', 'Entertainment']
     const categoryData: CategoryData[] = []
 
     categories.forEach(category => {
-      // Filter features that might belong to this category (simplified logic)
+      // Filter features that belong to this category
       const categoryFeatures = selectedIntersection.features.filter(feature => 
         feature.toLowerCase().includes(category.toLowerCase()) ||
-        (category === 'Mobility' && (feature.toLowerCase().includes('drive') || feature.toLowerCase().includes('travel'))) ||
-        (category === 'Health' && (feature.toLowerCase().includes('health') || feature.toLowerCase().includes('medical'))) ||
-        (category === 'Work' && (feature.toLowerCase().includes('work') || feature.toLowerCase().includes('office'))) ||
-        (category === 'Energy' && (feature.toLowerCase().includes('energy') || feature.toLowerCase().includes('fuel'))) ||
-        (category === 'Shopping' && (feature.toLowerCase().includes('shop') || feature.toLowerCase().includes('purchase'))) ||
-        (category === 'Enabler' && (feature.toLowerCase().includes('connect') || feature.toLowerCase().includes('enable'))) ||
-        (category === 'Entertainment' && (feature.toLowerCase().includes('music') || feature.toLowerCase().includes('media')))
+        (category === 'Mobility' && (feature.toLowerCase().includes('drive') || feature.toLowerCase().includes('travel') || feature.toLowerCase().includes('navigation'))) ||
+        (category === 'Health' && (feature.toLowerCase().includes('health') || feature.toLowerCase().includes('medical') || feature.toLowerCase().includes('emergency'))) ||
+        (category === 'Work' && (feature.toLowerCase().includes('work') || feature.toLowerCase().includes('office') || feature.toLowerCase().includes('business'))) ||
+        (category === 'Energy' && (feature.toLowerCase().includes('energy') || feature.toLowerCase().includes('fuel') || feature.toLowerCase().includes('charging'))) ||
+        (category === 'Shopping' && (feature.toLowerCase().includes('shop') || feature.toLowerCase().includes('purchase') || feature.toLowerCase().includes('payment'))) ||
+        (category === 'Enabler' && (feature.toLowerCase().includes('connect') || feature.toLowerCase().includes('enable') || feature.toLowerCase().includes('platform'))) ||
+        (category === 'Entertainment' && (feature.toLowerCase().includes('music') || feature.toLowerCase().includes('media') || feature.toLowerCase().includes('entertainment')))
       )
 
       if (categoryFeatures.length > 0) {
         const counts: Record<string, number> = {}
         const featuresPerEntity: Record<string, string[]> = {}
         
+        // For each entity, calculate how many of the category features they have
         selectedIntersection.entities.forEach(entity => {
-          counts[entity] = Math.floor(Math.random() * categoryFeatures.length) + 1 // Mock data
-          featuresPerEntity[entity] = categoryFeatures.slice(0, counts[entity])
+          // Get the entity's full feature list from the data
+          const entityData = entities.find(e => e.name === entity)
+          if (entityData) {
+            // Count how many category features this entity actually has
+            const entityCategoryFeatures = categoryFeatures.filter(feature => 
+              entityData.features.includes(feature)
+            )
+            counts[entity] = entityCategoryFeatures.length
+            featuresPerEntity[entity] = entityCategoryFeatures
+          } else {
+            // If this is an intersection, all entities in the intersection have these features
+            counts[entity] = categoryFeatures.length
+            featuresPerEntity[entity] = categoryFeatures
+          }
         })
 
         categoryData.push({
@@ -73,7 +86,7 @@ const VennDiagramTable = ({ data, entities, selectedIntersection }: VennDiagramT
       }
     })
 
-    // If no categorized features, create a general category
+    // If no categorized features, create a general category with all features
     if (categoryData.length === 0) {
       const counts: Record<string, number> = {}
       const featuresPerEntity: Record<string, string[]> = {}
@@ -199,6 +212,13 @@ const VennDiagramTable = ({ data, entities, selectedIntersection }: VennDiagramT
                                 {selectedIntersection.features
                                   .filter(feature => 
                                     feature.toLowerCase().includes(category.name.toLowerCase()) ||
+                                    (category.name === 'Mobility' && (feature.toLowerCase().includes('drive') || feature.toLowerCase().includes('travel') || feature.toLowerCase().includes('navigation'))) ||
+                                    (category.name === 'Health' && (feature.toLowerCase().includes('health') || feature.toLowerCase().includes('medical') || feature.toLowerCase().includes('emergency'))) ||
+                                    (category.name === 'Work' && (feature.toLowerCase().includes('work') || feature.toLowerCase().includes('office') || feature.toLowerCase().includes('business'))) ||
+                                    (category.name === 'Energy' && (feature.toLowerCase().includes('energy') || feature.toLowerCase().includes('fuel') || feature.toLowerCase().includes('charging'))) ||
+                                    (category.name === 'Shopping' && (feature.toLowerCase().includes('shop') || feature.toLowerCase().includes('purchase') || feature.toLowerCase().includes('payment'))) ||
+                                    (category.name === 'Enabler' && (feature.toLowerCase().includes('connect') || feature.toLowerCase().includes('enable') || feature.toLowerCase().includes('platform'))) ||
+                                    (category.name === 'Entertainment' && (feature.toLowerCase().includes('music') || feature.toLowerCase().includes('media') || feature.toLowerCase().includes('entertainment'))) ||
                                     category.name === 'General'
                                   )
                                   .map((feature, index) => (
