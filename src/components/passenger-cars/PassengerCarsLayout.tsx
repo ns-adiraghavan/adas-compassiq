@@ -61,28 +61,32 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
         </div>
       </div>
 
-      {/* Section Navigation - Fixed height */}
+      {/* Section Navigation - Fixed height with enhanced animations */}
       <div className="w-full px-8 mb-4">
         <div className="flex items-center justify-between w-full max-w-none">
           {sections.map((section) => (
             <Link
               key={section.id}
               to={section.path}
-              className={`flex-1 mx-1 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 text-center ${theme.shadowColor} ${
+              className={`flex-1 mx-1 px-4 py-2 rounded-lg text-sm font-medium text-center transition-all duration-500 ease-out transform hover:scale-105 ${theme.shadowColor} ${
                 getCurrentSection() === section.id
-                  ? `${theme.primary} ${theme.textPrimary} shadow-lg transform scale-105`
-                  : `${theme.cardBackground} ${theme.cardBorder} border ${theme.textSecondary} ${theme.hoverEffect}`
+                  ? `${theme.primary} ${theme.textPrimary} shadow-lg scale-105 animate-scale-in`
+                  : `${theme.cardBackground} ${theme.cardBorder} border ${theme.textSecondary} ${theme.hoverEffect} hover:shadow-md hover:translate-y-[-1px]`
               }`}
             >
-              {section.name}
+              <span className="block transition-all duration-300">
+                {section.name}
+              </span>
             </Link>
           ))}
         </div>
       </div>
 
-      {/* Main Content - Natural height with page scrolling */}
-      <div className="pb-8">
-        {children}
+      {/* Main Content - Natural height with page scrolling and fade transition */}
+      <div className="pb-8 animate-fade-in">
+        <div className="transition-all duration-500 ease-in-out">
+          {children}
+        </div>
       </div>
     </div>
   )
