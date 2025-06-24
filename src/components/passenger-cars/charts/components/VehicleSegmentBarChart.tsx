@@ -1,20 +1,22 @@
 
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend } from "recharts"
 import { useTheme } from "@/contexts/ThemeContext"
-import type { GroupingMode } from "../types/VehicleSegmentTypes"
+import type { GroupingMode, BarClickData } from "../types/VehicleSegmentTypes"
 
 interface VehicleSegmentBarChartProps {
   chartData: any[]
   availableSegments: string[]
   selectedOEMs: string[]
   groupingMode: GroupingMode
+  onBarClick?: (data: BarClickData) => void
 }
 
 const VehicleSegmentBarChart = ({ 
   chartData, 
   availableSegments, 
   selectedOEMs, 
-  groupingMode 
+  groupingMode,
+  onBarClick
 }: VehicleSegmentBarChartProps) => {
   const { theme } = useTheme()
 
@@ -28,6 +30,15 @@ const VehicleSegmentBarChart = ({
   const oemColors: string[] = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#10b981', '#06b6d4', '#8b5cf6', '#ec4899']
 
   const dataKeys = groupingMode === 'by-oem' ? availableSegments : selectedOEMs
+
+  const handleBarClick = (data: any) => {
+    if (onBarClick && data.name) {
+      onBarClick({
+        name: data.name,
+        type: groupingMode === 'by-oem' ? 'oem' : 'segment'
+      })
+    }
+  }
 
   return (
     <ResponsiveContainer width="100%" height={400}>
@@ -68,6 +79,8 @@ const VehicleSegmentBarChart = ({
               dataKey={key}
               fill={barColor}
               name={key}
+              onClick={handleBarClick}
+              style={{ cursor: 'pointer' }}
             />
           )
         })}

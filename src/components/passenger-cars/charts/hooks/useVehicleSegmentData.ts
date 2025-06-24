@@ -1,4 +1,3 @@
-
 import { useMemo } from "react"
 import { useWaypointData } from "@/hooks/useWaypointData"
 import type { ProcessedData, GroupingMode } from "../types/VehicleSegmentTypes"
@@ -12,13 +11,22 @@ export function useVehicleSegmentData(
 
   return useMemo(() => {
     if (!waypointData?.csvData?.length || !selectedCountry || selectedOEMs.length === 0) {
-      return { chartData: [], availableSegments: [], hasData: false, debugInfo: {}, segmentFeatureMap: new Map(), oemFeatureMap: new Map() }
+      return { 
+        chartData: [], 
+        availableSegments: [], 
+        hasData: false, 
+        debugInfo: {}, 
+        segmentFeatureMap: new Map(), 
+        oemFeatureMap: new Map(),
+        detailedFeatureData: new Map()
+      }
     }
 
     console.log('Processing vehicle segment data for:', { selectedCountry, selectedOEMs })
 
     const segmentFeatureMap = new Map<string, Map<string, number>>()
     const oemFeatureMap = new Map<string, Map<string, number>>()
+    const detailedFeatureData = new Map<string, Array<{ oem: string; category: string; feature: string }>>()
     const availableSegments = new Set<string>()
     
     let detectedSegmentColumns: string[] = []
@@ -71,6 +79,7 @@ export function useVehicleSegmentData(
             debugInfo.processedRows++
             const oem = row.OEM.toString().trim()
             const feature = row.Feature.toString().trim()
+            const category = row.Category?.toString().trim() || 'General'
             
             // Check segment columns
             if (detectedSegmentColumns.length > 0) {
@@ -103,6 +112,18 @@ export function useVehicleSegmentData(
                   }
                   const oemSegments = oemFeatureMap.get(oem)!
                   oemSegments.set(segmentName, (oemSegments.get(segmentName) || 0) + 1)
+                  
+                  // Store detailed feature data for OEMs
+                  if (!detailedFeatureData.has(oem)) {
+                    detailedFeatureData.set(oem, [])
+                  }
+                  detailedFeatureData.get(oem)!.push({ oem, category, feature })
+                  
+                  // Store detailed feature data for segments
+                  if (!detailedFeatureData.has(segmentName)) {
+                    detailedFeatureData.set(segmentName, [])
+                  }
+                  detailedFeatureData.get(segmentName)!.push({ oem, category, feature })
                 }
               })
             } else {
@@ -121,6 +142,17 @@ export function useVehicleSegmentData(
               }
               const oemSegments = oemFeatureMap.get(oem)!
               oemSegments.set(category, (oemSegments.get(category) || 0) + 1)
+              
+              // Store detailed feature data
+              if (!detailedFeatureData.has(oem)) {
+                detailedFeatureData.set(oem, [])
+              }
+              detailedFeatureData.get(oem)!.push({ oem, category, feature })
+              
+              if (!detailedFeatureData.has(category)) {
+                detailedFeatureData.set(category, [])
+              }
+              detailedFeatureData.get(category)!.push({ oem, category, feature })
             }
           }
         })
@@ -165,7 +197,8 @@ export function useVehicleSegmentData(
       hasData: chartData.length > 0,
       debugInfo,
       segmentFeatureMap,
-      oemFeatureMap
+      oemFeatureMap,
+      detailedFeatureData
     }
   }, [waypointData, selectedCountry, selectedOEMs, groupingMode])
 }

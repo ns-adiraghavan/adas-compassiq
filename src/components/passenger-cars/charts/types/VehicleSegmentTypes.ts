@@ -14,6 +14,7 @@ export interface ProcessedData {
   debugInfo: any
   segmentFeatureMap: Map<string, Map<string, number>>
   oemFeatureMap: Map<string, Map<string, number>>
+  detailedFeatureData: Map<string, Array<{ oem: string; category: string; feature: string }>>
 }
 
 export interface ChartControlsProps {
@@ -21,4 +22,9 @@ export interface ChartControlsProps {
   onViewModeChange: (mode: ViewMode) => void
   groupingMode: GroupingMode
   onGroupingModeChange: (mode: GroupingMode) => void
+}
+
+export interface BarClickData {
+  name: string
+  type: 'oem' | 'segment'
 }

@@ -5,15 +5,30 @@ import { useVehicleSegmentData } from "./hooks/useVehicleSegmentData"
 import VehicleSegmentControls from "./components/VehicleSegmentControls"
 import VehicleSegmentBarChart from "./components/VehicleSegmentBarChart"
 import VehicleSegmentTable from "./components/VehicleSegmentTable"
-import type { VehicleSegmentChartProps, ViewMode, GroupingMode } from "./types/VehicleSegmentTypes"
+import VehicleSegmentDetailTable from "./components/VehicleSegmentDetailTable"
+import type { VehicleSegmentChartProps, ViewMode, GroupingMode, BarClickData } from "./types/VehicleSegmentTypes"
 
 const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentChartProps) => {
   const { theme } = useTheme()
   const [viewMode, setViewMode] = useState<ViewMode>('grouped')
   const [groupingMode, setGroupingMode] = useState<GroupingMode>('by-oem')
+  const [selectedBarItem, setSelectedBarItem] = useState<BarClickData | null>(null)
 
-  const { chartData, availableSegments, hasData, debugInfo, segmentFeatureMap, oemFeatureMap } = 
+  const { chartData, availableSegments, hasData, debugInfo, segmentFeatureMap, oemFeatureMap, detailedFeatureData } = 
     useVehicleSegmentData(selectedCountry, selectedOEMs, groupingMode)
+
+  const handleBarClick = (data: BarClickData) => {
+    setSelectedBarItem(data)
+  }
+
+  const handleCloseDetail = () => {
+    setSelectedBarItem(null)
+  }
+
+  const getDetailedData = () => {
+    if (!selectedBarItem) return []
+    return detailedFeatureData.get(selectedBarItem.name) || []
+  }
 
   if (!hasData) {
     return (
@@ -51,8 +66,8 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
         </h4>
         <p className={`${theme.textMuted} text-sm`}>
           {groupingMode === 'by-oem' 
-            ? 'Number of features for each OEM, grouped by vehicle segments'
-            : 'Number of features for each vehicle segment, grouped by OEM manufacturers'
+            ? 'Number of features for each OEM, grouped by vehicle segments. Click on any bar to see detailed features.'
+            : 'Number of features for each vehicle segment, grouped by OEM manufacturers. Click on any bar to see detailed features.'
           }
         </p>
       </div>
@@ -65,6 +80,7 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
             availableSegments={availableSegments}
             selectedOEMs={selectedOEMs}
             groupingMode={groupingMode}
+            onBarClick={handleBarClick}
           />
         ) : (
           <VehicleSegmentTable
@@ -76,6 +92,16 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
           />
         )}
       </div>
+
+      {/* Detailed Feature Table */}
+      {selectedBarItem && (
+        <VehicleSegmentDetailTable
+          selectedItem={selectedBarItem.name}
+          itemType={selectedBarItem.type}
+          detailedData={getDetailedData()}
+          onClose={handleCloseDetail}
+        />
+      )}
     </div>
   )
 }
