@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
-import { ChevronDown, ChevronRight } from "lucide-react"
+import { ChevronDown, ChevronRight, Circle, CheckCircle } from "lucide-react"
 
 const CategoryAnalysisContent = () => {
   const [selectedCountry, setSelectedCountry] = useState("")
@@ -140,7 +140,6 @@ const CategoryAnalysisContent = () => {
       }
     })
 
-    // Convert to table rows
     return Object.entries(categoryOEMCount)
       .map(([category, oemCounts]) => ({
         category,
@@ -150,18 +149,14 @@ const CategoryAnalysisContent = () => {
       .sort((a, b) => b.total - a.total)
   })()
 
-  // Generate features data for expanded category
-  const getFeaturesForCategory = (category: string) => {
+  // Generate features matrix for expanded category
+  const getFeaturesMatrix = (category: string) => {
     if (!waypointData?.csvData?.length || !selectedCountry || selectedOEMs.length === 0) {
-      return []
+      return { features: [], matrix: {} }
     }
 
-    const features: Array<{
-      feature: string
-      oem: string
-      businessModel?: string
-      lighthouseFeature?: string
-    }> = []
+    const featureOEMMatrix: Record<string, Record<string, { available: boolean, lighthouse: boolean }>> = {}
+    const uniqueFeatures = new Set<string>()
     
     waypointData.csvData.forEach(file => {
       if (file.data && Array.isArray(file.data)) {
@@ -171,6 +166,7 @@ const CategoryAnalysisContent = () => {
           const rowCategory = row.Category?.toString().trim()
           const rowFeature = row.Feature?.toString().trim()
           const featureAvailability = row['Feature Availability']?.toString().trim().toLowerCase()
+          const lighthouseFeature = row['Lighthouse Feature']?.toString().trim().toLowerCase() === 'yes'
           
           if (rowCountry === selectedCountry &&
               rowOEM && selectedOEMs.includes(rowOEM) &&
@@ -178,18 +174,23 @@ const CategoryAnalysisContent = () => {
               rowFeature && rowFeature !== '' &&
               featureAvailability === 'available') {
             
-            features.push({
-              feature: rowFeature,
-              oem: rowOEM,
-              businessModel: row['Business Model']?.toString().trim() || '',
-              lighthouseFeature: row['Lighthouse Feature']?.toString().trim() || ''
-            })
+            uniqueFeatures.add(rowFeature)
+            
+            if (!featureOEMMatrix[rowFeature]) {
+              featureOEMMatrix[rowFeature] = {}
+            }
+            
+            featureOEMMatrix[rowFeature][rowOEM] = {
+              available: true,
+              lighthouse: lighthouseFeature
+            }
           }
         })
       }
     })
 
-    return features.sort((a, b) => a.feature.localeCompare(b.feature))
+    const sortedFeatures = Array.from(uniqueFeatures).sort()
+    return { features: sortedFeatures, matrix: featureOEMMatrix }
   }
 
   return (
@@ -311,7 +312,7 @@ const CategoryAnalysisContent = () => {
               </Table>
             </div>
 
-            {/* Expanded Features Table */}
+            {/* Expanded Features Matrix Table */}
             {expandedCategory && (
               <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-lg p-4 mt-4`}>
                 <h4 className={`text-md font-medium ${theme.textPrimary} mb-3`}>
@@ -322,28 +323,37 @@ const CategoryAnalysisContent = () => {
                     <TableHeader>
                       <TableRow className={`${theme.cardBorder} border-b`}>
                         <TableHead className={`${theme.textSecondary} font-medium`}>Feature</TableHead>
-                        <TableHead className={`${theme.textSecondary} font-medium`}>OEM</TableHead>
-                        <TableHead className={`${theme.textSecondary} font-medium`}>Business Model</TableHead>
-                        <TableHead className={`${theme.textSecondary} font-medium`}>Lighthouse</TableHead>
+                        {selectedOEMs.map((oem) => (
+                          <TableHead key={oem} className={`${theme.textSecondary} font-medium text-center`}>
+                            {oem.length > 12 ? oem.substring(0, 12) + '...' : oem}
+                          </TableHead>
+                        ))}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {getFeaturesForCategory(expandedCategory).map((feature, index) => (
-                        <TableRow key={index} className={`${theme.cardBorder} border-b hover:bg-gray-800/20`}>
-                          <TableCell className={`${theme.textPrimary}`}>
-                            {feature.feature}
-                          </TableCell>
-                          <TableCell className={`${theme.textSecondary}`}>
-                            {feature.oem}
-                          </TableCell>
-                          <TableCell className={`${theme.textSecondary}`}>
-                            {feature.businessModel || 'N/A'}
-                          </TableCell>
-                          <TableCell className={`${theme.textSecondary}`}>
-                            {feature.lighthouseFeature?.toLowerCase() === 'yes' ? 'Yes' : 'No'}
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {(() => {
+                        const { features, matrix } = getFeaturesMatrix(expandedCategory)
+                        return features.map((feature) => (
+                          <TableRow key={feature} className={`${theme.cardBorder} border-b hover:bg-gray-800/20`}>
+                            <TableCell className={`${theme.textPrimary} font-medium`}>
+                              {feature}
+                            </TableCell>
+                            {selectedOEMs.map((oem) => (
+                              <TableCell key={oem} className="text-center">
+                                {matrix[feature]?.[oem] ? (
+                                  matrix[feature][oem].lighthouse ? (
+                                    <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
+                                  ) : (
+                                    <Circle className="h-5 w-5 text-green-500 fill-green-500 mx-auto" />
+                                  )
+                                ) : (
+                                  <div className="h-5 w-5 mx-auto" />
+                                )}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        ))
+                      })()}
                     </TableBody>
                   </Table>
                 </div>
