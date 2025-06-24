@@ -87,7 +87,7 @@ const HeroSection = ({ scrollY }: HeroSectionProps) => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes typewriter {
           from { width: 0 }
           to { width: 100% }

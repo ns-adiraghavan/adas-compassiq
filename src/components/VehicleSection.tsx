@@ -1,9 +1,9 @@
-
 import { Link } from "react-router-dom"
 import { useScrollAnimation } from "@/hooks/useScrollAnimation"
 import AnimatedVehicleImage from "./AnimatedVehicleImage"
 import VehicleContent from "./VehicleContent"
 import VehicleCards from "./VehicleCards"
+import { ArrowRight } from "lucide-react"
 
 interface VehicleCategory {
   title: string
@@ -37,18 +37,18 @@ const VehicleSection = ({ category, index, currentSection, sectionIndex }: Vehic
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 blur-3xl"></div>
         
         <div className="max-w-7xl mx-auto relative z-10">
-          <Link to={category.href} className="group block">
-            <div className={`flex items-center gap-12 ${isEven ? 'flex-row' : 'flex-row-reverse'}`}>
-              
-              {/* Large Curved Image with Scroll Animation */}
-              <AnimatedVehicleImage
-                image={category.image}
-                title={category.title}
-                isEven={isEven}
-                imageTransform={getImageTransform()}
-              />
-              
-              {/* Content with side sliding animation */}
+          <div className={`flex items-center gap-12 ${isEven ? 'flex-row' : 'flex-row-reverse'}`}>
+            
+            {/* Large Curved Image with Scroll Animation */}
+            <AnimatedVehicleImage
+              image={category.image}
+              title={category.title}
+              isEven={isEven}
+              imageTransform={getImageTransform()}
+            />
+            
+            {/* Content with side sliding animation */}
+            <div className="flex-1">
               <VehicleContent
                 icon={category.icon}
                 title={category.title}
@@ -56,8 +56,54 @@ const VehicleSection = ({ category, index, currentSection, sectionIndex }: Vehic
                 description={category.description}
                 textTransform={getTextTransform(isEven)}
               />
+              
+              {/* Navigation buttons for Passenger Cars */}
+              {category.title === "Passenger Cars" && (
+                <div className="mt-8 grid grid-cols-2 gap-4 max-w-md">
+                  <Link 
+                    to="/passenger-cars/landscape"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 text-center"
+                  >
+                    Landscape
+                  </Link>
+                  <Link 
+                    to="/passenger-cars/analytics"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 text-center"
+                  >
+                    Category Analysis
+                  </Link>
+                  <Link 
+                    to="/passenger-cars/intelligence"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 text-center"
+                  >
+                    Vehicle Segment Analysis
+                  </Link>
+                  <Link 
+                    to="/passenger-cars/modeling"
+                    className="bg-gradient-to-r from-slate-600 to-gray-700 text-white px-4 py-3 rounded-lg text-sm font-medium hover:from-slate-700 hover:to-gray-800 transition-all duration-300 text-center"
+                  >
+                    Business Model Analysis
+                  </Link>
+                  <Link 
+                    to="/passenger-cars/insights"
+                    className="bg-gradient-to-r from-slate-700 to-gray-800 text-white px-4 py-3 rounded-lg text-sm font-medium hover:from-slate-800 hover:to-gray-900 transition-all duration-300 text-center col-span-2"
+                  >
+                    Insights
+                  </Link>
+                </div>
+              )}
+              
+              {/* Keep original explore button for other categories */}
+              {category.title !== "Passenger Cars" && (
+                <Link to={category.href} className="group block mt-6">
+                  <div className="inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors">
+                    <span className="mr-2">Explore</span>
+                    <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </Link>
+              )}
             </div>
-          </Link>
+          </div>
         </div>
       </section>
     )
