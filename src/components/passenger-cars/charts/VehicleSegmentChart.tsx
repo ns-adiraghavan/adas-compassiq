@@ -3,14 +3,6 @@ import { useMemo, useState } from "react"
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend } from "recharts"
 import { useWaypointData } from "@/hooks/useWaypointData"
 import { useTheme } from "@/contexts/ThemeContext"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 
 interface VehicleSegmentChartProps {
   selectedCountry: string
@@ -23,18 +15,21 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
   const [selectedOEM, setSelectedOEM] = useState<string | null>(null)
   const [selectedSegment, setSelectedSegment] = useState<string | null>(null)
 
-  const { oemChartData, segmentChartData, tableData, availableSegments } = useMemo(() => {
+  const { oemChartData, segmentChartData, availableSegments } = useMemo(() => {
     if (!waypointData?.csvData?.length || !selectedCountry || selectedOEMs.length === 0) {
-      return { oemChartData: [], segmentChartData: [], tableData: [], availableSegments: [] }
+      return { oemChartData: [], segmentChartData: [], availableSegments: [] }
     }
 
     console.log('Processing chart data for:', { selectedCountry, selectedOEMs })
+
+    // First, let's examine the data structure to find segment columns
+    const sampleRow = waypointData.csvData[0]?.data?.[0]
+    console.log('Sample row keys:', sampleRow ? Object.keys(sampleRow) : 'No sample data')
 
     // Collect segment data from CSV
     const segmentData = new Map<string, Map<string, number>>() // OEM -> Segment -> Count
     const oemData = new Map<string, Map<string, number>>() // Segment -> OEM -> Count
     const uniqueSegments = new Set<string>()
-    const detailedData = new Map<string, Map<string, string[]>>() // key -> category -> features
 
     waypointData.csvData.forEach(file => {
       if (file.data && Array.isArray(file.data)) {
@@ -47,33 +42,60 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
             const oem = row.OEM.toString().trim()
             const feature = row.Feature.toString().trim()
             
-            // Find segment columns dynamically
-            const segmentColumns = ['Entry', 'Mid', 'Luxury', 'Premium']
+            // Look for all possible segment columns in the data
+            const allKeys = Object.keys(row)
+            const segmentColumns = allKeys.filter(key => 
+              ['entry', 'mid', 'luxury', 'premium', 'basic', 'standard', 'executive'].includes(key.toLowerCase()) ||
+              key.toLowerCase().includes('segment') ||
+              key.toLowerCase().includes('tier')
+            )
+            
+            console.log('Found potential segment columns:', segmentColumns)
+            
+            // If no predefined segments found, check for any column with 'yes' values
+            if (segmentColumns.length === 0) {
+              const yesColumns = allKeys.filter(key => {
+                const value = row[key]?.toString().trim().toLowerCase()
+                return value === 'yes' && 
+                       !['feature availability', 'lighthouse', 'subscription'].includes(key.toLowerCase())
+              })
+              segmentColumns.push(...yesColumns)
+              console.log('Found YES columns as segments:', yesColumns)
+            }
+            
             let foundSegment = null
             
+            // Check each potential segment column
             for (const segmentCol of segmentColumns) {
-              if (row[segmentCol] && row[segmentCol].toString().trim().toLowerCase() === 'yes') {
+              const value = row[segmentCol]?.toString().trim().toLowerCase()
+              if (value === 'yes' || value === 'true' || value === '1') {
                 foundSegment = segmentCol.toLowerCase()
                 uniqueSegments.add(foundSegment)
                 break
               }
             }
             
-            if (foundSegment) {
-              // For OEM chart data (OEM on x-axis, segments stacked)
-              if (!segmentData.has(oem)) {
-                segmentData.set(oem, new Map())
-              }
-              const oemSegments = segmentData.get(oem)!
-              oemSegments.set(foundSegment, (oemSegments.get(foundSegment) || 0) + 1)
-              
-              // For Segment chart data (Segment on x-axis, OEMs stacked)
-              if (!oemData.has(foundSegment)) {
-                oemData.set(foundSegment, new Map())
-              }
-              const segmentOEMs = oemData.get(foundSegment)!
-              segmentOEMs.set(oem, (segmentOEMs.get(oem) || 0) + 1)
+            // If still no segment found, create a default 'unspecified' segment
+            if (!foundSegment) {
+              foundSegment = 'unspecified'
+              uniqueSegments.add(foundSegment)
             }
+            
+            console.log('Feature:', feature, 'OEM:', oem, 'Segment:', foundSegment)
+            
+            // For OEM chart data (OEM on x-axis, segments stacked)
+            if (!segmentData.has(oem)) {
+              segmentData.set(oem, new Map())
+            }
+            const oemSegments = segmentData.get(oem)!
+            oemSegments.set(foundSegment, (oemSegments.get(foundSegment) || 0) + 1)
+            
+            // For Segment chart data (Segment on x-axis, OEMs stacked)
+            if (!oemData.has(foundSegment)) {
+              oemData.set(foundSegment, new Map())
+            }
+            const segmentOEMs = oemData.get(foundSegment)!
+            segmentOEMs.set(oem, (segmentOEMs.get(oem) || 0) + 1)
           }
         })
       }
@@ -81,6 +103,8 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
 
     const segments = Array.from(uniqueSegments).sort()
     console.log('Found segments:', segments)
+    console.log('Segment data:', Array.from(segmentData.entries()))
+    console.log('OEM data:', Array.from(oemData.entries()))
 
     // Build OEM chart data (Features by OEM and Vehicle Segment)
     const oemChartData = selectedOEMs.map(oem => {
@@ -106,13 +130,12 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
       return segmentItem
     }).filter(item => selectedOEMs.some(oem => item[oem] > 0))
 
-    console.log('OEM Chart Data:', oemChartData)
-    console.log('Segment Chart Data:', segmentChartData)
+    console.log('Final OEM Chart Data:', oemChartData)
+    console.log('Final Segment Chart Data:', segmentChartData)
     
     return { 
       oemChartData, 
       segmentChartData, 
-      tableData: [], 
       availableSegments: segments 
     }
   }, [waypointData, selectedCountry, selectedOEMs])
@@ -133,7 +156,11 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
   if (!oemChartData.length && !segmentChartData.length) {
     return (
       <div className={`h-full flex items-center justify-center ${theme.textMuted}`}>
-        <p>No data available for the selected filters</p>
+        <div className="text-center">
+          <p>No data available for the selected filters</p>
+          <p className="text-sm mt-2">Selected Country: {selectedCountry}</p>
+          <p className="text-sm">Selected OEMs: {selectedOEMs.join(', ')}</p>
+        </div>
       </div>
     )
   }
@@ -141,116 +168,120 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
   return (
     <div className="space-y-8">
       {/* Features by OEM and Vehicle Segment */}
-      <div className="space-y-4">
-        <div>
-          <h4 className={`text-lg font-medium ${theme.textPrimary} mb-2`}>
-            Features by OEM and Vehicle Segment
-          </h4>
-          <p className={`${theme.textMuted} text-sm`}>
-            Distribution of available features across vehicle segments for each OEM
-          </p>
-        </div>
-        
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart
-            data={oemChartData}
-            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-            style={{ backgroundColor: 'transparent' }}
-            onClick={handleOEMBarClick}
-          >
-            <XAxis 
-              dataKey="oem" 
-              tick={{ fill: theme.textSecondary.includes('text-gray-400') ? '#9ca3af' : '#6b7280' }}
-              axisLine={{ stroke: theme.cardBorder.includes('border-gray-700') ? '#374151' : '#e5e7eb' }}
-            />
-            <YAxis 
-              tick={{ fill: theme.textSecondary.includes('text-gray-400') ? '#9ca3af' : '#6b7280' }}
-              axisLine={{ stroke: theme.cardBorder.includes('border-gray-700') ? '#374151' : '#e5e7eb' }}
-            />
-            <Tooltip 
-              contentStyle={{
-                backgroundColor: theme.cardBackground.includes('bg-gray-800') ? '#1f2937' : '#ffffff',
-                border: `1px solid ${theme.cardBorder.includes('border-gray-700') ? '#374151' : '#e5e7eb'}`,
-                borderRadius: '8px',
-                color: theme.textPrimary.includes('text-white') ? '#ffffff' : '#000000',
-                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
-              }}
-              formatter={(value: any, name: string) => [
-                `${value} features`,
-                name
-              ]}
-              labelFormatter={(label) => `${label}`}
-            />
-            <Legend />
-            {availableSegments.map((segment, index) => (
-              <Bar
-                key={segment}
-                dataKey={segment}
-                stackId="a"
-                fill={segmentColors[index % segmentColors.length]}
-                name={segment}
-                style={{ backgroundColor: 'transparent' }}
+      {oemChartData.length > 0 && (
+        <div className="space-y-4">
+          <div>
+            <h4 className={`text-lg font-medium ${theme.textPrimary} mb-2`}>
+              Features by OEM and Vehicle Segment
+            </h4>
+            <p className={`${theme.textMuted} text-sm`}>
+              Distribution of available features across vehicle segments for each OEM
+            </p>
+          </div>
+          
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart
+              data={oemChartData}
+              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              style={{ backgroundColor: 'transparent' }}
+              onClick={handleOEMBarClick}
+            >
+              <XAxis 
+                dataKey="oem" 
+                tick={{ fill: theme.textSecondary.includes('text-gray-400') ? '#9ca3af' : '#6b7280' }}
+                axisLine={{ stroke: theme.cardBorder.includes('border-gray-700') ? '#374151' : '#e5e7eb' }}
               />
-            ))}
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+              <YAxis 
+                tick={{ fill: theme.textSecondary.includes('text-gray-400') ? '#9ca3af' : '#6b7280' }}
+                axisLine={{ stroke: theme.cardBorder.includes('border-gray-700') ? '#374151' : '#e5e7eb' }}
+              />
+              <Tooltip 
+                contentStyle={{
+                  backgroundColor: theme.cardBackground.includes('bg-gray-800') ? '#1f2937' : '#ffffff',
+                  border: `1px solid ${theme.cardBorder.includes('border-gray-700') ? '#374151' : '#e5e7eb'}`,
+                  borderRadius: '8px',
+                  color: theme.textPrimary.includes('text-white') ? '#ffffff' : '#000000',
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                }}
+                formatter={(value: any, name: string) => [
+                  `${value} features`,
+                  name
+                ]}
+                labelFormatter={(label) => `${label}`}
+              />
+              <Legend />
+              {availableSegments.map((segment, index) => (
+                <Bar
+                  key={segment}
+                  dataKey={segment}
+                  stackId="a"
+                  fill={segmentColors[index % segmentColors.length]}
+                  name={segment}
+                  style={{ backgroundColor: 'transparent' }}
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
 
       {/* Features by Vehicle Segment and OEM */}
-      <div className="space-y-4">
-        <div>
-          <h4 className={`text-lg font-medium ${theme.textPrimary} mb-2`}>
-            Features by Vehicle Segment and OEM
-          </h4>
-          <p className={`${theme.textMuted} text-sm`}>
-            Distribution of available features across OEMs for each vehicle segment
-          </p>
-        </div>
-        
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart
-            data={segmentChartData}
-            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-            style={{ backgroundColor: 'transparent' }}
-            onClick={handleSegmentBarClick}
-          >
-            <XAxis 
-              dataKey="segment" 
-              tick={{ fill: theme.textSecondary.includes('text-gray-400') ? '#9ca3af' : '#6b7280' }}
-              axisLine={{ stroke: theme.cardBorder.includes('border-gray-700') ? '#374151' : '#e5e7eb' }}
-            />
-            <YAxis 
-              tick={{ fill: theme.textSecondary.includes('text-gray-400') ? '#9ca3af' : '#6b7280' }}
-              axisLine={{ stroke: theme.cardBorder.includes('border-gray-700') ? '#374151' : '#e5e7eb' }}
-            />
-            <Tooltip 
-              contentStyle={{
-                backgroundColor: theme.cardBackground.includes('bg-gray-800') ? '#1f2937' : '#ffffff',
-                border: `1px solid ${theme.cardBorder.includes('border-gray-700') ? '#374151' : '#e5e7eb'}`,
-                borderRadius: '8px',
-                color: theme.textPrimary.includes('text-white') ? '#ffffff' : '#000000',
-                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
-              }}
-              formatter={(value: any, name: string) => [
-                `${value} features`,
-                name
-              ]}
-              labelFormatter={(label) => `${label} Segment`}
-            />
-            <Legend />
-            {selectedOEMs.map((oem, index) => (
-              <Bar
-                key={oem}
-                dataKey={oem}
-                stackId="a"
-                fill={oemColors[index % oemColors.length]}
-                name={oem}
-                style={{ backgroundColor: 'transparent' }}
+      {segmentChartData.length > 0 && (
+        <div className="space-y-4">
+          <div>
+            <h4 className={`text-lg font-medium ${theme.textPrimary} mb-2`}>
+              Features by Vehicle Segment and OEM
+            </h4>
+            <p className={`${theme.textMuted} text-sm`}>
+              Distribution of available features across OEMs for each vehicle segment
+            </p>
+          </div>
+          
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart
+              data={segmentChartData}
+              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              style={{ backgroundColor: 'transparent' }}
+              onClick={handleSegmentBarClick}
+            >
+              <XAxis 
+                dataKey="segment" 
+                tick={{ fill: theme.textSecondary.includes('text-gray-400') ? '#9ca3af' : '#6b7280' }}
+                axisLine={{ stroke: theme.cardBorder.includes('border-gray-700') ? '#374151' : '#e5e7eb' }}
               />
-            ))}
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+              <YAxis 
+                tick={{ fill: theme.textSecondary.includes('text-gray-400') ? '#9ca3af' : '#6b7280' }}
+                axisLine={{ stroke: theme.cardBorder.includes('border-gray-700') ? '#374151' : '#e5e7eb' }}
+              />
+              <Tooltip 
+                contentStyle={{
+                  backgroundColor: theme.cardBackground.includes('bg-gray-800') ? '#1f2937' : '#ffffff',
+                  border: `1px solid ${theme.cardBorder.includes('border-gray-700') ? '#374151' : '#e5e7eb'}`,
+                  borderRadius: '8px',
+                  color: theme.textPrimary.includes('text-white') ? '#ffffff' : '#000000',
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                }}
+                formatter={(value: any, name: string) => [
+                  `${value} features`,
+                  name
+                ]}
+                labelFormatter={(label) => `${label} Segment`}
+              />
+              <Legend />
+              {selectedOEMs.map((oem, index) => (
+                <Bar
+                  key={oem}
+                  dataKey={oem}
+                  stackId="a"
+                  fill={oemColors[index % oemColors.length]}
+                  name={oem}
+                  style={{ backgroundColor: 'transparent' }}
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   )
 }
