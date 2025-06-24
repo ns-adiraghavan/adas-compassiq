@@ -184,14 +184,14 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
     return processVehicleSegmentData()
   }, [waypointData, selectedCountry, selectedOEMs, groupingMode])
 
-  const segmentColors = {
+  const segmentColors: Record<string, string> = {
     'Entry': '#ef4444',
     'Mid': '#f97316', 
     'Premium': '#eab308',
     'Luxury': '#10b981'
   }
 
-  const oemColors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#10b981', '#06b6d4', '#8b5cf6', '#ec4899']
+  const oemColors: string[] = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#10b981', '#06b6d4', '#8b5cf6', '#ec4899']
 
   const renderGroupedBarChart = () => {
     const dataKeys = groupingMode === 'by-oem' ? availableSegments : selectedOEMs
@@ -222,14 +222,23 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
             ]}
           />
           <Legend />
-          {dataKeys.map((key, index) => (
-            <Bar
-              key={key}
-              dataKey={key}
-              fill={colors[key as keyof typeof colors] || oemColors[index % oemColors.length]}
-              name={key}
-            />
-          ))}
+          {dataKeys.map((key, index) => {
+            let barColor: string
+            if (groupingMode === 'by-oem') {
+              barColor = segmentColors[key] || '#8b5cf6'
+            } else {
+              barColor = oemColors[index % oemColors.length] || '#8b5cf6'
+            }
+            
+            return (
+              <Bar
+                key={key}
+                dataKey={key}
+                fill={barColor}
+                name={key}
+              />
+            )
+          })}
         </BarChart>
       </ResponsiveContainer>
     )
