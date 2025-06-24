@@ -42,7 +42,7 @@ const VehicleSegmentBarChart = ({
     if (onBarClick && data.name) {
       onBarClick({
         name: data.name,
-        type: 'category' // Categories are now on X-axis
+        type: 'category'
       })
     }
   }
