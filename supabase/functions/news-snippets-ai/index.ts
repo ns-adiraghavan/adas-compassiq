@@ -81,19 +81,24 @@ serve(async (req) => {
     const oemsText = selectedOEMs.length > 0 ? selectedOEMs.join(' OR ') : 'automotive';
     const searchQuery = `${oemsText} automotive ${selectedCountry} car industry`;
 
+    console.log('Searching NewsAPI with query:', searchQuery);
+
     // Fetch real news from NewsAPI
     const newsResponse = await fetch(
       `https://newsapi.org/v2/everything?q=${encodeURIComponent(searchQuery)}&language=en&sortBy=publishedAt&pageSize=10&apiKey=${newsApiKey}`
     );
 
     if (!newsResponse.ok) {
+      console.error(`NewsAPI error: ${newsResponse.status} - ${newsResponse.statusText}`);
       throw new Error(`NewsAPI error: ${newsResponse.status}`);
     }
 
     const newsData = await newsResponse.json();
     console.log('NewsAPI response status:', newsData.status);
+    console.log('NewsAPI articles found:', newsData.totalResults);
 
     if (newsData.status !== 'ok') {
+      console.error('NewsAPI error:', newsData.message);
       throw new Error(`NewsAPI error: ${newsData.message}`);
     }
 
@@ -106,7 +111,9 @@ serve(async (req) => {
         const publishedDate = new Date(article.publishedAt);
         const now = new Date();
         const diffInHours = Math.floor((now.getTime() - publishedDate.getTime()) / (1000 * 60 * 60));
-        const timeAgo = diffInHours < 24 ? `${diffInHours} hours ago` : `${Math.floor(diffInHours / 24)} days ago`;
+        const timeAgo = diffInHours < 1 ? 'Just now' : 
+                       diffInHours < 24 ? `${diffInHours} hours ago` : 
+                       `${Math.floor(diffInHours / 24)} days ago`;
 
         return {
           id: index + 1,
@@ -118,8 +125,11 @@ serve(async (req) => {
         };
       });
 
+    console.log('Processed news snippets:', newsSnippets.length);
+
     // If no articles found, provide fallback
     if (newsSnippets.length === 0) {
+      console.log('No relevant articles found, using fallback');
       const fallbackNews = [
         {
           id: 1,
