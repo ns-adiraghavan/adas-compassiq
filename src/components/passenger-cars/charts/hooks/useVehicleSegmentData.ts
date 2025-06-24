@@ -1,6 +1,7 @@
 
 import { useMemo } from "react"
 import { useWaypointData } from "@/hooks/useWaypointData"
+import { extractVehicleSegments } from "../utils/segmentDetection"
 import type { ProcessedData, GroupingMode } from "../types/VehicleSegmentTypes"
 
 export function useVehicleSegmentData(
@@ -28,9 +29,7 @@ export function useVehicleSegmentData(
     const segmentFeatureMap = new Map<string, Map<string, number>>()
     const oemFeatureMap = new Map<string, Map<string, number>>()
     const detailedFeatureData = new Map<string, Array<{ oem: string; category: string; feature: string; segment: string; isLighthouse: boolean }>>()
-    const availableSegments = new Set<string>()
     
-    let detectedSegmentColumns: string[] = []
     let debugInfo: any = {
       totalRows: 0,
       processedRows: 0,
@@ -39,53 +38,86 @@ export function useVehicleSegmentData(
       sampleData: []
     }
 
-    // Analyze available columns
-    waypointData.csvData.forEach(file => {
-      if (file.data && Array.isArray(file.data) && file.data.length > 0) {
-        const firstRow = file.data[0]
-        const allColumns = Object.keys(firstRow)
-        debugInfo.availableColumns = allColumns
-        
-        console.log('All available columns:', allColumns)
-        
-        // Look for segment-related columns
-        const segmentPatterns = [
-          /segment/i, /entry/i, /mid/i, /premium/i, /luxury/i, /basic/i, /standard/i, /high/i, /executive/i
-        ]
-        
-        allColumns.forEach(column => {
-          if (segmentPatterns.some(pattern => pattern.test(column))) {
-            detectedSegmentColumns.push(column)
-          }
-        })
-        
-        debugInfo.segmentColumns = detectedSegmentColumns
-        debugInfo.sampleData = file.data.slice(0, 3)
+    const segments = extractVehicleSegments(waypointData, selectedCountry, selectedOEMs)
+
+    // Get column headers based on grouping mode
+    const columnHeaders = (() => {
+      if (groupingMode === 'by-oem') {
+        return selectedOEMs.map(oem => oem.length > 12 ? oem.substring(0, 12) + '...' : oem)
+      } else {
+        return segments
       }
-    })
+    })()
 
-    console.log('Detected segment columns:', detectedSegmentColumns)
-
-    // Process data
+    // Process data using the same structure as VehicleSegmentCategoryTable
+    const categoryData: Record<string, Record<string, number>> = {}
+    
     waypointData.csvData.forEach(file => {
       if (file.data && Array.isArray(file.data)) {
+        debugInfo.totalRows += file.data.length
+        
+        if (file.data.length > 0) {
+          const firstRow = file.data[0]
+          const allColumns = Object.keys(firstRow)
+          debugInfo.availableColumns = allColumns
+          debugInfo.sampleData = file.data.slice(0, 3)
+        }
+
         file.data.forEach((row: any) => {
-          debugInfo.totalRows++
+          const rowCountry = row.Country?.toString().trim()
+          const rowOEM = row.OEM?.toString().trim()
+          const rowCategory = row.Category?.toString().trim()
+          const featureAvailability = row['Feature Availability']?.toString().trim().toLowerCase()
+          const feature = row.Feature?.toString().trim()
+          const isLighthouse = row['Lighthouse Feature']?.toString().trim().toLowerCase() === 'yes'
           
-          if (row.Country === selectedCountry && 
-              selectedOEMs.includes(row.OEM) &&
-              row['Feature Availability']?.toString().trim().toLowerCase() === 'available' &&
-              row.Feature && row.Feature.toString().trim() !== '') {
+          if (rowCountry === selectedCountry &&
+              rowOEM && selectedOEMs.includes(rowOEM) &&
+              rowCategory && rowCategory !== '' &&
+              featureAvailability === 'available') {
             
             debugInfo.processedRows++
-            const oem = row.OEM.toString().trim()
-            const feature = row.Feature.toString().trim()
-            const category = row.Category?.toString().trim() || 'General'
-            const isLighthouse = row['Lighthouse Feature']?.toString().trim().toLowerCase() === 'yes'
             
-            // Check segment columns
-            if (detectedSegmentColumns.length > 0) {
-              detectedSegmentColumns.forEach(segmentCol => {
+            if (!categoryData[rowCategory]) {
+              categoryData[rowCategory] = {}
+              // Initialize all columns to 0
+              if (groupingMode === 'by-oem') {
+                selectedOEMs.forEach(oem => {
+                  const displayOem = oem.length > 12 ? oem.substring(0, 12) + '...' : oem
+                  categoryData[rowCategory][displayOem] = 0
+                })
+              } else {
+                segments.forEach(segment => {
+                  categoryData[rowCategory][segment] = 0
+                })
+              }
+            }
+            
+            if (groupingMode === 'by-oem') {
+              // Count by OEM - OEMs as columns
+              const displayOem = rowOEM.length > 12 ? rowOEM.substring(0, 12) + '...' : rowOEM
+              categoryData[rowCategory][displayOem]++
+              
+              // Store detailed feature data
+              if (!detailedFeatureData.has(displayOem)) {
+                detailedFeatureData.set(displayOem, [])
+              }
+              detailedFeatureData.get(displayOem)!.push({ 
+                oem: rowOEM, category: rowCategory, feature, segment: 'N/A', isLighthouse 
+              })
+            } else {
+              // Count by segment - segments as columns
+              const firstRow = file.data[0]
+              const allColumns = Object.keys(firstRow)
+              const segmentPatterns = [
+                /segment/i, /entry/i, /mid/i, /premium/i, /luxury/i, /basic/i, /standard/i, /high/i, /executive/i
+              ]
+              
+              const segmentColumns = allColumns.filter(column => 
+                segmentPatterns.some(pattern => pattern.test(column))
+              )
+              
+              segmentColumns.forEach(segmentCol => {
                 const segmentValue = row[segmentCol]?.toString().trim().toLowerCase()
                 
                 if (segmentValue && segmentValue !== 'n/a' && segmentValue !== '' && 
@@ -99,99 +131,45 @@ export function useVehicleSegmentData(
                   else if (segmentName.toLowerCase().includes('luxury')) segmentName = 'Luxury'
                   else segmentName = segmentCol
                   
-                  availableSegments.add(segmentName)
-                  
-                  // Update segment → OEM mapping
-                  if (!segmentFeatureMap.has(segmentName)) {
-                    segmentFeatureMap.set(segmentName, new Map())
+                  if (categoryData[rowCategory][segmentName] !== undefined) {
+                    categoryData[rowCategory][segmentName]++
                   }
-                  const segmentOEMs = segmentFeatureMap.get(segmentName)!
-                  segmentOEMs.set(oem, (segmentOEMs.get(oem) || 0) + 1)
                   
-                  // Update OEM → segment mapping
-                  if (!oemFeatureMap.has(oem)) {
-                    oemFeatureMap.set(oem, new Map())
-                  }
-                  const oemSegments = oemFeatureMap.get(oem)!
-                  oemSegments.set(segmentName, (oemSegments.get(segmentName) || 0) + 1)
-                  
-                  // Store detailed feature data for OEMs
-                  if (!detailedFeatureData.has(oem)) {
-                    detailedFeatureData.set(oem, [])
-                  }
-                  detailedFeatureData.get(oem)!.push({ oem, category, feature, segment: segmentName, isLighthouse })
-                  
-                  // Store detailed feature data for segments
+                  // Store detailed feature data
                   if (!detailedFeatureData.has(segmentName)) {
                     detailedFeatureData.set(segmentName, [])
                   }
-                  detailedFeatureData.get(segmentName)!.push({ oem, category, feature, segment: segmentName, isLighthouse })
+                  detailedFeatureData.get(segmentName)!.push({ 
+                    oem: rowOEM, category: rowCategory, feature, segment: segmentName, isLighthouse 
+                  })
                 }
               })
-            } else {
-              // Fallback to category-based segmentation
-              const category = row.Category?.toString().trim() || 'General'
-              availableSegments.add(category)
-              
-              if (!segmentFeatureMap.has(category)) {
-                segmentFeatureMap.set(category, new Map())
-              }
-              const segmentOEMs = segmentFeatureMap.get(category)!
-              segmentOEMs.set(oem, (segmentOEMs.get(oem) || 0) + 1)
-              
-              if (!oemFeatureMap.has(oem)) {
-                oemFeatureMap.set(oem, new Map())
-              }
-              const oemSegments = oemFeatureMap.get(oem)!
-              oemSegments.set(category, (oemSegments.get(category) || 0) + 1)
-              
-              // Store detailed feature data
-              if (!detailedFeatureData.has(oem)) {
-                detailedFeatureData.set(oem, [])
-              }
-              detailedFeatureData.get(oem)!.push({ oem, category, feature, segment: category, isLighthouse })
-              
-              if (!detailedFeatureData.has(category)) {
-                detailedFeatureData.set(category, [])
-              }
-              detailedFeatureData.get(category)!.push({ oem, category, feature, segment: category, isLighthouse })
             }
           }
         })
       }
     })
 
-    const segments = Array.from(availableSegments).sort()
-    console.log('Final processing results:', { segments, debugInfo })
+    // Convert to chart data format - transposed structure
+    const chartData = Object.entries(categoryData)
+      .map(([category, counts]) => {
+        const row: any = { name: category }
+        columnHeaders.forEach(header => {
+          const originalHeader = groupingMode === 'by-oem' 
+            ? selectedOEMs.find(oem => (oem.length > 12 ? oem.substring(0, 12) + '...' : oem) === header) || header
+            : header
+          row[header] = counts[originalHeader] || 0
+        })
+        return row
+      })
+      .filter(item => columnHeaders.some(header => item[header] > 0))
+      .sort((a, b) => {
+        const totalA = columnHeaders.reduce((sum, header) => sum + (a[header] || 0), 0)
+        const totalB = columnHeaders.reduce((sum, header) => sum + (b[header] || 0), 0)
+        return totalB - totalA
+      })
 
-    // Build chart data based on grouping mode
-    let chartData: any[] = []
-    
-    if (groupingMode === 'by-oem') {
-      // Group by OEM (OEMs on X-axis, segments as separate bars)
-      chartData = selectedOEMs.map(oem => {
-        const item: any = { name: oem }
-        const oemSegments = oemFeatureMap.get(oem) || new Map()
-        
-        segments.forEach(segment => {
-          item[segment] = oemSegments.get(segment) || 0
-        })
-        
-        return item
-      }).filter(item => segments.some(segment => item[segment] > 0))
-    } else {
-      // Group by segment (Segments on X-axis, OEMs as separate bars)
-      chartData = segments.map(segment => {
-        const item: any = { name: segment }
-        const segmentOEMs = segmentFeatureMap.get(segment) || new Map()
-        
-        selectedOEMs.forEach(oem => {
-          item[oem] = segmentOEMs.get(oem) || 0
-        })
-        
-        return item
-      }).filter(item => selectedOEMs.some(oem => item[oem] > 0))
-    }
+    console.log('Final processing results:', { chartData, segments, debugInfo })
 
     return { 
       chartData, 

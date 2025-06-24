@@ -29,13 +29,20 @@ const VehicleSegmentBarChart = ({
 
   const oemColors: string[] = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#10b981', '#06b6d4', '#8b5cf6', '#ec4899']
 
-  const dataKeys = groupingMode === 'by-oem' ? availableSegments : selectedOEMs
+  // Get the column headers (what will be shown as bars)
+  const dataKeys = (() => {
+    if (groupingMode === 'by-oem') {
+      return selectedOEMs.map(oem => oem.length > 12 ? oem.substring(0, 12) + '...' : oem)
+    } else {
+      return availableSegments
+    }
+  })()
 
   const handleBarClick = (data: any) => {
     if (onBarClick && data.name) {
       onBarClick({
         name: data.name,
-        type: groupingMode === 'by-oem' ? 'oem' : 'segment'
+        type: 'category' // Categories are now on X-axis
       })
     }
   }
@@ -67,7 +74,7 @@ const VehicleSegmentBarChart = ({
         <Legend />
         {dataKeys.map((key, index) => {
           let barColor: string
-          if (groupingMode === 'by-oem') {
+          if (groupingMode === 'by-segment') {
             barColor = segmentColors[key] || '#8b5cf6'
           } else {
             barColor = oemColors[index % oemColors.length] || '#8b5cf6'
