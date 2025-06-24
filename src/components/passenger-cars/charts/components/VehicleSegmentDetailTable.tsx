@@ -1,12 +1,11 @@
-
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useTheme } from "@/contexts/ThemeContext"
-import { X, Check } from "lucide-react"
+import { X, Circle, CheckCircle } from "lucide-react"
 import type { GroupingMode } from "../types/VehicleSegmentTypes"
 
 interface VehicleSegmentDetailTableProps {
   selectedItem: string
-  itemType: 'oem' | 'segment'
+  itemType: 'oem' | 'segment' | 'category'
   detailedData: Array<{ oem: string; category: string; feature: string; segment: string; isLighthouse: boolean }>
   groupingMode: GroupingMode
   onClose: () => void
@@ -16,84 +15,68 @@ const VehicleSegmentDetailTable = ({
   selectedItem, 
   itemType, 
   detailedData, 
-  groupingMode,
+  groupingMode, 
   onClose 
 }: VehicleSegmentDetailTableProps) => {
   const { theme } = useTheme()
 
-  // Determine the third column header based on grouping mode
-  const thirdColumnHeader = groupingMode === 'by-oem' ? 'Segment' : 'OEM'
-
-  const FeatureStatusIcon = ({ isLighthouse }: { isLighthouse: boolean }) => {
-    if (isLighthouse) {
-      return (
-        <div className="flex items-center justify-center">
-          <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-            <Check size={10} className="text-white" />
-          </div>
-        </div>
-      )
+  const getTitle = () => {
+    switch (itemType) {
+      case 'oem':
+        return `Features for ${selectedItem}`
+      case 'segment':
+        return `Features in ${selectedItem} Segment`
+      case 'category':
+        return `Features in ${selectedItem} Category`
+      default:
+        return `Features for ${selectedItem}`
     }
-    return (
-      <div className="flex items-center justify-center">
-        <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-      </div>
-    )
   }
 
   return (
-    <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm mt-6`}>
-      <div className="flex items-center justify-between mb-4">
-        <h4 className={`text-lg font-medium ${theme.textPrimary}`}>
-          Detailed Features for {selectedItem}
-        </h4>
-        <button
-          onClick={onClose}
-          className={`p-2 rounded-lg ${theme.cardBorder} border hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors`}
-        >
-          <X size={16} className={theme.textSecondary} />
-        </button>
-      </div>
-      
-      <div className="overflow-x-auto max-h-96">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Category</TableHead>
-              <TableHead>Feature</TableHead>
-              <TableHead>{thirdColumnHeader}</TableHead>
-              <TableHead className="text-center">Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {detailedData.map((item, index) => (
-              <TableRow key={index}>
-                <TableCell className="font-medium">{item.category}</TableCell>
-                <TableCell>{item.feature}</TableCell>
-                <TableCell>
-                  {groupingMode === 'by-oem' ? item.segment : item.oem}
-                </TableCell>
-                <TableCell>
-                  <FeatureStatusIcon isLighthouse={item.isLighthouse} />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-      
-      <div className={`mt-3 text-sm ${theme.textMuted} flex items-center gap-4`}>
-        <span>Showing {detailedData.length} features</span>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-            <span>Available</span>
+    <div className="fixed inset-0 z-50 overflow-auto bg-black/50">
+      <div className="flex items-center justify-center min-h-screen">
+        <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-lg shadow-lg m-4 max-w-3xl w-full`}>
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b">
+            <h3 className={`text-lg font-semibold ${theme.textPrimary}`}>{getTitle()}</h3>
+            <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+              <X className="h-5 w-5" />
+            </button>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-              <Check size={10} className="text-white" />
-            </div>
-            <span>Lighthouse Feature</span>
+
+          {/* Table */}
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className={`${theme.cardBorder} border-b`}>
+                  <TableHead className={`${theme.textSecondary} font-medium`}>Feature</TableHead>
+                  <TableHead className={`${theme.textSecondary} font-medium text-center`}>Category</TableHead>
+                  {groupingMode === 'by-oem' && (
+                    <TableHead className={`${theme.textSecondary} font-medium text-center`}>Segment</TableHead>
+                  )}
+                  <TableHead className={`${theme.textSecondary} font-medium text-center`}>Lighthouse</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {detailedData.map((item) => (
+                  <TableRow key={`${item.feature}-${item.oem}-${item.segment}`} className={`${theme.cardBorder} border-b`}>
+                    <TableCell className={`${theme.textPrimary} font-medium`}>{item.feature}</TableCell>
+                    <TableCell className={`${theme.textSecondary} text-center`}>{item.category}</TableCell>
+                    {groupingMode === 'by-oem' && (
+                      <TableCell className={`${theme.textSecondary} text-center`}>{item.segment}</TableCell>
+                    )}
+                    <TableCell className="text-center">
+                      {item.isLighthouse ? (
+                        <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
+                      ) : (
+                        <Circle className="h-5 w-5 text-gray-500 mx-auto" />
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         </div>
       </div>
