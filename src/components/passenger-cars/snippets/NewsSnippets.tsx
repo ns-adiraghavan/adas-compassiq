@@ -24,7 +24,19 @@ const NewsSnippets = ({
   const newsSnippets = newsData?.newsSnippets || []
 
   const handleNewsClick = (url: string) => {
-    window.open(url, '_blank', 'noopener,noreferrer')
+    // Validate URL before opening
+    try {
+      const validUrl = new URL(url)
+      if (validUrl.protocol === 'http:' || validUrl.protocol === 'https:') {
+        window.open(url, '_blank', 'noopener,noreferrer')
+      } else {
+        console.warn('Invalid URL protocol:', url)
+      }
+    } catch (error) {
+      console.error('Invalid URL:', url, error)
+      // For demo purposes, show an alert to the user
+      alert('This is a demo news snippet. In a real implementation, this would redirect to the actual news source.')
+    }
   }
 
   return (
