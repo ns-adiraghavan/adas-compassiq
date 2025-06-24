@@ -88,7 +88,6 @@ const BusinessModelTable = ({ selectedCountry, selectedOEMs, onBusinessModelClic
                 {oem}
               </th>
             ))}
-            <th className={`text-center p-3 ${theme.textPrimary} font-medium`}>Total</th>
           </tr>
         </thead>
         <tbody>
@@ -118,9 +117,6 @@ const BusinessModelTable = ({ selectedCountry, selectedOEMs, onBusinessModelClic
                     </td>
                   )
                 })}
-                <td className={`p-3 text-center font-bold ${theme.textPrimary}`}>
-                  {row.total}
-                </td>
               </tr>
             )
           })}

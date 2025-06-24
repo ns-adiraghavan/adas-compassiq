@@ -169,7 +169,6 @@ const CategoryAnalysisTable = ({
                   <th className={`text-left p-4 ${theme.textPrimary} font-medium`}>Feature</th>
                   <th className={`text-left p-4 ${theme.textPrimary} font-medium`}>OEM</th>
                   <th className={`text-left p-4 ${theme.textPrimary} font-medium`}>Business Model Type</th>
-                  <th className={`text-left p-4 ${theme.textPrimary} font-medium`}>Segment</th>
                 </tr>
               </thead>
               <tbody>
@@ -183,9 +182,6 @@ const CategoryAnalysisTable = ({
                     </td>
                     <td className={`p-4 ${theme.textSecondary}`}>
                       {feature['Business Model Type'] || 'Unknown'}
-                    </td>
-                    <td className={`p-4 ${theme.textSecondary}`}>
-                      {feature.Segment || 'Unknown'}
                     </td>
                   </tr>
                 ))}
