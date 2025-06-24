@@ -133,8 +133,8 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
   }, [waypointData, selectedCountry, selectedOEMs])
 
   const oemColors = [
-    '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', 
-    '#ef4444', '#ec4899', '#84cc16', '#6366f1'
+    '#10b981', '#8b5cf6', '#f59e0b', '#ef4444', 
+    '#06b6d4', '#ec4899', '#84cc16', '#6366f1'
   ]
 
   if (!chartData.length) {
@@ -150,6 +150,7 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
       <BarChart
         data={chartData}
         margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+        style={{ backgroundColor: 'transparent' }}
       >
         <XAxis 
           dataKey="segment" 
@@ -177,6 +178,7 @@ const VehicleSegmentChart = ({ selectedCountry, selectedOEMs }: VehicleSegmentCh
             stackId="a"
             fill={oemColors[index % oemColors.length]}
             name={oem}
+            style={{ backgroundColor: 'transparent' }}
           />
         ))}
       </BarChart>
