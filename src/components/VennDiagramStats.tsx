@@ -10,12 +10,6 @@ interface VennDiagramStatsProps {
 const VennDiagramStats = ({ data, entities }: VennDiagramStatsProps) => {
   const { theme } = useTheme()
 
-  const calculateCoveragePercentage = (entityName: string) => {
-    const entity = entities.find(e => e.name === entityName)
-    if (!entity || data.totalFeatures === 0) return 0
-    return ((entity.count / data.totalFeatures) * 100).toFixed(1)
-  }
-
   const getOverlapPercentage = () => {
     if (entities.length < 2) return 0
     const sharedCount = data.sharedFeatures.length
@@ -44,29 +38,6 @@ const VennDiagramStats = ({ data, entities }: VennDiagramStatsProps) => {
             <span className={`text-sm ${theme.textSecondary}`}>Overlap Percentage:</span>
             <span className={`text-sm font-medium ${theme.textPrimary}`}>{getOverlapPercentage()}%</span>
           </div>
-        </div>
-      </div>
-
-      {/* Entity Coverage */}
-      <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-lg p-4 ${theme.shadowColor} shadow-sm`}>
-        <h3 className={`text-lg font-medium ${theme.textPrimary} mb-4`}>Coverage</h3>
-        <div className="space-y-3">
-          {entities.map((entity) => (
-            <div key={entity.name}>
-              <div className="flex justify-between mb-1">
-                <span className={`text-sm ${theme.textSecondary}`}>{entity.name}:</span>
-                <span className={`text-sm font-medium ${theme.textPrimary}`}>
-                  {calculateCoveragePercentage(entity.name)}%
-                </span>
-              </div>
-              <div className="w-full bg-gray-700 rounded-full h-2">
-                <div
-                  className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${calculateCoveragePercentage(entity.name)}%` }}
-                />
-              </div>
-            </div>
-          ))}
         </div>
       </div>
 

@@ -4,7 +4,7 @@ import { VennDiagramData } from "@/utils/vennDiagramUtils"
 import VennDiagramSVG from "@/components/VennDiagramSVG"
 import VennDiagramLegend from "@/components/VennDiagramLegend"
 import VennDiagramStats from "@/components/VennDiagramStats"
-import VennDiagramIntersectionDetails from "@/components/VennDiagramIntersectionDetails"
+import VennDiagramTable from "@/components/VennDiagramTable"
 import { useTheme } from "@/contexts/ThemeContext"
 
 interface VennDiagramProps {
@@ -37,10 +37,6 @@ const VennDiagram = ({ data }: VennDiagramProps) => {
     setSelectedIntersection(intersection)
   }
 
-  const handleCloseDetails = () => {
-    setSelectedIntersection(null)
-  }
-
   if (displayEntities.length === 0) {
     return (
       <div className={`flex items-center justify-center h-96 ${theme.textMuted}`}>
@@ -50,9 +46,9 @@ const VennDiagram = ({ data }: VennDiagramProps) => {
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col space-y-6">
       {/* Main diagram area */}
-      <div className="flex-1 flex">
+      <div className="flex">
         <div className="flex-1 relative">
           <VennDiagramSVG
             data={data}
@@ -72,13 +68,12 @@ const VennDiagram = ({ data }: VennDiagramProps) => {
         </div>
       </div>
 
-      {/* Intersection details modal */}
-      {selectedIntersection && (
-        <VennDiagramIntersectionDetails
-          intersection={selectedIntersection}
-          onClose={handleCloseDetails}
-        />
-      )}
+      {/* Feature Distribution Table */}
+      <VennDiagramTable
+        data={data}
+        entities={displayEntities}
+        selectedIntersection={selectedIntersection}
+      />
     </div>
   )
 }
