@@ -180,7 +180,7 @@ const CategoryAnalysisTable = ({
       {expandedCategory && Object.keys(expandedFeaturesData).length > 0 && (
         <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-lg p-6`}>
           <h4 className={`text-xl font-semibold ${theme.textPrimary} mb-4`}>
-            Features in {expandedCategory} Category{businessModelFilter && ` (${businessModelFilter})`}
+            Available Features in {expandedCategory}
           </h4>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
