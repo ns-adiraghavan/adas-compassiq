@@ -20,6 +20,15 @@ const FooterSection = () => {
           <ArrowRight className="ml-2 h-5 w-5" />
         </Button>
       </div>
+      
+      {/* Copyright Footer */}
+      <div className="absolute bottom-4 left-0 right-0">
+        <div className="text-center">
+          <p className="text-gray-500 text-sm">
+            2025 © Netscribes. All Rights Reserved.
+          </p>
+        </div>
+      </div>
     </section>
   )
 }
