@@ -1,6 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users } from "lucide-react"
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import { Users, ZoomIn } from "lucide-react"
 import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
 import { useTheme } from "@/contexts/ThemeContext"
@@ -86,12 +87,34 @@ const PartnerEcosystem = ({ selectedOEM, selectedCountry }: PartnerEcosystemProp
           </div>
         ) : imageUrl ? (
           <div className="flex flex-col items-center justify-center h-60">
-            <img
-              src={imageUrl}
-              alt={`${selectedOEM} Partner Ecosystem`}
-              className="w-full h-52 object-contain rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300"
-              onError={() => setHasError(true)}
-            />
+            <Dialog>
+              <DialogTrigger asChild>
+                <div className="relative group cursor-pointer">
+                  <img
+                    src={imageUrl}
+                    alt={`${selectedOEM} Partner Ecosystem`}
+                    className="w-full h-52 object-contain rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group-hover:scale-105"
+                    onError={() => setHasError(true)}
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 rounded-lg flex items-center justify-center">
+                    <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                </div>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[90vh] p-2">
+                <div className="flex items-center justify-center">
+                  <img
+                    src={imageUrl}
+                    alt={`${selectedOEM} Partner Ecosystem - Full View`}
+                    className="max-w-full max-h-[80vh] object-contain rounded-lg"
+                  />
+                </div>
+                <div className="text-center mt-4">
+                  <h3 className="text-lg font-medium">{selectedOEM} Partner Ecosystem</h3>
+                  <p className="text-sm text-muted-foreground">Click outside to close</p>
+                </div>
+              </DialogContent>
+            </Dialog>
             <p className={`text-sm ${theme.textMuted} mt-2 text-center`}>
               {selectedOEM} Partner Ecosystem
             </p>
