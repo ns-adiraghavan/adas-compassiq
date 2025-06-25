@@ -93,7 +93,7 @@ const VehicleSection = ({ category, index, currentSection, sectionIndex }: Vehic
                 </div>
               )}
               
-              {/* Keep original explore button for other categories */}
+              {/* Keep original explore button for other categories (but not for Passenger Cars) */}
               {category.title !== "Passenger Cars" && (
                 <Link to={category.href} className="group block mt-6">
                   <div className="inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors">

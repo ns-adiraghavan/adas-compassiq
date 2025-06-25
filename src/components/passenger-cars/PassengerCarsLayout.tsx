@@ -61,7 +61,7 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
   }
 
   return (
-    <div className={`${theme.backgroundGradient} ${theme.textPrimary} transition-all duration-500`}>
+    <div className={`min-h-screen ${theme.backgroundGradient} ${theme.textPrimary} transition-all duration-500 flex flex-col`}>
       {/* Logo positioned in top right */}
       <div className="fixed top-4 right-4 z-50">
         <WaypointLogo />
@@ -118,9 +118,18 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
       </div>
 
       {/* Main Content - Natural height with page scrolling and fade transition */}
-      <div className="pb-8 animate-fade-in">
+      <div className="flex-grow pb-8 animate-fade-in">
         <div className="transition-all duration-500 ease-in-out">
           {children}
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="mt-auto py-4">
+        <div className="text-center">
+          <p className="text-gray-500 text-sm">
+            2025 © Netscribes. All Rights Reserved.
+          </p>
         </div>
       </div>
     </div>
