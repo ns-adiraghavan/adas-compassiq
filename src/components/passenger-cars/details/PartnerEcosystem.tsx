@@ -81,15 +81,15 @@ const PartnerEcosystem = ({ selectedOEM, selectedCountry }: PartnerEcosystemProp
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="flex items-center justify-center h-40">
+          <div className="flex items-center justify-center h-60">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         ) : imageUrl ? (
-          <div className="flex flex-col items-center justify-center h-40">
+          <div className="flex flex-col items-center justify-center h-60">
             <img
               src={imageUrl}
               alt={`${selectedOEM} Partner Ecosystem`}
-              className="max-w-full max-h-full object-contain rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300"
+              className="w-full h-52 object-contain rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300"
               onError={() => setHasError(true)}
             />
             <p className={`text-sm ${theme.textMuted} mt-2 text-center`}>
@@ -97,14 +97,14 @@ const PartnerEcosystem = ({ selectedOEM, selectedCountry }: PartnerEcosystemProp
             </p>
           </div>
         ) : hasError ? (
-          <div className="flex items-center justify-center h-40">
+          <div className="flex items-center justify-center h-60">
             <div className={`${theme.textMuted} text-center`}>
               <div className="text-lg font-medium mb-2">Image Not Available</div>
               <div className="text-sm">Partner ecosystem image for {selectedOEM} could not be loaded</div>
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-center h-40">
+          <div className="flex items-center justify-center h-60">
             <div className={`${theme.textMuted} text-center`}>
               <div className="text-lg font-medium mb-2">Coming Soon</div>
               <div className="text-sm">Partner ecosystem analysis for {selectedOEM}</div>
