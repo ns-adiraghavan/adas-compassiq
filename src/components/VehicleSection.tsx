@@ -1,110 +1,116 @@
-
 import { Link } from "react-router-dom"
-import { LucideIcon } from "lucide-react"
+import { useScrollAnimation } from "@/hooks/useScrollAnimation"
+import AnimatedVehicleImage from "./AnimatedVehicleImage"
+import VehicleContent from "./VehicleContent"
+import VehicleCards from "./VehicleCards"
+import { ArrowRight } from "lucide-react"
 
 interface VehicleCategory {
   title: string
   subtitle: string
   description: string
   image: string
-  icon: LucideIcon
+  icon: any
   href: string
   color: string
-  buttonColor?: string
-  shadowColor?: string
 }
 
 interface VehicleSectionProps {
-  category: VehicleCategory
-  index: number
-  currentSection: number
-  sectionIndex: number
+  category?: VehicleCategory
+  index?: number
+  currentSection?: number
+  sectionIndex?: number
 }
 
 const VehicleSection = ({ category, index, currentSection, sectionIndex }: VehicleSectionProps) => {
-  const isEven = index % 2 === 0
-  const isActive = currentSection === sectionIndex
+  const { sectionRef, getImageTransform, getTextTransform } = useScrollAnimation()
 
-  return (
-    <div className="min-h-screen flex items-center justify-center py-20 px-8">
-      <div className="container mx-auto max-w-7xl">
-        <div className={`grid lg:grid-cols-2 gap-16 items-center ${isEven ? '' : 'lg:grid-flow-col-dense'}`}>
-          {/* Image */}
-          <div className={`${isEven ? 'lg:order-1' : 'lg:order-2'} relative`}>
-            <div className="relative z-10">
-              <img
-                src={category.image}
-                alt={category.title}
-                className={`w-full h-auto rounded-2xl shadow-2xl transition-all duration-1000 ${
-                  isActive ? 'scale-100 opacity-100' : 'scale-95 opacity-80'
-                }`}
-                style={{
-                  filter: isActive ? 'brightness(1.1)' : 'brightness(0.9)',
-                }}
+  // If category prop is provided, render single category
+  if (category) {
+    const isEven = index !== undefined && index % 2 === 0
+    
+    return (
+      <section 
+        ref={sectionRef}
+        className="py-20 px-8 bg-gradient-to-b from-black to-gray-900 relative overflow-hidden"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 blur-3xl"></div>
+        
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className={`flex items-center gap-12 ${isEven ? 'flex-row' : 'flex-row-reverse'}`}>
+            
+            {/* Large Curved Image with Scroll Animation */}
+            <AnimatedVehicleImage
+              image={category.image}
+              title={category.title}
+              isEven={isEven}
+              imageTransform={getImageTransform()}
+            />
+            
+            {/* Content with side sliding animation */}
+            <div className="flex-1">
+              <VehicleContent
+                icon={category.icon}
+                title={category.title}
+                subtitle={category.subtitle}
+                description={category.description}
+                textTransform={getTextTransform(isEven)}
               />
-            </div>
-            <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-20 rounded-2xl blur-3xl`}></div>
-          </div>
-
-          {/* Content */}
-          <div className={`${isEven ? 'lg:order-2' : 'lg:order-1'} space-y-8`}>
-            <div className="space-y-4">
-              <div className={`inline-flex items-center space-x-3 transition-all duration-700 ${
-                isActive ? 'translate-x-0 opacity-100' : 'translate-x-8 opacity-60'
-              }`}>
-                <div className={`p-3 rounded-xl bg-gradient-to-br ${category.color}`}>
-                  <category.icon className="h-8 w-8 text-white" />
+              
+              {/* Navigation buttons for Passenger Cars */}
+              {category.title === "Passenger Cars" && (
+                <div className="mt-8 grid grid-cols-2 gap-4 max-w-md">
+                  <Link 
+                    to="/passenger-cars/landscape"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 text-center"
+                  >
+                    Landscape
+                  </Link>
+                  <Link 
+                    to="/passenger-cars/analytics"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 text-center"
+                  >
+                    Category Analysis
+                  </Link>
+                  <Link 
+                    to="/passenger-cars/intelligence"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 text-center"
+                  >
+                    Vehicle Segment Analysis
+                  </Link>
+                  <Link 
+                    to="/passenger-cars/modeling"
+                    className="bg-gradient-to-r from-slate-600 to-gray-700 text-white px-4 py-3 rounded-lg text-sm font-medium hover:from-slate-700 hover:to-gray-800 transition-all duration-300 text-center"
+                  >
+                    Business Model Analysis
+                  </Link>
+                  <Link 
+                    to="/passenger-cars/insights"
+                    className="bg-gradient-to-r from-slate-700 to-gray-800 text-white px-4 py-3 rounded-lg text-sm font-medium hover:from-slate-800 hover:to-gray-900 transition-all duration-300 text-center col-span-2"
+                  >
+                    Insights
+                  </Link>
                 </div>
-                <span className="text-sm font-medium text-gray-400 uppercase tracking-wider">
-                  {category.subtitle}
-                </span>
-              </div>
+              )}
               
-              <h2 className={`text-5xl lg:text-6xl font-bold bg-gradient-to-br ${category.color} bg-clip-text text-transparent transition-all duration-700 ${
-                isActive ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-60'
-              }`}>
-                {category.title}
-              </h2>
-              
-              <p className={`text-xl text-gray-300 leading-relaxed max-w-lg transition-all duration-700 delay-200 ${
-                isActive ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-60'
-              }`}>
-                {category.description}
-              </p>
-            </div>
-
-            <div className={`transition-all duration-700 delay-400 ${
-              isActive ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-60'
-            }`}>
-              <Link
-                to={category.href}
-                className={`inline-flex items-center px-8 py-4 text-lg font-semibold text-white ${
-                  category.buttonColor || `bg-gradient-to-r ${category.color}`
-                } rounded-xl shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 ${
-                  category.shadowColor || 'hover:shadow-xl'
-                } hover:shadow-2xl group animate-pulse-slow hover:animate-none`}
-              >
-                <span className="mr-3">Explore Platform</span>
-                <svg
-                  className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 7l5 5m0 0l-5 5m5-5H6"
-                  />
-                </svg>
-              </Link>
+              {/* Keep original explore button for other categories */}
+              {category.title !== "Passenger Cars" && (
+                <Link to={category.href} className="group block mt-6">
+                  <div className="inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors">
+                    <span className="mr-2">Explore</span>
+                    <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </Link>
+              )}
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  )
+      </section>
+    )
+  }
+
+  // Default two-card layout if no category prop
+  return <VehicleCards />
 }
 
 export default VehicleSection

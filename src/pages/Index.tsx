@@ -37,9 +37,7 @@ const Index = () => {
       image: "/lovable-uploads/c13e6208-3f44-451f-9b43-5f2707ee413c.png",
       icon: Car,
       href: "/passenger-cars",
-      color: "from-blue-600 to-purple-600",
-      buttonColor: "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700",
-      shadowColor: "hover:shadow-blue-500/25"
+      color: "from-blue-600 to-purple-600"
     },
     {
       title: "Two Wheelers",
@@ -48,9 +46,7 @@ const Index = () => {
       image: "/lovable-uploads/5bc26e8f-c225-4798-a305-557d8cc8b4af.png",
       icon: Bike,
       href: "#",
-      color: "from-green-600 to-teal-600",
-      buttonColor: "bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700",
-      shadowColor: "hover:shadow-green-500/25"
+      color: "from-green-600 to-teal-600"
     },
     {
       title: "Commercial Vehicles",
@@ -59,9 +55,7 @@ const Index = () => {
       image: "/lovable-uploads/849e6ee5-f48d-44b5-b934-674f44399eeb.png",
       icon: Truck,
       href: "#",
-      color: "from-orange-600 to-red-600",
-      buttonColor: "bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700",
-      shadowColor: "hover:shadow-orange-500/25"
+      color: "from-orange-600 to-red-600"
     },
     {
       title: "Agriculture Vehicles",
@@ -70,9 +64,7 @@ const Index = () => {
       image: "/lovable-uploads/a639b2c6-adaa-455a-adb5-c2c550261d96.png",
       icon: Tractor,
       href: "#",
-      color: "from-yellow-600 to-orange-600",
-      buttonColor: "bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700",
-      shadowColor: "hover:shadow-yellow-500/25"
+      color: "from-yellow-600 to-orange-600"
     }
   ]
 
