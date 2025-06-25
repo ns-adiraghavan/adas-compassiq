@@ -1,8 +1,18 @@
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Upload } from "lucide-react"
+import { ArrowRight, Upload, X } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import FileUpload from "@/components/FileUpload"
 
 const FooterSection = () => {
+  const [showUploadDialog, setShowUploadDialog] = useState(false)
+
+  const handleFileAnalyzed = (analysis: any) => {
+    console.log('File uploaded:', analysis)
+    // You can add additional handling here if needed
+  }
+
   return (
     <section className="section relative py-20 bg-gradient-to-t from-gray-900 to-black">
       <div className="max-w-4xl mx-auto text-center px-6">
@@ -25,6 +35,7 @@ const FooterSection = () => {
             size="sm"
             variant="outline"
             className="bg-transparent border-gray-500 text-gray-400 hover:bg-gray-800 hover:text-white text-sm px-4 py-2 rounded-lg transition-all duration-300"
+            onClick={() => setShowUploadDialog(true)}
           >
             <Upload className="mr-2 h-4 w-4" />
             Upload Image
@@ -40,6 +51,26 @@ const FooterSection = () => {
           </p>
         </div>
       </div>
+
+      {/* Upload Dialog */}
+      <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+        <DialogContent className="max-w-2xl bg-black/90 border-white/10">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center justify-between">
+              Upload Files
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setShowUploadDialog(false)}
+                className="text-white hover:bg-white/10"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
+          <FileUpload onFileAnalyzed={handleFileAnalyzed} />
+        </DialogContent>
+      </Dialog>
     </section>
   )
 }
