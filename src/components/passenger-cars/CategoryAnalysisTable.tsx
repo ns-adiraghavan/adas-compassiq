@@ -80,7 +80,7 @@ const CategoryAnalysisTable = ({
     })
 
     // Process features for expanded category
-    const expandedFeaturesData: Record<string, Record<string, { available: boolean, businessModel?: string }>> = {}
+    const expandedFeaturesData: Record<string, Record<string, { available: boolean, isLighthouse?: boolean, businessModel?: string }>> = {}
     if (expandedCategory && categoryFeatures[expandedCategory]) {
       categoryFeatures[expandedCategory].forEach((feature: any) => {
         const featureName = feature.Feature?.toString().trim()
@@ -90,9 +90,15 @@ const CategoryAnalysisTable = ({
           expandedFeaturesData[featureName] = {}
         }
         
-        // Always show availability with additional business model info if needed
+        // Check if this is a lighthouse feature
+        const isLighthouse = feature['Lighthouse Feature']?.toString().trim().toLowerCase() === 'yes' ||
+                            feature['Lighthouse Feature']?.toString().trim().toLowerCase() === 'true' ||
+                            feature['Is Lighthouse']?.toString().trim().toLowerCase() === 'yes' ||
+                            feature['Is Lighthouse']?.toString().trim().toLowerCase() === 'true'
+        
         expandedFeaturesData[featureName][oem] = {
           available: true,
+          isLighthouse,
           businessModel: showBusinessModelInDetails ? 
             feature['Business Model Type']?.toString().trim() || 'Unknown' : undefined
         }
@@ -206,9 +212,15 @@ const CategoryAnalysisTable = ({
                         <td key={oem} className={`p-4 text-center ${theme.textSecondary}`}>
                           {data ? (
                             <div className="flex items-center justify-center gap-2">
-                              <div className="flex items-center justify-center w-6 h-6 bg-green-500 rounded-full">
-                                <Check className="h-4 w-4 text-white" />
-                              </div>
+                              {data.isLighthouse ? (
+                                // Green circle with checkmark for lighthouse features
+                                <div className="flex items-center justify-center w-5 h-5 bg-green-500 rounded-full">
+                                  <Check className="h-3 w-3 text-white" />
+                                </div>
+                              ) : (
+                                // Simple "Available" text for non-lighthouse features
+                                <span className="text-sm text-gray-600">Available</span>
+                              )}
                               {showBusinessModelInDetails && data.businessModel && (
                                 <span className="text-xs text-gray-500">
                                   {data.businessModel}
