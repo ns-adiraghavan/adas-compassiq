@@ -2,7 +2,7 @@
 import { useMemo } from "react"
 import { useWaypointData } from "@/hooks/useWaypointData"
 import { useTheme } from "@/contexts/ThemeContext"
-import { ChevronDown, ChevronRight } from "lucide-react"
+import { ChevronDown, ChevronRight, Check } from "lucide-react"
 
 interface CategoryAnalysisTableProps {
   selectedCountry: string
@@ -80,7 +80,7 @@ const CategoryAnalysisTable = ({
     })
 
     // Process features for expanded category
-    const expandedFeaturesData: Record<string, Record<string, string>> = {}
+    const expandedFeaturesData: Record<string, Record<string, { available: boolean, businessModel?: string }>> = {}
     if (expandedCategory && categoryFeatures[expandedCategory]) {
       categoryFeatures[expandedCategory].forEach((feature: any) => {
         const featureName = feature.Feature?.toString().trim()
@@ -90,12 +90,11 @@ const CategoryAnalysisTable = ({
           expandedFeaturesData[featureName] = {}
         }
         
-        // Show either business model type or availability status based on context
-        if (showBusinessModelInDetails) {
-          const businessModelType = feature['Business Model Type']?.toString().trim() || 'Unknown'
-          expandedFeaturesData[featureName][oem] = businessModelType
-        } else {
-          expandedFeaturesData[featureName][oem] = 'Available'
+        // Always show availability with additional business model info if needed
+        expandedFeaturesData[featureName][oem] = {
+          available: true,
+          businessModel: showBusinessModelInDetails ? 
+            feature['Business Model Type']?.toString().trim() || 'Unknown' : undefined
         }
       })
     }
@@ -201,11 +200,27 @@ const CategoryAnalysisTable = ({
                     <td className={`p-4 ${theme.textSecondary} font-medium`}>
                       {featureName}
                     </td>
-                    {selectedOEMs.map(oem => (
-                      <td key={oem} className={`p-4 text-center ${theme.textSecondary}`}>
-                        {oemData[oem] || '-'}
-                      </td>
-                    ))}
+                    {selectedOEMs.map(oem => {
+                      const data = oemData[oem]
+                      return (
+                        <td key={oem} className={`p-4 text-center ${theme.textSecondary}`}>
+                          {data ? (
+                            <div className="flex items-center justify-center gap-2">
+                              <div className="flex items-center justify-center w-6 h-6 bg-green-500 rounded-full">
+                                <Check className="h-4 w-4 text-white" />
+                              </div>
+                              {showBusinessModelInDetails && data.businessModel && (
+                                <span className="text-xs text-gray-500">
+                                  {data.businessModel}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </td>
+                      )
+                    })}
                   </tr>
                 ))}
               </tbody>
