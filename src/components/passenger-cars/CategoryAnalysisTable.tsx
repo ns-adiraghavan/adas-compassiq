@@ -213,13 +213,13 @@ const CategoryAnalysisTable = ({
                           {data ? (
                             <div className="flex items-center justify-center gap-2">
                               {data.isLighthouse ? (
-                                // Green circle with checkmark for lighthouse features
-                                <div className="flex items-center justify-center w-5 h-5 bg-green-500 rounded-full">
-                                  <Check className="h-3 w-3 text-white" />
+                                // Green circle with white checkmark for lighthouse features
+                                <div className="flex items-center justify-center w-6 h-6 bg-green-500 rounded-full border-2 border-green-500">
+                                  <Check className="h-3 w-3 text-white stroke-2" />
                                 </div>
                               ) : (
-                                // Simple "Available" text for non-lighthouse features
-                                <span className="text-sm text-gray-600">Available</span>
+                                // Green circle without checkmark for regular available features
+                                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                               )}
                               {showBusinessModelInDetails && data.businessModel && (
                                 <span className="text-xs text-gray-500">
