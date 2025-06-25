@@ -96,30 +96,26 @@ const FileUpload = ({ onFileAnalyzed }: FileUploadProps) => {
         }
       }
 
-      // Generate unique file path
-      const timestamp = Date.now()
-      const randomId = Math.random().toString(36).substring(2)
-      const fileExtension = file.name.split('.').pop()
-      const fileName = `${timestamp}_${randomId}.${fileExtension}`
-      const filePath = `uploads/${fileName}`
+      // Use original filename for storage path
+      const filePath = `uploads/${file.name}`
 
-      // Upload file to Supabase Storage
+      // Upload file to Supabase Storage with original filename
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('documents')
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: false
+          upsert: true // Allow overwriting files with same name
         })
 
       if (uploadError) {
         throw uploadError
       }
 
-      // Store file metadata in database
+      // Store file metadata in database with original filename
       const { data: dbData, error: dbError } = await supabase
         .from('documents')
         .insert({
-          file_name: file.name,
+          file_name: file.name, // Use original filename
           file_type: file.type || 'application/octet-stream',
           file_size: file.size,
           file_path: uploadData.path,
@@ -141,7 +137,7 @@ const FileUpload = ({ onFileAnalyzed }: FileUploadProps) => {
 
       const newFile = {
         id: dbData.id,
-        name: file.name,
+        name: file.name, // Display original name
         type: file.type || 'application/octet-stream',
         size: file.size
       }
@@ -152,7 +148,7 @@ const FileUpload = ({ onFileAnalyzed }: FileUploadProps) => {
       const action = replaceDuplicate ? 'replaced' : 'uploaded'
       toast({
         title: `File ${action} successfully`,
-        description: `${file.name} has been stored in Supabase Storage.`
+        description: `${file.name} has been stored with its original filename.`
       })
 
     } catch (error) {

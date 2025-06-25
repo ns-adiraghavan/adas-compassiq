@@ -28,31 +28,27 @@ serve(async (req) => {
     // Convert base64 to binary data
     const binaryData = Uint8Array.from(atob(fileContent), c => c.charCodeAt(0));
     
-    // Generate unique file path
-    const timestamp = Date.now();
-    const randomId = Math.random().toString(36).substring(2);
-    const fileExtension = fileName.split('.').pop();
-    const uniqueFileName = `${timestamp}_${randomId}.${fileExtension}`;
-    const filePath = `uploads/${uniqueFileName}`;
+    // Use original filename with uploads/ prefix
+    const filePath = `uploads/${fileName}`;
 
-    // Upload file to Supabase Storage
+    // Upload file to Supabase Storage with original name
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('documents')
       .upload(filePath, binaryData, {
         contentType: fileType,
         cacheControl: '3600',
-        upsert: false
+        upsert: true // Allow overwriting files with same name
       });
 
     if (uploadError) {
       throw uploadError;
     }
 
-    // Store file metadata in database
+    // Store file metadata in database with original filename
     const { data, error } = await supabase
       .from('documents')
       .insert({
-        file_name: fileName,
+        file_name: fileName, // Keep original filename
         file_type: fileType,
         file_size: fileSize || 0,
         file_path: uploadData.path,
@@ -73,7 +69,7 @@ serve(async (req) => {
       throw error;
     }
 
-    console.log('Document stored successfully in storage:', fileName);
+    console.log('Document stored successfully with original name:', fileName);
 
     return new Response(
       JSON.stringify({
@@ -83,7 +79,7 @@ serve(async (req) => {
         fileType,
         fileSize,
         storagePath: uploadData.path,
-        message: 'Document stored successfully in Supabase Storage'
+        message: 'Document stored successfully with original filename'
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
