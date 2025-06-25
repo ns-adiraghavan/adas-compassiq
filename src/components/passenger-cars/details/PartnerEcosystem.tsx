@@ -22,12 +22,13 @@ const PartnerEcosystem = ({ selectedOEM, selectedCountry }: PartnerEcosystemProp
     const normalizedOEM = oemName.toLowerCase().trim()
     
     const oemImageMap: { [key: string]: string } = {
+      'byd': 'BYD_cspe.png',
       'zeekr': 'Zeekr_cspe.png',
       'hyundai': 'Hyundai_cspe.png',
-      'nio': 'Nio_cspe.png',
+      'nio': 'NIO_cspe.png',
       'gm': 'GM_cspe.png',
       'general motors': 'GM_cspe.png',
-      'mahindra': 'Mahindra_scpe.png'
+      'mahindra': 'Mahindra_cspe.png'
     }
     
     return oemImageMap[normalizedOEM] || null
@@ -54,7 +55,7 @@ const PartnerEcosystem = ({ selectedOEM, selectedCountry }: PartnerEcosystemProp
       try {
         const { data } = supabase.storage
           .from('documents')
-          .getPublicUrl(`images/${imageFileName}`)
+          .getPublicUrl(`uploads/${imageFileName}`)
         
         if (data?.publicUrl) {
           setImageUrl(data.publicUrl)
