@@ -295,6 +295,7 @@ const BusinessModelAnalysisContent = () => {
               businessModelFilter={selectedBusinessModel}
               expandedCategory={expandedCategory}
               onCategoryClick={handleCategoryClick}
+              showBusinessModelInDetails={true}
             />
           </div>
         )}

@@ -10,6 +10,7 @@ interface CategoryAnalysisTableProps {
   businessModelFilter?: string
   expandedCategory: string | null
   onCategoryClick: (category: string) => void
+  showBusinessModelInDetails?: boolean
 }
 
 const CategoryAnalysisTable = ({ 
@@ -17,7 +18,8 @@ const CategoryAnalysisTable = ({
   selectedOEMs, 
   businessModelFilter,
   expandedCategory, 
-  onCategoryClick 
+  onCategoryClick,
+  showBusinessModelInDetails = false
 }: CategoryAnalysisTableProps) => {
   const { data: waypointData } = useWaypointData()
   const { theme } = useTheme()
@@ -83,17 +85,23 @@ const CategoryAnalysisTable = ({
       categoryFeatures[expandedCategory].forEach((feature: any) => {
         const featureName = feature.Feature?.toString().trim()
         const oem = feature.OEM?.toString().trim()
-        const businessModelType = feature['Business Model Type']?.toString().trim() || 'Unknown'
         
         if (!expandedFeaturesData[featureName]) {
           expandedFeaturesData[featureName] = {}
         }
-        expandedFeaturesData[featureName][oem] = businessModelType
+        
+        // Show either business model type or availability status based on context
+        if (showBusinessModelInDetails) {
+          const businessModelType = feature['Business Model Type']?.toString().trim() || 'Unknown'
+          expandedFeaturesData[featureName][oem] = businessModelType
+        } else {
+          expandedFeaturesData[featureName][oem] = 'Available'
+        }
       })
     }
 
     return { categoryData, expandedFeaturesData }
-  }, [waypointData, selectedCountry, selectedOEMs, businessModelFilter, expandedCategory])
+  }, [waypointData, selectedCountry, selectedOEMs, businessModelFilter, expandedCategory, showBusinessModelInDetails])
 
   const getCellColor = (value: number, maxInRow: number) => {
     if (value === 0) return 'transparent'
