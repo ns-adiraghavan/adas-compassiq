@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom"
 import { useScrollAnimation } from "@/hooks/useScrollAnimation"
 import AnimatedVehicleImage from "./AnimatedVehicleImage"
@@ -58,40 +57,36 @@ const VehicleSection = ({ category, index, currentSection, sectionIndex }: Vehic
                 textTransform={getTextTransform(isEven)}
               />
               
-              {/* Navigation buttons for Passenger Cars with distinct colors and animations */}
+              {/* Navigation buttons for Passenger Cars with distinct colors */}
               {category.title === "Passenger Cars" && (
                 <div className="mt-8 grid grid-cols-2 gap-4 max-w-md">
                   <Link 
                     to="/passenger-cars/landscape"
-                    className="bg-gradient-to-r from-blue-500 to-blue-700 text-white px-4 py-3 rounded-lg text-sm font-medium hover:from-blue-600 hover:to-blue-800 transition-all duration-300 text-center transform hover:scale-105 hover:shadow-lg hover:-translate-y-1 animate-pulse"
+                    className="bg-gradient-to-r from-blue-500 to-blue-700 text-white px-4 py-3 rounded-lg text-sm font-medium hover:from-blue-600 hover:to-blue-800 transition-all duration-300 text-center"
                   >
                     Landscape
                   </Link>
                   <Link 
                     to="/passenger-cars/analytics"
-                    className="bg-gradient-to-r from-purple-500 to-purple-700 text-white px-4 py-3 rounded-lg text-sm font-medium hover:from-purple-600 hover:to-purple-800 transition-all duration-300 text-center transform hover:scale-105 hover:shadow-lg hover:-translate-y-1 animate-pulse"
-                    style={{ animationDelay: '0.2s' }}
+                    className="bg-gradient-to-r from-purple-500 to-purple-700 text-white px-4 py-3 rounded-lg text-sm font-medium hover:from-purple-600 hover:to-purple-800 transition-all duration-300 text-center"
                   >
                     Category Analysis
                   </Link>
                   <Link 
                     to="/passenger-cars/intelligence"
-                    className="bg-gradient-to-r from-green-500 to-green-700 text-white px-4 py-3 rounded-lg text-sm font-medium hover:from-green-600 hover:to-green-800 transition-all duration-300 text-center transform hover:scale-105 hover:shadow-lg hover:-translate-y-1 animate-pulse"
-                    style={{ animationDelay: '0.4s' }}
+                    className="bg-gradient-to-r from-green-500 to-green-700 text-white px-4 py-3 rounded-lg text-sm font-medium hover:from-green-600 hover:to-green-800 transition-all duration-300 text-center"
                   >
                     Vehicle Segment Analysis
                   </Link>
                   <Link 
                     to="/passenger-cars/modeling"
-                    className="bg-gradient-to-r from-orange-500 to-orange-700 text-white px-4 py-3 rounded-lg text-sm font-medium hover:from-orange-600 hover:to-orange-800 transition-all duration-300 text-center transform hover:scale-105 hover:shadow-lg hover:-translate-y-1 animate-pulse"
-                    style={{ animationDelay: '0.6s' }}
+                    className="bg-gradient-to-r from-orange-500 to-orange-700 text-white px-4 py-3 rounded-lg text-sm font-medium hover:from-orange-600 hover:to-orange-800 transition-all duration-300 text-center"
                   >
                     Business Model Analysis
                   </Link>
                   <Link 
                     to="/passenger-cars/insights"
-                    className="bg-gradient-to-r from-indigo-500 to-indigo-700 text-white px-4 py-3 rounded-lg text-sm font-medium hover:from-indigo-600 hover:to-indigo-800 transition-all duration-300 text-center col-span-2 transform hover:scale-105 hover:shadow-lg hover:-translate-y-1 animate-pulse"
-                    style={{ animationDelay: '0.8s' }}
+                    className="bg-gradient-to-r from-indigo-500 to-indigo-700 text-white px-4 py-3 rounded-lg text-sm font-medium hover:from-indigo-600 hover:to-indigo-800 transition-all duration-300 text-center col-span-2"
                   >
                     Insights
                   </Link>
