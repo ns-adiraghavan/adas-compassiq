@@ -23,7 +23,7 @@ const AISnippetsSidebar = ({
   const oemsArray = selectedOEMs.length > 0 ? selectedOEMs : (selectedOEM ? [selectedOEM] : [])
 
   return (
-    <div className="h-full bg-gradient-to-b from-gray-800/30 to-gray-900/50 p-6 space-y-6 overflow-y-auto">
+    <div className="min-h-0 bg-gradient-to-b from-gray-800/30 to-gray-900/50 p-6 space-y-6">
       <div className="space-y-6">
         <DataSnippets 
           selectedOEM={selectedOEM} 
