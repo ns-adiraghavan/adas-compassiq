@@ -47,9 +47,9 @@ const ExpandedFeaturesTable = ({
                       {data ? (
                         <div className="flex items-center justify-center gap-2">
                           {data.isLighthouse ? (
-                            // Green circle with white checkmark for lighthouse features
-                            <div className="flex items-center justify-center w-5 h-5 bg-green-500 rounded-full">
-                              <Check className="h-3 w-3 text-white stroke-[3]" />
+                            // Green bordered circle with no fill and green checkmark for lighthouse features
+                            <div className="flex items-center justify-center w-5 h-5 border-2 border-green-500 rounded-full bg-transparent">
+                              <Check className="h-3 w-3 text-green-500 stroke-[3]" />
                             </div>
                           ) : (
                             // Green circle without checkmark for regular available features
