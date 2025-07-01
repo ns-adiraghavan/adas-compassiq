@@ -12,23 +12,19 @@ const FeatureModules = ({ vehicleType }: FeatureModulesProps) => {
         return [
           {
             icon: Wifi,
-            title: "Connected Feature Module",
-            description: "Advanced connectivity and IoT integration"
+            title: "Connected Feature Module"
           },
           {
             icon: Shield,
-            title: "Autonomous Driving-ADAS Module",
-            description: "Advanced driver assistance and safety systems"
+            title: "Autonomous Driving-ADAS Module"
           },
           {
             icon: Monitor,
-            title: "Digital Cockpit Module",
-            description: "Next-generation infotainment and displays"
+            title: "Digital Cockpit Module"
           },
           {
             icon: Battery,
-            title: "Electric Powertrain and Battery",
-            description: "Sustainable electric mobility solutions"
+            title: "Electric Powertrain and Battery"
           }
         ]
       
@@ -36,23 +32,19 @@ const FeatureModules = ({ vehicleType }: FeatureModulesProps) => {
         return [
           {
             icon: Zap,
-            title: "Electric Drive Systems",
-            description: "Efficient electric motor technology"
+            title: "Electric Drive Systems"
           },
           {
             icon: Wifi,
-            title: "Smart Connectivity",
-            description: "IoT-enabled two-wheeler solutions"
+            title: "Smart Connectivity"
           },
           {
             icon: Shield,
-            title: "Safety & Security",
-            description: "Anti-theft and rider safety features"
+            title: "Safety & Security"
           },
           {
             icon: Battery,
-            title: "Battery Management",
-            description: "Advanced battery technology and charging"
+            title: "Battery Management"
           }
         ]
       
@@ -60,23 +52,19 @@ const FeatureModules = ({ vehicleType }: FeatureModulesProps) => {
         return [
           {
             icon: Navigation,
-            title: "Fleet Management",
-            description: "Real-time tracking and optimization"
+            title: "Fleet Management"
           },
           {
             icon: Fuel,
-            title: "Fuel Efficiency",
-            description: "Advanced engine and fuel management"
+            title: "Fuel Efficiency"
           },
           {
             icon: Shield,
-            title: "Cargo Security",
-            description: "Load monitoring and security systems"
+            title: "Cargo Security"
           },
           {
             icon: Cpu,
-            title: "Telematics",
-            description: "Advanced vehicle data analytics"
+            title: "Telematics"
           }
         ]
       
@@ -84,23 +72,19 @@ const FeatureModules = ({ vehicleType }: FeatureModulesProps) => {
         return [
           {
             icon: Cpu,
-            title: "Precision Agriculture",
-            description: "GPS-guided farming automation"
+            title: "Precision Agriculture"
           },
           {
             icon: Monitor,
-            title: "Smart Displays",
-            description: "Intuitive operator interfaces"
+            title: "Smart Displays"
           },
           {
             icon: Zap,
-            title: "Hybrid Powertrains",
-            description: "Efficient diesel-electric systems"
+            title: "Hybrid Powertrains"
           },
           {
             icon: Wifi,
-            title: "Farm Connectivity",
-            description: "IoT integration for smart farming"
+            title: "Farm Connectivity"
           }
         ]
       
@@ -120,10 +104,10 @@ const FeatureModules = ({ vehicleType }: FeatureModulesProps) => {
         {modules.map((module, index) => (
           <div 
             key={index}
-            className="group bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/20 
+            className="group bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 
                      hover:border-white/40 transition-all duration-500 hover:bg-white/15 text-center
                      animate-fade-in hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/20
-                     transform-gpu cursor-pointer relative overflow-hidden"
+                     transform-gpu cursor-pointer relative overflow-hidden min-h-[120px] flex flex-col justify-center"
             style={{ 
               animationDelay: `${index * 150}ms`,
               animationFillMode: 'both'
@@ -145,17 +129,13 @@ const FeatureModules = ({ vehicleType }: FeatureModulesProps) => {
               <div className="flex justify-center mb-4">
                 <div className="p-3 bg-white/20 rounded-xl group-hover:bg-white/30 transition-all duration-300 
                               group-hover:scale-110 group-hover:rotate-3 transform-gpu">
-                  <module.icon className="h-7 w-7 text-white group-hover:text-blue-200 transition-colors duration-300" />
+                  <module.icon className="h-8 w-8 text-white group-hover:text-blue-200 transition-colors duration-300" />
                 </div>
               </div>
               
-              <h5 className="text-white font-medium text-sm mb-3 group-hover:text-blue-100 transition-colors duration-300">
+              <h5 className="text-white font-medium text-sm leading-tight group-hover:text-blue-100 transition-colors duration-300">
                 {module.title}
               </h5>
-              
-              <p className="text-white/60 text-xs leading-relaxed group-hover:text-white/80 transition-colors duration-300">
-                {module.description}
-              </p>
             </div>
             
             {/* Hover border effect */}
