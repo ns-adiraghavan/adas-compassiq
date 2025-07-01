@@ -18,6 +18,14 @@ const CategorySummaryTable = ({
 }: CategorySummaryTableProps) => {
   const { theme } = useTheme()
 
+  // Calculate grand totals for each OEM
+  const grandTotals = selectedOEMs.reduce((totals, oem) => {
+    totals[oem] = categoryData.reduce((sum, row) => sum + (row[oem] || 0), 0)
+    return totals
+  }, {} as Record<string, number>)
+
+  const overallTotal = Object.values(grandTotals).reduce((sum, total) => sum + total, 0)
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse">
@@ -65,12 +73,27 @@ const CategorySummaryTable = ({
                     >
                       {value > 0 ? value : '-'}
                     </td>
-                  )
-                })}
-              </tr>
-            )
-          })}
-        </tbody>
+              )
+            })}
+          </tr>
+        )
+      })}
+      
+      {/* Grand Total Row */}
+      <tr className={`${theme.cardBorder} border-t-2 bg-gray-800/40 font-bold`}>
+        <td className={`p-3 ${theme.textPrimary} font-bold`}>
+          Grand Total
+        </td>
+        {selectedOEMs.map(oem => (
+          <td 
+            key={oem}
+            className={`p-3 text-center font-bold ${theme.textPrimary}`}
+          >
+            {grandTotals[oem] || 0}
+          </td>
+        ))}
+      </tr>
+    </tbody>
       </table>
     </div>
   )

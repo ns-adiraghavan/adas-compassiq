@@ -12,7 +12,7 @@ export async function callOpenAIAPI(prompt: string, openAIApiKey: string): Promi
       messages: [
         {
           role: 'system',
-          content: 'You are an automotive segment analysis expert. Return ONLY a JSON array of exactly 3 strings. Each insight must focus on comparative analysis between OEMs and vehicle segments, highlighting competitive positioning, feature leadership, and market differentiation. Make insights specific and actionable for vehicle segment strategy.'
+          content: 'You are an automotive segment analysis expert. CRITICAL: Use ONLY the data provided in the user prompt. Do NOT reference any OEMs, feature counts, or data not explicitly provided. Do NOT make up or assume any information. Return ONLY a JSON array of exactly 3 strings based strictly on the provided data. Each insight must be 15-20 words maximum and use only the actual OEM names and numbers from the provided context.'
         },
         {
           role: 'user',

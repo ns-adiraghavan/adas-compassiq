@@ -1,5 +1,6 @@
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect } from "react"
 import { useFirstAvailableOEM, useWaypointData } from "@/hooks/useWaypointData"
+import { useCountryContext } from "@/contexts/CountryContext"
 import CountryButtons from "@/components/CountryButtons"
 import OEMBarChart from "@/components/passenger-cars/charts/OEMBarChart"
 import LandscapeDetails from "@/components/passenger-cars/details/LandscapeDetails"
@@ -8,39 +9,12 @@ import PassengerCarsLayout from "@/components/passenger-cars/PassengerCarsLayout
 import { useTheme } from "@/contexts/ThemeContext"
 
 const LandscapeContent = () => {
-  const [selectedCountry, setSelectedCountry] = useState("")
+  const { selectedCountry, setSelectedCountry } = useCountryContext()
   const [selectedOEM, setSelectedOEM] = useState("")
   const [showDetails, setShowDetails] = useState(false)
   const [oemClickedFromChart, setOemClickedFromChart] = useState(false)
   const { data: firstOEM } = useFirstAvailableOEM()
-  const { data: waypointData } = useWaypointData()
   const { theme } = useTheme()
-
-  // useEffect hooks for setting default country and OEM
-  useEffect(() => {
-    if (waypointData?.csvData?.length && !selectedCountry) {
-      const uniqueCountries = new Set<string>()
-      
-      waypointData.csvData.forEach(file => {
-        if (file.data && Array.isArray(file.data)) {
-          file.data.forEach((row: any) => {
-            if (row.Country && typeof row.Country === 'string' && 
-                row.Country.trim() !== '' && 
-                row.Country.toLowerCase() !== 'yes' && 
-                row.Country.toLowerCase() !== 'no' &&
-                row.Country.toLowerCase() !== 'n/a') {
-              uniqueCountries.add(row.Country.trim())
-            }
-          })
-        }
-      })
-
-      const sortedCountries = Array.from(uniqueCountries).sort()
-      if (sortedCountries.length > 0) {
-        setSelectedCountry(sortedCountries[0])
-      }
-    }
-  }, [waypointData, selectedCountry])
 
   useEffect(() => {
     if (firstOEM && !selectedOEM) {
@@ -54,61 +28,6 @@ const LandscapeContent = () => {
     setShowDetails(true)
     setOemClickedFromChart(true)
   }
-
-  // Generate landscape context for AI insights
-  const landscapeContext = useMemo(() => {
-    if (!waypointData?.csvData?.length || !selectedCountry) {
-      return null
-    }
-
-    const oemData: Record<string, { total: number, categories: Record<string, number>, businessModels: Record<string, number> }> = {}
-    let totalFeatures = 0
-
-    waypointData.csvData.forEach(file => {
-      if (file.data && Array.isArray(file.data)) {
-        file.data.forEach((row: any) => {
-          if (row.Country === selectedCountry &&
-              row['Feature Availability']?.toString().trim().toLowerCase() === 'available' &&
-              row.Feature && row.Feature.toString().trim() !== '') {
-            
-            const oem = row.OEM?.toString().trim()
-            const category = row.Category?.toString().trim() || 'Unknown'
-            const businessModel = row['Business Model Type']?.toString().trim() || 'Unknown'
-            
-            if (oem) {
-              if (!oemData[oem]) {
-                oemData[oem] = { total: 0, categories: {}, businessModels: {} }
-              }
-              
-              oemData[oem].total++
-              oemData[oem].categories[category] = (oemData[oem].categories[category] || 0) + 1
-              oemData[oem].businessModels[businessModel] = (oemData[oem].businessModels[businessModel] || 0) + 1
-              totalFeatures++
-            }
-          }
-        })
-      }
-    })
-
-    // Calculate OEM rankings and insights
-    const oemRankings = Object.entries(oemData)
-      .map(([oem, data]) => ({
-        oem,
-        total: data.total,
-        topCategory: Object.entries(data.categories).sort(([,a], [,b]) => b - a)[0],
-        topBusinessModel: Object.entries(data.businessModels).sort(([,a], [,b]) => b - a)[0]
-      }))
-      .sort((a, b) => b.total - a.total)
-
-    return {
-      totalFeatures,
-      selectedCountry,
-      selectedOEM: showDetails ? selectedOEM : null,
-      oemRankings: oemRankings.slice(0, 10),
-      leadingOEM: oemRankings[0],
-      analysisType: 'landscape-analysis'
-    }
-  }, [waypointData, selectedCountry, selectedOEM, showDetails])
 
   const handleCountryChange = (country: string) => {
     setSelectedCountry(country)
@@ -167,7 +86,6 @@ const LandscapeContent = () => {
             selectedOEM={selectedOEM}
             selectedCountry={selectedCountry}
             oemClickedFromChart={oemClickedFromChart}
-            businessModelAnalysisContext={landscapeContext}
           />
         </div>
       </div>
