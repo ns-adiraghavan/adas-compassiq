@@ -74,11 +74,12 @@ const PassengerCarsCarousel = () => {
     return () => clearInterval(interval)
   }, [images.length])
 
+  // Hexagonal shape for Passenger Cars
   const containerStyle = {
-    borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%",
-    transform: "rotate(2deg)",
+    clipPath: "polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%)",
     width: "100%",
-    height: "400px"
+    height: "400px",
+    transform: "rotate(0deg)"
   }
 
   if (isLoading) {
@@ -130,10 +131,10 @@ const PassengerCarsCarousel = () => {
         />
       ))}
       
-      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
       
       {images.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2">
           {images.map((_, index) => (
             <button
               key={index}
@@ -151,7 +152,7 @@ const PassengerCarsCarousel = () => {
         </div>
       )}
       
-      <div className="absolute top-2 left-2 text-white text-xs bg-black/50 px-2 py-1 rounded">
+      <div className="absolute top-4 left-4 text-white text-xs bg-black/50 px-2 py-1 rounded">
         {currentIndex + 1}/{images.length}
       </div>
     </div>

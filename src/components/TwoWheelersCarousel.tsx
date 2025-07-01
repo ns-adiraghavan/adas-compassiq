@@ -69,17 +69,18 @@ const TwoWheelersCarousel = () => {
     return () => clearInterval(interval)
   }, [images.length])
 
+  // Circular shape for Two Wheelers
   const containerStyle = {
-    borderRadius: "40% 60% 70% 30% / 40% 70% 30% 60%",
-    transform: "rotate(-2deg)",
-    width: "100%",
-    height: "400px"
+    borderRadius: "50%",
+    width: "400px",
+    height: "400px",
+    transform: "rotate(0deg)"
   }
 
   if (isLoading) {
     return (
       <div 
-        className="relative overflow-hidden transition-all duration-500 group-hover:scale-105"
+        className="relative overflow-hidden transition-all duration-500 group-hover:scale-105 mx-auto"
         style={containerStyle}
       >
         <div className="w-full h-full bg-gray-300 animate-pulse flex items-center justify-center">
@@ -92,7 +93,7 @@ const TwoWheelersCarousel = () => {
   if (hasError || images.length === 0) {
     return (
       <div 
-        className="relative overflow-hidden transition-all duration-500 group-hover:scale-105 bg-gradient-to-br from-green-600/30 to-teal-600/30 flex items-center justify-center"
+        className="relative overflow-hidden transition-all duration-500 group-hover:scale-105 bg-gradient-to-br from-green-600/30 to-teal-600/30 flex items-center justify-center mx-auto"
         style={containerStyle}
       >
         <div className="text-white/60 text-center">
@@ -105,7 +106,7 @@ const TwoWheelersCarousel = () => {
 
   return (
     <div 
-      className="relative overflow-hidden transition-all duration-500 group-hover:scale-105"
+      className="relative overflow-hidden transition-all duration-500 group-hover:scale-105 mx-auto"
       style={containerStyle}
     >
       {images.map((imageUrl, index) => (
@@ -122,7 +123,7 @@ const TwoWheelersCarousel = () => {
       <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
       
       {images.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2">
           {images.map((_, index) => (
             <button
               key={index}
