@@ -1,4 +1,3 @@
-
 import { ArrowLeft } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext"
@@ -65,8 +64,8 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
           }}
         />
         
-        {/* Background Overlay for Header */}
-        <div className="absolute inset-0 bg-black/40" />
+        {/* Background Overlay for Header - made darker */}
+        <div className="absolute inset-0 bg-black/60" />
 
         <div className={`relative z-10 text-white transition-all duration-500`}>
           {/* Logo positioned in top right */}
