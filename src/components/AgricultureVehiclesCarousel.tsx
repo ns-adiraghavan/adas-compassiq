@@ -2,17 +2,17 @@
 import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
 
-const PassengerCarsCarousel = () => {
+const AgricultureVehiclesCarousel = () => {
   const [images, setImages] = useState<string[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
 
-  const imageFiles = ['pcl_1.jpg', 'pcl_2.jpg', 'pcl_3.jpg', 'pcl_4.jpg', 'pcl_5.jpg', 'pcl_6.jpg', 'pcl_7.jpg', 'pcl_8.jpg']
+  const imageFiles = ['agri_1.jpg', 'agri_2.jpg', 'agri_3.jpg', 'agri_4.jpg']
 
   useEffect(() => {
     const loadImages = async () => {
-      console.log('Loading carousel images...')
+      console.log('Loading Agriculture Vehicles carousel images...')
       try {
         const imageUrls = await Promise.all(
           imageFiles.map(async (fileName) => {
@@ -41,7 +41,7 @@ const PassengerCarsCarousel = () => {
         )
         
         const validUrls = imageUrls.filter(url => url !== null) as string[]
-        console.log('Valid image URLs:', validUrls)
+        console.log('Valid Agriculture Vehicles image URLs:', validUrls)
         
         if (validUrls.length === 0) {
           setHasError(true)
@@ -50,7 +50,7 @@ const PassengerCarsCarousel = () => {
         }
         setIsLoading(false)
       } catch (error) {
-        console.error('Error loading carousel images:', error)
+        console.error('Error loading Agriculture Vehicles carousel images:', error)
         setHasError(true)
         setIsLoading(false)
       }
@@ -62,21 +62,16 @@ const PassengerCarsCarousel = () => {
   useEffect(() => {
     if (images.length <= 1) return
 
-    console.log('Starting carousel with', images.length, 'images')
     const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => {
-        const nextIndex = (prevIndex + 1) % images.length
-        console.log('Carousel changing from', prevIndex, 'to', nextIndex)
-        return nextIndex
-      })
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length)
     }, 3500)
 
     return () => clearInterval(interval)
   }, [images.length])
 
   const containerStyle = {
-    borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%",
-    transform: "rotate(2deg)",
+    borderRadius: "40% 60% 70% 30% / 40% 70% 30% 60%",
+    transform: "rotate(-2deg)",
     width: "100%",
     height: "400px"
   }
@@ -97,13 +92,12 @@ const PassengerCarsCarousel = () => {
   if (hasError || images.length === 0) {
     return (
       <div 
-        className="relative overflow-hidden transition-all duration-500 group-hover:scale-105 bg-gradient-to-br from-blue-600/30 to-purple-600/30 flex items-center justify-center"
+        className="relative overflow-hidden transition-all duration-500 group-hover:scale-105 bg-gradient-to-br from-yellow-600/30 to-orange-600/30 flex items-center justify-center"
         style={containerStyle}
       >
         <div className="text-white/60 text-center">
-          <div className="text-lg font-medium mb-2">Passenger Cars</div>
-          <div className="text-sm">Premium Automotive Intelligence</div>
-          <div className="text-xs mt-2 opacity-50">Images loading...</div>
+          <div className="text-lg font-medium mb-2">Agriculture Vehicles</div>
+          <div className="text-sm">Smart Farming Technology</div>
         </div>
       </div>
     )
@@ -118,15 +112,10 @@ const PassengerCarsCarousel = () => {
         <img
           key={`${imageUrl}-${index}`}
           src={imageUrl}
-          alt={`Passenger Car ${index + 1}`}
+          alt={`Agriculture Vehicle ${index + 1}`}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
             index === currentIndex ? 'opacity-100' : 'opacity-0'
           }`}
-          onLoad={() => console.log(`Image ${index + 1} loaded successfully`)}
-          onError={(e) => {
-            console.error(`Image ${index + 1} failed to load:`, imageUrl)
-            e.currentTarget.style.display = 'none'
-          }}
         />
       ))}
       
@@ -137,10 +126,7 @@ const PassengerCarsCarousel = () => {
           {images.map((_, index) => (
             <button
               key={index}
-              onClick={() => {
-                console.log('Manual navigation to image', index)
-                setCurrentIndex(index)
-              }}
+              onClick={() => setCurrentIndex(index)}
               className={`w-2 h-2 rounded-full transition-all duration-300 ${
                 index === currentIndex 
                   ? 'bg-white w-6' 
@@ -150,12 +136,8 @@ const PassengerCarsCarousel = () => {
           ))}
         </div>
       )}
-      
-      <div className="absolute top-2 left-2 text-white text-xs bg-black/50 px-2 py-1 rounded">
-        {currentIndex + 1}/{images.length}
-      </div>
     </div>
   )
 }
 
-export default PassengerCarsCarousel
+export default AgricultureVehiclesCarousel

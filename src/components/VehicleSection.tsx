@@ -1,8 +1,10 @@
+
 import { Link } from "react-router-dom"
 import { useScrollAnimation } from "@/hooks/useScrollAnimation"
 import AnimatedVehicleImage from "./AnimatedVehicleImage"
 import VehicleContent from "./VehicleContent"
 import VehicleCards from "./VehicleCards"
+import FeatureModules from "./FeatureModules"
 import { ArrowRight } from "lucide-react"
 
 interface VehicleCategory {
@@ -25,7 +27,6 @@ interface VehicleSectionProps {
 const VehicleSection = ({ category, index, currentSection, sectionIndex }: VehicleSectionProps) => {
   const { sectionRef, getImageTransform, getTextTransform } = useScrollAnimation()
 
-  // If category prop is provided, render single category
   if (category) {
     const isEven = index !== undefined && index % 2 === 0
     
@@ -39,7 +40,6 @@ const VehicleSection = ({ category, index, currentSection, sectionIndex }: Vehic
         <div className="max-w-7xl mx-auto relative z-10">
           <div className={`flex items-center gap-12 ${isEven ? 'flex-row' : 'flex-row-reverse'}`}>
             
-            {/* Large Curved Image with Scroll Animation */}
             <AnimatedVehicleImage
               image={category.image}
               title={category.title}
@@ -47,7 +47,6 @@ const VehicleSection = ({ category, index, currentSection, sectionIndex }: Vehic
               imageTransform={getImageTransform()}
             />
             
-            {/* Content with side sliding animation */}
             <div className="flex-1">
               <VehicleContent
                 icon={category.icon}
@@ -57,7 +56,8 @@ const VehicleSection = ({ category, index, currentSection, sectionIndex }: Vehic
                 textTransform={getTextTransform(isEven)}
               />
               
-              {/* Navigation buttons for Passenger Cars with distinct colors */}
+              <FeatureModules vehicleType={category.title} />
+              
               {category.title === "Passenger Cars" && (
                 <div className="mt-8 grid grid-cols-2 gap-4 max-w-md">
                   <Link 
@@ -93,7 +93,6 @@ const VehicleSection = ({ category, index, currentSection, sectionIndex }: Vehic
                 </div>
               )}
               
-              {/* Keep original explore button for other categories (but not for Passenger Cars) */}
               {category.title !== "Passenger Cars" && (
                 <Link to={category.href} className="group block mt-6">
                   <div className="inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors">
@@ -109,7 +108,6 @@ const VehicleSection = ({ category, index, currentSection, sectionIndex }: Vehic
     )
   }
 
-  // Default two-card layout if no category prop
   return <VehicleCards />
 }
 
