@@ -80,6 +80,69 @@ const VennDiagramSVG = ({ data, entities, colors, onIntersectionSelect }: VennDi
 
   const positions = getCirclePositions()
 
+  // Calculate proper intersection positions for 3-circle Venn diagram
+  const getIntersectionPositions = () => {
+    if (entities.length === 3) {
+      const [pos1, pos2, pos3] = positions
+      return {
+        // Two-way intersections (excluding center overlap)
+        [`${entities[0].name}-${entities[1].name}`]: {
+          x: (pos1.cx + pos2.cx) / 2 - 15,
+          y: (pos1.cy + pos2.cy) / 2 - 25
+        },
+        [`${entities[0].name}-${entities[2].name}`]: {
+          x: (pos1.cx + pos3.cx) / 2 + 15,
+          y: (pos1.cy + pos3.cy) / 2 - 25
+        },
+        [`${entities[1].name}-${entities[2].name}`]: {
+          x: (pos2.cx + pos3.cx) / 2,
+          y: (pos2.cy + pos3.cy) / 2 + 20
+        },
+        // Three-way intersection (center)
+        'all': {
+          x: width / 2,
+          y: height / 2 + 5
+        }
+      }
+    } else if (entities.length === 2) {
+      const [pos1, pos2] = positions
+      return {
+        [`${entities[0].name}-${entities[1].name}`]: {
+          x: (pos1.cx + pos2.cx) / 2,
+          y: (pos1.cy + pos2.cy) / 2 + 5
+        }
+      }
+    }
+    return {}
+  }
+
+  const intersectionPositions = getIntersectionPositions()
+
+  // Calculate unique feature positions (outside intersections)
+  const getUniquePositions = () => {
+    if (entities.length === 3) {
+      const [pos1, pos2, pos3] = positions
+      return {
+        [entities[0].name]: { x: pos1.cx, y: pos1.cy - 60 },
+        [entities[1].name]: { x: pos2.cx - 50, y: pos2.cy + 30 },
+        [entities[2].name]: { x: pos3.cx + 50, y: pos3.cy + 30 }
+      }
+    } else if (entities.length === 2) {
+      const [pos1, pos2] = positions
+      return {
+        [entities[0].name]: { x: pos1.cx - 40, y: pos1.cy },
+        [entities[1].name]: { x: pos2.cx + 40, y: pos2.cy }
+      }
+    } else if (entities.length === 1) {
+      return {
+        [entities[0].name]: { x: positions[0].cx, y: positions[0].cy + 5 }
+      }
+    }
+    return {}
+  }
+
+  const uniquePositions = getUniquePositions()
+
   return (
     <div className="w-full h-full flex items-center justify-center">
       <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="max-w-full max-h-full">
@@ -111,22 +174,28 @@ const VennDiagramSVG = ({ data, entities, colors, onIntersectionSelect }: VennDi
               >
                 {entity.name}
               </text>
-              
-              {/* Unique count */}
-              <text
-                x={position.cx}
-                y={entities.length === 1 ? position.cy + 5 : (
-                  entities.length === 2 
-                    ? position.cy + (index === 0 ? -30 : 30)
-                    : position.cy + (index === 0 ? -40 : 30)
-                )}
-                textAnchor="middle"
-                className={`text-lg font-semibold ${theme.textPrimary} fill-current cursor-pointer hover:opacity-80`}
-                onClick={() => handleUniqueClick(entity.name)}
-              >
-                {calculateUniqueCount(entity.name)}
-              </text>
             </g>
+          )
+        })}
+
+        {/* Unique counts positioned outside intersections */}
+        {entities.map((entity) => {
+          const uniquePos = uniquePositions[entity.name]
+          const count = calculateUniqueCount(entity.name)
+          
+          if (!uniquePos || count === 0) return null
+          
+          return (
+            <text
+              key={`unique-${entity.name}`}
+              x={uniquePos.x}
+              y={uniquePos.y}
+              textAnchor="middle"
+              className={`text-lg font-semibold ${theme.textPrimary} fill-current cursor-pointer hover:opacity-80`}
+              onClick={() => handleUniqueClick(entity.name)}
+            >
+              {count}
+            </text>
           )
         })}
 
@@ -136,17 +205,18 @@ const VennDiagramSVG = ({ data, entities, colors, onIntersectionSelect }: VennDi
             {entities.map((entity1, i) => 
               entities.slice(i + 1).map((entity2, j) => {
                 const actualJ = i + 1 + j
-                const pos1 = positions[i]
-                const pos2 = positions[actualJ]
-                const midX = (pos1.cx + pos2.cx) / 2
-                const midY = (pos1.cy + pos2.cy) / 2
+                const key = `${entity1.name}-${entity2.name}`
+                const reverseKey = `${entity2.name}-${entity1.name}`
+                const intersectionPos = intersectionPositions[key] || intersectionPositions[reverseKey]
                 const count = calculateTwoWayIntersection(entity1.name, entity2.name)
+                
+                if (!intersectionPos || count === 0) return null
                 
                 return (
                   <text
-                    key={`${entity1.name}-${entity2.name}`}
-                    x={midX}
-                    y={entities.length === 3 ? midY + 20 : midY + 5}
+                    key={key}
+                    x={intersectionPos.x}
+                    y={intersectionPos.y}
                     textAnchor="middle"
                     className={`text-lg font-semibold ${theme.textPrimary} fill-current cursor-pointer hover:opacity-80`}
                     onClick={() => handlePairwiseClick(entity1.name, entity2.name)}
@@ -159,17 +229,26 @@ const VennDiagramSVG = ({ data, entities, colors, onIntersectionSelect }: VennDi
           </>
         )}
 
-        {/* Three-way intersection */}
+        {/* Three-way intersection (center) */}
         {entities.length === 3 && (
-          <text
-            x={width / 2}
-            y={height / 2 + 5}
-            textAnchor="middle"
-            className={`text-lg font-semibold ${theme.textPrimary} fill-current cursor-pointer hover:opacity-80`}
-            onClick={handleThreeWayClick}
-          >
-            {calculateThreeWayIntersection()}
-          </text>
+          (() => {
+            const centerPos = intersectionPositions['all']
+            const count = calculateThreeWayIntersection()
+            
+            if (!centerPos || count === 0) return null
+            
+            return (
+              <text
+                x={centerPos.x}
+                y={centerPos.y}
+                textAnchor="middle"
+                className={`text-lg font-semibold ${theme.textPrimary} fill-current cursor-pointer hover:opacity-80`}
+                onClick={handleThreeWayClick}
+              >
+                {count}
+              </text>
+            )
+          })()
         )}
       </svg>
     </div>
