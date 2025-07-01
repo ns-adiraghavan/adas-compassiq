@@ -1,4 +1,6 @@
 
+import { createVehicleSegmentAnalysisPrompt, createInsightsAnalysisPrompt } from './vehicle-segment-prompts.ts';
+
 // Prompt generation utilities
 function createFeedbackContext(feedbackData?: any[]): string {
   if (!feedbackData || feedbackData.length === 0) {
@@ -39,6 +41,8 @@ export function createVehicleSegmentInsightsPrompt(
   contextData?: any,
   feedbackData?: any[]
 ): string {
+  console.log('Creating prompt for analysis type:', analysisType)
+  
   // Handle Landscape Analysis context
   if (analysisType === "landscape-analysis" && contextData) {
     return createLandscapeAnalysisPrompt(country, contextData, feedbackData);
@@ -52,6 +56,16 @@ export function createVehicleSegmentInsightsPrompt(
   // Handle Category Analysis context
   if (analysisType === "category-analysis" && contextData) {
     return createCategoryAnalysisPrompt(country, contextData, feedbackData);
+  }
+  
+  // Handle Vehicle Segment Analysis context
+  if (analysisType === "vehicle-segment-analysis" && contextData) {
+    return createVehicleSegmentAnalysisPrompt(country, contextData, feedbackData);
+  }
+  
+  // Handle Insights/Venn Diagram Analysis context
+  if (analysisType === "insights-analysis" && contextData) {
+    return createInsightsAnalysisPrompt(country, contextData, feedbackData);
   }
 
   const topCategory = dashboardMetrics.topCategories?.[0]?.name || 'Unknown';

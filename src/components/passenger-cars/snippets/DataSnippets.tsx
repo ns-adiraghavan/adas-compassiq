@@ -5,6 +5,7 @@ import { useDataInsightsAI } from "@/hooks/useDataInsightsAI"
 import { useLandscapeAnalysisData } from "@/hooks/useLandscapeAnalysisData"
 import { useInsightFeedback } from "@/hooks/useInsightFeedback"
 import { useLocation } from "react-router-dom"
+import { useMemo } from "react"
 
 interface DataSnippetsProps {
   selectedOEM: string
@@ -23,49 +24,112 @@ const DataSnippets = ({
   const isLandscapePage = location.pathname.includes('/landscape')
   const { submitFeedback, getFeedbackState, submittingFeedback } = useInsightFeedback()
   
-  // Only show OEM-specific insights if OEM was actually clicked from chart
-  const showOEMInsights = oemClickedFromChart && selectedOEM && selectedOEM.trim() !== ""
+  // Enhanced logic to show insights for various scenarios
+  const shouldShowLandscapeInsights = isLandscapePage && selectedOEM && selectedCountry
+  const showOEMInsights = oemClickedFromChart || shouldShowLandscapeInsights
   
-  // Get landscape-specific analysis data when on landscape page and OEM is selected
+  // Get landscape-specific analysis data when on landscape page
   const landscapeData = useLandscapeAnalysisData(
-    showOEMInsights ? selectedOEM : "", 
+    shouldShowLandscapeInsights ? selectedOEM : "", 
     selectedCountry
   )
   
-  // Use landscape data for landscape page, business model or category analysis context otherwise
-  const contextData = isLandscapePage && landscapeData ? {
-    analysisType: 'landscape-analysis',
-    ...landscapeData
-  } : businessModelAnalysisContext || null
+  // Enhanced context data selection with validation
+  const contextData = useMemo(() => {
+    // Priority 1: Business Model Analysis Context (already validated in parent)
+    if (businessModelAnalysisContext && businessModelAnalysisContext.totalFeatures > 0) {
+      console.log('Using Business Model Analysis context:', businessModelAnalysisContext)
+      return {
+        ...businessModelAnalysisContext,
+        analysisType: businessModelAnalysisContext.analysisType || 'business-model-analysis'
+      }
+    }
+    
+    // Priority 2: Landscape Analysis Context (validate data quality)
+    if (isLandscapePage && landscapeData && landscapeData.ranking.availableFeatures > 0) {
+      console.log('Using Landscape Analysis context:', landscapeData)
+      return {
+        analysisType: 'landscape-analysis',
+        ...landscapeData
+      }
+    }
+    
+    // Priority 3: Vehicle Segment Analysis Context
+    if (location.pathname.includes('/intelligence') && selectedCountry) {
+      console.log('Creating Vehicle Segment Analysis context')
+      return {
+        analysisType: 'vehicle-segment-analysis',
+        selectedCountry,
+        selectedOEMs: Array.isArray(selectedOEM) ? selectedOEM : [selectedOEM].filter(Boolean),
+        totalFeatures: 0 // Will be calculated in edge function
+      }
+    }
+    
+    // Priority 4: Insights/Venn Diagram Context
+    if (location.pathname.includes('/insights') && selectedCountry) {
+      console.log('Creating Insights Analysis context')
+      return {
+        analysisType: 'insights-analysis',
+        selectedCountry,
+        selectedOEMs: Array.isArray(selectedOEM) ? selectedOEM : [selectedOEM].filter(Boolean),
+        totalFeatures: 0 // Will be calculated in edge function
+      }
+    }
+    
+    console.log('No valid context data found')
+    return null
+  }, [businessModelAnalysisContext, landscapeData, isLandscapePage, selectedOEM, selectedCountry, location.pathname])
   
   const { data: aiInsights, isLoading, error } = useDataInsightsAI({
-    selectedOEM: showOEMInsights ? selectedOEM : "",
+    selectedOEM: contextData ? (contextData.selectedOEM || selectedOEM) : "",
     selectedCountry,
-    enabled: true,
-    contextData // Pass the analysis context
+    enabled: Boolean(contextData && selectedCountry), // Only enable when we have valid context
+    contextData // Pass the validated analysis context
   })
 
   const getTitle = () => {
-    return "Strategic Insights"
+    const analysisType = contextData?.analysisType
+    switch (analysisType) {
+      case 'landscape-analysis': return "Landscape Strategic Insights"
+      case 'business-model-analysis': return "Business Model Strategic Insights"
+      case 'category-analysis': return "Category Strategic Insights"
+      case 'vehicle-segment-analysis': return "Vehicle Segment Strategic Insights"
+      case 'insights-analysis': return "Feature Overlap Strategic Insights"
+      default: return "Strategic Insights"
+    }
   }
 
   const getSubtitle = () => {
-    if (contextData?.analysisType === 'landscape-analysis') {
-      const data = contextData as any
-      return `${data.selectedOEM} • ${data.selectedCountry} • Rank #${data.ranking?.rank} • ${data.ranking?.availableFeatures} features • ${data.ranking?.lighthouseFeatures} lighthouse`
+    if (!contextData) {
+      return `Select data to view strategic insights • ${selectedCountry || 'Global'}`
     }
-    if (businessModelAnalysisContext?.analysisType === 'business-model-analysis') {
-      const { selectedOEMs, totalFeatures, selectedCountry: country } = businessModelAnalysisContext
-      return `${selectedOEMs.join(', ')} • ${country} • ${totalFeatures} features analyzed`
+    
+    const analysisType = contextData.analysisType
+    
+    switch (analysisType) {
+      case 'landscape-analysis': {
+        const data = contextData
+        return `${data.selectedOEM} • ${data.selectedCountry} • Rank #${data.ranking?.rank} • ${data.ranking?.availableFeatures} features • ${data.ranking?.lighthouseFeatures} lighthouse`
+      }
+      case 'business-model-analysis': {
+        const { selectedOEMs, totalFeatures, selectedCountry: country } = contextData
+        return `${selectedOEMs?.join(', ')} • ${country} • ${totalFeatures} features analyzed`
+      }
+      case 'category-analysis': {
+        const { selectedOEMs, totalFeatures, selectedCountry: country, topCategories } = contextData
+        return `${selectedOEMs?.join(', ')} • ${country} • ${totalFeatures} features • ${topCategories?.length || 0} categories`
+      }
+      case 'vehicle-segment-analysis': {
+        const oemsText = contextData.selectedOEMs?.length > 0 ? contextData.selectedOEMs.join(', ') : 'All OEMs'
+        return `${oemsText} • ${contextData.selectedCountry} • Vehicle segment analysis • ${aiInsights?.dataPoints || 0} features`
+      }
+      case 'insights-analysis': {
+        const oemsText = contextData.selectedOEMs?.length > 0 ? contextData.selectedOEMs.join(', ') : 'All OEMs'
+        return `${oemsText} • ${contextData.selectedCountry} • Feature overlap analysis • ${aiInsights?.dataPoints || 0} features`
+      }
+      default:
+        return `${selectedCountry || 'Global'} • ${aiInsights?.dataPoints || 0} features analyzed`
     }
-    if (businessModelAnalysisContext?.analysisType === 'category-analysis') {
-      const { selectedOEMs, totalFeatures, selectedCountry: country, topCategories } = businessModelAnalysisContext
-      return `${selectedOEMs.join(', ')} • ${country} • ${totalFeatures} features • ${topCategories.length} categories`
-    }
-    if (showOEMInsights) {
-      return `${selectedOEM} • ${selectedCountry || 'Global'} • ${aiInsights?.dataPoints || 0} data points analyzed`
-    }
-    return `Market Overview • ${selectedCountry || 'Global'} • ${aiInsights?.dataPoints || 0} features analyzed`
   }
 
   const getIcon = () => {
@@ -86,21 +150,33 @@ const DataSnippets = ({
 
   const renderContent = () => {
     if (isLoading) {
+      const analysisType = contextData?.analysisType
+      let loadingText = 'Analyzing data...'
+      
+      switch (analysisType) {
+        case 'landscape-analysis': loadingText = 'Analyzing landscape positioning...'; break
+        case 'business-model-analysis': loadingText = 'Analyzing business model patterns...'; break
+        case 'category-analysis': loadingText = 'Analyzing category distribution...'; break
+        case 'vehicle-segment-analysis': loadingText = 'Analyzing vehicle segment data...'; break
+        case 'insights-analysis': loadingText = 'Analyzing feature overlaps...'; break
+        default: loadingText = showOEMInsights ? 'Analyzing OEM performance...' : 'Analyzing market landscape...'
+      }
+      
       return (
         <div className="flex items-center justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-blue-400 mr-2" />
-          <span className="text-white/60">
-            {contextData?.analysisType === 'landscape-analysis' 
-              ? 'Analyzing landscape details...'
-              : businessModelAnalysisContext?.analysisType === 'business-model-analysis' 
-                ? 'Analyzing business model patterns...'
-                : businessModelAnalysisContext?.analysisType === 'category-analysis'
-                  ? 'Analyzing category distribution...'
-                  : showOEMInsights 
-                    ? 'Analyzing OEM performance...' 
-                    : 'Analyzing market landscape...'
-            }
-          </span>
+          <span className="text-white/60">{loadingText}</span>
+        </div>
+      )
+    }
+    
+    if (!contextData) {
+      return (
+        <div className="py-4">
+          <p className="text-white/60 text-sm">No analysis context available</p>
+          <p className="text-white/40 text-xs mt-1">
+            Select OEMs and ensure data is loaded to view strategic insights
+          </p>
         </div>
       )
     }
@@ -115,21 +191,46 @@ const DataSnippets = ({
     }
 
     if (!aiInsights?.insights?.length) {
+      const analysisType = contextData?.analysisType
+      let noDataText = 'No insights available for current selection'
+      let helpText = selectedCountry ? `No data found for ${selectedCountry}` : 'Select a country to view analysis'
+      
+      switch (analysisType) {
+        case 'landscape-analysis':
+          noDataText = 'No landscape insights available'
+          helpText = 'Ensure OEM is selected and data is available'
+          break
+        case 'business-model-analysis':
+          noDataText = 'No business model insights available'
+          helpText = 'Select OEMs to analyze business model patterns'
+          break
+        case 'category-analysis':
+          noDataText = 'No category insights available'
+          helpText = 'Select OEMs to analyze category distribution'
+          break
+        case 'vehicle-segment-analysis':
+          noDataText = 'No vehicle segment insights available'
+          helpText = 'Select OEMs and country for segment analysis'
+          break
+        case 'insights-analysis':
+          noDataText = 'No feature overlap insights available'
+          helpText = 'Select multiple OEMs to analyze feature overlaps'
+          break
+      }
+      
       return (
         <div className="py-4">
-          <p className="text-white/60 text-sm">No insights available for current selection</p>
-          <p className="text-white/40 text-xs mt-1">
-            {selectedCountry ? `No data found for ${selectedCountry}` : 'Select a country to view analysis'}
-          </p>
+          <p className="text-white/60 text-sm">{noDataText}</p>
+          <p className="text-white/40 text-xs mt-1">{helpText}</p>
         </div>
       )
     }
 
     const handleFeedback = (insight: string, feedbackType: 'like' | 'dislike') => {
       submitFeedback(insight, feedbackType, {
-        selectedOEM,
-        selectedCountry,
-        analysisType: contextData?.analysisType || businessModelAnalysisContext?.analysisType || 'general'
+        selectedOEM: contextData?.selectedOEM || selectedOEM,
+        selectedCountry: contextData?.selectedCountry || selectedCountry,
+        analysisType: contextData?.analysisType || 'general'
       })
     }
 
@@ -137,9 +238,9 @@ const DataSnippets = ({
       <div className="space-y-3">
         {aiInsights.insights.map((insight: string, index: number) => {
           const feedbackState = getFeedbackState(insight, {
-            selectedOEM,
-            selectedCountry,
-            analysisType: contextData?.analysisType || businessModelAnalysisContext?.analysisType || 'general'
+            selectedOEM: contextData?.selectedOEM || selectedOEM,
+            selectedCountry: contextData?.selectedCountry || selectedCountry,
+            analysisType: contextData?.analysisType || 'general'
           })
           
           return (

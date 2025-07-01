@@ -6,12 +6,16 @@ import OEMSelector from "./OEMSelector"
 import VehicleSegmentChart from "./charts/VehicleSegmentChart"
 import AISnippetsSidebar from "./AISnippetsSidebar"
 import { useTheme } from "@/contexts/ThemeContext"
+import { useVehicleSegmentContext } from "@/hooks/useVehicleSegmentContext"
 
 const VehicleSegmentAnalysisContent = () => {
   const { selectedCountry, setSelectedCountry } = useCountryContext()
   const [selectedOEMs, setSelectedOEMs] = useState<string[]>([])
   const { data: waypointData } = useWaypointData()
   const { theme } = useTheme()
+  
+  // Generate context for AI insights
+  const vehicleSegmentContext = useVehicleSegmentContext(selectedOEMs, selectedCountry)
 
 
   // Get available OEMs for the selected country
@@ -112,6 +116,7 @@ const VehicleSegmentAnalysisContent = () => {
             selectedOEM={selectedOEMs.length === 1 ? selectedOEMs[0] : ""}
             selectedCountry={selectedCountry}
             oemClickedFromChart={false}
+            businessModelAnalysisContext={vehicleSegmentContext}
             selectedOEMs={selectedOEMs}
             analysisType="vehicle-segment"
           />

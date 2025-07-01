@@ -16,28 +16,45 @@ serve(async (req) => {
   try {
     const { oem, country, dashboardMetrics, isMarketOverview, analysisType, contextData } = await req.json();
     
+    console.log('=== Data Insights AI Request ===')
+    console.log('OEM:', oem)
+    console.log('Country:', country) 
+    console.log('Analysis Type:', analysisType)
+    console.log('Context Data:', contextData ? 'Present' : 'Missing')
+    console.log('Context Data Keys:', contextData ? Object.keys(contextData) : 'None')
+    
+    // Validate input data
+    if (!country || country.trim() === '') {
+      throw new Error('Country is required for insight generation')
+    }
+    
+    // Enhanced context data validation
+    if (!contextData || typeof contextData !== 'object') {
+      throw new Error('Context data is required for meaningful insights')
+    }
+    
     // Initialize Supabase client for feedback queries
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY');
     const supabase = createClient(supabaseUrl!, supabaseKey!);
     
-    // Fetch feedback data to improve insight generation
+    // Enhanced feedback context
     const feedbackContext = {
-      selectedOEM: oem,
-      selectedCountry: country,
-      analysisType: analysisType || 'general'
+      selectedOEM: contextData.selectedOEM || oem,
+      selectedCountry: contextData.selectedCountry || country,
+      analysisType: contextData.analysisType || analysisType || 'general'
     };
     
     const { data: feedbackData } = await supabase
       .from('strategic_insights_feedback')
       .select('insight_text, feedback_type')
-      .eq('context_info->selectedCountry', country)
-      .eq('context_info->analysisType', analysisType || 'general')
+      .eq('context_info->selectedCountry', feedbackContext.selectedCountry)
+      .eq('context_info->analysisType', feedbackContext.analysisType)
       .order('created_at', { ascending: false })
       .limit(50);
     
     console.log('=== Feedback Data Retrieved ===')
-    console.log(`Found ${feedbackData?.length || 0} feedback entries`)
+    console.log(`Found ${feedbackData?.length || 0} feedback entries for ${feedbackContext.analysisType}`)
     
     // Generate context-aware prompt with feedback data
     const prompt = createVehicleSegmentInsightsPrompt(
@@ -50,28 +67,37 @@ serve(async (req) => {
       feedbackData || []
     );
     
-    // Enhanced logging for debugging
-    console.log('=== Data Insights AI Request ===')
-    console.log('OEM:', oem)
-    console.log('Country:', country) 
-    console.log('Analysis Type:', analysisType)
-    console.log('Is Market Overview:', isMarketOverview)
-    console.log('Dashboard Metrics Keys:', Object.keys(dashboardMetrics || {}))
-    console.log('Context Data Keys:', contextData ? Object.keys(contextData) : 'None')
-    
     // Log detailed context data for debugging
-    if (contextData) {
-      console.log('=== Context Data Details ===')
-      console.log('Analysis Type:', contextData.analysisType)
-      if (contextData.ranking) {
-        console.log('Ranking Data:', JSON.stringify(contextData.ranking))
-      }
-      if (contextData.topCategories) {
-        console.log('Top Categories:', JSON.stringify(contextData.topCategories.slice(0, 3)))
-      }
-      if (contextData.selectedOEMs) {
-        console.log('Selected OEMs:', JSON.stringify(contextData.selectedOEMs))
-      }
+    console.log('=== Context Data Details ===')
+    console.log('Analysis Type:', contextData.analysisType)
+    
+    if (contextData.analysisType === 'landscape-analysis') {
+      console.log('Landscape Data:', {
+        selectedOEM: contextData.selectedOEM,
+        ranking: contextData.ranking,
+        topCategories: contextData.topCategories?.slice(0, 3),
+        availableFeatures: contextData.ranking?.availableFeatures,
+        lighthouseFeatures: contextData.ranking?.lighthouseFeatures
+      })
+    } else if (contextData.analysisType === 'business-model-analysis') {
+      console.log('Business Model Data:', {
+        selectedOEMs: contextData.selectedOEMs,
+        totalFeatures: contextData.totalFeatures,
+        businessModelComparison: contextData.businessModelComparison?.slice(0, 2)
+      })
+    } else if (contextData.analysisType === 'category-analysis') {
+      console.log('Category Data:', {
+        selectedOEMs: contextData.selectedOEMs,
+        totalFeatures: contextData.totalFeatures,
+        topCategories: contextData.topCategories?.slice(0, 3),
+        categoryBreakdown: contextData.categoryBreakdown?.slice(0, 3)
+      })
+    } else {
+      console.log('Other Analysis Data:', {
+        selectedOEMs: contextData.selectedOEMs,
+        selectedCountry: contextData.selectedCountry,
+        totalFeatures: contextData.totalFeatures
+      })
     }
     
     console.log('Generated Prompt Length:', prompt.length)

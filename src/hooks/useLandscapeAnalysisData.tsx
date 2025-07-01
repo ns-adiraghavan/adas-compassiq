@@ -29,7 +29,15 @@ export function useLandscapeAnalysisData(selectedOEM: string, selectedCountry: s
   const { data: waypointData } = useWaypointData()
 
   return useMemo(() => {
-    if (!waypointData?.csvData?.length || !selectedOEM || !selectedCountry) return null
+    if (!waypointData?.csvData?.length || !selectedCountry) {
+      console.log('Missing waypoint data or country:', { hasData: !!waypointData?.csvData?.length, selectedCountry })
+      return null
+    }
+    
+    if (!selectedOEM || selectedOEM.trim() === "") {
+      console.log('Missing or empty selectedOEM:', selectedOEM)
+      return null
+    }
 
     console.log('Processing landscape analysis data for:', selectedOEM, selectedCountry)
 
@@ -147,6 +155,12 @@ export function useLandscapeAnalysisData(selectedOEM: string, selectedCountry: s
       businessModels
     }
 
+    // Validate data quality before returning
+    if (result.ranking.availableFeatures === 0 && result.ranking.totalOEMs === 0) {
+      console.log('No valid data found for:', selectedOEM, selectedCountry)
+      return null
+    }
+    
     console.log('Landscape analysis data:', result)
     return result
   }, [waypointData, selectedOEM, selectedCountry])

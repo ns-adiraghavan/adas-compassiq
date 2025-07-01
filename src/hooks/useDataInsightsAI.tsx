@@ -28,27 +28,47 @@ export function useDataInsightsAI({
   const { dashboardMetrics, isLoading: isMetricsLoading } = useDashboardMetrics(selectedOEM, selectedCountry)
   
   const queryFn = useCallback(async (): Promise<DataInsightsResponse> => {
-    // Use context data if available, otherwise fall back to dashboard metrics
-    const analysisData = contextData || dashboardMetrics
-    const analysisType = contextData ? "Business Model Analysis" : (selectedOEM ? selectedOEM : "Market Overview")
-    const isMarketOverview = !selectedOEM || selectedOEM.trim() === ""
+    // Enhanced validation and data preparation
+    if (!contextData) {
+      throw new Error('Context data is required for meaningful insights')
+    }
+    
+    const analysisType = contextData.analysisType || 'general'
+    const actualSelectedOEM = contextData.selectedOEM || selectedOEM || ""
+    const actualSelectedCountry = contextData.selectedCountry || selectedCountry
+    const isMarketOverview = !actualSelectedOEM || actualSelectedOEM.trim() === ""
     
     console.log('Requesting Data Insights AI for:', { 
-      selectedOEM: analysisType, 
-      selectedCountry, 
+      selectedOEM: actualSelectedOEM, 
+      selectedCountry: actualSelectedCountry, 
+      analysisType,
       isMarketOverview,
-      hasContextData: !!contextData,
-      contextData: contextData ? 'Business Model Analysis Context' : 'Dashboard Metrics'
+      hasContextData: true,
+      contextDataType: analysisType
     })
-    console.log('Using analysis data:', analysisData)
+    
+    // Validate context data quality
+    if (analysisType === 'landscape-analysis' && (!contextData.ranking || contextData.ranking.availableFeatures === 0)) {
+      throw new Error('Invalid landscape analysis data - no features found')
+    }
+    
+    if ((analysisType === 'business-model-analysis' || analysisType === 'category-analysis') && contextData.totalFeatures === 0) {
+      throw new Error('Invalid analysis data - no features found')
+    }
+    
+    console.log('Using validated context data:', {
+      analysisType,
+      totalFeatures: contextData.totalFeatures || contextData.ranking?.availableFeatures || 0,
+      hasValidData: true
+    })
     
     const { data, error } = await supabase.functions.invoke('data-insights-ai', {
       body: {
-        oem: analysisType,
-        country: selectedCountry,
-        dashboardMetrics: analysisData,
+        oem: actualSelectedOEM,
+        country: actualSelectedCountry,
+        dashboardMetrics: dashboardMetrics || {},
         isMarketOverview: isMarketOverview,
-        analysisType: contextData ? "business-model-analysis" : "general",
+        analysisType: analysisType,
         contextData: contextData
       }
     })

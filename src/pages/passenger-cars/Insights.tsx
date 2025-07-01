@@ -9,6 +9,7 @@ import VennDiagram from "@/components/VennDiagram"
 import { useVennDiagramData } from "@/hooks/useVennDiagramData"
 import { useTheme } from "@/contexts/ThemeContext"
 import { useWaypointData } from "@/hooks/useWaypointData"
+import { useInsightsContext } from "@/hooks/useInsightsContext"
 
 const InsightsContent = () => {
   const { theme } = useTheme()
@@ -49,6 +50,9 @@ const InsightsContent = () => {
   }, [selectedCountry, waypointData])
 
   const { vennData, isLoading } = useVennDiagramData(selectedCountry, selectedOEMs)
+  
+  // Generate context for AI insights
+  const insightsContext = useInsightsContext(selectedOEMs, selectedCountry)
 
   const handleOEMToggle = (oem: string) => {
     setSelectedOEMs(prev => 
@@ -136,6 +140,7 @@ const InsightsContent = () => {
         <AISnippetsSidebar
           selectedOEM={selectedOEMs.join(", ")}
           selectedCountry={selectedCountry}
+          businessModelAnalysisContext={insightsContext}
           selectedOEMs={selectedOEMs}
           analysisType="insights"
         />
