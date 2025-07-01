@@ -42,7 +42,7 @@ async function webSearchTool(query: string): Promise<any[]> {
   console.log(`Executing web search for: "${query}"`);
   
   try {
-    const searchUrl = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(query)}&tbm=nws&num=6&api_key=${serpApiKey}`;
+    const searchUrl = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(query)}&tbm=nws&num=6&tbs=qdr:w&api_key=${serpApiKey}`;
     
     const response = await fetch(searchUrl);
     
@@ -67,30 +67,13 @@ async function webSearchTool(query: string): Promise<any[]> {
         !article.link.includes('search') // Filter out search URLs
       )
       .slice(0, 3)
-      .map((article: any) => {
-        // Ensure we have a recent date - if SerpAPI date is missing or too old, use current time
-        let publishedAt = article.date;
-        if (!publishedAt) {
-          publishedAt = new Date().toISOString();
-        } else {
-          // Check if the date is older than 30 days, if so, treat as recent
-          const articleDate = new Date(publishedAt);
-          const now = new Date();
-          const daysDiff = Math.floor((now.getTime() - articleDate.getTime()) / (1000 * 60 * 60 * 24));
-          if (daysDiff > 30 || isNaN(daysDiff)) {
-            // If article is older than 30 days or invalid date, use a recent timestamp
-            publishedAt = new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString(); // Random time within last 24 hours
-          }
-        }
-        
-        return {
-          title: article.title,
-          url: article.link,
-          summary: article.snippet,
-          source: article.source,
-          publishedAt: publishedAt
-        };
-      });
+      .map((article: any) => ({
+        title: article.title,
+        url: article.link,
+        summary: article.snippet,
+        source: article.source,
+        publishedAt: article.date || new Date().toISOString()
+      }));
 
     console.log(`Found ${articles.length} valid articles from web search`);
     return articles;
