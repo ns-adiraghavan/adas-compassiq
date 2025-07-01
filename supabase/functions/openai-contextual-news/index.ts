@@ -86,20 +86,28 @@ async function webSearchTool(query: string): Promise<any[]> {
 
 // Function to build contextual search query
 function buildContextualQuery(selectedOEMs: string[], selectedCountry: string, analysisType: string): string {
-  const oemPart = selectedOEMs.length > 0 ? selectedOEMs.join(' OR ') : 'automotive manufacturers';
-  const countryPart = selectedCountry ? ` ${selectedCountry}` : '';
+  const automotiveTerms = '(automotive OR car OR vehicle OR auto)';
+  const connectedFeaturesTerms = '(connected features AND launch OR introduction OR partnership OR technology OR update)';
   
-  const analysisQueries = {
-    'landscape': 'market landscape competition features news',
-    'category-analysis': 'category analysis features innovation news',
-    'business-model': 'business model strategy revenue news',
-    'vehicle-segment': 'vehicle segment SUV sedan electric news',
-    'general': 'news updates technology features'
-  };
+  // Primary search: OEM + Country + automotive terms + connected features
+  if (selectedOEMs.length > 0 && selectedCountry) {
+    const primaryOEM = selectedOEMs[0];
+    return `"${primaryOEM}" "${selectedCountry}" ${automotiveTerms} ${connectedFeaturesTerms}`;
+  }
   
-  const analysisKeywords = analysisQueries[analysisType as keyof typeof analysisQueries] || analysisQueries.general;
+  // Secondary: OEM only + automotive terms + connected features  
+  if (selectedOEMs.length > 0) {
+    const primaryOEM = selectedOEMs[0];
+    return `"${primaryOEM}" ${automotiveTerms} ${connectedFeaturesTerms}`;
+  }
   
-  return `${oemPart}${countryPart} automotive ${analysisKeywords} -site:reddit.com -site:youtube.com`;
+  // Fallback: Country + automotive terms + connected features
+  if (selectedCountry) {
+    return `"${selectedCountry}" ${automotiveTerms} ${connectedFeaturesTerms}`;
+  }
+  
+  // Broadest fallback: Just automotive + connected features
+  return `${automotiveTerms} ${connectedFeaturesTerms}`;
 }
 
 // Function to validate URLs concurrently
