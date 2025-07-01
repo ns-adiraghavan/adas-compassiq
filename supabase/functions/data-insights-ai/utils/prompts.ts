@@ -159,13 +159,12 @@ ${selectedOEM ? `• Selected OEM: ${selectedOEM} for detailed analysis` : ''}
 
 Focus on:
 - OEM competitive positioning and market leadership
-- Feature distribution patterns across the landscape
+- Feature distribution patterns across the landscape  
 - Strategic positioning opportunities and market gaps
 
 Requirements:
-- Each insight must be exactly 2-3 sentences
+- Each insight must be EXACTLY 20 words or less
 - Reference specific OEMs and their feature counts
-- Highlight competitive advantages and strategic positions
 - Return insights as a JSON array: ["insight1", "insight2", "insight3"]
 
 Return only the JSON array, no additional text.`;
@@ -193,9 +192,8 @@ Focus on:
 - Segment-specific feature opportunities and gaps
 
 Requirements:
-- Each insight must be exactly 2-3 sentences
-- Reference specific vehicle segments and their characteristics
-- Highlight segment leadership and strategic opportunities
+- Each insight must be EXACTLY 20 words or less
+- Reference specific vehicle segments and characteristics
 - Return insights as a JSON array: ["insight1", "insight2", "insight3"]
 
 Return only the JSON array, no additional text.`;
@@ -229,9 +227,8 @@ Focus on:
 - Collaboration and competition insights from shared features
 
 Requirements:
-- Each insight must be exactly 2-3 sentences
-- Reference specific overlap percentages and unique features
-- Highlight differentiation opportunities and market positioning
+- Each insight must be EXACTLY 20 words or less
+- Reference specific overlap data and unique features
 - Return insights as a JSON array: ["insight1", "insight2", "insight3"]
 
 Return only the JSON array, no additional text.`;
