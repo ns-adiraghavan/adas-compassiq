@@ -34,13 +34,13 @@ export function useNewsSnippetsAI({
 }: NewsSnippetsAIProps) {
   
   const queryFn = useCallback(async (): Promise<NewsSnippetsResponse> => {
-    console.log('Requesting News Snippets AI for:', { 
+    console.log('Requesting OpenAI Contextual News for:', { 
       selectedOEMs, 
       selectedCountry, 
       analysisType 
     })
     
-    const { data, error } = await supabase.functions.invoke('news-snippets-ai', {
+    const { data, error } = await supabase.functions.invoke('openai-contextual-news', {
       body: {
         selectedOEMs,
         selectedCountry,
@@ -49,11 +49,11 @@ export function useNewsSnippetsAI({
     })
 
     if (error) {
-      console.error('News Snippets AI error:', error)
+      console.error('OpenAI Contextual News error:', error)
       throw error
     }
 
-    console.log('News Snippets AI result:', data)
+    console.log('OpenAI Contextual News result:', data)
     return data as NewsSnippetsResponse
   }, [selectedOEMs, selectedCountry, analysisType])
 
@@ -61,15 +61,15 @@ export function useNewsSnippetsAI({
 
   return useQuery<NewsSnippetsResponse>({
     queryKey: [
-      'news-snippets-ai', 
+      'openai-contextual-news', 
       selectedOEMs.join(',') || 'all', 
       selectedCountry, 
       analysisType
     ],
     queryFn: queryFn,
     enabled: Boolean(shouldEnable),
-    staleTime: 10 * 60 * 1000, // Cache for 10 minutes (news updates frequently)
-    gcTime: 20 * 60 * 1000, // Keep in cache for 20 minutes
+    staleTime: 15 * 60 * 1000, // Cache for 15 minutes (fresh contextual content)
+    gcTime: 30 * 60 * 1000, // Keep in cache for 30 minutes
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
     retry: 1,
