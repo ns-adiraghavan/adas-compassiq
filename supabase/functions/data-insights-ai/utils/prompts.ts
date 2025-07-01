@@ -75,25 +75,38 @@ function createLandscapeAnalysisPrompt(
   const secondCategory = topCategories[1] || { category: 'Unknown', count: 0 };
   const topBusinessModel = businessModels[0] || { model: 'Unknown', count: 0 };
 
-  return `Generate exactly 3 strategic insights for Landscape Analysis of ${selectedOEM} in ${selectedCountry}. Each insight must be 20-25 words and follow these specific insight types:
+  // Calculate competitive positioning
+  const marketRank = ranking?.rank || 0;
+  const totalOEMs = ranking?.totalOEMs || 0;
+  const availableFeatures = ranking?.availableFeatures || 0;
+  const lighthouseFeatures = ranking?.lighthouseFeatures || 0;
+  const lighthouseRate = availableFeatures > 0 ? Math.round((lighthouseFeatures / availableFeatures) * 100) : 0;
 
-CRITICAL: Use ONLY these exact data points from the Detailed Analysis section:
+  return `You are an automotive industry analyst. Generate exactly 3 strategic insights based on real data analysis. Each insight must be 22-28 words and provide specific, actionable intelligence.
 
-ACTUAL LANDSCAPE DATA:
+VERIFIED DATA CONTEXT:
 - OEM: ${selectedOEM}
-- Country: ${selectedCountry}
-- Market Rank: #${ranking?.rank || 0} of ${ranking?.totalOEMs || 0} OEMs
-- Available Features: ${ranking?.availableFeatures || 0}
-- Lighthouse Features: ${ranking?.lighthouseFeatures || 0}
-- Top Category: ${topCategory.category} (${topCategory.count} features)
-- Second Category: ${secondCategory.category} (${secondCategory.count} features)
-- Top Business Model: ${topBusinessModel.model} (${topBusinessModel.count} features)
+- Country Market: ${selectedCountry}
+- Market Position: Rank #${marketRank} of ${totalOEMs} OEMs
+- Total Available Features: ${availableFeatures}
+- Lighthouse Features: ${lighthouseFeatures} (${lighthouseRate}% of portfolio)
+- Leading Category: ${topCategory.category} with ${topCategory.count} features
+- Secondary Category: ${secondCategory.category} with ${secondCategory.count} features
+- Primary Business Model: ${topBusinessModel.model} (${topBusinessModel.count} implementations)
 
-GENERATE 3 INSIGHTS (20-25 words each) using ONLY the data above:
+GENERATE EXACTLY 3 INSIGHTS IN THIS FORMAT:
 
-1. OEM Feature Diversity Leadership: Focus on ${selectedOEM}'s ranking and feature count compared to market position
-2. Geographic Feature Availability Hotspots: Focus on ${selectedCountry}'s feature availability and market characteristics  
-3. Lighthouse Feature Implementation Excellence: Focus on ${selectedOEM}'s lighthouse features and innovation leadership
+1. OEM Feature Diversity Leadership: [Analysis of ${selectedOEM}'s feature portfolio strength, ranking (#${marketRank}), and competitive positioning against ${totalOEMs-1} competitors]
+
+2. Geographic Feature Availability Hotspots: [Assessment of ${selectedCountry} market characteristics, feature deployment density, and regional technology adoption patterns]
+
+3. Lighthouse Feature Implementation Excellence: [Evaluation of ${selectedOEM}'s innovation leadership through ${lighthouseFeatures} lighthouse features representing ${lighthouseRate}% implementation rate]
+
+Requirements:
+- Use exact numbers from the data above
+- Each insight must be 22-28 words
+- Focus on competitive intelligence and strategic implications
+- Maintain professional, analytical tone
 
 Respond with ONLY a JSON array of exactly 3 strings.`;
 }
@@ -128,24 +141,36 @@ function createCategoryAnalysisPrompt(
   const leadingOEM = oemPerformance[0] || { oem: 'Unknown', total: 0, strongestCategory: 'Unknown' };
   const secondOEM = oemPerformance[1] || { oem: 'Unknown', total: 0, strongestCategory: 'Unknown' };
 
-  // Get category-specific insights if expanded
-  const expandedCategoryData = expandedCategory ? 
-    categoryBreakdown.find(cat => cat.category === expandedCategory) : null;
+  // Calculate market share percentages
+  const topCategoryShare = totalFeatures > 0 ? Math.round((topCategory.total / totalFeatures) * 100) : 0;
+  const secondCategoryShare = totalFeatures > 0 ? Math.round((secondCategory.total / totalFeatures) * 100) : 0;
+  const leadingOEMShare = totalFeatures > 0 ? Math.round((leadingOEM.total / totalFeatures) * 100) : 0;
 
-  return `Generate exactly 3 concise strategic insights for Category Analysis in ${country}. Each insight must be exactly 15-20 words maximum.
+  return `You are an automotive technology analyst. Generate exactly 3 strategic insights for Category Analysis in ${country}. Each insight must be 22-28 words and provide specific competitive intelligence.
 
-CRITICAL: Use ONLY these exact OEMs and numbers provided below. Do NOT reference Ford, Toyota, or any OEM not listed:
+VERIFIED CATEGORY DATA:
+- Market Scope: ${selectedOEMs?.join(', ') || 'All OEMs'} in ${country}
+- Total Features Analyzed: ${totalFeatures || 0}
+- Leading Category: ${topCategory.category} (${topCategory.total} features, ${topCategoryShare}% market share, led by ${topCategory.leader})
+- Secondary Category: ${secondCategory.category} (${secondCategory.total} features, ${secondCategoryShare}% share)
+- Market Leader: ${leadingOEM.oem} (${leadingOEM.total} features, ${leadingOEMShare}% portfolio, strongest in ${leadingOEM.strongestCategory})
+- Second Player: ${secondOEM.oem} (${secondOEM.total} features, strongest in ${secondOEM.strongestCategory})
 
-ACTUAL DATA CONTEXT: 
-- Selected OEMs: ${selectedOEMs?.join(', ') || 'None specified'}
-- Total Features: ${totalFeatures || 0}
-- Top Category: ${topCategory.category} with ${topCategory.total || 0} features led by ${topCategory.leader || 'Unknown'}
-- Leading OEM: ${leadingOEM.oem || 'Unknown'} with ${leadingOEM.total || 0} features
-- Second OEM: ${secondOEM.oem || 'Unknown'} with ${secondOEM.total || 0} features
+GENERATE EXACTLY 3 INSIGHTS:
 
-GENERATE 3 INSIGHTS using ONLY the data above (15-20 words each):
+1. Category Market Dominance: [Analysis of ${topCategory.category}'s ${topCategoryShare}% market leadership and strategic implications for ${topCategory.leader}]
 
-Respond with ONLY a JSON array of exactly 3 concise strings.`;
+2. OEM Portfolio Strategy: [Assessment of ${leadingOEM.oem}'s ${leadingOEMShare}% market control and specialization in ${leadingOEM.strongestCategory} category]
+
+3. Technology Distribution Patterns: [Evaluation of feature distribution across ${selectedOEMs?.length || 0} OEMs and competitive gaps in ${secondCategory.category}]
+
+Requirements:
+- Use exact numbers and percentages from verified data
+- Each insight must be 22-28 words
+- Focus on strategic business implications
+- Professional analytical tone
+
+Respond with ONLY a JSON array of exactly 3 strings.`;
 }
 
 function createBusinessModelAnalysisPrompt(
@@ -211,19 +236,42 @@ function createMarketOverviewPrompt(
   topOEMFeatures: number,
   secondOEMFeatures: number
 ): string {
-  return `Generate exactly 3 concise strategic insights for Vehicle Segment Analysis in ${country || 'global market'}. Each insight must be exactly 15-20 words maximum.
+  const totalLighthouseFeatures = dashboardMetrics.lighthouseFeatures || 0;
+  const topCategoryFeatures = dashboardMetrics.topCategories?.[0]?.value || 0;
+  const secondCategoryFeatures = dashboardMetrics.topCategories?.[1]?.value || 0;
+  const totalMarketFeatures = dashboardMetrics.totalFeatures || (topOEMFeatures + secondOEMFeatures);
+  
+  // Calculate market share percentages
+  const topOEMShare = totalMarketFeatures > 0 ? Math.round((topOEMFeatures / totalMarketFeatures) * 100) : 0;
+  const secondOEMShare = totalMarketFeatures > 0 ? Math.round((secondOEMFeatures / totalMarketFeatures) * 100) : 0;
+  const lighthouseRate = totalMarketFeatures > 0 ? Math.round((totalLighthouseFeatures / totalMarketFeatures) * 100) : 0;
 
-CRITICAL: Use ONLY these exact OEMs and numbers provided below. Do NOT reference Ford, Toyota, or any OEM not listed:
+  return `You are a senior automotive market analyst. Generate exactly 3 strategic insights for Market Overview in ${country || 'Global'}. Each insight must be 22-28 words and provide actionable market intelligence.
 
-ACTUAL DATA CONTEXT:
-- Top OEM: ${topOEM || 'Unknown'} with ${topOEMFeatures || 0} features
-- Second OEM: ${secondOEM || 'Unknown'} with ${secondOEMFeatures || 0} features  
-- Top Category: ${topCategory || 'Unknown'} with ${dashboardMetrics.topCategories?.[0]?.value || 0} features
-- Lighthouse Features: ${dashboardMetrics.lighthouseFeatures || 0} total
+VERIFIED MARKET DATA:
+- Geographic Market: ${country || 'Global'} automotive technology landscape
+- Market Leader: ${topOEM || 'Unknown'} (${topOEMFeatures || 0} features, ${topOEMShare}% market share)
+- Second Player: ${secondOEM || 'Unknown'} (${secondOEMFeatures || 0} features, ${secondOEMShare}% share)
+- Dominant Category: ${topCategory || 'Unknown'} (${topCategoryFeatures} implementations)
+- Secondary Category: ${secondCategory || 'Unknown'} (${secondCategoryFeatures} implementations)
+- Innovation Index: ${totalLighthouseFeatures} lighthouse features (${lighthouseRate}% of total market)
+- Total Market Size: ${totalMarketFeatures} connected features deployed
 
-GENERATE 3 INSIGHTS using ONLY the data above (15-20 words each):
+GENERATE EXACTLY 3 INSIGHTS:
 
-Respond with ONLY a JSON array of exactly 3 concise strings.`;
+1. OEM Feature Diversity Leadership: [Analysis of ${topOEM}'s ${topOEMShare}% market dominance with ${topOEMFeatures} features versus ${secondOEM}'s ${secondOEMShare}% position]
+
+2. Geographic Feature Availability Hotspots: [Assessment of ${country || 'Global'} market maturity through ${totalMarketFeatures} deployed features and ${topCategory} category leadership]
+
+3. Lighthouse Feature Implementation Excellence: [Evaluation of market innovation through ${totalLighthouseFeatures} lighthouse features representing ${lighthouseRate}% implementation rate across OEMs]
+
+Requirements:
+- Use exact numbers and percentages from verified data
+- Each insight must be 22-28 words
+- Focus on competitive positioning and market dynamics
+- Professional analytical tone
+
+Respond with ONLY a JSON array of exactly 3 strings.`;
 }
 
 function createOEMSpecificPrompt(
