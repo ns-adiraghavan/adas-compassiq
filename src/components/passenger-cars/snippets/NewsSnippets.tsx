@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Newspaper, Loader2, ExternalLink, AlertCircle, CheckCircle } from "lucide-react"
+import { Newspaper, Loader2, ExternalLink, AlertCircle, CheckCircle, Search } from "lucide-react"
 import { useNewsSnippetsAI } from "@/hooks/useNewsSnippetsAI"
 import { useState } from "react"
 
@@ -25,7 +25,7 @@ const NewsSnippets = ({
   const [failedUrls, setFailedUrls] = useState<Set<string>>(new Set())
 
   const newsSnippets = newsData?.newsSnippets || []
-  const isRealContent = newsData?.context?.source === 'openai_real_news'
+  const isRealWebSearch = newsData?.context?.source === 'real_web_search'
   const isFallbackContent = newsData?.context?.source?.includes('fallback')
 
   const handleNewsClick = async (url: string, title: string) => {
@@ -44,7 +44,7 @@ const NewsSnippets = ({
         return
       }
 
-      // Open the URL directly - improved URLs should work better
+      // Open the URL directly
       window.open(url, '_blank', 'noopener,noreferrer')
       
     } catch (error) {
@@ -55,21 +55,21 @@ const NewsSnippets = ({
   }
 
   const getContentStatusIcon = () => {
-    if (isRealContent) {
+    if (isRealWebSearch) {
       return <CheckCircle className="h-4 w-4 ml-2 text-green-500" />
     } else if (isFallbackContent) {
       return <AlertCircle className="h-4 w-4 ml-2 text-yellow-500" />
     }
-    return null
+    return <Search className="h-4 w-4 ml-2 text-blue-500" />
   }
 
   const getContentStatusText = () => {
-    if (isRealContent) {
-      return "Real-time news with validated sources"
+    if (isRealWebSearch) {
+      return "Live web search results with validated sources"
     } else if (isFallbackContent) {
       return "Curated automotive news highlights"
     }
-    return "Contextual automotive news"
+    return "Contextual automotive news analysis"
   }
 
   return (
@@ -104,9 +104,14 @@ const NewsSnippets = ({
           </div>
         ) : (
           <div className="space-y-2">
+            {isRealWebSearch && (
+              <div className="text-xs text-green-400 mb-2 p-2 bg-green-900/20 rounded border border-green-700/30">
+                ✓ Real-time web search results with validated article links
+              </div>
+            )}
             {isFallbackContent && (
               <div className="text-xs text-yellow-400 mb-2 p-2 bg-yellow-900/20 rounded border border-yellow-700/30">
-                Note: Showing curated content. Real-time news integration is being optimized.
+                Note: Showing curated content. Links direct to automotive news sections.
               </div>
             )}
             {newsSnippets.map((news) => (
