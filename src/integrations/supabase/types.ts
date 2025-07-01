@@ -69,6 +69,33 @@ export type Database = {
         }
         Relationships: []
       }
+      strategic_insights_feedback: {
+        Row: {
+          context_info: Json
+          created_at: string
+          feedback_type: string
+          id: string
+          insight_hash: string
+          insight_text: string
+        }
+        Insert: {
+          context_info?: Json
+          created_at?: string
+          feedback_type: string
+          id?: string
+          insight_hash: string
+          insight_text: string
+        }
+        Update: {
+          context_info?: Json
+          created_at?: string
+          feedback_type?: string
+          id?: string
+          insight_hash?: string
+          insight_text?: string
+        }
+        Relationships: []
+      }
       waypoint_data_context: {
         Row: {
           created_at: string

@@ -1,26 +1,57 @@
 
 // Prompt generation utilities
+function createFeedbackContext(feedbackData?: any[]): string {
+  if (!feedbackData || feedbackData.length === 0) {
+    return '';
+  }
+
+  const dislikedInsights = feedbackData
+    .filter(f => f.feedback_type === 'dislike')
+    .map(f => f.insight_text)
+    .slice(0, 5); // Limit to recent 5 dislikes
+
+  const likedInsights = feedbackData
+    .filter(f => f.feedback_type === 'like')
+    .map(f => f.insight_text)
+    .slice(0, 3); // Include 3 liked patterns
+
+  let feedbackContext = '\n\nFEEDBACK CONTEXT:\n';
+  
+  if (dislikedInsights.length > 0) {
+    feedbackContext += `AVOID these patterns (previously disliked):\n${dislikedInsights.map((insight, i) => `- ${insight}`).join('\n')}\n`;
+  }
+  
+  if (likedInsights.length > 0) {
+    feedbackContext += `PREFERRED patterns (previously liked):\n${likedInsights.map((insight, i) => `- ${insight}`).join('\n')}\n`;
+  }
+  
+  feedbackContext += '\nGenerate fresh insights that avoid disliked patterns and follow successful patterns.\n';
+  
+  return feedbackContext;
+}
+
 export function createVehicleSegmentInsightsPrompt(
   oem: string, 
   country: string, 
   dashboardMetrics: any, 
   isMarketOverview: boolean,
   analysisType?: string,
-  contextData?: any
+  contextData?: any,
+  feedbackData?: any[]
 ): string {
   // Handle Landscape Analysis context
   if (analysisType === "landscape-analysis" && contextData) {
-    return createLandscapeAnalysisPrompt(country, contextData);
+    return createLandscapeAnalysisPrompt(country, contextData, feedbackData);
   }
 
   // Handle Business Model Analysis context
   if (analysisType === "business-model-analysis" && contextData) {
-    return createBusinessModelAnalysisPrompt(country, contextData);
+    return createBusinessModelAnalysisPrompt(country, contextData, feedbackData);
   }
 
   // Handle Category Analysis context
   if (analysisType === "category-analysis" && contextData) {
-    return createCategoryAnalysisPrompt(country, contextData);
+    return createCategoryAnalysisPrompt(country, contextData, feedbackData);
   }
 
   const topCategory = dashboardMetrics.topCategories?.[0]?.name || 'Unknown';
@@ -58,7 +89,8 @@ export function createVehicleSegmentInsightsPrompt(
 
 function createLandscapeAnalysisPrompt(
   country: string,
-  contextData: any
+  contextData: any,
+  feedbackData?: any[]
 ): string {
   const { 
     selectedOEM, 
@@ -82,6 +114,8 @@ function createLandscapeAnalysisPrompt(
   const lighthouseFeatures = ranking?.lighthouseFeatures || 0;
   const lighthouseRate = availableFeatures > 0 ? Math.round((lighthouseFeatures / availableFeatures) * 100) : 0;
 
+  const feedbackContext = createFeedbackContext(feedbackData);
+
   return `You are an automotive industry analyst. Generate exactly 3 strategic insights based on real data analysis. Each insight must be 22-28 words and provide specific, actionable intelligence.
 
 VERIFIED DATA CONTEXT:
@@ -92,7 +126,7 @@ VERIFIED DATA CONTEXT:
 - Lighthouse Features: ${lighthouseFeatures} (${lighthouseRate}% of portfolio)
 - Leading Category: ${topCategory.category} with ${topCategory.count} features
 - Secondary Category: ${secondCategory.category} with ${secondCategory.count} features
-- Primary Business Model: ${topBusinessModel.model} (${topBusinessModel.count} implementations)
+- Primary Business Model: ${topBusinessModel.model} (${topBusinessModel.count} implementations)${feedbackContext}
 
 GENERATE EXACTLY 3 INSIGHTS IN THIS FORMAT:
 
@@ -113,7 +147,8 @@ Respond with ONLY a JSON array of exactly 3 strings.`;
 
 function createCategoryAnalysisPrompt(
   country: string,
-  contextData: any
+  contextData: any,
+  feedbackData?: any[]
 ): string {
   const { 
     totalFeatures = 0, 
@@ -168,6 +203,8 @@ function createCategoryAnalysisPrompt(
     strongestCategory: secondCategory.category 
   };
 
+  const feedbackContext = createFeedbackContext(feedbackData);
+
   return `You are an automotive technology analyst. Generate exactly 3 strategic insights for Category Analysis in ${country}. Each insight must be 22-28 words and use only raw counts, no percentages.
 
 VERIFIED CATEGORY DATA:
@@ -176,7 +213,7 @@ VERIFIED CATEGORY DATA:
 - Leading Category: ${topCategory.category} (${topCategory.total} features, led by ${topCategory.leader})
 - Secondary Category: ${secondCategory.category} (${secondCategory.total} features, led by ${secondCategory.leader})
 - Market Leader: ${leadingOEM.oem} (${leadingOEM.total} features, strongest in ${leadingOEM.strongestCategory})
-- Secondary Player: ${secondOEM.oem} (${secondOEM.total} features, specializes in ${secondOEM.strongestCategory})
+- Secondary Player: ${secondOEM.oem} (${secondOEM.total} features, specializes in ${secondOEM.strongestCategory})${feedbackContext}
 
 GENERATE 3 INSIGHTS (22-28 words each, counts only):
 
@@ -191,7 +228,8 @@ Use exact counts only, no percentages. Respond with ONLY a JSON array of exactly
 
 function createBusinessModelAnalysisPrompt(
   country: string,
-  contextData: any
+  contextData: any,
+  feedbackData?: any[]
 ): string {
   const { 
     totalFeatures = 0, 
@@ -225,6 +263,8 @@ function createBusinessModelAnalysisPrompt(
   const leadingOEM = oemPerformance[0] || { oem: selectedOEMs[0] || 'Market Leader', total: Math.floor(totalFeatures * 0.4), strongestBusinessModel: topBusinessModel.businessModel };
   const secondOEM = oemPerformance[1] || { oem: selectedOEMs[1] || 'Runner Up', total: Math.floor(totalFeatures * 0.3), strongestBusinessModel: secondBusinessModel.businessModel };
 
+  const feedbackContext = createFeedbackContext(feedbackData);
+
   return `You are an automotive business analyst. Generate exactly 3 strategic insights for Business Model Analysis in ${country}. Each insight must be 22-28 words and use only raw counts, no percentages.
 
 VERIFIED BUSINESS MODEL DATA:
@@ -233,7 +273,7 @@ VERIFIED BUSINESS MODEL DATA:
 - Leading Business Model: ${topBusinessModel.businessModel} (${topBusinessModel.total} features, led by ${topBusinessModelLeader.oem})
 - Market Leader: ${leadingOEM.oem} (${leadingOEM.total} features, strongest in ${leadingOEM.strongestBusinessModel})
 - Secondary Player: ${secondOEM.oem} (${secondOEM.total} features, focused on ${secondOEM.strongestBusinessModel} model)
-- Top Category: ${topCategory.category} (${topCategory.total} features, led by ${topCategory.leader})
+- Top Category: ${topCategory.category} (${topCategory.total} features, led by ${topCategory.leader})${feedbackContext}
 
 GENERATE 3 INSIGHTS (22-28 words each, counts only):
 

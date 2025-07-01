@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0';
 import { createVehicleSegmentInsightsPrompt } from './utils/prompts.ts';
 
 const corsHeaders = {
@@ -15,14 +16,38 @@ serve(async (req) => {
   try {
     const { oem, country, dashboardMetrics, isMarketOverview, analysisType, contextData } = await req.json();
     
-    // Generate context-aware prompt
+    // Initialize Supabase client for feedback queries
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY');
+    const supabase = createClient(supabaseUrl!, supabaseKey!);
+    
+    // Fetch feedback data to improve insight generation
+    const feedbackContext = {
+      selectedOEM: oem,
+      selectedCountry: country,
+      analysisType: analysisType || 'general'
+    };
+    
+    const { data: feedbackData } = await supabase
+      .from('strategic_insights_feedback')
+      .select('insight_text, feedback_type')
+      .eq('context_info->selectedCountry', country)
+      .eq('context_info->analysisType', analysisType || 'general')
+      .order('created_at', { ascending: false })
+      .limit(50);
+    
+    console.log('=== Feedback Data Retrieved ===')
+    console.log(`Found ${feedbackData?.length || 0} feedback entries`)
+    
+    // Generate context-aware prompt with feedback data
     const prompt = createVehicleSegmentInsightsPrompt(
       oem, 
       country, 
       dashboardMetrics, 
       isMarketOverview, 
       analysisType, 
-      contextData
+      contextData,
+      feedbackData || []
     );
     
     // Enhanced logging for debugging

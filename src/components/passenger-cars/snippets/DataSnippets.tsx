@@ -1,7 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BarChart, Loader2, Lightbulb, TrendingUp, Grid } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { BarChart, Loader2, Lightbulb, TrendingUp, Grid, ThumbsUp, ThumbsDown } from "lucide-react"
 import { useDataInsightsAI } from "@/hooks/useDataInsightsAI"
 import { useLandscapeAnalysisData } from "@/hooks/useLandscapeAnalysisData"
+import { useInsightFeedback } from "@/hooks/useInsightFeedback"
 import { useLocation } from "react-router-dom"
 
 interface DataSnippetsProps {
@@ -19,6 +21,7 @@ const DataSnippets = ({
 }: DataSnippetsProps) => {
   const location = useLocation()
   const isLandscapePage = location.pathname.includes('/landscape')
+  const { submitFeedback, getFeedbackState, submittingFeedback } = useInsightFeedback()
   
   // Only show OEM-specific insights if OEM was actually clicked from chart
   const showOEMInsights = oemClickedFromChart && selectedOEM && selectedOEM.trim() !== ""
@@ -122,16 +125,60 @@ const DataSnippets = ({
       )
     }
 
+    const handleFeedback = (insight: string, feedbackType: 'like' | 'dislike') => {
+      submitFeedback(insight, feedbackType, {
+        selectedOEM,
+        selectedCountry,
+        analysisType: contextData?.analysisType || businessModelAnalysisContext?.analysisType || 'general'
+      })
+    }
+
     return (
       <div className="space-y-3">
-        {aiInsights.insights.map((insight: string, index: number) => (
-          <div key={index} className="flex items-start space-x-3 p-3 bg-gray-800/30 rounded-lg border border-gray-700/50">
-            {getIcon()}
-            <p className="text-white text-sm leading-relaxed flex-1">
-              {insight}
-            </p>
-          </div>
-        ))}
+        {aiInsights.insights.map((insight: string, index: number) => {
+          const feedbackState = getFeedbackState(insight, {
+            selectedOEM,
+            selectedCountry,
+            analysisType: contextData?.analysisType || businessModelAnalysisContext?.analysisType || 'general'
+          })
+          
+          return (
+            <div key={index} className="flex items-start space-x-3 p-3 bg-gray-800/30 rounded-lg border border-gray-700/50">
+              {getIcon()}
+              <p className="text-white text-sm leading-relaxed flex-1">
+                {insight}
+              </p>
+              <div className="flex items-center space-x-1 ml-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`h-6 w-6 p-0 hover:bg-green-500/20 ${
+                    feedbackState === 'like' 
+                      ? 'bg-green-500/30 text-green-400' 
+                      : 'text-gray-400 hover:text-green-400'
+                  }`}
+                  onClick={() => handleFeedback(insight, 'like')}
+                  disabled={submittingFeedback !== null}
+                >
+                  <ThumbsUp className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`h-6 w-6 p-0 hover:bg-red-500/20 ${
+                    feedbackState === 'dislike' 
+                      ? 'bg-red-500/30 text-red-400' 
+                      : 'text-gray-400 hover:text-red-400'
+                  }`}
+                  onClick={() => handleFeedback(insight, 'dislike')}
+                  disabled={submittingFeedback !== null}
+                >
+                  <ThumbsDown className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
+          )
+        })}
       </div>
     )
   }
