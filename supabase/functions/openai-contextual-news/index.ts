@@ -205,92 +205,56 @@ function generateFallbackURL(source: string): string {
 
 // Function to search for real news using OpenAI with Function Calling
 async function searchRealNewsWithFunctionCalling(query: string): Promise<NewsSnippet[]> {
-  console.log(`Starting OpenAI Function Calling search for: "${query}"`);
+  console.log(`Starting web search for: "${query}"`);
   
-  const messages = [
-    {
-      role: 'system',
-      content: 'You are an automotive industry news researcher. Use the web_search tool to find recent, relevant automotive news articles. Focus on connected vehicle features, technology launches, partnerships, and industry developments.'
-    },
-    {
-      role: 'user',
-      content: `Find recent automotive news articles about: ${query}. Focus on connected features, technology launches, partnerships, and innovation in the automotive industry.`
-    }
-  ];
-
-  const tools = [
-    {
-      type: 'function',
-      function: {
-        name: 'web_search',
-        description: 'Search for recent automotive news articles using web search',
-        parameters: {
-          type: 'object',
-          properties: {
-            query: {
-              type: 'string',
-              description: 'The search query for finding automotive news articles'
-            }
-          },
-          required: ['query']
-        }
-      }
-    }
-  ];
-
-  try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o', // Using gpt-4o for better reasoning
-        messages: messages,
-        tools: tools,
-        tool_choice: 'auto',
-        temperature: 0.3,
-        max_tokens: 1000,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorBody = await response.text();
-      throw new Error(`OpenAI API error: ${response.status} - ${errorBody}`);
-    }
-
-    const data = await response.json();
-    const message = data.choices[0].message;
-
-    // Check if OpenAI wants to call the web_search tool
-    if (message.tool_calls && message.tool_calls.length > 0) {
-      const toolCall = message.tool_calls[0];
-      
-      if (toolCall.function.name === 'web_search') {
-        const searchQuery = JSON.parse(toolCall.function.arguments).query;
-        console.log(`OpenAI requested web search for: "${searchQuery}"`);
-        
-        // Execute the web search
-        const searchResults = await webSearchTool(searchQuery);
-        
-        if (searchResults.length === 0) {
-          console.log('No search results found, returning empty array');
-          return [];
-        }
-
-        // Validate URLs concurrently and return processed articles
-        return await validateURLsConcurrently(searchResults);
-      }
-    }
-
-    console.log('OpenAI did not request web search, returning empty results');
-    return [];
-
-  } catch (error) {
-    console.error('OpenAI Function Calling error:', error);
+  // First, get real search results from SerpAPI
+  const searchResults = await webSearchTool(query);
+  
+  if (searchResults.length === 0) {
+    console.log('No search results found');
     return [];
   }
+
+  console.log(`Found ${searchResults.length} search results, processing...`);
+  
+  // Process real search results into news snippets
+  const processedArticles = await Promise.all(
+    searchResults.map(async (article, index) => {
+      try {
+        // Use the actual snippet from search results, not generated content
+        let publishedDate = new Date(article.publishedAt);
+        const now = new Date();
+        
+        // If date is invalid, use current time minus a few hours
+        if (isNaN(publishedDate.getTime())) {
+          publishedDate = new Date(Date.now() - Math.random() * 12 * 60 * 60 * 1000);
+        }
+        
+        const diffInHours = Math.floor((now.getTime() - publishedDate.getTime()) / (1000 * 60 * 60));
+        const timeAgo = diffInHours < 1 ? 'Just now' : 
+                       diffInHours < 24 ? `${diffInHours} hours ago` : 
+                       `${Math.floor(diffInHours / 24)} days ago`;
+
+        return {
+          id: index + 1,
+          title: article.title.length > 80 ? article.title.substring(0, 77) + '...' : article.title,
+          summary: article.summary.length > 120 ? article.summary.substring(0, 117) + '...' : article.summary,
+          source: article.source,
+          timestamp: timeAgo,
+          url: article.url
+        };
+      } catch (error) {
+        console.log(`Error processing article ${index}:`, error.message);
+        return null;
+      }
+    })
+  );
+
+  // Filter out null results and return valid articles
+  const validArticles = processedArticles.filter(article => article !== null) as NewsSnippet[];
+  
+  console.log(`Successfully processed ${validArticles.length} real news articles`);
+  return validArticles;
 }
 
 // Enhanced fallback function with quality URLs
