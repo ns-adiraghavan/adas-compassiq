@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
 
@@ -69,9 +68,9 @@ const TwoWheelersCarousel = () => {
     return () => clearInterval(interval)
   }, [images.length])
 
-  // Square shape for Two Wheelers
+  // Rectangular shape with full width and 400px height
   const containerStyle = {
-    width: "400px",
+    width: "100%",
     height: "400px",
     borderRadius: "16px"
   }
