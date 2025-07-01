@@ -116,7 +116,7 @@ function createLandscapeAnalysisPrompt(
 
   const feedbackContext = createFeedbackContext(feedbackData);
 
-  return `You are an automotive industry analyst. Generate exactly 3 strategic insights based on real data analysis. Each insight must be 22-28 words and provide specific, actionable intelligence.
+return `You are an automotive industry analyst. Generate exactly 3 strategic insights based on real data analysis. Each insight must be 15-20 words maximum and provide specific, actionable intelligence.
 
 VERIFIED DATA CONTEXT:
 - OEM: ${selectedOEM}
@@ -128,19 +128,19 @@ VERIFIED DATA CONTEXT:
 - Secondary Category: ${secondCategory.category} with ${secondCategory.count} features
 - Primary Business Model: ${topBusinessModel.model} (${topBusinessModel.count} implementations)${feedbackContext}
 
-GENERATE EXACTLY 3 INSIGHTS IN THIS FORMAT:
+GENERATE EXACTLY 3 INSIGHTS (15-20 words each):
 
-1. OEM Feature Diversity Leadership: [Analysis of ${selectedOEM}'s feature portfolio strength, ranking (#${marketRank}), and competitive positioning against ${totalOEMs-1} competitors]
+1. OEM Market Position: [Analysis of ${selectedOEM} rank #${marketRank} with ${availableFeatures} features vs ${totalOEMs-1} competitors]
 
-2. Geographic Feature Availability Hotspots: [Assessment of ${selectedCountry} market characteristics, feature deployment density, and regional technology adoption patterns]
+2. Regional Feature Deployment: [Assessment of ${selectedCountry} market with ${topCategory.category} leadership and ${availableFeatures} total features]
 
-3. Lighthouse Feature Implementation Excellence: [Evaluation of ${selectedOEM}'s innovation leadership through ${lighthouseFeatures} lighthouse features representing ${lighthouseRate}% implementation rate]
+3. Innovation Leadership: [Evaluation of ${selectedOEM} lighthouse capabilities through ${lighthouseFeatures} advanced features]
 
 Requirements:
-- Use exact numbers from the data above
-- Each insight must be 22-28 words
+- Use exact numbers from verified data
+- Each insight must be 15-20 words maximum
 - Focus on competitive intelligence and strategic implications
-- Maintain professional, analytical tone
+- Professional, analytical tone
 
 Respond with ONLY a JSON array of exactly 3 strings.`;
 }
@@ -205,7 +205,7 @@ function createCategoryAnalysisPrompt(
 
   const feedbackContext = createFeedbackContext(feedbackData);
 
-  return `You are an automotive technology analyst. Generate exactly 3 strategic insights for Category Analysis in ${country}. Each insight must be 22-28 words and use only raw counts, no percentages.
+  return `You are an automotive technology analyst. Generate exactly 3 strategic insights for Category Analysis in ${country}. Each insight must be 15-20 words maximum and use only raw counts, no percentages.
 
 VERIFIED CATEGORY DATA:
 - Market Analysis: ${selectedOEMs.join(', ')} in ${country}
@@ -215,13 +215,13 @@ VERIFIED CATEGORY DATA:
 - Market Leader: ${leadingOEM.oem} (${leadingOEM.total} features, strongest in ${leadingOEM.strongestCategory})
 - Secondary Player: ${secondOEM.oem} (${secondOEM.total} features, specializes in ${secondOEM.strongestCategory})${feedbackContext}
 
-GENERATE 3 INSIGHTS (22-28 words each, counts only):
+GENERATE 3 INSIGHTS (15-20 words each, counts only):
 
-1. Category Market Leadership: [Analysis of ${topCategory.category} dominance with ${topCategory.total} features led by ${topCategory.leader} in ${country}]
+1. Category Leadership: [${topCategory.category} leads with ${topCategory.total} features via ${topCategory.leader} dominance in ${country}]
 
-2. OEM Portfolio Specialization: [Assessment of ${leadingOEM.oem} market control through ${leadingOEM.strongestCategory} category excellence with ${leadingOEM.total} features]
+2. OEM Specialization: [${leadingOEM.oem} controls ${leadingOEM.total} features through ${leadingOEM.strongestCategory} category excellence]
 
-3. Technology Distribution Strategy: [Evaluation of ${secondCategory.category} category growth with ${secondCategory.total} features creating competitive opportunities for ${secondOEM.oem}]
+3. Market Opportunity: [${secondCategory.category} shows ${secondCategory.total} features creating growth opportunities for ${secondOEM.oem}]
 
 Use exact counts only, no percentages. Respond with ONLY a JSON array of exactly 3 strings.`;
 }
@@ -265,7 +265,7 @@ function createBusinessModelAnalysisPrompt(
 
   const feedbackContext = createFeedbackContext(feedbackData);
 
-  return `You are an automotive business analyst. Generate exactly 3 strategic insights for Business Model Analysis in ${country}. Each insight must be 22-28 words and use only raw counts, no percentages.
+  return `You are an automotive business analyst. Generate exactly 3 strategic insights for Business Model Analysis in ${country}. Each insight must be 15-20 words maximum and use only raw counts, no percentages.
 
 VERIFIED BUSINESS MODEL DATA:
 - Market Analysis: ${selectedOEMs.join(', ')} in ${country}
@@ -275,13 +275,13 @@ VERIFIED BUSINESS MODEL DATA:
 - Secondary Player: ${secondOEM.oem} (${secondOEM.total} features, focused on ${secondOEM.strongestBusinessModel} model)
 - Top Category: ${topCategory.category} (${topCategory.total} features, led by ${topCategory.leader})${feedbackContext}
 
-GENERATE 3 INSIGHTS (22-28 words each, counts only):
+GENERATE 3 INSIGHTS (15-20 words each, counts only):
 
-1. Business Model Leadership: [Analysis of ${topBusinessModel.businessModel} model dominance with ${topBusinessModel.total} features led by ${topBusinessModelLeader.oem}]
+1. Business Model Leadership: [${topBusinessModel.businessModel} dominates with ${topBusinessModel.total} features led by ${topBusinessModelLeader.oem}]
 
-2. OEM Strategic Positioning: [Assessment of ${leadingOEM.oem}'s ${leadingOEM.total} features through ${leadingOEM.strongestBusinessModel} specialization in ${country}]
+2. OEM Strategy: [${leadingOEM.oem} achieves ${leadingOEM.total} features through ${leadingOEM.strongestBusinessModel} model specialization in ${country}]
 
-3. Category Business Alignment: [Evaluation of ${topCategory.category} category leadership with ${topCategory.total} features driving ${topCategory.leader}'s competitive advantage]
+3. Category Alignment: [${topCategory.category} leadership with ${topCategory.total} features drives ${topCategory.leader} competitive advantage]
 
 Use exact counts only, no percentages. Respond with ONLY a JSON array of exactly 3 strings.`;
 }
@@ -307,7 +307,7 @@ function createMarketOverviewPrompt(
   const secondOEMShare = totalMarketFeatures > 0 ? Math.round((secondOEMFeatures / totalMarketFeatures) * 100) : 0;
   const lighthouseRate = totalMarketFeatures > 0 ? Math.round((totalLighthouseFeatures / totalMarketFeatures) * 100) : 0;
 
-  return `You are a senior automotive market analyst. Generate exactly 3 strategic insights for Market Overview in ${country || 'Global'}. Each insight must be 22-28 words and provide actionable market intelligence.
+  return `You are a senior automotive market analyst. Generate exactly 3 strategic insights for Market Overview in ${country || 'Global'}. Each insight must be 15-20 words maximum and provide actionable market intelligence.
 
 VERIFIED MARKET DATA:
 - Geographic Market: ${country || 'Global'} automotive technology landscape
@@ -318,17 +318,17 @@ VERIFIED MARKET DATA:
 - Innovation Index: ${totalLighthouseFeatures} lighthouse features (${lighthouseRate}% of total market)
 - Total Market Size: ${totalMarketFeatures} connected features deployed
 
-GENERATE EXACTLY 3 INSIGHTS:
+GENERATE EXACTLY 3 INSIGHTS (15-20 words each):
 
-1. OEM Feature Diversity Leadership: [Analysis of ${topOEM}'s ${topOEMShare}% market dominance with ${topOEMFeatures} features versus ${secondOEM}'s ${secondOEMShare}% position]
+1. Market Leadership: [${topOEM} dominates with ${topOEMFeatures} features (${topOEMShare}%) vs ${secondOEM} ${secondOEMFeatures} features (${secondOEMShare}%)]
 
-2. Geographic Feature Availability Hotspots: [Assessment of ${country || 'Global'} market maturity through ${totalMarketFeatures} deployed features and ${topCategory} category leadership]
+2. Regional Maturity: [${country || 'Global'} shows ${totalMarketFeatures} deployed features with ${topCategory} category leading market development]
 
-3. Lighthouse Feature Implementation Excellence: [Evaluation of market innovation through ${totalLighthouseFeatures} lighthouse features representing ${lighthouseRate}% implementation rate across OEMs]
+3. Innovation Index: [Market achieves ${totalLighthouseFeatures} lighthouse features representing ${lighthouseRate}% innovation rate across OEM portfolios]
 
 Requirements:
 - Use exact numbers and percentages from verified data
-- Each insight must be 22-28 words
+- Each insight must be 15-20 words maximum
 - Focus on competitive positioning and market dynamics
 - Professional analytical tone
 
@@ -365,7 +365,7 @@ function createOEMSpecificPrompt(
   const isMidTier = marketPosition > 3 && marketPosition <= Math.ceil(totalOEMs / 2);
   const performanceLevel = isTopTier ? 'leading' : isMidTier ? 'competitive' : 'developing';
 
-  return `Generate exactly 3 concise strategic insights for ${oem} analysis in ${country || 'global market'}. Each insight must be exactly 15-20 words maximum.
+  return `Generate exactly 3 strategic insights for ${oem} analysis in ${country || 'global market'}. Each insight must be 15-20 words maximum.
 
 CRITICAL: Use ONLY these exact OEMs and numbers provided below. Do NOT reference Ford, Toyota, or any OEM not listed:
 
@@ -378,5 +378,11 @@ ACTUAL DATA CONTEXT:
 
 GENERATE 3 INSIGHTS using ONLY the data above (15-20 words each):
 
-Respond with ONLY a JSON array of exactly 3 concise strings.`;
+1. OEM Position: [${oem} ranks #${marketPosition} of ${totalOEMs} with ${selectedOEMData?.features || 0} features in ${country}]
+
+2. Innovation Index: [${oem} achieves ${selectedOEMData?.lighthouseRate || 0} lighthouse features versus ${topOEM} market leadership]
+
+3. Competitive Gap: [${oem} shows ${selectedOEMData?.features || 0} features indicating positioning against top competitor ${topOEM}]
+
+Respond with ONLY a JSON array of exactly 3 strings (15-20 words each).`;
 }

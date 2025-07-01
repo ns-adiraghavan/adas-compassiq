@@ -94,7 +94,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are a senior automotive technology analyst with deep expertise in connected vehicle markets, OEM competitive positioning, and feature deployment strategies. Generate precise, actionable strategic insights using exact data points provided. Always respond with valid JSON containing exactly 3 insight strings, each 22-28 words, focusing on competitive intelligence and market dynamics.'
+            content: 'You are a senior automotive technology analyst with deep expertise in connected vehicle markets, OEM competitive positioning, and feature deployment strategies. Generate precise, actionable strategic insights using exact data points provided. Always respond with valid JSON containing exactly 3 insight strings, each 15-20 words maximum, focusing on competitive intelligence and market dynamics.'
           },
           {
             role: 'user',
@@ -178,9 +178,9 @@ serve(async (req) => {
         const lighthouse = ranking?.lighthouseFeatures || Math.floor(features * 0.3);
         
         insights = [
-          `${selectedOEM || oem} secures rank ${rank} of ${totalOEMs} OEMs in ${selectedCountry || country} with ${features} connected features establishing strong competitive market positioning.`,
-          `${selectedCountry || country} automotive market demonstrates ${features} available features indicating mature technology adoption and robust regional deployment capabilities.`,
-          `${selectedOEM || oem} achieves innovation leadership through ${lighthouse} lighthouse features representing advanced technology deployment in connected vehicle segment.`
+          `${selectedOEM || oem} ranks ${rank} of ${totalOEMs} OEMs in ${selectedCountry || country} with ${features} features`,
+          `${selectedCountry || country} market shows ${features} available features indicating mature technology adoption`,
+          `${selectedOEM || oem} leads innovation through ${lighthouse} lighthouse features in connected vehicle segment`
         ]
       } else if (analysisType === "business-model-analysis" && contextData) {
         const { selectedOEMs = ['Leading OEM', 'Second OEM'], totalFeatures = 45, businessModelComparison = [] } = contextData;
@@ -189,9 +189,9 @@ serve(async (req) => {
         const leadingOEM = selectedOEMs[0];
         
         insights = [
-          `${topModel} business model leads with ${modelFeatures} features across ${selectedOEMs.join(', ')} demonstrating strategic monetization focus in ${country} market.`,
-          `${leadingOEM} portfolio optimization shows ${Math.floor(totalFeatures * 0.4)} features enabling subscription-based revenue generation and customer engagement strategies.`,
-          `Business model diversification across ${selectedOEMs.length} manufacturers reveals ${totalFeatures} total features indicating comprehensive market coverage and growth potential.`
+          `${topModel} model leads with ${modelFeatures} features across ${selectedOEMs.join(', ')} in ${country}`,
+          `${leadingOEM} shows ${Math.floor(totalFeatures * 0.4)} features enabling subscription revenue generation strategies`,
+          `Business model diversification across ${selectedOEMs.length} manufacturers reveals ${totalFeatures} total features`
         ]
       } else if (analysisType === "category-analysis" && contextData) {
         const { selectedOEMs = ['Market Leader', 'Runner Up'], totalFeatures = 42, topCategories = [] } = contextData;
@@ -200,18 +200,18 @@ serve(async (req) => {
         const categoryLeader = topCategories[0]?.leader || selectedOEMs[0];
         
         insights = [
-          `${topCategory} category dominates with ${categoryFeatures} features led by ${categoryLeader} establishing market leadership in ${country} automotive technology sector.`,
-          `${selectedOEMs[0]} strategic positioning shows ${Math.floor(totalFeatures * 0.4)} features across categories enabling competitive advantage through technology specialization.`,
-          `Category distribution analysis reveals ${totalFeatures} features across ${selectedOEMs.join(', ')} indicating diverse technology deployment and market opportunity capture.`
+          `${topCategory} dominates with ${categoryFeatures} features led by ${categoryLeader} in ${country} automotive market`,
+          `${selectedOEMs[0]} shows ${Math.floor(totalFeatures * 0.4)} features across categories enabling competitive advantage`,
+          `Category analysis reveals ${totalFeatures} features across ${selectedOEMs.join(', ')} indicating diverse deployment`
         ]
       } else {
         // Generic market overview fallback with meaningful data
         const marketFeatures = Math.floor(Math.random() * 100) + 50;
         const topOEM = 'Market Leader';
         insights = [
-          `${country} automotive technology landscape reveals ${marketFeatures} connected features indicating strong market maturity and competitive OEM positioning strategies.`,
-          `${topOEM} demonstrates market leadership through comprehensive feature deployment enabling sustainable competitive advantage in connected vehicle segment.`,
-          `Strategic technology investments across ${country} market show ${Math.floor(marketFeatures * 0.7)} available features driving industry innovation and customer value creation.`
+          `${country} automotive landscape reveals ${marketFeatures} connected features indicating strong market maturity`,
+          `${topOEM} demonstrates market leadership through comprehensive feature deployment in connected vehicle segment`,
+          `Strategic investments across ${country} show ${Math.floor(marketFeatures * 0.7)} features driving industry innovation`
         ]
       }
       
@@ -220,7 +220,7 @@ serve(async (req) => {
 
     // Ensure we have exactly 3 insights
     while (insights.length < 3) {
-      insights.push(`Strategic market analysis indicates competitive opportunities and technology deployment potential in ${country} automotive sector.`)
+      insights.push(`Strategic analysis indicates competitive opportunities in ${country} automotive technology sector`)
     }
     if (insights.length > 3) {
       insights = insights.slice(0, 3)
@@ -245,9 +245,9 @@ serve(async (req) => {
       success: false,
       error: error.message,
       insights: [
-        "Strategic market analysis indicates competitive opportunities in automotive technology deployment.",
-        "Connected vehicle innovation shows significant potential for OEM differentiation and customer engagement.",
-        "Market dynamics suggest strategic positioning advantages through targeted technology implementation approaches."
+        "Strategic market analysis indicates competitive opportunities in automotive technology deployment",
+        "Connected vehicle innovation shows significant potential for OEM differentiation and engagement",
+        "Market dynamics suggest strategic positioning advantages through targeted technology implementation"
       ],
       dataPoints: 0
     }), {
