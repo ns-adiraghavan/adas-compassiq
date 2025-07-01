@@ -1,6 +1,7 @@
 
 import { Check } from "lucide-react"
 import { useTheme } from "@/contexts/ThemeContext"
+import FeatureTableLegend from "./FeatureTableLegend"
 
 interface ExpandedFeaturesTableProps {
   expandedCategory: string
@@ -72,6 +73,7 @@ const ExpandedFeaturesTable = ({
           </tbody>
         </table>
       </div>
+      <FeatureTableLegend />
     </div>
   )
 }
