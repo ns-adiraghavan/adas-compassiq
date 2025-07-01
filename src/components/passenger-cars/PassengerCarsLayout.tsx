@@ -1,3 +1,4 @@
+
 import { ArrowLeft } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext"
@@ -60,7 +61,7 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: `url('/lovable-uploads/a639b2c6-adaa-455a-adb5-c2c550261d96.png')`,
+            backgroundImage: `url('https://ymnnvlhzdftchppusxkx.supabase.co/storage/v1/object/public/documents/uploads/bg-1.jpg')`,
           }}
         />
         
