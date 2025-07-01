@@ -17,42 +17,27 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
     { 
       id: 'landscape', 
       name: 'Landscape', 
-      path: '/passenger-cars/landscape',
-      activeColor: 'bg-blue-600 hover:bg-blue-700',
-      inactiveColor: 'bg-blue-100 hover:bg-blue-200 text-blue-800',
-      borderColor: 'border-blue-300'
+      path: '/passenger-cars/landscape'
     },
     { 
       id: 'analytics', 
       name: 'Category Analysis', 
-      path: '/passenger-cars/analytics',
-      activeColor: 'bg-purple-600 hover:bg-purple-700',
-      inactiveColor: 'bg-purple-100 hover:bg-purple-200 text-purple-800',
-      borderColor: 'border-purple-300'
+      path: '/passenger-cars/analytics'
     },
     { 
       id: 'intelligence', 
       name: 'Vehicle Segment Analysis', 
-      path: '/passenger-cars/intelligence',
-      activeColor: 'bg-green-600 hover:bg-green-700',
-      inactiveColor: 'bg-green-100 hover:bg-green-200 text-green-800',
-      borderColor: 'border-green-300'
+      path: '/passenger-cars/intelligence'
     },
     { 
       id: 'modeling', 
       name: 'Business Model Analysis', 
-      path: '/passenger-cars/modeling',
-      activeColor: 'bg-orange-600 hover:bg-orange-700',
-      inactiveColor: 'bg-orange-100 hover:bg-orange-200 text-orange-800',
-      borderColor: 'border-orange-300'
+      path: '/passenger-cars/modeling'
     },
     { 
       id: 'insights', 
       name: 'Insights', 
-      path: '/passenger-cars/insights',
-      activeColor: 'bg-indigo-600 hover:bg-indigo-700',
-      inactiveColor: 'bg-indigo-100 hover:bg-indigo-200 text-indigo-800',
-      borderColor: 'border-indigo-300'
+      path: '/passenger-cars/insights'
     },
   ]
 
@@ -113,8 +98,8 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
               to={section.path}
               className={`flex-1 mx-1 px-4 py-2 rounded-lg text-sm font-medium text-center transition-all duration-300 ease-out transform hover:scale-105 hover:-translate-y-1 shadow-md hover:shadow-lg ${
                 getCurrentSection() === section.id
-                  ? `${section.activeColor} text-white shadow-lg scale-105 animate-scale-in`
-                  : `${section.inactiveColor} ${section.borderColor} border-2 hover:border-opacity-80`
+                  ? `${theme.primary} text-white shadow-lg scale-105 animate-scale-in`
+                  : `${theme.cardBackground} ${theme.cardBorder} border-2 ${theme.textSecondary} ${theme.hoverEffect}`
               }`}
             >
               <span className="block transition-all duration-300">
