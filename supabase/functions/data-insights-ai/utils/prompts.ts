@@ -168,30 +168,25 @@ function createCategoryAnalysisPrompt(
     strongestCategory: secondCategory.category 
   };
 
-  // Calculate meaningful market share percentages
-  const topCategoryShare = totalFeatures > 0 ? Math.round((topCategory.total / totalFeatures) * 100) : 35;
-  const secondCategoryShare = totalFeatures > 0 ? Math.round((secondCategory.total / totalFeatures) * 100) : 25;
-  const leadingOEMShare = totalFeatures > 0 ? Math.round((leadingOEM.total / totalFeatures) * 100) : 40;
-
-  return `You are an automotive technology analyst. Generate exactly 3 strategic insights for Category Analysis in ${country}. Each insight must be 22-28 words.
+  return `You are an automotive technology analyst. Generate exactly 3 strategic insights for Category Analysis in ${country}. Each insight must be 22-28 words and use only raw counts, no percentages.
 
 VERIFIED CATEGORY DATA:
 - Market Analysis: ${selectedOEMs.join(', ')} in ${country}
 - Total Features: ${totalFeatures}
-- Leading Category: ${topCategory.category} (${topCategory.total} features, ${topCategoryShare}% market share, led by ${topCategory.leader})
-- Secondary Category: ${secondCategory.category} (${secondCategory.total} features, ${secondCategoryShare}% share, led by ${secondCategory.leader})
-- Market Leader: ${leadingOEM.oem} (${leadingOEM.total} features, ${leadingOEMShare}% portfolio, strongest in ${leadingOEM.strongestCategory})
+- Leading Category: ${topCategory.category} (${topCategory.total} features, led by ${topCategory.leader})
+- Secondary Category: ${secondCategory.category} (${secondCategory.total} features, led by ${secondCategory.leader})
+- Market Leader: ${leadingOEM.oem} (${leadingOEM.total} features, strongest in ${leadingOEM.strongestCategory})
 - Secondary Player: ${secondOEM.oem} (${secondOEM.total} features, specializes in ${secondOEM.strongestCategory})
 
-GENERATE 3 INSIGHTS (22-28 words each):
+GENERATE 3 INSIGHTS (22-28 words each, counts only):
 
-1. Category Market Leadership: [Analysis of ${topCategory.category}'s ${topCategoryShare}% dominance with ${topCategory.total} features led by ${topCategory.leader} in ${country}]
+1. Category Market Leadership: [Analysis of ${topCategory.category} dominance with ${topCategory.total} features led by ${topCategory.leader} in ${country}]
 
-2. OEM Portfolio Specialization: [Assessment of ${leadingOEM.oem}'s ${leadingOEMShare}% market control through ${leadingOEM.strongestCategory} category excellence with ${leadingOEM.total} features]
+2. OEM Portfolio Specialization: [Assessment of ${leadingOEM.oem} market control through ${leadingOEM.strongestCategory} category excellence with ${leadingOEM.total} features]
 
 3. Technology Distribution Strategy: [Evaluation of ${secondCategory.category} category growth with ${secondCategory.total} features creating competitive opportunities for ${secondOEM.oem}]
 
-Use exact data above. Respond with ONLY a JSON array of exactly 3 strings.`;
+Use exact counts only, no percentages. Respond with ONLY a JSON array of exactly 3 strings.`;
 }
 
 function createBusinessModelAnalysisPrompt(
@@ -230,29 +225,25 @@ function createBusinessModelAnalysisPrompt(
   const leadingOEM = oemPerformance[0] || { oem: selectedOEMs[0] || 'Market Leader', total: Math.floor(totalFeatures * 0.4), strongestBusinessModel: topBusinessModel.businessModel };
   const secondOEM = oemPerformance[1] || { oem: selectedOEMs[1] || 'Runner Up', total: Math.floor(totalFeatures * 0.3), strongestBusinessModel: secondBusinessModel.businessModel };
 
-  // Calculate meaningful percentages
-  const topModelShare = totalFeatures > 0 ? Math.round((topBusinessModel.total / totalFeatures) * 100) : 35;
-  const leadingOEMShare = totalFeatures > 0 ? Math.round((leadingOEM.total / totalFeatures) * 100) : 40;
-
-  return `You are an automotive business analyst. Generate exactly 3 strategic insights for Business Model Analysis in ${country}. Each insight must be 22-28 words.
+  return `You are an automotive business analyst. Generate exactly 3 strategic insights for Business Model Analysis in ${country}. Each insight must be 22-28 words and use only raw counts, no percentages.
 
 VERIFIED BUSINESS MODEL DATA:
 - Market Analysis: ${selectedOEMs.join(', ')} in ${country}
 - Total Features: ${totalFeatures} 
-- Leading Business Model: ${topBusinessModel.businessModel} (${topBusinessModel.total} features, ${topModelShare}% share, led by ${topBusinessModelLeader.oem})
-- Market Leader: ${leadingOEM.oem} (${leadingOEM.total} features, ${leadingOEMShare}% portfolio, strongest in ${leadingOEM.strongestBusinessModel})
+- Leading Business Model: ${topBusinessModel.businessModel} (${topBusinessModel.total} features, led by ${topBusinessModelLeader.oem})
+- Market Leader: ${leadingOEM.oem} (${leadingOEM.total} features, strongest in ${leadingOEM.strongestBusinessModel})
 - Secondary Player: ${secondOEM.oem} (${secondOEM.total} features, focused on ${secondOEM.strongestBusinessModel} model)
 - Top Category: ${topCategory.category} (${topCategory.total} features, led by ${topCategory.leader})
 
-GENERATE 3 INSIGHTS (22-28 words each):
+GENERATE 3 INSIGHTS (22-28 words each, counts only):
 
-1. Business Model Leadership: [Analysis of ${topBusinessModel.businessModel} model dominance with ${topModelShare}% market share led by ${topBusinessModelLeader.oem}]
+1. Business Model Leadership: [Analysis of ${topBusinessModel.businessModel} model dominance with ${topBusinessModel.total} features led by ${topBusinessModelLeader.oem}]
 
-2. OEM Strategic Positioning: [Assessment of ${leadingOEM.oem}'s ${leadingOEMShare}% market control through ${leadingOEM.strongestBusinessModel} specialization in ${country}]
+2. OEM Strategic Positioning: [Assessment of ${leadingOEM.oem}'s ${leadingOEM.total} features through ${leadingOEM.strongestBusinessModel} specialization in ${country}]
 
 3. Category Business Alignment: [Evaluation of ${topCategory.category} category leadership with ${topCategory.total} features driving ${topCategory.leader}'s competitive advantage]
 
-Use exact data above. Respond with ONLY a JSON array of exactly 3 strings.`;
+Use exact counts only, no percentages. Respond with ONLY a JSON array of exactly 3 strings.`;
 }
 
 function createMarketOverviewPrompt(
