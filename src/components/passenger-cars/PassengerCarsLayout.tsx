@@ -61,7 +61,7 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: `url('/lovable-uploads/5e73caf8-0d46-4b38-8cc5-db32acbd9c64.png')`,
+            backgroundImage: `url('/lovable-uploads/bg-1.jpg')`,
           }}
         />
         
