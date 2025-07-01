@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react"
+import { useCountryContext } from "@/contexts/CountryContext"
 import PassengerCarsLayout from "@/components/passenger-cars/PassengerCarsLayout"
 import CountryButtons from "@/components/CountryButtons"
 import OEMSelector from "@/components/passenger-cars/OEMSelector"
@@ -11,7 +12,7 @@ import { useWaypointData } from "@/hooks/useWaypointData"
 
 const InsightsContent = () => {
   const { theme } = useTheme()
-  const [selectedCountry, setSelectedCountry] = useState("Germany")
+  const { selectedCountry, setSelectedCountry } = useCountryContext()
   const [selectedOEMs, setSelectedOEMs] = useState<string[]>([])
   const { data: waypointData } = useWaypointData()
 

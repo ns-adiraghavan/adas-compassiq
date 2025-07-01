@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { useWaypointData } from "@/hooks/useWaypointData"
+import { useCountryContext } from "@/contexts/CountryContext"
 import CountryButtons from "@/components/CountryButtons"
 import OEMSelector from "./OEMSelector"
 import VehicleSegmentChart from "./charts/VehicleSegmentChart"
@@ -7,36 +8,11 @@ import AISnippetsSidebar from "./AISnippetsSidebar"
 import { useTheme } from "@/contexts/ThemeContext"
 
 const VehicleSegmentAnalysisContent = () => {
-  const [selectedCountry, setSelectedCountry] = useState("")
+  const { selectedCountry, setSelectedCountry } = useCountryContext()
   const [selectedOEMs, setSelectedOEMs] = useState<string[]>([])
   const { data: waypointData } = useWaypointData()
   const { theme } = useTheme()
 
-  // Set default country when data is loaded
-  useEffect(() => {
-    if (waypointData?.csvData?.length && !selectedCountry) {
-      const uniqueCountries = new Set<string>()
-      
-      waypointData.csvData.forEach(file => {
-        if (file.data && Array.isArray(file.data)) {
-          file.data.forEach((row: any) => {
-            if (row.Country && typeof row.Country === 'string' && 
-                row.Country.trim() !== '' && 
-                row.Country.toLowerCase() !== 'yes' && 
-                row.Country.toLowerCase() !== 'no' &&
-                row.Country.toLowerCase() !== 'n/a') {
-              uniqueCountries.add(row.Country.trim())
-            }
-          })
-        }
-      })
-
-      const sortedCountries = Array.from(uniqueCountries).sort()
-      if (sortedCountries.length > 0) {
-        setSelectedCountry(sortedCountries[0])
-      }
-    }
-  }, [waypointData, selectedCountry])
 
   // Get available OEMs for the selected country
   const availableOEMs = (() => {
