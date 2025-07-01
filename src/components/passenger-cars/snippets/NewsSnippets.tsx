@@ -17,9 +17,9 @@ const NewsSnippets = ({
   analysisType = "general" 
 }: NewsSnippetsProps) => {
   const [autoGenerateEnabled, setAutoGenerateEnabled] = useState<boolean>(() => {
-    // Get initial state from localStorage, default to true
+    // Get initial state from localStorage, default to false (OFF)
     const saved = localStorage.getItem('news-snippets-auto-generate')
-    return saved ? JSON.parse(saved) : true
+    return saved ? JSON.parse(saved) : false
   })
   
   const [failedUrls, setFailedUrls] = useState<Set<string>>(new Set())
