@@ -1,8 +1,18 @@
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0';
+import { InsightsCache } from './utils/cache.ts';
 import { createVehicleSegmentInsightsPrompt } from './utils/prompts.ts';
+import { generateFallbackInsights, generateEmptyDataInsights } from './utils/fallbacks.ts';
+import { 
+  callOpenAIAPI, 
+  parseAIResponse, 
+  ensureThreeInsights, 
+  createSuccessResponse, 
+  createErrorResponse 
+} from './utils/response.ts';
 
+const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -16,243 +26,75 @@ serve(async (req) => {
   try {
     const { oem, country, dashboardMetrics, isMarketOverview, analysisType, contextData } = await req.json();
     
-    // Initialize Supabase client for feedback queries
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY');
-    const supabase = createClient(supabaseUrl!, supabaseKey!);
+    // Create cache key that includes context data type
+    const contextType = analysisType || 'general';
+    const requestCacheKey = InsightsCache.generateCacheKey(oem, country, dashboardMetrics, isMarketOverview, contextType);
     
-    // Fetch feedback data to improve insight generation
-    const feedbackContext = {
-      selectedOEM: oem,
-      selectedCountry: country,
-      analysisType: analysisType || 'general'
-    };
+    // Check cache first
+    if (InsightsCache.has(requestCacheKey)) {
+      console.log('Returning cached insights for:', requestCacheKey);
+      return new Response(
+        JSON.stringify(InsightsCache.get(requestCacheKey)),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Handle empty data case
+    const dataMetrics = contextData || dashboardMetrics;
+    const totalFeatures = dataMetrics?.totalFeatures || 0;
     
-    const { data: feedbackData } = await supabase
-      .from('strategic_insights_feedback')
-      .select('insight_text, feedback_type')
-      .eq('context_info->selectedCountry', country)
-      .eq('context_info->analysisType', analysisType || 'general')
-      .order('created_at', { ascending: false })
-      .limit(50);
-    
-    console.log('=== Feedback Data Retrieved ===')
-    console.log(`Found ${feedbackData?.length || 0} feedback entries`)
-    
-    // Generate context-aware prompt with feedback data
+    if (!dataMetrics || totalFeatures === 0) {
+      const emptyInsights = generateEmptyDataInsights(isMarketOverview, oem, country);
+      const emptyResult = createSuccessResponse(emptyInsights, 0);
+      
+      InsightsCache.set(requestCacheKey, emptyResult);
+      return new Response(
+        JSON.stringify(emptyResult),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Generate AI insights with context-aware prompts
     const prompt = createVehicleSegmentInsightsPrompt(
       oem, 
       country, 
       dashboardMetrics, 
       isMarketOverview, 
       analysisType, 
-      contextData,
-      feedbackData || []
+      contextData
     );
     
-    // Enhanced logging for debugging
-    console.log('=== Data Insights AI Request ===')
-    console.log('OEM:', oem)
-    console.log('Country:', country) 
-    console.log('Analysis Type:', analysisType)
-    console.log('Is Market Overview:', isMarketOverview)
-    console.log('Dashboard Metrics Keys:', Object.keys(dashboardMetrics || {}))
-    console.log('Context Data Keys:', contextData ? Object.keys(contextData) : 'None')
-    
-    // Log detailed context data for debugging
-    if (contextData) {
-      console.log('=== Context Data Details ===')
-      console.log('Analysis Type:', contextData.analysisType)
-      if (contextData.ranking) {
-        console.log('Ranking Data:', JSON.stringify(contextData.ranking))
-      }
-      if (contextData.topCategories) {
-        console.log('Top Categories:', JSON.stringify(contextData.topCategories.slice(0, 3)))
-      }
-      if (contextData.selectedOEMs) {
-        console.log('Selected OEMs:', JSON.stringify(contextData.selectedOEMs))
-      }
-    }
-    
-    console.log('Generated Prompt Length:', prompt.length)
-    console.log('=== Prompt Preview ===')
-    console.log(prompt.substring(0, 600) + '...')
-    
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY')
-    if (!openAIApiKey) {
-      throw new Error('OpenAI API key not found')
-    }
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a senior automotive technology analyst with deep expertise in connected vehicle markets, OEM competitive positioning, and feature deployment strategies. Generate precise, actionable strategic insights using exact data points provided. Always respond with valid JSON containing exactly 3 insight strings, each 22-28 words, focusing on competitive intelligence and market dynamics.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.3,
-        max_tokens: 1000,
-        response_format: { type: "json_object" }
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.text()
-      console.error('OpenAI API Error:', response.status, errorData)
-      throw new Error(`OpenAI API error: ${response.status}`)
-    }
-
-    const data = await response.json()
-    console.log('=== OpenAI Response Analysis ===')
-    console.log('Response Status:', response.status)
-    console.log('Response Headers:', Object.fromEntries(response.headers.entries()))
-    console.log('Full OpenAI Response:', JSON.stringify(data, null, 2))
-
-    let insights: string[] = []
-    
+    let insights: string[] = [];
     try {
-      const content = data.choices[0]?.message?.content || ''
-      console.log('=== AI Response Content ===')
-      console.log('Raw Content:', content)
-      console.log('Content Length:', content.length)
-      
-      // Enhanced JSON parsing with better error handling
-      let parsed: any
-      
-      // Try direct JSON parse first
-      try {
-        parsed = JSON.parse(content)
-      } catch (directParseError) {
-        console.log('Direct JSON parse failed, trying to extract JSON from content...')
-        
-        // Try to extract JSON array from content
-        const jsonMatch = content.match(/\[[\s\S]*\]/);
-        if (jsonMatch) {
-          parsed = JSON.parse(jsonMatch[0]);
-        } else {
-          throw new Error('No JSON array found in response')
-        }
-      }
-      
-      console.log('Parsed Content:', JSON.stringify(parsed, null, 2))
-      
-      if (Array.isArray(parsed)) {
-        insights = parsed.filter(insight => typeof insight === 'string' && insight.trim().length > 0)
-      } else if (parsed.insights && Array.isArray(parsed.insights)) {
-        insights = parsed.insights.filter(insight => typeof insight === 'string' && insight.trim().length > 0)
-      } else if (parsed.data && Array.isArray(parsed.data)) {
-        insights = parsed.data.filter(insight => typeof insight === 'string' && insight.trim().length > 0)
-      } else {
-        throw new Error(`Response format not recognized: ${typeof parsed}`)
-      }
-      
-      console.log('Extracted Insights:', insights)
-      
-      // Validate insights length and content
-      if (insights.length !== 3) {
-        console.warn(`Expected 3 insights, got ${insights.length}`)
-      }
-      
+      const aiResponse = await callOpenAIAPI(prompt, openAIApiKey);
+      insights = parseAIResponse(aiResponse);
     } catch (parseError) {
-      console.error('=== Parse Error Details ===')
-      console.error('Parse Error:', parseError)
-      console.error('Original Content:', data.choices[0]?.message?.content)
-      
-      // Enhanced fallback with actual context data
-      if (analysisType === "landscape-analysis" && contextData) {
-        const { selectedOEM, selectedCountry, ranking } = contextData;
-        const rank = ranking?.rank || Math.floor(Math.random() * 5) + 1;
-        const totalOEMs = ranking?.totalOEMs || 12;
-        const features = ranking?.availableFeatures || Math.floor(Math.random() * 50) + 15;
-        const lighthouse = ranking?.lighthouseFeatures || Math.floor(features * 0.3);
-        
-        insights = [
-          `${selectedOEM || oem} secures rank ${rank} of ${totalOEMs} OEMs in ${selectedCountry || country} with ${features} connected features establishing strong competitive market positioning.`,
-          `${selectedCountry || country} automotive market demonstrates ${features} available features indicating mature technology adoption and robust regional deployment capabilities.`,
-          `${selectedOEM || oem} achieves innovation leadership through ${lighthouse} lighthouse features representing advanced technology deployment in connected vehicle segment.`
-        ]
-      } else if (analysisType === "business-model-analysis" && contextData) {
-        const { selectedOEMs = ['Leading OEM', 'Second OEM'], totalFeatures = 45, businessModelComparison = [] } = contextData;
-        const topModel = businessModelComparison[0]?.businessModel || 'Subscription';
-        const modelFeatures = businessModelComparison[0]?.total || Math.floor(totalFeatures * 0.4);
-        const leadingOEM = selectedOEMs[0];
-        
-        insights = [
-          `${topModel} business model leads with ${modelFeatures} features across ${selectedOEMs.join(', ')} demonstrating strategic monetization focus in ${country} market.`,
-          `${leadingOEM} portfolio optimization shows ${Math.floor(totalFeatures * 0.4)} features enabling subscription-based revenue generation and customer engagement strategies.`,
-          `Business model diversification across ${selectedOEMs.length} manufacturers reveals ${totalFeatures} total features indicating comprehensive market coverage and growth potential.`
-        ]
-      } else if (analysisType === "category-analysis" && contextData) {
-        const { selectedOEMs = ['Market Leader', 'Runner Up'], totalFeatures = 42, topCategories = [] } = contextData;
-        const topCategory = topCategories[0]?.category || 'Connectivity';
-        const categoryFeatures = topCategories[0]?.total || Math.floor(totalFeatures * 0.35);
-        const categoryLeader = topCategories[0]?.leader || selectedOEMs[0];
-        
-        insights = [
-          `${topCategory} category dominates with ${categoryFeatures} features led by ${categoryLeader} establishing market leadership in ${country} automotive technology sector.`,
-          `${selectedOEMs[0]} strategic positioning shows ${Math.floor(totalFeatures * 0.4)} features across categories enabling competitive advantage through technology specialization.`,
-          `Category distribution analysis reveals ${totalFeatures} features across ${selectedOEMs.join(', ')} indicating diverse technology deployment and market opportunity capture.`
-        ]
-      } else {
-        // Generic market overview fallback with meaningful data
-        const marketFeatures = Math.floor(Math.random() * 100) + 50;
-        const topOEM = 'Market Leader';
-        insights = [
-          `${country} automotive technology landscape reveals ${marketFeatures} connected features indicating strong market maturity and competitive OEM positioning strategies.`,
-          `${topOEM} demonstrates market leadership through comprehensive feature deployment enabling sustainable competitive advantage in connected vehicle segment.`,
-          `Strategic technology investments across ${country} market show ${Math.floor(marketFeatures * 0.7)} available features driving industry innovation and customer value creation.`
-        ]
-      }
-      
-      console.log('Using Fallback Insights:', insights)
+      console.log('AI response parsing failed, using fallback insights:', parseError);
+      insights = generateFallbackInsights(isMarketOverview, oem, country, dataMetrics);
     }
 
-    // Ensure we have exactly 3 insights
-    while (insights.length < 3) {
-      insights.push(`Strategic market analysis indicates competitive opportunities and technology deployment potential in ${country} automotive sector.`)
-    }
-    if (insights.length > 3) {
-      insights = insights.slice(0, 3)
-    }
+    // Ensure exactly 3 insights
+    const fallbackInsights = generateFallbackInsights(isMarketOverview, oem, country, dataMetrics);
+    const finalInsights = ensureThreeInsights(insights, fallbackInsights);
 
-    const result = {
-      success: true,
-      insights,
-      dataPoints: contextData?.totalFeatures || dashboardMetrics?.totalFeatures || 0
-    }
+    const result = createSuccessResponse(finalInsights, totalFeatures);
+    InsightsCache.set(requestCacheKey, { ...result, cached: true });
 
-    console.log('Final Result:', JSON.stringify(result, null, 2))
-
-    return new Response(JSON.stringify(result), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify(result),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
 
   } catch (error) {
     console.error('Error in data-insights-ai function:', error);
+    const errorResponse = createErrorResponse(error);
     
-    return new Response(JSON.stringify({
-      success: false,
-      error: error.message,
-      insights: [
-        "Strategic market analysis indicates competitive opportunities in automotive technology deployment.",
-        "Connected vehicle innovation shows significant potential for OEM differentiation and customer engagement.",
-        "Market dynamics suggest strategic positioning advantages through targeted technology implementation approaches."
-      ],
-      dataPoints: 0
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify(errorResponse),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
   }
 });

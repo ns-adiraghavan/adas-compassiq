@@ -1,10 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { BarChart, Loader2, Lightbulb, TrendingUp, Grid, ThumbsUp, ThumbsDown } from "lucide-react"
+import { BarChart, Loader2, Lightbulb, TrendingUp, Grid } from "lucide-react"
 import { useDataInsightsAI } from "@/hooks/useDataInsightsAI"
-import { useLandscapeAnalysisData } from "@/hooks/useLandscapeAnalysisData"
-import { useInsightFeedback } from "@/hooks/useInsightFeedback"
-import { useLocation } from "react-router-dom"
 
 interface DataSnippetsProps {
   selectedOEM: string
@@ -19,24 +15,11 @@ const DataSnippets = ({
   oemClickedFromChart = false,
   businessModelAnalysisContext
 }: DataSnippetsProps) => {
-  const location = useLocation()
-  const isLandscapePage = location.pathname.includes('/landscape')
-  const { submitFeedback, getFeedbackState, submittingFeedback } = useInsightFeedback()
-  
   // Only show OEM-specific insights if OEM was actually clicked from chart
   const showOEMInsights = oemClickedFromChart && selectedOEM && selectedOEM.trim() !== ""
   
-  // Get landscape-specific analysis data when on landscape page and OEM is selected
-  const landscapeData = useLandscapeAnalysisData(
-    showOEMInsights ? selectedOEM : "", 
-    selectedCountry
-  )
-  
-  // Use landscape data for landscape page, business model or category analysis context otherwise
-  const contextData = isLandscapePage && landscapeData ? {
-    analysisType: 'landscape-analysis',
-    ...landscapeData
-  } : businessModelAnalysisContext || null
+  // Use business model or category analysis context if available, otherwise fall back to regular dashboard metrics
+  const contextData = businessModelAnalysisContext || null
   
   const { data: aiInsights, isLoading, error } = useDataInsightsAI({
     selectedOEM: showOEMInsights ? selectedOEM : "",
@@ -46,14 +29,19 @@ const DataSnippets = ({
   })
 
   const getTitle = () => {
+    if (businessModelAnalysisContext?.analysisType === 'business-model-analysis') {
+      return "Business Model Strategic Insights"
+    }
+    if (businessModelAnalysisContext?.analysisType === 'category-analysis') {
+      return "Category Strategic Insights"
+    }
+    if (showOEMInsights) {
+      return `Strategic Insights - ${selectedOEM}`
+    }
     return "Strategic Insights"
   }
 
   const getSubtitle = () => {
-    if (contextData?.analysisType === 'landscape-analysis') {
-      const data = contextData as any
-      return `${data.selectedOEM} • ${data.selectedCountry} • Rank #${data.ranking?.rank} • ${data.ranking?.availableFeatures} features • ${data.ranking?.lighthouseFeatures} lighthouse`
-    }
     if (businessModelAnalysisContext?.analysisType === 'business-model-analysis') {
       const { selectedOEMs, totalFeatures, selectedCountry: country } = businessModelAnalysisContext
       return `${selectedOEMs.join(', ')} • ${country} • ${totalFeatures} features analyzed`
@@ -69,9 +57,6 @@ const DataSnippets = ({
   }
 
   const getIcon = () => {
-    if (contextData?.analysisType === 'landscape-analysis') {
-      return <TrendingUp className="h-4 w-4 text-blue-400 mt-0.5 flex-shrink-0" />
-    }
     if (businessModelAnalysisContext?.analysisType === 'category-analysis') {
       return <Grid className="h-4 w-4 text-purple-400 mt-0.5 flex-shrink-0" />
     }
@@ -90,15 +75,13 @@ const DataSnippets = ({
         <div className="flex items-center justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-blue-400 mr-2" />
           <span className="text-white/60">
-            {contextData?.analysisType === 'landscape-analysis' 
-              ? 'Analyzing landscape details...'
-              : businessModelAnalysisContext?.analysisType === 'business-model-analysis' 
-                ? 'Analyzing business model patterns...'
-                : businessModelAnalysisContext?.analysisType === 'category-analysis'
-                  ? 'Analyzing category distribution...'
-                  : showOEMInsights 
-                    ? 'Analyzing OEM performance...' 
-                    : 'Analyzing market landscape...'
+            {businessModelAnalysisContext?.analysisType === 'business-model-analysis' 
+              ? 'Analyzing business model patterns...'
+              : businessModelAnalysisContext?.analysisType === 'category-analysis'
+                ? 'Analyzing category distribution...'
+                : showOEMInsights 
+                  ? 'Analyzing OEM performance...' 
+                  : 'Analyzing market landscape...'
             }
           </span>
         </div>
@@ -125,60 +108,16 @@ const DataSnippets = ({
       )
     }
 
-    const handleFeedback = (insight: string, feedbackType: 'like' | 'dislike') => {
-      submitFeedback(insight, feedbackType, {
-        selectedOEM,
-        selectedCountry,
-        analysisType: contextData?.analysisType || businessModelAnalysisContext?.analysisType || 'general'
-      })
-    }
-
     return (
       <div className="space-y-3">
-        {aiInsights.insights.map((insight: string, index: number) => {
-          const feedbackState = getFeedbackState(insight, {
-            selectedOEM,
-            selectedCountry,
-            analysisType: contextData?.analysisType || businessModelAnalysisContext?.analysisType || 'general'
-          })
-          
-          return (
-            <div key={index} className="flex items-start space-x-3 p-3 bg-gray-800/30 rounded-lg border border-gray-700/50">
-              {getIcon()}
-              <p className="text-white text-sm leading-relaxed flex-1">
-                {insight}
-              </p>
-              <div className="flex items-center space-x-1 ml-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`h-6 w-6 p-0 hover:bg-green-500/20 ${
-                    feedbackState === 'like' 
-                      ? 'bg-green-500/30 text-green-400' 
-                      : 'text-gray-400 hover:text-green-400'
-                  }`}
-                  onClick={() => handleFeedback(insight, 'like')}
-                  disabled={submittingFeedback !== null}
-                >
-                  <ThumbsUp className="h-3 w-3" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`h-6 w-6 p-0 hover:bg-red-500/20 ${
-                    feedbackState === 'dislike' 
-                      ? 'bg-red-500/30 text-red-400' 
-                      : 'text-gray-400 hover:text-red-400'
-                  }`}
-                  onClick={() => handleFeedback(insight, 'dislike')}
-                  disabled={submittingFeedback !== null}
-                >
-                  <ThumbsDown className="h-3 w-3" />
-                </Button>
-              </div>
-            </div>
-          )
-        })}
+        {aiInsights.insights.map((insight: string, index: number) => (
+          <div key={index} className="flex items-start space-x-3 p-3 bg-gray-800/30 rounded-lg border border-gray-700/50">
+            {getIcon()}
+            <p className="text-white text-sm leading-relaxed flex-1">
+              {insight}
+            </p>
+          </div>
+        ))}
       </div>
     )
   }

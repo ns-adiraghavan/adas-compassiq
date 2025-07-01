@@ -2,7 +2,7 @@
 import { useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useWaypointData } from "@/hooks/useWaypointData"
-import { TrendingUp, Lightbulb } from "lucide-react"
+import { TrendingUp } from "lucide-react"
 
 interface RankingValueBoxProps {
   selectedOEM: string
@@ -13,10 +13,9 @@ const RankingValueBox = ({ selectedOEM, selectedCountry }: RankingValueBoxProps)
   const { data: waypointData } = useWaypointData()
 
   const rankingData = useMemo(() => {
-    if (!waypointData?.csvData?.length) return { rank: 0, availableFeatures: 0, lighthouseFeatures: 0, totalOEMs: 0 }
+    if (!waypointData?.csvData?.length) return { rank: 0, availableFeatures: 0, totalOEMs: 0 }
 
     const oemAvailableFeatureCounts = new Map<string, number>()
-    const oemLighthouseFeatureCounts = new Map<string, number>()
 
     waypointData.csvData.forEach(file => {
       if (file.data && Array.isArray(file.data)) {
@@ -46,18 +45,6 @@ const RankingValueBox = ({ selectedOEM, selectedCountry }: RankingValueBoxProps)
             
             const oemName = oem.toString().trim()
             oemAvailableFeatureCounts.set(oemName, (oemAvailableFeatureCounts.get(oemName) || 0) + 1)
-
-            // Step 4: Check if it's a lighthouse feature
-            const isLighthouse = row['Lighthouse Feature'] || 
-                               row['Lighthouse_Feature'] || 
-                               row.lighthouse_feature || 
-                               row.LighthouseFeature ||
-                               row['lighthouse feature'] ||
-                               row['LIGHTHOUSE FEATURE']
-
-            if (isLighthouse && isLighthouse.toString().trim().toLowerCase() === 'yes') {
-              oemLighthouseFeatureCounts.set(oemName, (oemLighthouseFeatureCounts.get(oemName) || 0) + 1)
-            }
           }
         })
       }
@@ -68,10 +55,9 @@ const RankingValueBox = ({ selectedOEM, selectedCountry }: RankingValueBoxProps)
 
     const rank = sortedOEMs.findIndex(([oem]) => oem === selectedOEM) + 1
     const availableFeatures = oemAvailableFeatureCounts.get(selectedOEM) || 0
-    const lighthouseFeatures = oemLighthouseFeatureCounts.get(selectedOEM) || 0
     const totalOEMs = oemAvailableFeatureCounts.size
 
-    return { rank, availableFeatures, lighthouseFeatures, totalOEMs }
+    return { rank, availableFeatures, totalOEMs }
   }, [waypointData, selectedOEM, selectedCountry])
 
   return (
@@ -91,13 +77,6 @@ const RankingValueBox = ({ selectedOEM, selectedCountry }: RankingValueBoxProps)
           <div>
             <div className="text-xl font-semibold text-white">{rankingData.availableFeatures}</div>
             <div className="text-sm text-gray-400">Available Features</div>
-          </div>
-          <div>
-            <div className="text-lg font-semibold text-yellow-400 flex items-center">
-              <Lightbulb className="h-4 w-4 mr-1" />
-              {rankingData.lighthouseFeatures}
-            </div>
-            <div className="text-sm text-gray-400">Lighthouse Features</div>
           </div>
         </div>
       </CardContent>

@@ -61,12 +61,6 @@ const BusinessModelTable = ({ selectedCountry, selectedOEMs, onBusinessModelClic
     return { businessModels, oemTotals }
   }, [waypointData, selectedCountry, selectedOEMs])
 
-  // Calculate grand totals for each OEM column
-  const grandTotals = selectedOEMs.reduce((totals, oem) => {
-    totals[oem] = tableData.businessModels.reduce((sum, row) => sum + (row[oem] || 0), 0)
-    return totals
-  }, {} as Record<string, number>)
-
   const getCellColor = (value: number, maxInRow: number) => {
     if (value === 0) return 'transparent'
     const intensity = value / maxInRow
@@ -126,21 +120,6 @@ const BusinessModelTable = ({ selectedCountry, selectedOEMs, onBusinessModelClic
               </tr>
             )
           })}
-          
-          {/* Grand Total Row */}
-          <tr className={`${theme.cardBorder} border-t-2 bg-gray-800/40`}>
-            <td className={`p-3 ${theme.textPrimary} font-bold`}>
-              Grand Total
-            </td>
-            {selectedOEMs.map(oem => (
-              <td 
-                key={oem}
-                className={`p-3 text-center font-bold ${theme.textPrimary}`}
-              >
-                {grandTotals[oem] || 0}
-              </td>
-            ))}
-          </tr>
         </tbody>
       </table>
     </div>

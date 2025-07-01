@@ -108,26 +108,6 @@ const VehicleSegmentCategoryTable = ({
 
   const { categories, mainColumns, subColumns, categoryData } = getTableStructure()
 
-  // Calculate grand totals for the main table
-  const calculateGrandTotals = () => {
-    const totals: Record<string, Record<string, number>> = {}
-    
-    mainColumns.forEach(mainCol => {
-      totals[mainCol] = {}
-      subColumns.forEach(subCol => {
-        let sum = 0
-        for (const category of categories) {
-          sum += (categoryData?.[category]?.[mainCol]?.[subCol] || 0)
-        }
-        totals[mainCol][subCol] = sum
-      })
-    })
-    
-    return totals
-  }
-
-  const grandTotals = calculateGrandTotals()
-
   // Generate features matrix for expanded category
   const getFeaturesMatrix = (category: string) => {
     if (!waypointData?.csvData?.length || !selectedCountry || selectedOEMs.length === 0) {
@@ -280,28 +260,11 @@ const VehicleSegmentCategoryTable = ({
                     >
                       {categoryData?.[category]?.[mainCol]?.[subCol] || 0}
                     </TableCell>
-                ))
-              )}
-            </TableRow>
-          ))}
-          
-          {/* Grand Total Row */}
-          <TableRow className={`${theme.cardBorder} border-t-2 bg-gray-800/40 font-bold`}>
-            <TableCell className={`${theme.textPrimary} font-bold`}>
-              Grand Total
-            </TableCell>
-            {mainColumns.map((mainCol) => 
-              subColumns.map((subCol) => (
-                <TableCell 
-                  key={`total-${mainCol}-${subCol}`} 
-                  className={`${theme.textPrimary} text-center border-l ${theme.cardBorder} font-bold`}
-                >
-                  {grandTotals[mainCol]?.[subCol] || 0}
-                </TableCell>
-              ))
-            )}
-          </TableRow>
-        </TableBody>
+                  ))
+                )}
+              </TableRow>
+            ))}
+          </TableBody>
         </Table>
       </div>
 
@@ -360,35 +323,12 @@ const VehicleSegmentCategoryTable = ({
                               <div className="h-5 w-5 mx-auto" />
                             )}
                           </TableCell>
-                      ))
-                    )}
-                  </TableRow>
-                ))
-              })()}
-              
-              {/* Grand Total Row for Features */}
-              <TableRow className={`${theme.cardBorder} border-t-2 bg-gray-800/40 font-bold`}>
-                <TableCell className={`${theme.textPrimary} font-bold`}>
-                  Total Features
-                </TableCell>
-                {mainColumns.map((mainCol) => 
-                  subColumns.map((subCol) => {
-                    const { features, matrix } = getFeaturesMatrix(expandedCategory)
-                    const totalFeatures = features.filter(feature => 
-                      matrix[feature]?.[mainCol]?.[subCol]
-                    ).length
-                    return (
-                      <TableCell 
-                        key={`feature-total-${mainCol}-${subCol}`} 
-                        className={`${theme.textPrimary} text-center border-l ${theme.cardBorder} font-bold`}
-                      >
-                        {totalFeatures}
-                      </TableCell>
-                    )
-                  })
-                )}
-              </TableRow>
-            </TableBody>
+                        ))
+                      )}
+                    </TableRow>
+                  ))
+                })()}
+              </TableBody>
             </Table>
           </div>
         </div>
