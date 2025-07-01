@@ -1,8 +1,9 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Newspaper, Loader2, ExternalLink, AlertCircle, CheckCircle, Search } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Newspaper, Loader2, ExternalLink, AlertCircle, CheckCircle, Search, ToggleLeft, ToggleRight } from "lucide-react"
 import { useNewsSnippetsAI } from "@/hooks/useNewsSnippetsAI"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 interface NewsSnippetsProps {
   selectedOEMs?: string[]
@@ -15,18 +16,33 @@ const NewsSnippets = ({
   selectedCountry = "", 
   analysisType = "general" 
 }: NewsSnippetsProps) => {
+  const [autoGenerateEnabled, setAutoGenerateEnabled] = useState<boolean>(() => {
+    // Get initial state from localStorage, default to true
+    const saved = localStorage.getItem('news-snippets-auto-generate')
+    return saved ? JSON.parse(saved) : true
+  })
+  
+  const [failedUrls, setFailedUrls] = useState<Set<string>>(new Set())
+
+  // Save preference to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('news-snippets-auto-generate', JSON.stringify(autoGenerateEnabled))
+  }, [autoGenerateEnabled])
+
   const { data: newsData, isLoading, error } = useNewsSnippetsAI({
     selectedOEMs,
     selectedCountry,
     analysisType,
-    enabled: Boolean(selectedCountry && analysisType)
+    enabled: Boolean(selectedCountry && analysisType && autoGenerateEnabled)
   })
-
-  const [failedUrls, setFailedUrls] = useState<Set<string>>(new Set())
 
   const newsSnippets = newsData?.newsSnippets || []
   const isRealWebSearch = newsData?.context?.source === 'real_web_search'
   const isFallbackContent = newsData?.context?.source?.includes('fallback')
+
+  const handleToggleAutoGenerate = () => {
+    setAutoGenerateEnabled(prev => !prev)
+  }
 
   const handleNewsClick = async (url: string, title: string) => {
     // Check if this URL has already failed
@@ -75,20 +91,47 @@ const NewsSnippets = ({
   return (
     <Card className="bg-gray-900/50 border-gray-700">
       <CardHeader className="pb-3">
-        <CardTitle className="text-white text-lg flex items-center">
-          <Newspaper className="h-5 w-5 mr-2" />
-          News Snippets - Real Time
-          {isLoading && <Loader2 className="h-4 w-4 ml-2 animate-spin" />}
-          {!isLoading && getContentStatusIcon()}
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-white text-lg flex items-center">
+            <Newspaper className="h-5 w-5 mr-2" />
+            News Snippets - Real Time
+            {isLoading && <Loader2 className="h-4 w-4 ml-2 animate-spin" />}
+            {!isLoading && getContentStatusIcon()}
+          </CardTitle>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleToggleAutoGenerate}
+            className="h-8 px-2 text-gray-400 hover:text-white"
+            title={autoGenerateEnabled ? "Disable auto-generation" : "Enable auto-generation"}
+          >
+            {autoGenerateEnabled ? (
+              <ToggleRight className="h-4 w-4 text-green-400" />
+            ) : (
+              <ToggleLeft className="h-4 w-4 text-gray-500" />
+            )}
+            <span className="ml-1 text-xs">
+              {autoGenerateEnabled ? "ON" : "OFF"}
+            </span>
+          </Button>
+        </div>
         {!isLoading && (
           <p className="text-xs text-gray-400 mt-1">
-            {getContentStatusText()}
+            {autoGenerateEnabled ? getContentStatusText() : "Auto-generation disabled to save API usage"}
           </p>
         )}
       </CardHeader>
       <CardContent className="space-y-3">
-        {isLoading ? (
+        {!autoGenerateEnabled ? (
+          <div className="text-center py-8">
+            <div className="text-gray-400 text-sm space-y-2">
+              <ToggleLeft className="h-8 w-8 mx-auto text-gray-500 mb-3" />
+              <p className="font-medium">Auto-generation is disabled</p>
+              <p className="text-xs text-gray-500">Enable the toggle above to fetch real-time news updates</p>
+              <p className="text-xs text-gray-500">This helps reduce API usage when not needed</p>
+            </div>
+          </div>
+        ) : isLoading ? (
           <div className="space-y-2">
             {[1, 2, 3].map((i) => (
               <div key={i} className="animate-pulse">
