@@ -60,6 +60,14 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
     return sections.find(section => location.pathname === section.path)?.id || 'landscape'
   }
 
+  const getPageTitle = () => {
+    const currentSection = getCurrentSection()
+    if (currentSection === 'landscape') {
+      return 'Passenger Cars - Connected Features Module'
+    }
+    return 'Passenger Cars'
+  }
+
   return (
     <div className={`min-h-screen ${theme.backgroundGradient} ${theme.textPrimary} transition-all duration-500 flex flex-col`}>
       {/* Logo positioned in top right */}
@@ -88,7 +96,7 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
           
           {/* Title and subtitle aligned to left */}
           <h1 className={`text-3xl font-thin mb-1 ${theme.textPrimary} tracking-tight`}>
-            Passenger Cars
+            {getPageTitle()}
           </h1>
           <p className={`text-base ${theme.textSecondary} font-light mb-4`}>
             Premium Automotive Intelligence
