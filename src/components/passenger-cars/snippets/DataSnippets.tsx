@@ -1,6 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart, Loader2, Lightbulb, TrendingUp, Grid } from "lucide-react"
 import { useDataInsightsAI } from "@/hooks/useDataInsightsAI"
+import { useLandscapeAnalysisData } from "@/hooks/useLandscapeAnalysisData"
+import { useLocation } from "react-router-dom"
 
 interface DataSnippetsProps {
   selectedOEM: string
@@ -15,11 +17,23 @@ const DataSnippets = ({
   oemClickedFromChart = false,
   businessModelAnalysisContext
 }: DataSnippetsProps) => {
+  const location = useLocation()
+  const isLandscapePage = location.pathname.includes('/landscape')
+  
   // Only show OEM-specific insights if OEM was actually clicked from chart
   const showOEMInsights = oemClickedFromChart && selectedOEM && selectedOEM.trim() !== ""
   
-  // Use business model or category analysis context if available, otherwise fall back to regular dashboard metrics
-  const contextData = businessModelAnalysisContext || null
+  // Get landscape-specific analysis data when on landscape page and OEM is selected
+  const landscapeData = useLandscapeAnalysisData(
+    showOEMInsights ? selectedOEM : "", 
+    selectedCountry
+  )
+  
+  // Use landscape data for landscape page, business model or category analysis context otherwise
+  const contextData = isLandscapePage && landscapeData ? {
+    analysisType: 'landscape-analysis',
+    ...landscapeData
+  } : businessModelAnalysisContext || null
   
   const { data: aiInsights, isLoading, error } = useDataInsightsAI({
     selectedOEM: showOEMInsights ? selectedOEM : "",
@@ -29,6 +43,9 @@ const DataSnippets = ({
   })
 
   const getTitle = () => {
+    if (contextData?.analysisType === 'landscape-analysis') {
+      return `Landscape Strategic Insights - ${selectedOEM}`
+    }
     if (businessModelAnalysisContext?.analysisType === 'business-model-analysis') {
       return "Business Model Strategic Insights"
     }
@@ -42,6 +59,10 @@ const DataSnippets = ({
   }
 
   const getSubtitle = () => {
+    if (contextData?.analysisType === 'landscape-analysis') {
+      const data = contextData as any
+      return `${data.selectedOEM} • ${data.selectedCountry} • Rank #${data.ranking?.rank} • ${data.ranking?.availableFeatures} features • ${data.ranking?.lighthouseFeatures} lighthouse`
+    }
     if (businessModelAnalysisContext?.analysisType === 'business-model-analysis') {
       const { selectedOEMs, totalFeatures, selectedCountry: country } = businessModelAnalysisContext
       return `${selectedOEMs.join(', ')} • ${country} • ${totalFeatures} features analyzed`
@@ -57,6 +78,9 @@ const DataSnippets = ({
   }
 
   const getIcon = () => {
+    if (contextData?.analysisType === 'landscape-analysis') {
+      return <TrendingUp className="h-4 w-4 text-blue-400 mt-0.5 flex-shrink-0" />
+    }
     if (businessModelAnalysisContext?.analysisType === 'category-analysis') {
       return <Grid className="h-4 w-4 text-purple-400 mt-0.5 flex-shrink-0" />
     }
@@ -75,13 +99,15 @@ const DataSnippets = ({
         <div className="flex items-center justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-blue-400 mr-2" />
           <span className="text-white/60">
-            {businessModelAnalysisContext?.analysisType === 'business-model-analysis' 
-              ? 'Analyzing business model patterns...'
-              : businessModelAnalysisContext?.analysisType === 'category-analysis'
-                ? 'Analyzing category distribution...'
-                : showOEMInsights 
-                  ? 'Analyzing OEM performance...' 
-                  : 'Analyzing market landscape...'
+            {contextData?.analysisType === 'landscape-analysis' 
+              ? 'Analyzing landscape details...'
+              : businessModelAnalysisContext?.analysisType === 'business-model-analysis' 
+                ? 'Analyzing business model patterns...'
+                : businessModelAnalysisContext?.analysisType === 'category-analysis'
+                  ? 'Analyzing category distribution...'
+                  : showOEMInsights 
+                    ? 'Analyzing OEM performance...' 
+                    : 'Analyzing market landscape...'
             }
           </span>
         </div>

@@ -8,6 +8,11 @@ export function createVehicleSegmentInsightsPrompt(
   analysisType?: string,
   contextData?: any
 ): string {
+  // Handle Landscape Analysis context
+  if (analysisType === "landscape-analysis" && contextData) {
+    return createLandscapeAnalysisPrompt(country, contextData);
+  }
+
   // Handle Business Model Analysis context
   if (analysisType === "business-model-analysis" && contextData) {
     return createBusinessModelAnalysisPrompt(country, contextData);
@@ -50,6 +55,44 @@ export function createVehicleSegmentInsightsPrompt(
     topCategory
   );
 }
+
+function createLandscapeAnalysisPrompt(
+  country: string,
+  contextData: any
+): string {
+  const { 
+    selectedOEM, 
+    selectedCountry, 
+    ranking, 
+    topCategories = [], 
+    lighthouseFeaturesList = [],
+    categoryDistribution = [],
+    businessModels = []
+  } = contextData;
+
+  // Get the top 3 categories safely
+  const topCategory = topCategories[0] || { category: 'Unknown', count: 0 };
+  const secondCategory = topCategories[1] || { category: 'Unknown', count: 0 };
+  const topBusinessModel = businessModels[0] || { model: 'Unknown', count: 0 };
+
+  return `Generate exactly 3 concise strategic insights for Landscape Analysis of ${selectedOEM} in ${selectedCountry}. Each insight must be exactly 15-20 words maximum.
+
+CRITICAL: Use ONLY these exact data points from the Detailed Analysis section. Do NOT reference Ford, Toyota, or any data not listed:
+
+ACTUAL LANDSCAPE DATA:
+- OEM: ${selectedOEM}
+- Country: ${selectedCountry}
+- Market Rank: #${ranking?.rank || 0} of ${ranking?.totalOEMs || 0} OEMs
+- Available Features: ${ranking?.availableFeatures || 0}
+- Lighthouse Features: ${ranking?.lighthouseFeatures || 0}
+- Top Category: ${topCategory.category} (${topCategory.count} features)
+- Second Category: ${secondCategory.category} (${secondCategory.count} features)
+- Top Business Model: ${topBusinessModel.model} (${topBusinessModel.count} features)
+- Sample Lighthouse Features: ${lighthouseFeaturesList.slice(0, 3).join(', ') || 'None listed'}
+
+GENERATE 3 INSIGHTS using ONLY the data above (15-20 words each):
+
+Respond with ONLY a JSON array of exactly 3 concise strings.`;
 
 function createCategoryAnalysisPrompt(
   country: string,
