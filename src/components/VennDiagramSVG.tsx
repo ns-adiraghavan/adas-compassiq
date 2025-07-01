@@ -1,4 +1,3 @@
-
 import { EntityFeatureData, VennDiagramData } from "@/utils/vennDiagramUtils"
 import { SelectedIntersection } from "@/components/VennDiagram"
 import { useTheme } from "@/contexts/ThemeContext"
@@ -87,16 +86,16 @@ const VennDiagramSVG = ({ data, entities, colors, onIntersectionSelect }: VennDi
       return {
         // Two-way intersections (excluding center overlap)
         [`${entities[0].name}-${entities[1].name}`]: {
-          x: (pos1.cx + pos2.cx) / 2 - 15,
-          y: (pos1.cy + pos2.cy) / 2 - 25
+          x: (pos1.cx + pos2.cx) / 2 - 25,
+          y: (pos1.cy + pos2.cy) / 2 - 15
         },
         [`${entities[0].name}-${entities[2].name}`]: {
-          x: (pos1.cx + pos3.cx) / 2 + 15,
-          y: (pos1.cy + pos3.cy) / 2 - 25
+          x: (pos1.cx + pos3.cx) / 2 + 25,
+          y: (pos1.cy + pos3.cy) / 2 - 15
         },
         [`${entities[1].name}-${entities[2].name}`]: {
           x: (pos2.cx + pos3.cx) / 2,
-          y: (pos2.cy + pos3.cy) / 2 + 20
+          y: (pos2.cy + pos3.cy) / 2 + 35
         },
         // Three-way intersection (center)
         'all': {
