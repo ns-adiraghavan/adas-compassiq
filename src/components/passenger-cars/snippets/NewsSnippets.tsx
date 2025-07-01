@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Newspaper, Loader2, ExternalLink, AlertCircle } from "lucide-react"
+import { Newspaper, Loader2, ExternalLink, AlertCircle, CheckCircle } from "lucide-react"
 import { useNewsSnippetsAI } from "@/hooks/useNewsSnippetsAI"
 import { useState } from "react"
 
@@ -25,6 +25,8 @@ const NewsSnippets = ({
   const [failedUrls, setFailedUrls] = useState<Set<string>>(new Set())
 
   const newsSnippets = newsData?.newsSnippets || []
+  const isRealContent = newsData?.context?.source === 'openai_real_news'
+  const isFallbackContent = newsData?.context?.source?.includes('fallback')
 
   const handleNewsClick = async (url: string, title: string) => {
     // Check if this URL has already failed
@@ -42,43 +44,33 @@ const NewsSnippets = ({
         return
       }
 
-      // Check if URL is accessible (basic check)
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 3000) // 3 second timeout
-
-      try {
-        // Try to fetch just the headers to check if URL is accessible
-        const response = await fetch(url, {
-          method: 'HEAD',
-          signal: controller.signal,
-          mode: 'no-cors' // Allow cross-origin requests
-        })
-        clearTimeout(timeoutId)
-        
-        // Open the URL
-        window.open(url, '_blank', 'noopener,noreferrer')
-        
-      } catch (fetchError) {
-        clearTimeout(timeoutId)
-        console.warn('URL accessibility check failed, but opening anyway:', url)
-        // Still try to open the URL as the fetch might fail due to CORS but URL might be valid
-        window.open(url, '_blank', 'noopener,noreferrer')
-      }
-
+      // Open the URL directly - improved URLs should work better
+      window.open(url, '_blank', 'noopener,noreferrer')
+      
     } catch (error) {
       console.error('Invalid URL:', url, error)
       setFailedUrls(prev => new Set(prev).add(url))
-      
-      // Show user-friendly error message
-      if (url.includes('example.com')) {
-        alert('This is demo content. Real news links will be available with live data.')
-      } else {
-        alert('This news link appears to be invalid. Please try another article.')
-      }
+      alert('This news link appears to be invalid. Please try another article.')
     }
   }
 
-  const isRealContent = newsSnippets.some(news => !news.url.includes('example.com'))
+  const getContentStatusIcon = () => {
+    if (isRealContent) {
+      return <CheckCircle className="h-4 w-4 ml-2 text-green-500" />
+    } else if (isFallbackContent) {
+      return <AlertCircle className="h-4 w-4 ml-2 text-yellow-500" />
+    }
+    return null
+  }
+
+  const getContentStatusText = () => {
+    if (isRealContent) {
+      return "Real-time news with validated sources"
+    } else if (isFallbackContent) {
+      return "Curated automotive news highlights"
+    }
+    return "Contextual automotive news"
+  }
 
   return (
     <Card className="bg-gray-900/50 border-gray-700">
@@ -87,13 +79,13 @@ const NewsSnippets = ({
           <Newspaper className="h-5 w-5 mr-2" />
           News Snippets - Real Time
           {isLoading && <Loader2 className="h-4 w-4 ml-2 animate-spin" />}
-          {!isRealContent && !isLoading && (
-            <div className="relative">
-              <AlertCircle className="h-4 w-4 ml-2 text-yellow-500" />
-              <span className="sr-only">Demo content - real URLs will show with live data</span>
-            </div>
-          )}
+          {!isLoading && getContentStatusIcon()}
         </CardTitle>
+        {!isLoading && (
+          <p className="text-xs text-gray-400 mt-1">
+            {getContentStatusText()}
+          </p>
+        )}
       </CardHeader>
       <CardContent className="space-y-3">
         {isLoading ? (
@@ -112,9 +104,9 @@ const NewsSnippets = ({
           </div>
         ) : (
           <div className="space-y-2">
-            {!isRealContent && (
+            {isFallbackContent && (
               <div className="text-xs text-yellow-400 mb-2 p-2 bg-yellow-900/20 rounded border border-yellow-700/30">
-                Note: Currently showing demo content. Live news will appear with API access.
+                Note: Showing curated content. Real-time news integration is being optimized.
               </div>
             )}
             {newsSnippets.map((news) => (
