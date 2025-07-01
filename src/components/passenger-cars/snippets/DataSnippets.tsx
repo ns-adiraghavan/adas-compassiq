@@ -33,7 +33,7 @@ const DataSnippets = ({
       return "Business Model Strategic Insights"
     }
     if (businessModelAnalysisContext?.analysisType === 'category-analysis') {
-      return "Category Strategic Insights"
+      return "Strategic Insights"
     }
     if (showOEMInsights) {
       return `Strategic Insights - ${selectedOEM}`
