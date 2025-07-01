@@ -85,31 +85,17 @@ function createCategoryAnalysisPrompt(
   const expandedCategoryData = expandedCategory ? 
     categoryBreakdown.find(cat => cat.category === expandedCategory) : null;
 
-  return `Generate exactly 3 comparative strategic insights for Category Analysis in ${country} focusing on category distribution, feature density, and OEM leadership within categories.
+  return `Generate exactly 3 concise strategic insights for Category Analysis in ${country}. Each insight must be exactly 15-20 words maximum.
 
-CATEGORY ANALYSIS CONTEXT:
-• Market: ${country}
-• Selected OEMs: ${selectedOEMs?.join(', ') || 'None'}
-• Total Features Analyzed: ${totalFeatures || 0}
-• Categories: ${categoryBreakdown.length} total categories analyzed
-• Top Category: ${topCategory.category} with ${topCategory.total} features, led by ${topCategory.leader} (${topCategory.leaderCount} features)
-• Second Category: ${secondCategory.category} with ${secondCategory.total} features, led by ${secondCategory.leader} (${secondCategory.leaderCount} features)
-• Third Category: ${thirdCategory.category} with ${thirdCategory.total} features, led by ${thirdCategory.leader} (${thirdCategory.leaderCount} features)
-• Leading OEM: ${leadingOEM.oem} (${leadingOEM.total} features), strongest in ${leadingOEM.strongestCategory}
-• Second OEM: ${secondOEM.oem} (${secondOEM.total} features), strongest in ${secondOEM.strongestCategory}
-${expandedCategoryData ? `• Category Deep-dive: ${expandedCategory} - ${expandedCategoryData.total} features, led by ${expandedCategoryData.leader}, top business model: ${expandedCategoryData.topBusinessModel}` : ''}
+CONTEXT: ${selectedOEMs?.join(', ')} • ${totalFeatures} features • ${topCategory.category} leads with ${topCategory.total} features
 
-IMPORTANT: Focus on comparative analysis between categories and OEMs using absolute feature counts, not percentages.
+GENERATE 3 INSIGHTS (15-20 words each):
 
-GENERATE EXACTLY 3 CATEGORY COMPARATIVE INSIGHTS:
+1. ${topCategory.category} dominates with ${topCategory.total} features led by ${topCategory.leader}
+2. ${leadingOEM.oem} leads deployment with ${leadingOEM.total} features across categories  
+3. ${secondCategory.category} shows ${secondCategory.total} features indicating competitive landscape
 
-1. Category Leadership Distribution - ${topCategory.category} dominates ${country} with ${topCategory.total} features where ${topCategory.leader} leads with ${topCategory.leaderCount} features, while ${secondCategory.category} shows ${secondCategory.total} features under ${secondCategory.leader} leadership, revealing category specialization strategies
-
-2. OEM Category Positioning - ${leadingOEM.oem} leads overall deployment with ${leadingOEM.total} features, showing dominance in ${leadingOEM.strongestCategory} category, compared to ${secondOEM.oem} with ${secondOEM.total} features focusing on ${secondOEM.strongestCategory}, indicating different category investment priorities
-
-3. Feature Density Analysis - ${topCategory.category} emerges as highest density category with ${topCategory.total} features across ${selectedOEMs?.length || 0} OEMs, followed by ${secondCategory.category} (${secondCategory.total}) and ${thirdCategory.category} (${thirdCategory.total}), showing where OEMs concentrate innovation efforts in ${country}
-
-Each insight should provide specific comparative analysis using actual feature counts and category distributions. Respond with ONLY a JSON array of exactly 3 strings.`;
+Respond with ONLY a JSON array of exactly 3 concise strings.`;
 }
 
 function createBusinessModelAnalysisPrompt(
@@ -148,32 +134,17 @@ function createBusinessModelAnalysisPrompt(
   const leadingOEM = oemPerformance[0] || { oem: 'Unknown', total: 0, strongestBusinessModel: 'Unknown' };
   const secondOEM = oemPerformance[1] || { oem: 'Unknown', total: 0, strongestBusinessModel: 'Unknown' };
 
-  return `Generate exactly 3 comparative strategic insights for Business Model Analysis in ${country} focusing on business model distribution and OEM performance.
+  return `Generate exactly 3 concise strategic insights for Business Model Analysis in ${country}. Each insight must be exactly 15-20 words maximum.
 
-BUSINESS MODEL ANALYSIS CONTEXT:
-• Market: ${country}
-• Selected OEMs: ${selectedOEMs?.join(', ') || 'None'}
-• Total Features Analyzed: ${totalFeatures || 0}
-• Business Models: ${businessModelComparison.map(bm => `${bm.businessModel} (${bm.total})`).join(', ')}
-• Top Business Model: ${topBusinessModel.businessModel} with ${topBusinessModel.total} features, led by ${topBusinessModelLeader.oem} (${topBusinessModelLeader.count})
-• Second Business Model: ${secondBusinessModel.businessModel} with ${secondBusinessModel.total} features, led by ${secondBusinessModelLeader.oem} (${secondBusinessModelLeader.count})
-• Leading OEM: ${leadingOEM.oem} (${leadingOEM.total} features), strongest in ${leadingOEM.strongestBusinessModel}
-• Second OEM: ${secondOEM.oem} (${secondOEM.total} features), strongest in ${secondOEM.strongestBusinessModel}
-• Top Categories: ${topCategory.category} (${topCategory.total}, led by ${topCategory.leader}), ${secondCategory.category} (${secondCategory.total}, led by ${secondCategory.leader})
-${selectedBusinessModel ? `• Focus: ${selectedBusinessModel} business model` : ''}
-${expandedCategory ? `• Category Deep-dive: ${expandedCategory}` : ''}
+CONTEXT: ${selectedOEMs?.join(', ')} • ${totalFeatures} features • ${topBusinessModel.businessModel} leads with ${topBusinessModel.total} features
 
-IMPORTANT: Focus on comparative analysis between business models and OEMs using absolute feature counts, not percentages.
+GENERATE 3 INSIGHTS (15-20 words each):
 
-GENERATE EXACTLY 3 BUSINESS MODEL COMPARATIVE INSIGHTS:
+1. ${topBusinessModel.businessModel} dominates with ${topBusinessModel.total} features led by ${topBusinessModelLeader.oem}
+2. ${leadingOEM.oem} leads with ${leadingOEM.total} features focusing on ${leadingOEM.strongestBusinessModel} model
+3. ${secondBusinessModel.businessModel} shows ${secondBusinessModel.total} features indicating diverse monetization strategies
 
-1. Business Model Leadership - ${topBusinessModel.businessModel} dominates ${country} market with ${topBusinessModel.total} features, where ${topBusinessModelLeader.oem} leads with ${topBusinessModelLeader.count} features, while ${secondBusinessModel.businessModel} shows ${secondBusinessModel.total} features with ${secondBusinessModelLeader.oem} contributing ${secondBusinessModelLeader.count}
-
-2. OEM Strategy Comparison - ${leadingOEM.oem} leads overall deployment with ${leadingOEM.total} features, showing strength in ${leadingOEM.strongestBusinessModel} model, compared to ${secondOEM.oem} with ${secondOEM.total} features focusing on ${secondOEM.strongestBusinessModel}, indicating different monetization strategies
-
-3. Category-Business Model Alignment - ${topCategory.category} emerges as top category with ${topCategory.total} features led by ${topCategory.leader}, while ${secondCategory.category} shows ${secondCategory.total} features under ${secondCategory.leader} leadership, revealing how OEMs align category investments with business model strategies
-
-Each insight should provide specific comparative analysis using actual feature counts and business model distributions. Respond with ONLY a JSON array of exactly 3 strings.`;
+Respond with ONLY a JSON array of exactly 3 concise strings.`;
 }
 
 function createMarketOverviewPrompt(
@@ -187,29 +158,17 @@ function createMarketOverviewPrompt(
   topOEMFeatures: number,
   secondOEMFeatures: number
 ): string {
-  return `Generate exactly 3 strategic insights for Vehicle Segment Analysis in ${country || 'global market'} focusing on OEM and segment comparisons.
+  return `Generate exactly 3 concise strategic insights for Vehicle Segment Analysis in ${country || 'global market'}. Each insight must be exactly 15-20 words maximum.
 
-VEHICLE SEGMENT ANALYSIS CONTEXT:
-• Market: ${country || 'Global'}
-• Total Features Analyzed: ${dashboardMetrics.totalFeatures}
-• Active OEMs: ${dashboardMetrics.totalOEMs}
-• Leading Categories: ${topCategory} (${dashboardMetrics.topCategories?.[0]?.value || 0}), ${secondCategory} (${dashboardMetrics.topCategories?.[1]?.value || 0}), ${thirdCategory} (${dashboardMetrics.topCategories?.[2]?.value || 0})
-• Market Leaders: ${topOEM} (${topOEMFeatures} features), ${secondOEM} (${secondOEMFeatures} features)
-• Lighthouse Features: ${dashboardMetrics.lighthouseFeatures} across all segments
-• Subscription Features: ${dashboardMetrics.subscriptionFeatures}
-• Free Features: ${dashboardMetrics.freeFeatures}
+CONTEXT: ${topOEM} leads with ${topOEMFeatures} features • ${topCategory} dominates with ${dashboardMetrics.topCategories?.[0]?.value || 0} features
 
-IMPORTANT: Do not include percentage values in your insights. Focus on absolute numbers and qualitative comparisons.
+GENERATE 3 INSIGHTS (15-20 words each):
 
-GENERATE EXACTLY 3 COMPARATIVE INSIGHTS:
+1. ${topOEM} dominates ${country || 'market'} with ${topOEMFeatures} features leading in ${topCategory} category
+2. ${topCategory} shows highest feature density with ${dashboardMetrics.topCategories?.[0]?.value || 0} features across segments
+3. ${dashboardMetrics.lighthouseFeatures} lighthouse features indicate premium innovation focus across vehicle segments
 
-1. Segment Leadership Analysis - ${topOEM} dominates ${country || 'the market'} with ${topOEMFeatures} features across vehicle segments, outpacing ${secondOEM} by ${topOEMFeatures - secondOEMFeatures} features, particularly strong in ${topCategory} category
-
-2. Category Distribution Comparison - ${topCategory} emerges as the most competitive category with ${dashboardMetrics.topCategories?.[0]?.value || 0} features, followed by ${secondCategory} (${dashboardMetrics.topCategories?.[1]?.value || 0}), indicating OEMs prioritize customer experience and technology differentiation
-
-3. Lighthouse Feature Penetration - With ${dashboardMetrics.lighthouseFeatures} lighthouse features across segments in ${country || 'the market'}, leading OEMs are setting premium standards that define customer expectations for next-generation automotive experiences
-
-Each insight should focus on comparative analysis between OEMs and segments using absolute feature counts, not percentages. Respond with ONLY a JSON array of exactly 3 strings.`;
+Respond with ONLY a JSON array of exactly 3 concise strings.`;
 }
 
 function createOEMSpecificPrompt(
@@ -242,30 +201,15 @@ function createOEMSpecificPrompt(
   const isMidTier = marketPosition > 3 && marketPosition <= Math.ceil(totalOEMs / 2);
   const performanceLevel = isTopTier ? 'leading' : isMidTier ? 'competitive' : 'developing';
 
-  return `Generate exactly 3 strategic insights for ${oem} Vehicle Segment Analysis in ${country || 'global market'} focusing on ranking and lighthouse feature analysis.
+  return `Generate exactly 3 concise strategic insights for ${oem} analysis in ${country || 'global market'}. Each insight must be exactly 15-20 words maximum.
 
-OEM COMPETITIVE ANALYSIS CONTEXT:
-• OEM: ${oem}
-• Market: ${country || 'Global'}
-• Market Position: #${marketPosition} of ${totalOEMs} OEMs
-• ${oem} Available Features: ${selectedOEMData?.features || 0}
-• Market Leader: ${topOEM} with ${topOEMFeatures} features
-• Second Leader: ${secondOEM} with ${secondOEMFeatures} features
-• ${oem} Lighthouse Features: ${selectedOEMData?.lighthouseRate || 0}
-• Top OEM Lighthouse: ${topOEMLighthouse}
-• Second OEM Lighthouse: ${secondOEMLighthouse}
-• Performance Level: ${performanceLevel}
-• Feature Gap vs Market Average: ${featureGap > 0 ? '+' : ''}${featureGap}
+CONTEXT: ${oem} ranks #${marketPosition} with ${selectedOEMData?.features || 0} features • ${selectedOEMData?.lighthouseRate || 0} lighthouse features
 
-IMPORTANT: Focus on ranking analysis and lighthouse feature comparison using absolute counts, not percentages.
+GENERATE 3 INSIGHTS (15-20 words each):
 
-GENERATE EXACTLY 3 STRATEGIC INSIGHTS:
+1. ${oem} ranks #${marketPosition} in ${country || 'market'} with ${selectedOEMData?.features || 0} features ${featureGap > 0 ? 'exceeding' : 'trailing'} market average
+2. ${oem} offers ${selectedOEMData?.lighthouseRate || 0} lighthouse features compared to leader ${topOEM} with ${topOEMLighthouse} features
+3. ${oem} shows ${performanceLevel} positioning with ${selectedOEMData?.features || 0} features indicating ${isTopTier ? 'market leadership' : 'growth opportunity'}
 
-1. Market Ranking Analysis - ${oem} ranks #${marketPosition} in ${country || 'the market'} with ${selectedOEMData?.features || 0} available features, ${featureGap > 0 ? `exceeding market average by ${featureGap} features showing strong competitive positioning` : `trailing market leaders by ${Math.abs(featureGap)} features, indicating opportunity for feature expansion in key categories like ${topCategory}`}
-
-2. Lighthouse Feature Leadership - ${oem} offers ${selectedOEMData?.lighthouseRate || 0} lighthouse features compared to market leader ${topOEM} with ${topOEMLighthouse} lighthouse features, ${lighthouseGap >= 0 ? `positioning them as premium innovation leaders` : `revealing opportunity to enhance premium feature portfolio and differentiation strategy`} in ${country || 'target market'}
-
-3. Competitive Positioning Strategy - ${oem}'s ${performanceLevel} market position with ${selectedOEMData?.features || 0} features shows ${isTopTier ? `strong competitive advantage and market leadership potential` : isMidTier ? `solid foundation for growth with focused feature development needed` : `significant growth opportunity through strategic feature expansion and lighthouse innovation`} compared to top performers in ${country}
-
-Each insight should provide specific ranking and lighthouse feature analysis using absolute feature counts. Respond with ONLY a JSON array of exactly 3 strings.`;
+Respond with ONLY a JSON array of exactly 3 concise strings.`;
 }
