@@ -82,7 +82,7 @@ export function processNewsArticles(articles: any[], selectedOEMs: string[]): Ne
       const description = article.description?.toLowerCase() || '';
       const content = `${title} ${description}`;
       
-      // Much more lenient automotive relevance check
+      // Enhanced automotive relevance check with requested focus terms
       const automotiveKeywords = [
         // Core automotive
         'automotive', 'car', 'vehicle', 'auto', 'oem', 'manufacturer',
@@ -98,8 +98,22 @@ export function processNewsArticles(articles: any[], selectedOEMs: string[]): Ne
         'mobility', 'transport', 'dealership', 'sales', 'recall', 'safety', 'crash test',
         'market share', 'revenue', 'profit', 'earnings', 'production', 'manufacturing'
       ];
+
+      // Requested focus terms for enhanced relevance
+      const focusKeywords = [
+        'connected features', 'connected', 'connectivity',
+        'launch', 'launched', 'launching', 'debut', 'unveil', 'unveiling',
+        'introduction', 'introduced', 'introducing', 'announce', 'announcement',
+        'partnership', 'partnership agreement', 'collaboration', 'joint venture', 'alliance',
+        'technology', 'tech', 'innovation', 'breakthrough', 'advancement',
+        'update', 'updated', 'upgrade', 'upgraded', 'enhancement', 'improved'
+      ];
       
       const hasAutomotiveContent = automotiveKeywords.some(keyword => 
+        content.includes(keyword)
+      );
+
+      const hasFocusContent = focusKeywords.some(keyword => 
         content.includes(keyword)
       );
       
@@ -123,7 +137,8 @@ export function processNewsArticles(articles: any[], selectedOEMs: string[]): Ne
         });
       }
       
-      const isRelevant = hasAutomotiveContent || hasOEMRelevance;
+      // Enhanced relevance scoring - prioritize articles with focus terms
+      const isRelevant = (hasAutomotiveContent || hasOEMRelevance) && (hasFocusContent || hasAutomotiveContent);
       
       if (!isRelevant) {
         console.log('Filtered out article (not relevant):', article.title.substring(0, 50));
