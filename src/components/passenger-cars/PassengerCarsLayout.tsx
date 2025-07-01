@@ -1,4 +1,3 @@
-
 import { ArrowLeft } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext"
@@ -61,7 +60,7 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: `url('/lovable-uploads/849e6ee5-f48d-44b5-b934-674f44399eeb.png')`,
+            backgroundImage: `url('/lovable-uploads/a639b2c6-adaa-455a-adb5-c2c550261d96.png')`,
           }}
         />
         
