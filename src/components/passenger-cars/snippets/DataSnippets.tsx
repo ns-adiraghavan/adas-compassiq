@@ -43,18 +43,6 @@ const DataSnippets = ({
   })
 
   const getTitle = () => {
-    if (contextData?.analysisType === 'landscape-analysis') {
-      return `Landscape Strategic Insights - ${selectedOEM}`
-    }
-    if (businessModelAnalysisContext?.analysisType === 'business-model-analysis') {
-      return "Business Model Strategic Insights"
-    }
-    if (businessModelAnalysisContext?.analysisType === 'category-analysis') {
-      return "Category Strategic Insights"
-    }
-    if (showOEMInsights) {
-      return `Strategic Insights - ${selectedOEM}`
-    }
     return "Strategic Insights"
   }
 
