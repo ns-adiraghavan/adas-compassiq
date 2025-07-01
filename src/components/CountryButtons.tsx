@@ -32,9 +32,17 @@ const CountryButtons = ({ selectedCountry, onCountryChange }: CountryButtonsProp
       }
     })
 
-    const countryList = Array.from(uniqueCountries).sort()
-    console.log('Extracted Countries:', countryList)
-    return countryList
+    const countryList = Array.from(uniqueCountries)
+    
+    // Sort countries with China first, then alphabetically
+    const sortedCountries = countryList.sort((a, b) => {
+      if (a === 'China') return -1
+      if (b === 'China') return 1
+      return a.localeCompare(b)
+    })
+    
+    console.log('Extracted Countries:', sortedCountries)
+    return sortedCountries
   }, [waypointData])
 
   if (isLoading) {

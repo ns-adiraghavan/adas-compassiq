@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart, Loader2, Lightbulb, TrendingUp, Grid } from "lucide-react"
 import { useDataInsightsAI } from "@/hooks/useDataInsightsAI"
@@ -39,7 +38,7 @@ const DataSnippets = ({
     if (showOEMInsights) {
       return `Strategic Insights - ${selectedOEM}`
     }
-    return "Market Strategic Insights"
+    return "Strategic Insights"
   }
 
   const getSubtitle = () => {
