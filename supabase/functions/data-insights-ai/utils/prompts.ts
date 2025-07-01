@@ -75,9 +75,9 @@ function createLandscapeAnalysisPrompt(
   const secondCategory = topCategories[1] || { category: 'Unknown', count: 0 };
   const topBusinessModel = businessModels[0] || { model: 'Unknown', count: 0 };
 
-  return `Generate exactly 3 concise strategic insights for Landscape Analysis of ${selectedOEM} in ${selectedCountry}. Each insight must be exactly 15-20 words maximum.
+  return `Generate exactly 3 strategic insights for Landscape Analysis of ${selectedOEM} in ${selectedCountry}. Each insight must be 20-25 words and follow these specific insight types:
 
-CRITICAL: Use ONLY these exact data points from the Detailed Analysis section. Do NOT reference Ford, Toyota, or any data not listed:
+CRITICAL: Use ONLY these exact data points from the Detailed Analysis section:
 
 ACTUAL LANDSCAPE DATA:
 - OEM: ${selectedOEM}
@@ -88,11 +88,14 @@ ACTUAL LANDSCAPE DATA:
 - Top Category: ${topCategory.category} (${topCategory.count} features)
 - Second Category: ${secondCategory.category} (${secondCategory.count} features)
 - Top Business Model: ${topBusinessModel.model} (${topBusinessModel.count} features)
-- Sample Lighthouse Features: ${lighthouseFeaturesList.slice(0, 3).join(', ') || 'None listed'}
 
-GENERATE 3 INSIGHTS using ONLY the data above (15-20 words each):
+GENERATE 3 INSIGHTS (20-25 words each) using ONLY the data above:
 
-Respond with ONLY a JSON array of exactly 3 concise strings.`;
+1. OEM Feature Diversity Leadership: Focus on ${selectedOEM}'s ranking and feature count compared to market position
+2. Geographic Feature Availability Hotspots: Focus on ${selectedCountry}'s feature availability and market characteristics  
+3. Lighthouse Feature Implementation Excellence: Focus on ${selectedOEM}'s lighthouse features and innovation leadership
+
+Respond with ONLY a JSON array of exactly 3 strings.`;
 
 function createCategoryAnalysisPrompt(
   country: string,
