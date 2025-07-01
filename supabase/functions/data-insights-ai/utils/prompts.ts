@@ -96,6 +96,7 @@ GENERATE 3 INSIGHTS (20-25 words each) using ONLY the data above:
 3. Lighthouse Feature Implementation Excellence: Focus on ${selectedOEM}'s lighthouse features and innovation leadership
 
 Respond with ONLY a JSON array of exactly 3 strings.`;
+}
 
 function createCategoryAnalysisPrompt(
   country: string,
