@@ -1,3 +1,4 @@
+
 // Prompt generation utilities
 export function createVehicleSegmentInsightsPrompt(
   oem: string, 
@@ -220,32 +221,51 @@ function createOEMSpecificPrompt(
   const selectedOEMData = dashboardMetrics.competitiveAnalysis?.selectedOEM;
   const marketAverage = dashboardMetrics.competitiveAnalysis?.marketAverage;
   const marketPosition = dashboardMetrics.competitiveAnalysis?.marketPosition || 'N/A';
+  const totalOEMs = dashboardMetrics.totalOEMs || 0;
   
   // Calculate competitive gaps in absolute numbers
   const featureGap = (selectedOEMData?.features || 0) - (marketAverage?.features || 0);
   const lighthouseGap = (selectedOEMData?.lighthouseRate || 0) - (marketAverage?.lighthouseRate || 0);
   const subscriptionGap = (selectedOEMData?.subscriptionRate || 0) - (marketAverage?.subscriptionRate || 0);
 
-  return `Generate exactly 3 strategic insights for ${oem} Vehicle Segment Analysis in ${country || 'global market'} with competitive comparisons.
+  // Get market leaders for better comparison
+  const marketLeaders = dashboardMetrics.marketLeaders || [];
+  const topOEM = marketLeaders[0]?.oem || 'Unknown';
+  const secondOEM = marketLeaders[1]?.oem || 'Unknown';
+  const topOEMFeatures = marketLeaders[0]?.totalFeatures || 0;
+  const secondOEMFeatures = marketLeaders[1]?.totalFeatures || 0;
+  const topOEMLighthouse = marketLeaders[0]?.lighthouseFeatures || 0;
+  const secondOEMLighthouse = marketLeaders[1]?.lighthouseFeatures || 0;
+
+  // Calculate strengths and weaknesses based on ranking
+  const isTopTier = marketPosition <= 3;
+  const isMidTier = marketPosition > 3 && marketPosition <= Math.ceil(totalOEMs / 2);
+  const performanceLevel = isTopTier ? 'leading' : isMidTier ? 'competitive' : 'developing';
+
+  return `Generate exactly 3 strategic insights for ${oem} Vehicle Segment Analysis in ${country || 'global market'} focusing on ranking and lighthouse feature analysis.
 
 OEM COMPETITIVE ANALYSIS CONTEXT:
 • OEM: ${oem}
 • Market: ${country || 'Global'}
-• Market Position: #${marketPosition} of ${dashboardMetrics.totalOEMs} OEMs
-• ${oem} Features: ${selectedOEMData?.features || 0} vs Market Average ${marketAverage?.features || 0} (${featureGap > 0 ? '+' : ''}${featureGap} difference)
-• ${oem} Lighthouse Features: ${selectedOEMData?.lighthouseRate || 0} vs Market ${marketAverage?.lighthouseRate || 0}
-• ${oem} Subscription Features: ${selectedOEMData?.subscriptionRate || 0} vs Market ${marketAverage?.subscriptionRate || 0}
-• Leading Market Category: ${topCategory} (${dashboardMetrics.topCategories?.[0]?.value || 0} total features)
+• Market Position: #${marketPosition} of ${totalOEMs} OEMs
+• ${oem} Available Features: ${selectedOEMData?.features || 0}
+• Market Leader: ${topOEM} with ${topOEMFeatures} features
+• Second Leader: ${secondOEM} with ${secondOEMFeatures} features
+• ${oem} Lighthouse Features: ${selectedOEMData?.lighthouseRate || 0}
+• Top OEM Lighthouse: ${topOEMLighthouse}
+• Second OEM Lighthouse: ${secondOEMLighthouse}
+• Performance Level: ${performanceLevel}
+• Feature Gap vs Market Average: ${featureGap > 0 ? '+' : ''}${featureGap}
 
-IMPORTANT: Do not include percentage values in your insights. Focus on absolute numbers and qualitative comparisons.
+IMPORTANT: Focus on ranking analysis and lighthouse feature comparison using absolute counts, not percentages.
 
-GENERATE EXACTLY 3 COMPETITIVE INSIGHTS:
+GENERATE EXACTLY 3 STRATEGIC INSIGHTS:
 
-1. Segment Positioning Analysis - ${oem} ranks #${marketPosition} in ${country || 'the market'} with ${selectedOEMData?.features || 0} features, ${featureGap > 0 ? 'leading market average by ' + featureGap + ' features' : 'trailing market average by ' + Math.abs(featureGap) + ' features'}, particularly ${featureGap > 0 ? 'strong' : 'developing'} in competitive segments
+1. Market Ranking Analysis - ${oem} ranks #${marketPosition} in ${country || 'the market'} with ${selectedOEMData?.features || 0} available features, ${featureGap > 0 ? `exceeding market average by ${featureGap} features showing strong competitive positioning` : `trailing market leaders by ${Math.abs(featureGap)} features, indicating opportunity for feature expansion in key categories like ${topCategory}`}
 
-2. Lighthouse Feature Strategy - ${oem} offers ${selectedOEMData?.lighthouseRate || 0} lighthouse features compared to market benchmark of ${marketAverage?.lighthouseRate || 0}, ${lighthouseGap > 0 ? 'positioning them as innovation leaders' : 'indicating opportunity to enhance premium feature leadership'} across vehicle segments
+2. Lighthouse Feature Leadership - ${oem} offers ${selectedOEMData?.lighthouseRate || 0} lighthouse features compared to market leader ${topOEM} with ${topOEMLighthouse} lighthouse features, ${lighthouseGap >= 0 ? `positioning them as premium innovation leaders` : `revealing opportunity to enhance premium feature portfolio and differentiation strategy`} in ${country || 'target market'}
 
-3. Revenue Model Comparison - ${oem} provides ${selectedOEMData?.subscriptionRate || 0} subscription features compared to market trend of ${marketAverage?.subscriptionRate || 0}, ${subscriptionGap > 0 ? 'capitalizing on' : 'potentially missing'} monetization opportunities in ${country || 'target'} automotive segments
+3. Competitive Positioning Strategy - ${oem}'s ${performanceLevel} market position with ${selectedOEMData?.features || 0} features shows ${isTopTier ? `strong competitive advantage and market leadership potential` : isMidTier ? `solid foundation for growth with focused feature development needed` : `significant growth opportunity through strategic feature expansion and lighthouse innovation`} compared to top performers in ${country}
 
-Each insight should provide specific competitive comparisons using absolute feature counts, not percentages. Respond with ONLY a JSON array of exactly 3 strings.`;
+Each insight should provide specific ranking and lighthouse feature analysis using absolute feature counts. Respond with ONLY a JSON array of exactly 3 strings.`;
 }
