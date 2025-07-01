@@ -5,7 +5,6 @@ import AnimatedVehicleImage from "./AnimatedVehicleImage"
 import VehicleContent from "./VehicleContent"
 import VehicleCards from "./VehicleCards"
 import FeatureModules from "./FeatureModules"
-import { ArrowRight } from "lucide-react"
 
 interface VehicleCategory {
   title: string
@@ -91,15 +90,6 @@ const VehicleSection = ({ category, index, currentSection, sectionIndex }: Vehic
                     Insights
                   </Link>
                 </div>
-              )}
-              
-              {category.title !== "Passenger Cars" && (
-                <Link to={category.href} className="group block mt-6">
-                  <div className="inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors">
-                    <span className="mr-2">Explore</span>
-                    <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </Link>
               )}
             </div>
           </div>

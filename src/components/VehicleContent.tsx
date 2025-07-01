@@ -27,10 +27,6 @@ const VehicleContent = ({ icon: Icon, title, subtitle, description, textTransfor
       <p className="text-white/60 font-light leading-relaxed mb-8 text-lg max-w-2xl">
         {description}
       </p>
-      <div className="flex items-center text-white/80 font-medium group-hover:text-white transition-colors text-lg">
-        <span className="mr-3">Explore</span>
-        <span className="transform group-hover:translate-x-2 transition-transform text-2xl">→</span>
-      </div>
     </div>
   )
 }
