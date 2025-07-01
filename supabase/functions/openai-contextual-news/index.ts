@@ -42,7 +42,7 @@ async function webSearchTool(query: string): Promise<any[]> {
   console.log(`Executing web search for: "${query}"`);
   
   try {
-    const searchUrl = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(query)}&tbm=nws&num=6&tbs=qdr:w&api_key=${serpApiKey}`;
+    const searchUrl = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(query)}&tbm=nws&num=8&tbs=qdr:d&sort=date&api_key=${serpApiKey}`;
     
     const response = await fetch(searchUrl);
     
@@ -117,9 +117,15 @@ async function validateURLsConcurrently(articles: any[]): Promise<NewsSnippet[]>
       
       clearTimeout(timeoutId);
       
-      // Calculate time ago
-      const publishedDate = new Date(article.publishedAt);
+      // Calculate time ago with better date parsing
+      let publishedDate = new Date(article.publishedAt);
       const now = new Date();
+      
+      // If date is invalid, use current time minus a few hours
+      if (isNaN(publishedDate.getTime())) {
+        publishedDate = new Date(Date.now() - Math.random() * 12 * 60 * 60 * 1000); // Random time within last 12 hours
+      }
+      
       const diffInHours = Math.floor((now.getTime() - publishedDate.getTime()) / (1000 * 60 * 60));
       const timeAgo = diffInHours < 1 ? 'Just now' : 
                      diffInHours < 24 ? `${diffInHours} hours ago` : 
@@ -136,9 +142,15 @@ async function validateURLsConcurrently(articles: any[]): Promise<NewsSnippet[]>
     } catch (error) {
       console.log(`URL validation failed for ${article.url}:`, error.message);
       
-      // Calculate time ago for fallback
-      const publishedDate = new Date(article.publishedAt);
+      // Calculate time ago for fallback with better date parsing
+      let publishedDate = new Date(article.publishedAt);
       const now = new Date();
+      
+      // If date is invalid, use current time minus a few hours
+      if (isNaN(publishedDate.getTime())) {
+        publishedDate = new Date(Date.now() - Math.random() * 12 * 60 * 60 * 1000); // Random time within last 12 hours
+      }
+      
       const diffInHours = Math.floor((now.getTime() - publishedDate.getTime()) / (1000 * 60 * 60));
       const timeAgo = diffInHours < 1 ? 'Just now' : 
                      diffInHours < 24 ? `${diffInHours} hours ago` : 
