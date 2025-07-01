@@ -87,13 +87,16 @@ function createCategoryAnalysisPrompt(
 
   return `Generate exactly 3 concise strategic insights for Category Analysis in ${country}. Each insight must be exactly 15-20 words maximum.
 
-CONTEXT: ${selectedOEMs?.join(', ')} • ${totalFeatures} features • ${topCategory.category} leads with ${topCategory.total} features
+CRITICAL: Use ONLY these exact OEMs and numbers provided below. Do NOT reference Ford, Toyota, or any OEM not listed:
 
-GENERATE 3 INSIGHTS (15-20 words each):
+ACTUAL DATA CONTEXT: 
+- Selected OEMs: ${selectedOEMs?.join(', ') || 'None specified'}
+- Total Features: ${totalFeatures || 0}
+- Top Category: ${topCategory.category} with ${topCategory.total || 0} features led by ${topCategory.leader || 'Unknown'}
+- Leading OEM: ${leadingOEM.oem || 'Unknown'} with ${leadingOEM.total || 0} features
+- Second OEM: ${secondOEM.oem || 'Unknown'} with ${secondOEM.total || 0} features
 
-1. ${topCategory.category} dominates with ${topCategory.total} features led by ${topCategory.leader}
-2. ${leadingOEM.oem} leads deployment with ${leadingOEM.total} features across categories  
-3. ${secondCategory.category} shows ${secondCategory.total} features indicating competitive landscape
+GENERATE 3 INSIGHTS using ONLY the data above (15-20 words each):
 
 Respond with ONLY a JSON array of exactly 3 concise strings.`;
 }
@@ -136,13 +139,16 @@ function createBusinessModelAnalysisPrompt(
 
   return `Generate exactly 3 concise strategic insights for Business Model Analysis in ${country}. Each insight must be exactly 15-20 words maximum.
 
-CONTEXT: ${selectedOEMs?.join(', ')} • ${totalFeatures} features • ${topBusinessModel.businessModel} leads with ${topBusinessModel.total} features
+CRITICAL: Use ONLY these exact OEMs and numbers provided below. Do NOT reference Ford, Toyota, or any OEM not listed:
 
-GENERATE 3 INSIGHTS (15-20 words each):
+ACTUAL DATA CONTEXT:
+- Selected OEMs: ${selectedOEMs?.join(', ') || 'None specified'}
+- Total Features: ${totalFeatures || 0}
+- Top Business Model: ${topBusinessModel.businessModel || 'Unknown'} with ${topBusinessModel.total || 0} features led by ${topBusinessModelLeader.oem || 'Unknown'}
+- Leading OEM: ${leadingOEM.oem || 'Unknown'} with ${leadingOEM.total || 0} features
+- Second OEM: ${secondOEM.oem || 'Unknown'} with ${secondOEM.total || 0} features
 
-1. ${topBusinessModel.businessModel} dominates with ${topBusinessModel.total} features led by ${topBusinessModelLeader.oem}
-2. ${leadingOEM.oem} leads with ${leadingOEM.total} features focusing on ${leadingOEM.strongestBusinessModel} model
-3. ${secondBusinessModel.businessModel} shows ${secondBusinessModel.total} features indicating diverse monetization strategies
+GENERATE 3 INSIGHTS using ONLY the data above (15-20 words each):
 
 Respond with ONLY a JSON array of exactly 3 concise strings.`;
 }
@@ -160,13 +166,15 @@ function createMarketOverviewPrompt(
 ): string {
   return `Generate exactly 3 concise strategic insights for Vehicle Segment Analysis in ${country || 'global market'}. Each insight must be exactly 15-20 words maximum.
 
-CONTEXT: ${topOEM} leads with ${topOEMFeatures} features • ${topCategory} dominates with ${dashboardMetrics.topCategories?.[0]?.value || 0} features
+CRITICAL: Use ONLY these exact OEMs and numbers provided below. Do NOT reference Ford, Toyota, or any OEM not listed:
 
-GENERATE 3 INSIGHTS (15-20 words each):
+ACTUAL DATA CONTEXT:
+- Top OEM: ${topOEM || 'Unknown'} with ${topOEMFeatures || 0} features
+- Second OEM: ${secondOEM || 'Unknown'} with ${secondOEMFeatures || 0} features  
+- Top Category: ${topCategory || 'Unknown'} with ${dashboardMetrics.topCategories?.[0]?.value || 0} features
+- Lighthouse Features: ${dashboardMetrics.lighthouseFeatures || 0} total
 
-1. ${topOEM} dominates ${country || 'market'} with ${topOEMFeatures} features leading in ${topCategory} category
-2. ${topCategory} shows highest feature density with ${dashboardMetrics.topCategories?.[0]?.value || 0} features across segments
-3. ${dashboardMetrics.lighthouseFeatures} lighthouse features indicate premium innovation focus across vehicle segments
+GENERATE 3 INSIGHTS using ONLY the data above (15-20 words each):
 
 Respond with ONLY a JSON array of exactly 3 concise strings.`;
 }
@@ -203,13 +211,16 @@ function createOEMSpecificPrompt(
 
   return `Generate exactly 3 concise strategic insights for ${oem} analysis in ${country || 'global market'}. Each insight must be exactly 15-20 words maximum.
 
-CONTEXT: ${oem} ranks #${marketPosition} with ${selectedOEMData?.features || 0} features • ${selectedOEMData?.lighthouseRate || 0} lighthouse features
+CRITICAL: Use ONLY these exact OEMs and numbers provided below. Do NOT reference Ford, Toyota, or any OEM not listed:
 
-GENERATE 3 INSIGHTS (15-20 words each):
+ACTUAL DATA CONTEXT:
+- Analyzed OEM: ${oem}
+- Market Rank: #${marketPosition} of ${totalOEMs} OEMs
+- Available Features: ${selectedOEMData?.features || 0}
+- Lighthouse Features: ${selectedOEMData?.lighthouseRate || 0}
+- Top Market OEM: ${topOEM || 'Unknown'} with ${topOEMLighthouse || 0} lighthouse features
 
-1. ${oem} ranks #${marketPosition} in ${country || 'market'} with ${selectedOEMData?.features || 0} features ${featureGap > 0 ? 'exceeding' : 'trailing'} market average
-2. ${oem} offers ${selectedOEMData?.lighthouseRate || 0} lighthouse features compared to leader ${topOEM} with ${topOEMLighthouse} features
-3. ${oem} shows ${performanceLevel} positioning with ${selectedOEMData?.features || 0} features indicating ${isTopTier ? 'market leadership' : 'growth opportunity'}
+GENERATE 3 INSIGHTS using ONLY the data above (15-20 words each):
 
 Respond with ONLY a JSON array of exactly 3 concise strings.`;
 }
