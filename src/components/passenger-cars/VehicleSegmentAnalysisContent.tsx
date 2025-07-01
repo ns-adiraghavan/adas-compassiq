@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useWaypointData } from "@/hooks/useWaypointData"
 import CountryButtons from "@/components/CountryButtons"
 import OEMSelector from "./OEMSelector"
@@ -90,6 +90,67 @@ const VehicleSegmentAnalysisContent = () => {
     setSelectedOEMs([])
   }
 
+  // Generate vehicle segment analysis context for AI insights
+  const vehicleSegmentContext = useMemo(() => {
+    if (!waypointData?.csvData?.length || !selectedCountry || selectedOEMs.length === 0) {
+      return null
+    }
+
+    const segmentData: Record<string, { categories: Record<string, number>, total: number, oemDistribution: Record<string, number> }> = {}
+    let totalFeatures = 0
+
+    waypointData.csvData.forEach(file => {
+      if (file.data && Array.isArray(file.data)) {
+        file.data.forEach((row: any) => {
+          if (row.Country === selectedCountry && 
+              selectedOEMs.includes(row.OEM) &&
+              row['Feature Availability']?.toString().trim().toLowerCase() === 'available' &&
+              row.Feature && row.Feature.toString().trim() !== '') {
+            
+            const segment = row['Vehicle Segment']?.toString().trim() || 'Unknown'
+            const category = row.Category?.toString().trim() || 'Unknown'
+            const oem = row.OEM?.toString().trim()
+            
+            if (!segmentData[segment]) {
+              segmentData[segment] = { categories: {}, total: 0, oemDistribution: {} }
+            }
+            
+            segmentData[segment].categories[category] = (segmentData[segment].categories[category] || 0) + 1
+            segmentData[segment].oemDistribution[oem] = (segmentData[segment].oemDistribution[oem] || 0) + 1
+            segmentData[segment].total++
+            totalFeatures++
+          }
+        })
+      }
+    })
+
+    // Calculate segment insights
+    const segmentBreakdown = Object.entries(segmentData).map(([segment, data]) => {
+      const topCategory = Object.entries(data.categories).sort(([,a], [,b]) => b - a)[0]
+      const leadingOEM = Object.entries(data.oemDistribution).sort(([,a], [,b]) => b - a)[0]
+      
+      return {
+        segment,
+        total: data.total,
+        topCategory: topCategory?.[0] || 'Unknown',
+        topCategoryCount: topCategory?.[1] || 0,
+        leadingOEM: leadingOEM?.[0] || 'Unknown',
+        leadingOEMCount: leadingOEM?.[1] || 0,
+        categoryDistribution: data.categories,
+        oemDistribution: data.oemDistribution
+      }
+    }).sort((a, b) => b.total - a.total)
+
+    return {
+      totalFeatures,
+      selectedOEMs,
+      selectedCountry,
+      segmentBreakdown,
+      topSegments: segmentBreakdown.slice(0, 5),
+      analysisType: 'vehicle-segment-analysis'
+    }
+  }, [waypointData, selectedCountry, selectedOEMs])
+
   return (
     <div className="w-full flex">
       {/* Main Content Area - 60% */}
@@ -138,6 +199,7 @@ const VehicleSegmentAnalysisContent = () => {
             oemClickedFromChart={false}
             selectedOEMs={selectedOEMs}
             analysisType="vehicle-segment"
+            businessModelAnalysisContext={vehicleSegmentContext}
           />
         </div>
       </div>

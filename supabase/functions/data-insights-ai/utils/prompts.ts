@@ -1,9 +1,36 @@
 
 // Prompt generation utilities
 export function createVehicleSegmentInsightsPrompt(
-  oem: string, 
-  country: string, 
-  dashboardMetrics: any, 
+  oem: string,
+  country: string,
+  dashboardMetrics: any,
+  isMarketOverview: boolean,
+  analysisType?: string,
+  contextData?: any
+): string {
+  // Handle different analysis contexts
+  if (contextData) {
+    switch (contextData.analysisType) {
+      case 'landscape-analysis':
+        return createLandscapeAnalysisPrompt(contextData, country);
+      case 'category-analysis':
+        return createCategoryAnalysisPrompt(contextData, country);
+      case 'business-model-analysis':
+        return createBusinessModelAnalysisPrompt(country, contextData);
+      case 'vehicle-segment-analysis':
+        return createVehicleSegmentAnalysisPrompt(contextData, country);
+      case 'feature-overlap-analysis':
+        return createFeatureOverlapAnalysisPrompt(contextData, country);
+    }
+  }
+  // Fallback to original logic for backward compatibility
+  return createOriginalInsightsPrompt(oem, country, dashboardMetrics, isMarketOverview, analysisType, contextData);
+}
+
+function createOriginalInsightsPrompt(
+  oem: string,
+  country: string,
+  dashboardMetrics: any,
   isMarketOverview: boolean,
   analysisType?: string,
   contextData?: any
@@ -15,7 +42,7 @@ export function createVehicleSegmentInsightsPrompt(
 
   // Handle Category Analysis context
   if (analysisType === "category-analysis" && contextData) {
-    return createCategoryAnalysisPrompt(country, contextData);
+    return createCategoryAnalysisPrompt(contextData, country);
   }
 
   const topCategory = dashboardMetrics.topCategories?.[0]?.name || 'Unknown';
@@ -52,8 +79,8 @@ export function createVehicleSegmentInsightsPrompt(
 }
 
 function createCategoryAnalysisPrompt(
-  country: string,
-  contextData: any
+  contextData: any,
+  country: string
 ): string {
   const { 
     totalFeatures, 
@@ -110,6 +137,104 @@ GENERATE EXACTLY 3 CATEGORY COMPARATIVE INSIGHTS:
 3. Feature Density Analysis - ${topCategory.category} emerges as highest density category with ${topCategory.total} features across ${selectedOEMs?.length || 0} OEMs, followed by ${secondCategory.category} (${secondCategory.total}) and ${thirdCategory.category} (${thirdCategory.total}), showing where OEMs concentrate innovation efforts in ${country}
 
 Each insight should provide specific comparative analysis using actual feature counts and category distributions. Respond with ONLY a JSON array of exactly 3 strings.`;
+}
+
+function createLandscapeAnalysisPrompt(contextData: any, country: string): string {
+  const { 
+    totalFeatures, 
+    selectedCountry, 
+    selectedOEM,
+    oemRankings = [], 
+    leadingOEM
+  } = contextData;
+
+  return `Generate exactly 3 strategic insights for OEM Feature Distribution landscape analysis in ${country}.
+
+LANDSCAPE ANALYSIS CONTEXT:
+• Market: ${selectedCountry}
+• Total Features Analyzed: ${totalFeatures || 0}
+• Leading OEM: ${leadingOEM?.oem || 'Unknown'} with ${leadingOEM?.total || 0} features
+• Top OEMs: ${oemRankings.slice(0, 3).map(oem => `${oem.oem} (${oem.total})`).join(', ')}
+${selectedOEM ? `• Selected OEM: ${selectedOEM} for detailed analysis` : ''}
+
+Focus on:
+- OEM competitive positioning and market leadership
+- Feature distribution patterns across the landscape
+- Strategic positioning opportunities and market gaps
+
+Requirements:
+- Each insight must be exactly 2-3 sentences
+- Reference specific OEMs and their feature counts
+- Highlight competitive advantages and strategic positions
+- Return insights as a JSON array: ["insight1", "insight2", "insight3"]
+
+Return only the JSON array, no additional text.`;
+}
+
+function createVehicleSegmentAnalysisPrompt(contextData: any, country: string): string {
+  const { 
+    totalFeatures, 
+    selectedOEMs, 
+    segmentBreakdown = [], 
+    topSegments = []
+  } = contextData;
+
+  return `Generate exactly 3 strategic insights for Features by Vehicle Segment and Category analysis in ${country}.
+
+VEHICLE SEGMENT ANALYSIS CONTEXT:
+• Market: ${country}
+• Selected OEMs: ${selectedOEMs?.join(', ') || 'None'}
+• Total Features Analyzed: ${totalFeatures || 0}
+• Top Segments: ${topSegments.map(seg => `${seg.segment} (${seg.total} features, led by ${seg.leadingOEM})`).join(', ')}
+
+Focus on:
+- Vehicle segment distribution and category patterns
+- OEM positioning across different vehicle segments
+- Segment-specific feature opportunities and gaps
+
+Requirements:
+- Each insight must be exactly 2-3 sentences
+- Reference specific vehicle segments and their characteristics
+- Highlight segment leadership and strategic opportunities
+- Return insights as a JSON array: ["insight1", "insight2", "insight3"]
+
+Return only the JSON array, no additional text.`;
+}
+
+function createFeatureOverlapAnalysisPrompt(contextData: any, country: string): string {
+  const { 
+    totalOEMs, 
+    selectedOEMs, 
+    totalFeatures, 
+    sharedFeatures, 
+    entities = [], 
+    allThreeShared,
+    pairwiseIntersections = []
+  } = contextData;
+
+  return `Generate exactly 3 strategic insights for Feature Overlap Analysis (Venn Diagram) in ${country}.
+
+FEATURE OVERLAP ANALYSIS CONTEXT:
+• Market: ${country}
+• Selected OEMs: ${selectedOEMs?.join(', ') || 'None'}
+• Total Features: ${totalFeatures || 0}
+• Shared Features: ${sharedFeatures || 0}
+• All Three OEMs Share: ${allThreeShared || 0} features
+• Individual OEM Features: ${entities.map(e => `${e.name} (${e.totalFeatures} total, ${e.uniqueFeatures} unique)`).join(', ')}
+• Pairwise Sharing: ${pairwiseIntersections.map(p => `${p.oemPair}: ${p.sharedFeatures}`).join(', ')}
+
+Focus on:
+- Feature overlap patterns and competitive dynamics
+- Unique feature opportunities and differentiation strategies
+- Collaboration and competition insights from shared features
+
+Requirements:
+- Each insight must be exactly 2-3 sentences
+- Reference specific overlap percentages and unique features
+- Highlight differentiation opportunities and market positioning
+- Return insights as a JSON array: ["insight1", "insight2", "insight3"]
+
+Return only the JSON array, no additional text.`;
 }
 
 function createBusinessModelAnalysisPrompt(

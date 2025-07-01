@@ -97,7 +97,8 @@ const BusinessModelAnalysisContent = () => {
       topCategories,
       oemTotals,
       selectedBusinessModel,
-      expandedCategory
+      expandedCategory,
+      analysisType: 'business-model-analysis'
     }
   }, [waypointData, selectedCountry, selectedOEMs, selectedBusinessModel, expandedCategory])
 

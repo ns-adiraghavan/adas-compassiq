@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import PassengerCarsLayout from "@/components/passenger-cars/PassengerCarsLayout"
 import CountryButtons from "@/components/CountryButtons"
 import OEMSelector from "@/components/passenger-cars/OEMSelector"
@@ -48,6 +48,40 @@ const InsightsContent = () => {
   }, [selectedCountry, waypointData])
 
   const { vennData, isLoading } = useVennDiagramData(selectedCountry, selectedOEMs)
+
+  // Generate insights context based on Venn diagram analysis
+  const insightsContext = useMemo(() => {
+    if (!vennData || selectedOEMs.length === 0) {
+      return null
+    }
+
+    const featureOverlapAnalysis = {
+      totalOEMs: selectedOEMs.length,
+      selectedOEMs,
+      selectedCountry,
+      totalFeatures: vennData.totalFeatures,
+      totalUniqueFeatures: vennData.totalUniqueFeatures,
+      sharedFeatures: vennData.sharedFeatures.length,
+      entities: vennData.entities.map(entity => ({
+        name: entity.name,
+        totalFeatures: entity.count,
+        uniqueFeatures: vennData.uniqueFeatures[entity.name]?.length || 0
+      })),
+      pairwiseIntersections: Object.entries(vennData.featureIntersections)
+        .filter(([key]) => key !== 'all')
+        .map(([key, features]) => ({
+          oemPair: key,
+          sharedFeatures: features.length
+        })),
+      allThreeShared: vennData.featureIntersections['all']?.length || 0,
+      mostCommonFeatures: vennData.mostCommonFeatures,
+      leastCommonFeatures: vennData.leastCommonFeatures,
+      overlapPercentages: vennData.overlapPercentages,
+      analysisType: 'feature-overlap-analysis'
+    }
+
+    return featureOverlapAnalysis
+  }, [vennData, selectedOEMs, selectedCountry])
 
   const handleOEMToggle = (oem: string) => {
     setSelectedOEMs(prev => 
@@ -137,6 +171,7 @@ const InsightsContent = () => {
           selectedCountry={selectedCountry}
           selectedOEMs={selectedOEMs}
           analysisType="insights"
+          businessModelAnalysisContext={insightsContext}
         />
       </div>
     </div>
