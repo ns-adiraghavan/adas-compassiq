@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react"
 import { useFirstAvailableOEM, useWaypointData } from "@/hooks/useWaypointData"
 import CountryButtons from "@/components/CountryButtons"
@@ -95,16 +94,6 @@ const LandscapeContent = () => {
         {/* Details Section with smooth fade transition */}
         {showDetails && (
           <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm min-h-[400px] animate-fade-in hover-lift`}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className={`text-lg font-medium ${theme.textPrimary}`}>
-                {selectedOEM} - Detailed Analysis
-              </h3>
-              {selectedCountry && (
-                <div className={`text-sm ${theme.textMuted}`}>
-                  Country: {selectedCountry}
-                </div>
-              )}
-            </div>
             <div className="w-full">
               <LandscapeDetails
                 selectedOEM={selectedOEM}
