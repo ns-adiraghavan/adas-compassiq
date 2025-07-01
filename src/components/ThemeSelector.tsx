@@ -1,58 +1,24 @@
 
-import { Palette } from "lucide-react"
-import { useTheme, ThemeType } from "@/contexts/ThemeContext"
-import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { Sun, Moon } from "lucide-react"
+import { useTheme } from "@/contexts/ThemeContext"
+import { Switch } from "@/components/ui/switch"
 
 const ThemeSelector = () => {
-  const { currentTheme, setTheme, themes } = useTheme()
-  const [isOpen, setIsOpen] = useState(false)
+  const { currentTheme, setTheme } = useTheme()
 
-  const themeColors = {
-    midnight: 'from-blue-600 to-cyan-500',
-    emerald: 'from-emerald-600 to-amber-500',
-    sunset: 'from-orange-600 to-pink-500',
-    royal: 'from-purple-600 to-pink-500',
-    arctic: 'from-slate-600 to-blue-500'
+  const handleThemeToggle = (checked: boolean) => {
+    setTheme(checked ? 'light' : 'dark')
   }
 
   return (
-    <div className="relative">
-      <Button
-        onClick={() => setIsOpen(!isOpen)}
-        className="bg-black/20 backdrop-blur-sm border border-white/20 text-white hover:bg-black/30 transition-all"
-        size="sm"
-      >
-        <Palette className="h-4 w-4 mr-2" />
-        Themes
-      </Button>
-      
-      {isOpen && (
-        <div className="absolute top-full right-0 mt-2 p-3 bg-black/80 backdrop-blur-md rounded-lg border border-white/20 min-w-[180px] w-max z-50">
-          <h3 className="text-white text-sm font-medium mb-3">Choose Theme</h3>
-          <div className="space-y-2">
-            {Object.entries(themes).map(([key, theme]) => (
-              <button
-                key={key}
-                onClick={() => {
-                  setTheme(key as ThemeType)
-                  setIsOpen(false)
-                }}
-                className={`w-full flex items-center gap-3 p-2 rounded-md transition-all text-left ${
-                  currentTheme === key 
-                    ? 'bg-white/20 border border-white/30' 
-                    : 'hover:bg-white/10 border border-transparent'
-                }`}
-              >
-                <div 
-                  className={`w-4 h-4 rounded-full bg-gradient-to-r flex-shrink-0 ${themeColors[key as ThemeType]}`}
-                />
-                <span className="text-white text-sm whitespace-nowrap">{theme.name}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+    <div className="flex items-center gap-2 bg-black/20 backdrop-blur-sm border border-white/20 text-white px-3 py-2 rounded-md">
+      <Moon className="h-4 w-4" />
+      <Switch
+        checked={currentTheme === 'light'}
+        onCheckedChange={handleThemeToggle}
+        className="data-[state=checked]:bg-white data-[state=unchecked]:bg-slate-600"
+      />
+      <Sun className="h-4 w-4" />
     </div>
   )
 }
