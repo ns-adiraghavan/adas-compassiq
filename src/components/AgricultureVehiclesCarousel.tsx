@@ -69,18 +69,17 @@ const AgricultureVehiclesCarousel = () => {
     return () => clearInterval(interval)
   }, [images.length])
 
-  // Octagon shape for Agriculture Vehicles
+  // Square shape for Agriculture Vehicles
   const containerStyle = {
-    clipPath: "polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%)",
     width: "400px",
     height: "400px",
-    transform: "rotate(0deg)"
+    borderRadius: "16px"
   }
 
   if (isLoading) {
     return (
       <div 
-        className="relative overflow-hidden transition-all duration-500 group-hover:scale-105 mx-auto"
+        className="relative overflow-hidden transition-all duration-500 group-hover:scale-105 mx-auto rounded-2xl"
         style={containerStyle}
       >
         <div className="w-full h-full bg-gray-300 animate-pulse flex items-center justify-center">
@@ -93,7 +92,7 @@ const AgricultureVehiclesCarousel = () => {
   if (hasError || images.length === 0) {
     return (
       <div 
-        className="relative overflow-hidden transition-all duration-500 group-hover:scale-105 bg-gradient-to-br from-yellow-600/30 to-orange-600/30 flex items-center justify-center mx-auto"
+        className="relative overflow-hidden transition-all duration-500 group-hover:scale-105 bg-gradient-to-br from-yellow-600/30 to-orange-600/30 flex items-center justify-center mx-auto rounded-2xl"
         style={containerStyle}
       >
         <div className="text-white/60 text-center">
@@ -106,7 +105,7 @@ const AgricultureVehiclesCarousel = () => {
 
   return (
     <div 
-      className="relative overflow-hidden transition-all duration-500 group-hover:scale-105 mx-auto"
+      className="relative overflow-hidden transition-all duration-500 group-hover:scale-105 mx-auto rounded-2xl"
       style={containerStyle}
     >
       {images.map((imageUrl, index) => (

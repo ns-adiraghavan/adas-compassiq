@@ -74,12 +74,11 @@ const PassengerCarsCarousel = () => {
     return () => clearInterval(interval)
   }, [images.length])
 
-  // Hexagonal shape for Passenger Cars
+  // Rectangular shape for Passenger Cars
   const containerStyle = {
-    clipPath: "polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%)",
     width: "100%",
     height: "400px",
-    transform: "rotate(0deg)"
+    borderRadius: "16px"
   }
 
   if (isLoading) {
@@ -88,7 +87,7 @@ const PassengerCarsCarousel = () => {
         className="relative overflow-hidden transition-all duration-500 group-hover:scale-105"
         style={containerStyle}
       >
-        <div className="w-full h-full bg-gray-300 animate-pulse flex items-center justify-center">
+        <div className="w-full h-full bg-gray-300 animate-pulse flex items-center justify-center rounded-2xl">
           <div className="text-gray-600">Loading images...</div>
         </div>
       </div>
@@ -98,7 +97,7 @@ const PassengerCarsCarousel = () => {
   if (hasError || images.length === 0) {
     return (
       <div 
-        className="relative overflow-hidden transition-all duration-500 group-hover:scale-105 bg-gradient-to-br from-blue-600/30 to-purple-600/30 flex items-center justify-center"
+        className="relative overflow-hidden transition-all duration-500 group-hover:scale-105 bg-gradient-to-br from-blue-600/30 to-purple-600/30 flex items-center justify-center rounded-2xl"
         style={containerStyle}
       >
         <div className="text-white/60 text-center">
@@ -112,7 +111,7 @@ const PassengerCarsCarousel = () => {
 
   return (
     <div 
-      className="relative overflow-hidden transition-all duration-500 group-hover:scale-105"
+      className="relative overflow-hidden transition-all duration-500 group-hover:scale-105 rounded-2xl"
       style={containerStyle}
     >
       {images.map((imageUrl, index) => (
