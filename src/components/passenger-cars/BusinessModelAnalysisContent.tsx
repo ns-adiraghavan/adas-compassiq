@@ -177,9 +177,6 @@ const BusinessModelAnalysisContent = () => {
       {/* Main Content Area - 60% */}
       <div className="w-3/5 px-6 py-4 space-y-6">
         {/* Page Title */}
-        <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
-          <h2 className={`text-2xl font-light ${theme.textPrimary} mb-2`}>Business Model Analysis</h2>
-        </div>
 
         {/* Countries Section */}
         <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm h-[120px]`}>
