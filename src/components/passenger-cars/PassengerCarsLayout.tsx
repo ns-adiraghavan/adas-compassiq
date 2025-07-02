@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom"
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext"
 import ThemeSelector from "@/components/ThemeSelector"
 import WaypointLogo from "@/components/WaypointLogo"
+import AskWayPointChatButton from "@/components/AskWayPointChatButton"
 
 interface PassengerCarsLayoutProps {
   children: React.ReactNode
@@ -140,6 +141,9 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
           </p>
         </div>
       </div>
+
+      {/* Ask WayPoint Chat Button - appears on all passenger cars pages */}
+      <AskWayPointChatButton />
     </div>
   )
 }
