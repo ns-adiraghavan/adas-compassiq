@@ -74,34 +74,31 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
           </div>
           
           {/* Header Content */}
-          <div className="container mx-auto px-8 py-4">
+          <div className="relative px-8 py-4">
             {/* Themes button at extreme top left */}
             <div className="absolute top-4 left-8 z-50">
               <ThemeSelector />
             </div>
             
-            {/* Content layout */}
-            <div className="flex flex-col items-start">
-              {/* Back to Home button - positioned below theme selector */}
-              <div className="mt-12 mb-4">
-                <Link 
-                  to="/" 
-                  className="inline-flex items-center text-gray-300 hover:text-white transition-colors"
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Home
-                </Link>
-              </div>
-              
-              {/* Title and subtitle aligned to left */}
-              <div className="mb-4">
-                <h1 className="text-3xl font-thin mb-1 text-white tracking-tight">
-                  {getPageTitle()}
-                </h1>
-                <p className="text-base text-gray-200 font-light">
-                  Premium Automotive Intelligence
-                </p>
-              </div>
+            {/* Back to Home button - positioned below theme selector, aligned to left */}
+            <div className="mt-12 mb-4">
+              <Link 
+                to="/" 
+                className="inline-flex items-center text-gray-300 hover:text-white transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Home
+              </Link>
+            </div>
+            
+            {/* Title and subtitle aligned to left */}
+            <div className="mb-4">
+              <h1 className="text-3xl font-thin mb-1 text-white tracking-tight">
+                {getPageTitle()}
+              </h1>
+              <p className="text-base text-gray-200 font-light">
+                Premium Automotive Intelligence
+              </p>
             </div>
           </div>
 
