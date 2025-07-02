@@ -65,7 +65,7 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
         />
         
         {/* Background Overlay for Header - made darker */}
-        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-0 bg-black/80" />
 
         <div className={`relative z-10 text-white transition-all duration-500`}>
           {/* Logo positioned in top right */}
@@ -75,17 +75,18 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
           
           {/* Header Content */}
           <div className="container mx-auto px-8 py-4">
+            {/* Themes button at extreme top left */}
+            <div className="absolute top-4 left-8 z-50">
+              <ThemeSelector />
+            </div>
+            
+            {/* Content layout */}
             <div className="flex flex-col items-start">
-              {/* Themes button at extreme top left */}
-              <div className="absolute top-4 left-8 z-50">
-                <ThemeSelector />
-              </div>
-              
-              {/* Back to Home button - with top margin to account for themes button */}
-              <div className="mt-12">
+              {/* Back to Home button - positioned below theme selector */}
+              <div className="mt-12 mb-4">
                 <Link 
                   to="/" 
-                  className="inline-flex items-center text-gray-300 hover:text-white transition-colors mb-3"
+                  className="inline-flex items-center text-gray-300 hover:text-white transition-colors"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Back to Home
@@ -93,12 +94,14 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
               </div>
               
               {/* Title and subtitle aligned to left */}
-              <h1 className="text-3xl font-thin mb-1 text-white tracking-tight">
-                {getPageTitle()}
-              </h1>
-              <p className="text-base text-gray-200 font-light mb-4">
-                Premium Automotive Intelligence
-              </p>
+              <div className="mb-4">
+                <h1 className="text-3xl font-thin mb-1 text-white tracking-tight">
+                  {getPageTitle()}
+                </h1>
+                <p className="text-base text-gray-200 font-light">
+                  Premium Automotive Intelligence
+                </p>
+              </div>
             </div>
           </div>
 
