@@ -225,11 +225,11 @@ const VehicleSegmentCategoryTable = ({
 
   return (
     <div className="space-y-4">
-      <div className="overflow-x-auto">
+      <div className="table-container">
         <Table>
           <TableHeader>
-            <TableRow className={`${theme.cardBorder} border-b`}>
-              <TableHead className={`${theme.textSecondary} font-medium`} rowSpan={2}>Category</TableHead>
+            <TableRow className={`${theme.cardBorder} border-b sticky-header-row-1`}>
+              <TableHead className={`${theme.textSecondary} font-medium sticky-column sticky-corner-1`} rowSpan={2}>Category</TableHead>
               {mainColumns.map((mainCol) => (
                 <TableHead 
                   key={mainCol} 
@@ -240,7 +240,7 @@ const VehicleSegmentCategoryTable = ({
                 </TableHead>
               ))}
             </TableRow>
-            <TableRow className={`${theme.cardBorder} border-b`}>
+            <TableRow className={`${theme.cardBorder} border-b sticky-header-row-2`}>
               {mainColumns.map((mainCol) => 
                 subColumns.map((subCol) => (
                   <TableHead 
@@ -262,7 +262,7 @@ const VehicleSegmentCategoryTable = ({
                 }`}
                 onClick={() => onCategoryClick(category)}
               >
-                <TableCell className={`${theme.textPrimary} font-medium`}>
+                <TableCell className={`${theme.textPrimary} font-medium sticky-column`}>
                   <div className="flex items-center gap-2">
                     {expandedCategory === category ? (
                       <ChevronDown className="h-4 w-4" />
@@ -287,7 +287,7 @@ const VehicleSegmentCategoryTable = ({
           
           {/* Grand Total Row */}
           <TableRow className={`${theme.cardBorder} border-t-2 bg-gray-800/40 font-bold`}>
-            <TableCell className={`${theme.textPrimary} font-bold`}>
+            <TableCell className={`${theme.textPrimary} font-bold sticky-column`}>
               Grand Total
             </TableCell>
             {mainColumns.map((mainCol) => 
@@ -311,11 +311,11 @@ const VehicleSegmentCategoryTable = ({
           <h4 className={`text-md font-medium ${theme.textPrimary} mb-3`}>
             Available Features in {expandedCategory}
           </h4>
-          <div className="overflow-x-auto">
+          <div className="table-container">
             <Table>
               <TableHeader>
-                <TableRow className={`${theme.cardBorder} border-b`}>
-                  <TableHead className={`${theme.textSecondary} font-medium`} rowSpan={2}>Feature</TableHead>
+                <TableRow className={`${theme.cardBorder} border-b sticky-header-row-1`}>
+                  <TableHead className={`${theme.textSecondary} font-medium sticky-column sticky-corner-1`} rowSpan={2}>Feature</TableHead>
                   {mainColumns.map((mainCol) => (
                     <TableHead 
                       key={mainCol} 
@@ -326,7 +326,7 @@ const VehicleSegmentCategoryTable = ({
                     </TableHead>
                   ))}
                 </TableRow>
-                <TableRow className={`${theme.cardBorder} border-b`}>
+                <TableRow className={`${theme.cardBorder} border-b sticky-header-row-2`}>
                   {mainColumns.map((mainCol) => 
                     subColumns.map((subCol) => (
                       <TableHead 
@@ -344,7 +344,7 @@ const VehicleSegmentCategoryTable = ({
                   const { features, matrix } = getFeaturesMatrix(expandedCategory)
                   return features.map((feature) => (
                     <TableRow key={feature} className={`${theme.cardBorder} border-b hover:bg-gray-800/20`}>
-                      <TableCell className={`${theme.textPrimary} font-medium`}>
+                      <TableCell className={`${theme.textPrimary} font-medium sticky-column`}>
                         {feature}
                       </TableCell>
                       {mainColumns.map((mainCol) => 
@@ -368,7 +368,7 @@ const VehicleSegmentCategoryTable = ({
               
               {/* Grand Total Row for Features */}
               <TableRow className={`${theme.cardBorder} border-t-2 bg-gray-800/40 font-bold`}>
-                <TableCell className={`${theme.textPrimary} font-bold`}>
+                <TableCell className={`${theme.textPrimary} font-bold sticky-column`}>
                   Total Features
                 </TableCell>
                 {mainColumns.map((mainCol) => 

@@ -156,3 +156,37 @@
 .chart-gradient {
   background: linear-gradient(180deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.05) 100%);
 }
+
+/* Sticky table styles */
+.sticky-column {
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  background: hsl(var(--card));
+}
+
+.sticky-header-row-1 {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: hsl(var(--card));
+}
+
+.sticky-header-row-2 {
+  position: sticky;
+  top: 48px;
+  z-index: 20;
+  background: hsl(var(--card));
+}
+
+.sticky-corner-1,
+.sticky-corner-2 {
+  z-index: 30;
+}
+
+.table-container {
+  max-height: 70vh;
+  overflow: auto;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+}
