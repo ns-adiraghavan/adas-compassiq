@@ -26,6 +26,7 @@ export function useAskWayPointChat() {
   const { selectedCountry } = useCountryContext();
 
   const getCurrentSection = useCallback(() => {
+    console.log('Getting current section from path:', location.pathname);
     const path = location.pathname;
     if (path.includes('/analytics')) return 'analytics';
     if (path.includes('/intelligence')) return 'intelligence';

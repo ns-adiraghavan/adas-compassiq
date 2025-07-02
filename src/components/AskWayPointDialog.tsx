@@ -13,6 +13,8 @@ interface AskWayPointDialogProps {
 }
 
 const AskWayPointDialog = ({ open, onOpenChange }: AskWayPointDialogProps) => {
+  console.log('AskWayPointDialog rendering, open:', open);
+  
   const [inputMessage, setInputMessage] = useState("");
   const { theme } = useTheme();
   const messagesEndRef = useRef<HTMLDivElement>(null);
