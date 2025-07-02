@@ -14,12 +14,13 @@ const AskWayPointChatButton = () => {
 
   return (
     <>
-      {/* Floating Chat Button */}
-      <div className="fixed bottom-6 right-6 z-50">
+      {/* Floating Chat Button with higher z-index */}
+      <div className="fixed bottom-6 right-6 z-[9999]" style={{ pointerEvents: 'all' }}>
         <Button
           onClick={handleButtonClick}
-          className="h-14 w-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+          className="h-14 w-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 cursor-pointer"
           size="icon"
+          style={{ pointerEvents: 'all', zIndex: 10000 }}
         >
           <MessageCircle className="h-6 w-6" />
           <span className="sr-only">Ask WayPoint AI</span>
