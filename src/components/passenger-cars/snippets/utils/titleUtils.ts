@@ -1,15 +1,7 @@
 import { ContextData } from "../types"
 
 export function getTitle(contextData?: ContextData): string {
-  const analysisType = contextData?.analysisType
-  switch (analysisType) {
-    case 'landscape-analysis': return "Landscape Strategic Insights"
-    case 'business-model-analysis': return "Business Model Strategic Insights"
-    case 'category-analysis': return "Category Strategic Insights"
-    case 'vehicle-segment-analysis': return "Vehicle Segment Strategic Insights"
-    case 'insights-analysis': return "Feature Overlap Strategic Insights"
-    default: return "Strategic Insights"
-  }
+  return "Strategic Insights"
 }
 
 export function getSubtitle(
