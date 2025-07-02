@@ -179,9 +179,6 @@ const BusinessModelAnalysisContent = () => {
         {/* Page Title */}
         <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-xl p-5 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
           <h2 className={`text-2xl font-light ${theme.textPrimary} mb-2`}>Business Model Analysis</h2>
-          <p className={`${theme.textMuted} text-sm`}>
-            Analyze feature distribution across different business model types and OEMs
-          </p>
         </div>
 
         {/* Countries Section */}
