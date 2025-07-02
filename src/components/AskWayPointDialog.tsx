@@ -68,8 +68,8 @@ const AskWayPointDialog = ({ open, onOpenChange }: AskWayPointDialogProps) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} modal={true}>
-      <DialogContent className={`${theme.cardBackground} border-2 ${theme.cardBorder} max-w-2xl max-h-[80vh] flex flex-col z-[10001]`}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className={`${theme.cardBackground} border-2 ${theme.cardBorder} max-w-2xl max-h-[80vh] flex flex-col`}>
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className={`${theme.textPrimary} text-xl font-semibold flex items-center gap-2`}>
             <Bot className="h-6 w-6 text-blue-500" />

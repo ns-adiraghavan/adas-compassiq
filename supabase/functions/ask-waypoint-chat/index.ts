@@ -30,7 +30,22 @@ serve(async (req) => {
   }
 
   try {
-    const { message, conversationHistory, contextData }: ChatRequest = await req.json();
+    const requestBody = await req.text();
+    console.log('Raw request body:', requestBody);
+    
+    let parsedData: ChatRequest;
+    try {
+      parsedData = JSON.parse(requestBody);
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      throw new Error('Invalid JSON in request body');
+    }
+
+    const { message, conversationHistory, contextData } = parsedData;
+
+    if (!message || typeof message !== 'string') {
+      throw new Error('Message is required and must be a string');
+    }
 
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openAIApiKey) {
@@ -40,20 +55,24 @@ serve(async (req) => {
     // Create context-aware system prompt
     const systemPrompt = createSystemPrompt(contextData);
     
-    // Build conversation messages
+    // Build conversation messages - safely handle conversation history
+    const historyMessages = Array.isArray(conversationHistory) 
+      ? conversationHistory.slice(-5).map(msg => ({
+          role: msg.role,
+          content: String(msg.content || '').substring(0, 1000) // Limit content length
+        }))
+      : [];
+
     const messages = [
       { role: 'system', content: systemPrompt },
-      ...conversationHistory.map(msg => ({
-        role: msg.role,
-        content: msg.content
-      })),
-      { role: 'user', content: message }
+      ...historyMessages,
+      { role: 'user', content: String(message).substring(0, 2000) } // Limit user message length
     ];
 
     console.log('Processing chat request:', { 
-      section: contextData.currentSection, 
-      country: contextData.selectedCountry,
-      oems: contextData.selectedOEMs 
+      section: contextData?.currentSection, 
+      country: contextData?.selectedCountry,
+      messageLength: message.length
     });
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -63,24 +82,25 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-4o-mini',
         messages: messages,
         temperature: 0.7,
-        max_tokens: 1000,
+        max_tokens: 800,
       }),
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`OpenAI API error: ${error}`);
+      const errorText = await response.text();
+      console.error('OpenAI API error:', errorText);
+      throw new Error(`OpenAI API error: ${response.status}`);
     }
 
     const data = await response.json();
-    const aiResponse = data.choices[0].message.content;
+    const aiResponse = data.choices?.[0]?.message?.content || 'I apologize, but I encountered an issue processing your request.';
 
     return new Response(JSON.stringify({ 
       response: aiResponse,
-      contextUsed: contextData.currentSection,
+      contextUsed: contextData?.currentSection || 'unknown',
       confidence: 0.9
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -88,8 +108,10 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in ask-waypoint-chat:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    
     return new Response(JSON.stringify({ 
-      error: error.message,
+      error: errorMessage,
       response: "I'm having trouble processing your request right now. Please try again in a moment."
     }), {
       status: 500,
@@ -99,52 +121,50 @@ serve(async (req) => {
 });
 
 function createSystemPrompt(contextData: any): string {
-  const { currentSection, selectedCountry, selectedOEMs } = contextData;
+  const currentSection = contextData?.currentSection || 'unknown';
+  const selectedCountry = contextData?.selectedCountry || 'Global';
 
   let contextDescription = '';
   
   switch (currentSection) {
     case 'landscape':
-      contextDescription = `You are viewing the Landscape section showing OEM feature distribution and competitive positioning across different automotive manufacturers.`;
+      contextDescription = `You are viewing the Landscape section showing OEM feature distribution and competitive positioning.`;
       break;
     case 'analytics':
-      contextDescription = `You are viewing the Category Analysis section showing connected car features organized by categories like Safety, Comfort, Entertainment, etc.`;
+      contextDescription = `You are viewing the Category Analysis section showing connected car features by categories.`;
       break;
     case 'intelligence':
-      contextDescription = `You are viewing the Vehicle Segment Analysis section showing how features are distributed across different vehicle segments (Compact, SUV, Luxury, etc.).`;
+      contextDescription = `You are viewing the Vehicle Segment Analysis section showing features by vehicle segments.`;
       break;
     case 'modeling':
-      contextDescription = `You are viewing the Business Model Analysis section showing how OEMs monetize connected car features through different business models.`;
+      contextDescription = `You are viewing the Business Model Analysis section showing OEM monetization strategies.`;
       break;
     case 'insights':
-      contextDescription = `You are viewing the Insights section with AI-generated strategic insights and competitive intelligence.`;
+      contextDescription = `You are viewing the Insights section with AI-generated strategic insights.`;
       break;
     default:
-      contextDescription = `You are viewing connected car features data across multiple automotive manufacturers.`;
+      contextDescription = `You are viewing connected car features data.`;
   }
 
-  return `You are WayPoint AI, an expert assistant for automotive connected features analysis. You help users understand data about connected car features, OEM strategies, and market trends.
+  return `You are WayPoint AI, an expert assistant for automotive connected features analysis.
 
 Current Context:
 - ${contextDescription}
-- Selected Country: ${selectedCountry || 'Global'}
-- Selected OEMs: ${selectedOEMs?.length ? selectedOEMs.join(', ') : 'All OEMs'}
+- Selected Country: ${selectedCountry}
 
-You have access to comprehensive data about:
-- Connected car features across major automotive OEMs
+You help users understand:
+- Connected car features across automotive OEMs
 - Feature availability by country and region
-- Business models (Subscription, One-time, Freemium, etc.)
-- Vehicle segments (Compact, Mid-size, Premium, SUV, etc.)
-- Feature categories (Safety, Comfort, Entertainment, Navigation, etc.)
+- Business models and monetization strategies
+- Vehicle segments and feature distribution
+- Market trends and competitive intelligence
 
 Guidelines:
-1. Provide data-driven insights based on the connected features database
-2. Handle typos and unclear questions gracefully by asking for clarification
-3. Focus on automotive industry trends and competitive intelligence
-4. Be concise but informative
-5. If you don't have specific data, acknowledge limitations clearly
-6. Suggest related questions when appropriate
-7. Use automotive industry terminology appropriately
+1. Provide concise, data-driven insights
+2. Handle unclear questions gracefully
+3. Focus on automotive industry context
+4. Be helpful and informative
+5. If you lack specific data, acknowledge limitations clearly
 
-Always provide actionable insights that help users understand the connected car landscape and make informed strategic decisions.`;
+Keep responses focused and under 200 words when possible.`;
 }
