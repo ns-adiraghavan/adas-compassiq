@@ -109,11 +109,27 @@ const AskWayPointDialog = ({ open, onOpenChange }: AskWayPointDialogProps) => {
                     }`}
                   >
                     {message.role === 'assistant' ? (
-                      <ReactMarkdown className="text-sm prose prose-sm max-w-none prose-invert">
-                        {message.content}
-                      </ReactMarkdown>
+                      <div className="text-sm">
+                        <ReactMarkdown 
+                          className="prose prose-sm max-w-none [&>*]:mb-3 [&>p]:mb-2 [&>ul]:mb-3 [&>ol]:mb-3 [&>h1]:mb-3 [&>h2]:mb-3 [&>h3]:mb-2 [&>h4]:mb-2 [&>h5]:mb-2 [&>h6]:mb-2"
+                          components={{
+                            p: ({ children }) => <p className="mb-2 leading-relaxed">{children}</p>,
+                            ul: ({ children }) => <ul className="mb-3 ml-4 list-disc space-y-1">{children}</ul>,
+                            ol: ({ children }) => <ol className="mb-3 ml-4 list-decimal space-y-1">{children}</ol>,
+                            li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+                            strong: ({ children }) => <strong className="font-semibold text-blue-400">{children}</strong>,
+                            h1: ({ children }) => <h1 className="text-lg font-bold mb-2 text-blue-300">{children}</h1>,
+                            h2: ({ children }) => <h2 className="text-base font-bold mb-2 text-blue-300">{children}</h2>,
+                            h3: ({ children }) => <h3 className="text-sm font-semibold mb-1 text-blue-300">{children}</h3>,
+                            code: ({ children }) => <code className="bg-gray-700 px-1 py-0.5 rounded text-xs">{children}</code>,
+                            blockquote: ({ children }) => <blockquote className="border-l-2 border-blue-400 pl-3 mb-2 italic">{children}</blockquote>
+                          }}
+                        >
+                          {message.content}
+                        </ReactMarkdown>
+                      </div>
                     ) : (
-                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
                     )}
                     <p className={`text-xs mt-1 opacity-70`}>
                       {new Date(message.timestamp).toLocaleTimeString()}
