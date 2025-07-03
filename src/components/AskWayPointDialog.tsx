@@ -3,10 +3,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Bot, User, Loader2 } from "lucide-react";
+import { Send, Bot, User, Loader2, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useAskWayPointChat } from "@/hooks/useAskWayPointChat";
 import { useTheme } from "@/contexts/ThemeContext";
 import ReactMarkdown from "react-markdown";
+import { useChatFeedback } from "@/hooks/useChatFeedback";
+import ChatFeedbackDialog from "./ChatFeedbackDialog";
 
 interface AskWayPointDialogProps {
   open: boolean;
@@ -29,6 +31,15 @@ const AskWayPointDialog = ({ open, onOpenChange }: AskWayPointDialogProps) => {
     addWelcomeMessage,
     currentSection
   } = useAskWayPointChat();
+
+  const {
+    submitFeedback,
+    getFeedbackState,
+    submittingFeedback,
+    showFeedbackDialog,
+    setShowFeedbackDialog,
+    handleDislikeFeedback
+  } = useChatFeedback();
 
   // Add welcome message when dialog opens
   useEffect(() => {
@@ -55,6 +66,39 @@ const AskWayPointDialog = ({ open, onOpenChange }: AskWayPointDialogProps) => {
       e.preventDefault();
       handleSendMessage();
     }
+  };
+
+  const handleFeedback = async (message: any, feedbackType: 'like' | 'dislike', feedbackDetails?: any) => {
+    if (feedbackType === 'dislike') {
+      handleDislikeFeedback(message.id);
+      return;
+    }
+    
+    await submitFeedback(
+      message.content,
+      feedbackType,
+      {
+        currentSection,
+        selectedCountry: 'Global', // You can get this from context
+        messageId: message.id
+      }
+    );
+  };
+
+  const handleFeedbackSubmit = async (category: string, description: string) => {
+    const messageToFeedback = messages.find(m => m.id === showFeedbackDialog);
+    if (!messageToFeedback) return;
+
+    await submitFeedback(
+      messageToFeedback.content,
+      'dislike',
+      {
+        currentSection,
+        selectedCountry: 'Global',
+        messageId: messageToFeedback.id
+      },
+      { category, description }
+    );
   };
 
   const getSectionDisplayName = (section: string) => {
@@ -109,24 +153,64 @@ const AskWayPointDialog = ({ open, onOpenChange }: AskWayPointDialogProps) => {
                     }`}
                   >
                     {message.role === 'assistant' ? (
-                      <div className="text-sm">
-                        <ReactMarkdown 
-                          className="prose prose-sm max-w-none [&>*]:mb-3 [&>p]:mb-2 [&>ul]:mb-3 [&>ol]:mb-3 [&>h1]:mb-3 [&>h2]:mb-3 [&>h3]:mb-2 [&>h4]:mb-2 [&>h5]:mb-2 [&>h6]:mb-2"
-                          components={{
-                            p: ({ children }) => <p className="mb-2 leading-relaxed">{children}</p>,
-                            ul: ({ children }) => <ul className="mb-3 ml-4 list-disc space-y-1">{children}</ul>,
-                            ol: ({ children }) => <ol className="mb-3 ml-4 list-decimal space-y-1">{children}</ol>,
-                            li: ({ children }) => <li className="leading-relaxed">{children}</li>,
-                            strong: ({ children }) => <strong className="font-semibold text-blue-400">{children}</strong>,
-                            h1: ({ children }) => <h1 className="text-lg font-bold mb-2 text-blue-300">{children}</h1>,
-                            h2: ({ children }) => <h2 className="text-base font-bold mb-2 text-blue-300">{children}</h2>,
-                            h3: ({ children }) => <h3 className="text-sm font-semibold mb-1 text-blue-300">{children}</h3>,
-                            code: ({ children }) => <code className="bg-gray-700 px-1 py-0.5 rounded text-xs">{children}</code>,
-                            blockquote: ({ children }) => <blockquote className="border-l-2 border-blue-400 pl-3 mb-2 italic">{children}</blockquote>
-                          }}
-                        >
-                          {message.content}
-                        </ReactMarkdown>
+                      <div className="flex-1">
+                        <div className="text-sm">
+                          <ReactMarkdown 
+                            className="prose prose-sm max-w-none [&>*]:mb-3 [&>p]:mb-2 [&>ul]:mb-3 [&>ol]:mb-3 [&>h1]:mb-3 [&>h2]:mb-3 [&>h3]:mb-2 [&>h4]:mb-2 [&>h5]:mb-2 [&>h6]:mb-2"
+                            components={{
+                              p: ({ children }) => <p className="mb-2 leading-relaxed">{children}</p>,
+                              ul: ({ children }) => <ul className="mb-3 ml-4 list-disc space-y-1">{children}</ul>,
+                              ol: ({ children }) => <ol className="mb-3 ml-4 list-decimal space-y-1">{children}</ol>,
+                              li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+                              strong: ({ children }) => <strong className="font-semibold text-blue-400">{children}</strong>,
+                              h1: ({ children }) => <h1 className="text-lg font-bold mb-2 text-blue-300">{children}</h1>,
+                              h2: ({ children }) => <h2 className="text-base font-bold mb-2 text-blue-300">{children}</h2>,
+                              h3: ({ children }) => <h3 className="text-sm font-semibold mb-1 text-blue-300">{children}</h3>,
+                              code: ({ children }) => <code className="bg-gray-700 px-1 py-0.5 rounded text-xs">{children}</code>,
+                              blockquote: ({ children }) => <blockquote className="border-l-2 border-blue-400 pl-3 mb-2 italic">{children}</blockquote>
+                            }}
+                          >
+                            {message.content}
+                          </ReactMarkdown>
+                        </div>
+                        
+                        {/* Feedback buttons for AI responses */}
+                        <div className="flex items-center gap-1 mt-2 pt-2 border-t border-gray-600/50">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className={`h-6 w-6 p-0 hover:bg-green-500/20 ${
+                              getFeedbackState(message.content, {
+                                currentSection,
+                                selectedCountry: 'Global',
+                                messageId: message.id
+                              }) === 'like' 
+                                ? 'bg-green-500/30 text-green-400' 
+                                : 'text-gray-400 hover:text-green-400'
+                            }`}
+                            onClick={() => handleFeedback(message, 'like')}
+                            disabled={submittingFeedback === message.id}
+                          >
+                            <ThumbsUp className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className={`h-6 w-6 p-0 hover:bg-red-500/20 ${
+                              getFeedbackState(message.content, {
+                                currentSection,
+                                selectedCountry: 'Global',
+                                messageId: message.id
+                              }) === 'dislike' 
+                                ? 'bg-red-500/30 text-red-400' 
+                                : 'text-gray-400 hover:text-red-400'
+                            }`}
+                            onClick={() => handleFeedback(message, 'dislike')}
+                            disabled={submittingFeedback === message.id}
+                          >
+                            <ThumbsDown className="h-3 w-3" />
+                          </Button>
+                        </div>
                       </div>
                     ) : (
                       <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
@@ -185,6 +269,14 @@ const AskWayPointDialog = ({ open, onOpenChange }: AskWayPointDialogProps) => {
             {error}
           </div>
         )}
+
+        {/* Feedback Dialog */}
+        <ChatFeedbackDialog
+          open={!!showFeedbackDialog}
+          onOpenChange={(open) => !open && setShowFeedbackDialog(null)}
+          onSubmit={handleFeedbackSubmit}
+          isSubmitting={!!submittingFeedback}
+        />
       </DialogContent>
     </Dialog>
   );

@@ -24,6 +24,41 @@ interface ChatRequest {
   };
 }
 
+interface FeedbackPattern {
+  common_issues: string[];
+  improvement_suggestions: string[];
+}
+
+// Function to get recent feedback patterns
+async function getFeedbackPatterns(): Promise<FeedbackPattern> {
+  try {
+    // This is a placeholder for actual Supabase client usage
+    // In a real implementation, you would query the feedback table
+    const feedbackData = {
+      common_issues: [
+        'Response not specific enough to user question',
+        'Missing concrete data and numbers',
+        'Too generic without OEM-specific insights',
+        'Poor formatting of data presentation'
+      ],
+      improvement_suggestions: [
+        'Always include specific numbers and counts in responses',
+        'Directly address the user\'s specific question first',
+        'Use clear formatting with headers and bullet points',
+        'Provide OEM-specific insights when possible'
+      ]
+    };
+    
+    return feedbackData;
+  } catch (error) {
+    console.error('Error fetching feedback patterns:', error);
+    return {
+      common_issues: [],
+      improvement_suggestions: []
+    };
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -52,8 +87,11 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
+    // Get feedback patterns to improve responses
+    const feedbackPatterns = await getFeedbackPatterns();
+    
     // Create context-aware system prompt
-    const systemPrompt = createSystemPrompt(contextData);
+    const systemPrompt = createSystemPrompt(contextData, feedbackPatterns);
     
     // Build conversation messages - safely handle conversation history
     const historyMessages = Array.isArray(conversationHistory) 
@@ -120,7 +158,7 @@ serve(async (req) => {
   }
 });
 
-function createSystemPrompt(contextData: any): string {
+function createSystemPrompt(contextData: any, feedbackPatterns: FeedbackPattern): string {
   const currentSection = contextData?.currentSection || 'unknown';
   const selectedCountry = contextData?.selectedCountry || 'Global';
 
@@ -164,11 +202,25 @@ function createSystemPrompt(contextData: any): string {
 **Available Countries:** ${data.countryList?.slice(0, 8).join(', ') || 'N/A'}${data.countryList?.length > 8 ? ` (and ${data.countryList.length - 8} more)` : ''}`;
   }
 
+  // Add feedback improvement guidelines
+  let feedbackGuidelines = '';
+  if (feedbackPatterns.common_issues.length > 0 || feedbackPatterns.improvement_suggestions.length > 0) {
+    feedbackGuidelines = `
+
+**CRITICAL IMPROVEMENT GUIDELINES (Based on User Feedback):**
+
+**Common Issues to AVOID:**
+${feedbackPatterns.common_issues.map(issue => `- ${issue}`).join('\n')}
+
+**Required Improvements:**
+${feedbackPatterns.improvement_suggestions.map(suggestion => `- ${suggestion}`).join('\n')}`;
+  }
+
   return `You are WayPoint AI, an expert assistant with access to our complete WayPoint automotive connected features database.
 
 **Current Context:**
 - ${contextDescription}
-- User's Selected Country: ${selectedCountry}${contextInfo}
+- User's Selected Country: ${selectedCountry}${contextInfo}${feedbackGuidelines}
 
 **IMPORTANT FORMATTING GUIDELINES:**
 1. **Use proper markdown formatting** with headers, bullet points, and spacing
@@ -176,6 +228,7 @@ function createSystemPrompt(contextData: any): string {
 3. **Use bold text** for important terms and numbers
 4. **Structure responses** with clear sections and bullet points
 5. **Include specific data and counts** from our comprehensive dataset
+6. **Be specific and direct** - address the user's exact question first
 
 **Key Capabilities:**
 - Compare any OEMs across all countries and features

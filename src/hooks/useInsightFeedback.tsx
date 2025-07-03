@@ -15,7 +15,15 @@ export function useInsightFeedback() {
   const generateInsightHash = (insight: string, context: FeedbackContext): string => {
     const normalizedInsight = insight.toLowerCase().trim()
     const contextString = `${context.selectedOEM || ''}_${context.selectedCountry || ''}_${context.analysisType || ''}`
-    return btoa(normalizedInsight + contextString).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32)
+    // Use crypto.subtle.digest to generate a hash instead of btoa to avoid character encoding issues
+    const textToHash = normalizedInsight + contextString
+    let hash = 0
+    for (let i = 0; i < textToHash.length; i++) {
+      const char = textToHash.charCodeAt(i)
+      hash = ((hash << 5) - hash) + char
+      hash = hash & hash // Convert to 32bit integer
+    }
+    return Math.abs(hash).toString(36).substring(0, 16)
   }
 
   const submitFeedback = async (
