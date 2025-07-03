@@ -82,8 +82,8 @@ const AskWayPointDialog = ({ open, onOpenChange }: AskWayPointDialogProps) => {
         </DialogHeader>
 
         {/* Messages Area */}
-        <ScrollArea className="flex-1 overflow-auto">
-          <div className="space-y-4 p-4">
+        <div className="flex-1 overflow-y-auto border border-gray-200 rounded p-4" style={{ maxHeight: 'calc(85vh - 200px)' }}>
+          <div className="space-y-4">
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -139,7 +139,7 @@ const AskWayPointDialog = ({ open, onOpenChange }: AskWayPointDialogProps) => {
             
             <div ref={messagesEndRef} />
           </div>
-        </ScrollArea>
+        </div>
 
         {/* Input Area */}
         <div className="flex-shrink-0 flex gap-2 pt-4 border-t border-border">
