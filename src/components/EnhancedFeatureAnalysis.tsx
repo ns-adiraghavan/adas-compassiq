@@ -125,7 +125,7 @@ const EnhancedFeatureAnalysis = ({ selectedOEM, selectedCountry }: EnhancedFeatu
         <h3 className="text-xl font-light text-white mb-6">Top Features by Availability</h3>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={featureAnalysis.featureAvailability} layout="horizontal">
+            <BarChart data={featureAnalysis.featureAvailability} layout="horizontal" maxBarSize={30} barCategoryGap="15%">
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
               <XAxis type="number" tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 12 }} />
               <YAxis 

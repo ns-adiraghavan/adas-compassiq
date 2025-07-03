@@ -110,7 +110,7 @@ const CategoryBarChart = ({ selectedOEM, selectedCountry }: CategoryBarChartProp
       </CardHeader>
       <CardContent className="p-2 h-44">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 40 }} className="animate-scale-in">
+          <BarChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 40 }} maxBarSize={40} barCategoryGap="15%" className="animate-scale-in">
             <CartesianGrid strokeDasharray="3 3" stroke={getGridColor()} />
             <XAxis 
               dataKey="category" 

@@ -70,7 +70,7 @@ export function FeatureChart() {
         {chartData.length > 0 ? (
           <ChartContainer config={chartConfig}>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={chartData}>
+              <BarChart data={chartData} maxBarSize={50} barCategoryGap="20%">
                 <XAxis 
                   dataKey="oem" 
                   tick={{ fill: 'hsl(215 20.2% 65.1%)' }}

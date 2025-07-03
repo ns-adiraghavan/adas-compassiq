@@ -95,7 +95,7 @@ const EnhancedCategoryAnalysis = ({ selectedOEM, selectedCountry }: EnhancedCate
         <h3 className="text-xl font-light text-white mb-6">Feature Categories Overview</h3>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={categoryAnalysis.categories.slice(0, 8)}>
+            <BarChart data={categoryAnalysis.categories.slice(0, 8)} maxBarSize={45} barCategoryGap="20%">
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
               <XAxis 
                 dataKey="name" 
@@ -125,7 +125,7 @@ const EnhancedCategoryAnalysis = ({ selectedOEM, selectedCountry }: EnhancedCate
         <h3 className="text-xl font-light text-white mb-6">Business Model Distribution by Category</h3>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={categoryAnalysis.businessModels.slice(0, 8)}>
+            <BarChart data={categoryAnalysis.businessModels.slice(0, 8)} maxBarSize={45} barCategoryGap="20%">
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
               <XAxis 
                 dataKey="name" 

@@ -140,6 +140,8 @@ const OEMBarChart = ({ selectedCountry, onOEMClick }: OEMBarChartProps) => {
         <BarChart
           data={chartData}
           margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+          maxBarSize={60}
+          barCategoryGap="20%"
         >
           <CartesianGrid strokeDasharray="3 3" stroke={getGridColor()} />
           <XAxis 

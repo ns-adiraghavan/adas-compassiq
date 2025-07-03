@@ -237,7 +237,7 @@ const BusinessModelAnalysis = ({ selectedOEM, selectedCountry }: BusinessModelAn
         <h3 className="text-xl font-light text-white mb-6">OEM Business Model Strategy</h3>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={businessAnalysis.oemComparison}>
+            <BarChart data={businessAnalysis.oemComparison} maxBarSize={40} barCategoryGap="20%">
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
               <XAxis 
                 dataKey="oem" 
@@ -268,7 +268,7 @@ const BusinessModelAnalysis = ({ selectedOEM, selectedCountry }: BusinessModelAn
         <h3 className="text-xl font-light text-white mb-6">Category Monetization Strategy</h3>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={businessAnalysis.categoryBreakdown}>
+            <BarChart data={businessAnalysis.categoryBreakdown} maxBarSize={40} barCategoryGap="20%">
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
               <XAxis 
                 dataKey="category" 

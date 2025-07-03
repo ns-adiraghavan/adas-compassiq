@@ -88,7 +88,7 @@ const BusinessModelChart = ({ selectedCountry, selectedOEMs, onBusinessModelClic
   return (
     <div className="h-96">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={chartData} onClick={handleBarClick}>
+        <BarChart data={chartData} onClick={handleBarClick} maxBarSize={50} barCategoryGap="25%">
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
           <XAxis 
             dataKey="name" 
