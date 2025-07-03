@@ -19,7 +19,7 @@ const AskWayPointChatButton = () => {
       {/* Simplified floating button with maximum z-index */}
       <button
         onClick={handleButtonClick}
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg cursor-pointer border-2 border-white"
+        className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg cursor-pointer"
         style={{ 
           zIndex: 999999,
           pointerEvents: 'auto',
