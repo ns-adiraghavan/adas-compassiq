@@ -2,6 +2,8 @@ import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLocation } from "react-router-dom";
 import { useCountryContext } from "@/contexts/CountryContext";
+import { useLandscapeAnalysisData } from "./useLandscapeAnalysisData";
+import { useWaypointData } from "./useWaypointData";
 
 export interface ChatMessage {
   role: 'user' | 'assistant';
@@ -24,6 +26,22 @@ export function useAskWayPointChat() {
   const [error, setError] = useState<string | null>(null);
   const location = useLocation();
   const { selectedCountry } = useCountryContext();
+  
+  // Get OEM data for landscape page
+  const { data: waypointData } = useWaypointData();
+  const firstAvailableOEM = waypointData?.csvData?.length > 0 ? 
+    Array.from(new Set(
+      waypointData.csvData.flatMap(file => 
+        file.data && Array.isArray(file.data) ? 
+          file.data.map((row: any) => row.OEM).filter(oem => 
+            oem && typeof oem === 'string' && 
+            !oem.toLowerCase().includes('merged') &&
+            !oem.toLowerCase().includes('monitoring')
+          ) : []
+      )
+    )).sort()[0] : null;
+  
+  const landscapeData = useLandscapeAnalysisData(firstAvailableOEM || "", selectedCountry || "");
 
   const getCurrentSection = useCallback(() => {
     console.log('Getting current section from path:', location.pathname);
@@ -39,14 +57,19 @@ export function useAskWayPointChat() {
     // Get context based on current page
     const currentSection = getCurrentSection();
     
-    // You can extend this to get specific data from the current page context
-    // For now, we'll use basic context information
+    // Add section-specific data when available
+    let sectionData = null;
+    if (currentSection === 'landscape' && landscapeData) {
+      sectionData = landscapeData;
+    }
+    
     return {
       currentSection,
       selectedCountry: selectedCountry || 'Global',
-      selectedOEMs: [], // This can be passed as props if needed
+      selectedOEMs: firstAvailableOEM ? [firstAvailableOEM] : [],
+      sectionData
     };
-  }, [getCurrentSection, selectedCountry]);
+  }, [getCurrentSection, selectedCountry, firstAvailableOEM, landscapeData]);
 
   const sendMessage = useCallback(async (message: string) => {
     if (!message.trim()) return;

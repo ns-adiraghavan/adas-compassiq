@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Bot, User, Loader2 } from "lucide-react";
 import { useAskWayPointChat } from "@/hooks/useAskWayPointChat";
 import { useTheme } from "@/contexts/ThemeContext";
+import ReactMarkdown from "react-markdown";
 
 interface AskWayPointDialogProps {
   open: boolean;
@@ -107,7 +108,13 @@ const AskWayPointDialog = ({ open, onOpenChange }: AskWayPointDialogProps) => {
                         : `${theme.cardBackground} border ${theme.cardBorder} ${theme.textPrimary}`
                     }`}
                   >
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    {message.role === 'assistant' ? (
+                      <ReactMarkdown className="text-sm prose prose-sm max-w-none prose-invert">
+                        {message.content}
+                      </ReactMarkdown>
+                    ) : (
+                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    )}
                     <p className={`text-xs mt-1 opacity-70`}>
                       {new Date(message.timestamp).toLocaleTimeString()}
                     </p>
