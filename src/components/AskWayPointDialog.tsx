@@ -70,7 +70,7 @@ const AskWayPointDialog = ({ open, onOpenChange }: AskWayPointDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`${theme.cardBackground} border-2 ${theme.cardBorder} max-w-2xl max-h-[85vh] flex flex-col overflow-hidden`}>
+      <DialogContent className={`${theme.cardBackground} border-2 ${theme.cardBorder} max-w-2xl h-[85vh] flex flex-col`}>
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className={`${theme.textPrimary} text-xl font-semibold flex items-center gap-2`}>
             <Bot className="h-6 w-6 text-blue-500" />
@@ -82,8 +82,8 @@ const AskWayPointDialog = ({ open, onOpenChange }: AskWayPointDialogProps) => {
         </DialogHeader>
 
         {/* Messages Area */}
-        <ScrollArea className="flex-1 min-h-0 max-h-96 pr-4">
-          <div className="space-y-4 pb-4">
+        <ScrollArea className="flex-1 overflow-auto">
+          <div className="space-y-4 p-4">
             {messages.map((message) => (
               <div
                 key={message.id}
