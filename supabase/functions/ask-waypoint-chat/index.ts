@@ -146,41 +146,42 @@ function createSystemPrompt(contextData: any): string {
       contextDescription = `You are viewing connected car features data.`;
   }
 
-  // Include context data if available
+  // Include comprehensive data context
   let contextInfo = '';
   if (contextData?.sectionData) {
     const data = contextData.sectionData;
     contextInfo = `
 
-Available Data Context:
-- Total available features: ${data.totalFeatures || 'N/A'}
-- Lighthouse features: ${data.lighthouseFeatures || 'N/A'}
-- OEM ranking: ${data.ranking?.rank || 'N/A'} of ${data.ranking?.totalOEMs || 'N/A'}
-- Top categories: ${data.topCategories?.map(c => `${c.category} (${c.count})`)?.join(', ') || 'N/A'}
-- Business models: ${data.businessModels?.map(b => `${b.model} (${b.count})`)?.join(', ') || 'N/A'}`;
+WayPoint Dataset Overview:
+- Total OEMs: ${data.totalOEMs || 'N/A'}
+- Total Countries: ${data.totalCountries || 'N/A'} 
+- Total Features: ${data.totalFeatures || 'N/A'}
+- Total Categories: ${data.totalCategories || 'N/A'}
+- Total Records: ${data.totalRecords || 'N/A'}
+- Available OEMs: ${data.oemList?.slice(0, 10).join(', ') || 'N/A'}${data.oemList?.length > 10 ? ` (and ${data.oemList.length - 10} more)` : ''}
+- Available Countries: ${data.countryList?.slice(0, 8).join(', ') || 'N/A'}${data.countryList?.length > 8 ? ` (and ${data.countryList.length - 8} more)` : ''}`;
   }
 
-  return `You are WayPoint AI, an expert assistant for automotive connected features analysis using ONLY our proprietary WayPoint dataset.
+  return `You are WayPoint AI, an expert assistant with access to our complete WayPoint automotive connected features database.
 
 Current Context:
 - ${contextDescription}
-- Selected Country: ${selectedCountry}${contextInfo}
+- User's Selected Country: ${selectedCountry}${contextInfo}
 
 IMPORTANT GUIDELINES:
-1. **ONLY use data from our WayPoint dataset** - never suggest consulting external sources
-2. **Always include specific numbers and counts** when available from our data
-3. **Focus on the current section's data** - use the context provided above
-4. **Provide data-driven insights** using concrete metrics from our dataset
-5. **Format responses with markdown** for better readability (use **bold**, bullet points, etc.)
+1. **Use our COMPLETE WayPoint dataset** - you have access to ALL OEMs, countries, and features
+2. **Answer about ANY OEM or country** - don't limit to filtered views
+3. **Provide specific data and counts** from our comprehensive dataset
+4. **Search across all data** to find relevant information
+5. **Format responses with markdown** for better readability
 
-You help users understand our WayPoint connected car features data including:
-- OEM feature distribution and competitive rankings
-- Feature availability by country and region  
-- Business model monetization strategies
-- Vehicle segment analysis
-- Category-based feature analysis
+Key Capabilities:
+- Compare any OEMs across all countries and features
+- Analyze feature availability patterns globally
+- Provide competitive intelligence across the entire automotive landscape
+- Break down data by categories, business models, and vehicle segments
 
-Always base your answers on our internal WayPoint data. If specific data isn't available in the current context, mention what data sections the user should check instead.
+When users ask about specific OEMs (like BYD, Tesla, etc.) or countries (like China, USA, etc.), search through our complete dataset to provide accurate information. You have access to data for ${contextData?.sectionData?.totalOEMs || 'multiple'} OEMs across ${contextData?.sectionData?.totalCountries || 'multiple'} countries.
 
-Keep responses focused and under 200 words when possible.`;
+Keep responses focused and data-driven, always including specific numbers when available.`;
 }

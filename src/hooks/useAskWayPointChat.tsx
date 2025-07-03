@@ -26,22 +26,56 @@ export function useAskWayPointChat() {
   const [error, setError] = useState<string | null>(null);
   const location = useLocation();
   const { selectedCountry } = useCountryContext();
-  
-  // Get OEM data for landscape page
   const { data: waypointData } = useWaypointData();
-  const firstAvailableOEM = waypointData?.csvData?.length > 0 ? 
-    Array.from(new Set(
-      waypointData.csvData.flatMap(file => 
-        file.data && Array.isArray(file.data) ? 
-          file.data.map((row: any) => row.OEM).filter(oem => 
-            oem && typeof oem === 'string' && 
-            !oem.toLowerCase().includes('merged') &&
-            !oem.toLowerCase().includes('monitoring')
-          ) : []
-      )
-    )).sort()[0] : null;
   
-  const landscapeData = useLandscapeAnalysisData(firstAvailableOEM || "", selectedCountry || "");
+  // Get complete dataset for AI context - not filtered
+  const getCompleteDatasetSummary = useCallback(() => {
+    if (!waypointData?.csvData?.length) return null;
+
+    // Extract all OEMs, countries, features from complete dataset
+    const allOEMs = new Set<string>();
+    const allCountries = new Set<string>();
+    const allFeatures = new Set<string>();
+    const allCategories = new Set<string>();
+    let totalRecords = 0;
+
+    waypointData.csvData.forEach(file => {
+      if (file.data && Array.isArray(file.data)) {
+        file.data.forEach((row: any) => {
+          totalRecords++;
+          
+          if (row.OEM && typeof row.OEM === 'string' && 
+              !row.OEM.toLowerCase().includes('merged') &&
+              !row.OEM.toLowerCase().includes('monitoring')) {
+            allOEMs.add(row.OEM.trim());
+          }
+          
+          if (row.Country && typeof row.Country === 'string') {
+            allCountries.add(row.Country.trim());
+          }
+          
+          if (row.Feature && typeof row.Feature === 'string') {
+            allFeatures.add(row.Feature.trim());
+          }
+          
+          if (row.Category && typeof row.Category === 'string') {
+            allCategories.add(row.Category.trim());
+          }
+        });
+      }
+    });
+
+    return {
+      totalOEMs: allOEMs.size,
+      totalCountries: allCountries.size,
+      totalFeatures: allFeatures.size,
+      totalCategories: allCategories.size,
+      totalRecords,
+      oemList: Array.from(allOEMs).sort(),
+      countryList: Array.from(allCountries).sort(),
+      categoryList: Array.from(allCategories).sort()
+    };
+  }, [waypointData]);
 
   const getCurrentSection = useCallback(() => {
     console.log('Getting current section from path:', location.pathname);
@@ -54,22 +88,17 @@ export function useAskWayPointChat() {
   }, [location.pathname]);
 
   const getContextData = useCallback((): ChatContextData => {
-    // Get context based on current page
     const currentSection = getCurrentSection();
-    
-    // Add section-specific data when available
-    let sectionData = null;
-    if (currentSection === 'landscape' && landscapeData) {
-      sectionData = landscapeData;
-    }
+    const datasetSummary = getCompleteDatasetSummary();
     
     return {
       currentSection,
       selectedCountry: selectedCountry || 'Global',
-      selectedOEMs: firstAvailableOEM ? [firstAvailableOEM] : [],
-      sectionData
+      selectedOEMs: [],
+      sectionData: datasetSummary, // Pass complete dataset summary instead of filtered data
+      globalData: datasetSummary
     };
-  }, [getCurrentSection, selectedCountry, firstAvailableOEM, landscapeData]);
+  }, [getCurrentSection, selectedCountry, getCompleteDatasetSummary]);
 
   const sendMessage = useCallback(async (message: string) => {
     if (!message.trim()) return;
