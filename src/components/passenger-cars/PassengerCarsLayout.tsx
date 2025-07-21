@@ -76,9 +76,15 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
           
           {/* Header Content */}
           <div className="relative px-8 py-4">
-            {/* Themes button at extreme top left */}
-            <div className="absolute top-4 left-8 z-50">
+            {/* Themes button and Taxonomy link at extreme top left */}
+            <div className="absolute top-4 left-8 z-50 flex items-center gap-3">
               <ThemeSelector />
+              <Link 
+                to="#" 
+                className="text-white text-sm font-medium hover:text-gray-300 transition-colors bg-black/20 backdrop-blur-sm border border-white/20 px-3 py-2 rounded-md"
+              >
+                Taxonomy
+              </Link>
             </div>
             
             {/* Back to Home button - positioned below theme selector, aligned to left */}
