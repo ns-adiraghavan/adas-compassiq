@@ -42,8 +42,20 @@ export function createVehicleSegmentAnalysisPrompt(
   } = contextData;
 
   const feedbackContext = createFeedbackContext(feedbackData);
+  
+  // Define available terms for validation
+  const validOEMs = ['BYD', 'GM', 'Hyundai', 'Mahindra', 'Nio', 'Tata', 'Zeekr'];
+  const validCountries = ['Australia', 'China', 'Germany', 'India', 'New Zealand', 'Norway', 'UK', 'US'];
+  const validCategories = ['Available', 'Enabler', 'Energy', 'Entertainment', 'Financials', 'Gaming', 'Health', 'Home', 'Mobility', 'Shopping', 'Social', 'Work'];
 
   return `You are an automotive vehicle segment analyst. Generate exactly 3 strategic insights for Vehicle Segment Analysis in ${country}. Each insight must be 15-20 words maximum and use only raw counts, no percentages.
+
+IMPORTANT: Use ONLY these verified terms from our dataset:
+- OEMs: ${validOEMs.join(', ')}
+- Countries: ${validCountries.join(', ')}
+- Categories: ${validCategories.join(', ')}
+- Do NOT use any OEM names, country names, or technical terms not listed above
+- Use generic terms like "manufacturers", "automotive market", "connected features" instead of undefined terms
 
 VERIFIED VEHICLE SEGMENT DATA:
 - Market Analysis: ${selectedOEMs.join(', ')} in ${country}
@@ -59,7 +71,7 @@ GENERATE 3 INSIGHTS (15-20 words each, counts only):
 
 3. Market Positioning: [Segment-specific deployment strategies indicate competitive positioning for ${selectedOEMs.join(', ')} manufacturers]
 
-Use exact counts only, no percentages. Respond with ONLY a JSON array of exactly 3 strings.`;
+Use exact counts only, no percentages. Use only verified terms from the dataset. Respond with ONLY a JSON array of exactly 3 strings.`;
 }
 
 export function createInsightsAnalysisPrompt(
@@ -73,8 +85,20 @@ export function createInsightsAnalysisPrompt(
   } = contextData;
 
   const feedbackContext = createFeedbackContext(feedbackData);
+  
+  // Define available terms for validation
+  const validOEMs = ['BYD', 'GM', 'Hyundai', 'Mahindra', 'Nio', 'Tata', 'Zeekr'];
+  const validCountries = ['Australia', 'China', 'Germany', 'India', 'New Zealand', 'Norway', 'UK', 'US'];
+  const validCategories = ['Available', 'Enabler', 'Energy', 'Entertainment', 'Financials', 'Gaming', 'Health', 'Home', 'Mobility', 'Shopping', 'Social', 'Work'];
 
   return `You are an automotive feature overlap analyst. Generate exactly 3 strategic insights for Feature Overlap Analysis in ${country}. Each insight must be 15-20 words maximum and focus on feature intersection patterns.
+
+IMPORTANT: Use ONLY these verified terms from our dataset:
+- OEMs: ${validOEMs.join(', ')}
+- Countries: ${validCountries.join(', ')}
+- Categories: ${validCategories.join(', ')}
+- Do NOT use any OEM names, country names, or technical terms not listed above
+- Use generic terms like "manufacturers", "automotive market", "connected features" instead of undefined terms
 
 VERIFIED FEATURE OVERLAP DATA:
 - Market Analysis: ${selectedOEMs.join(', ')} in ${country}
@@ -90,5 +114,5 @@ GENERATE 3 INSIGHTS (15-20 words each):
 
 3. Market Convergence: [Feature intersection data indicates convergence patterns across ${selectedOEMs.join(', ')} manufacturer portfolios]
 
-Focus on overlap patterns and competitive dynamics. Respond with ONLY a JSON array of exactly 3 strings.`;
+Focus on overlap patterns and competitive dynamics. Use only verified terms from the dataset. Respond with ONLY a JSON array of exactly 3 strings.`;
 }
