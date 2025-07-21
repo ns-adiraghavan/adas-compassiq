@@ -8,54 +8,6 @@ import { getFeedbackData } from './utils/feedback.ts';
 import { logRequestDetails, logContextDataDetails, logPromptDetails, logOpenAIResponse } from './utils/logging.ts';
 import { generateEnhancedFallbacks, ensureThreeInsights } from './utils/enhanced-fallbacks.ts';
 
-// Available terms from database - used to validate AI output
-const AVAILABLE_TERMS = {
-  oems: ['BYD', 'GM', 'Hyundai', 'Mahindra', 'Nio', 'Tata', 'Zeekr'],
-  countries: ['Australia', 'China', 'Germany', 'India', 'New Zealand', 'Norway', 'UK', 'US'],
-  categories: ['Available', 'Enabler', 'Energy', 'Entertainment', 'Financials', 'Gaming', 'Health', 'Home', 'Mobility', 'Not available', 'Shopping', 'Social', 'Work'],
-  businessModels: ['Add-on', 'Flatrate', 'Free', 'Freemium', 'Not available', 'Subscription', 'Subscription - Free Trial'],
-  features: ['AI Platform', 'Android Auto/ Apple car play', 'App Store', 'Automated Valet parking', 'Calendar Sync', 'Connected navigation', 'Crash Documentation', 'Digital Security Services', 'Driving Behavior Analytics', 'Emergency Call/ Notification', 'Entertainment/ Streaming Services', 'Fleet Management', 'Geo-fencing', 'Gesture control', 'Global Maps', 'Integrated payment', 'Integration of live-streaming services', 'Local Weather App', 'Multi Device Integration', 'POI Locator', 'Remote Climate', 'Remote access and immobilisation', 'Remote tire pressure information', 'Vehicle tracking', 'Voice assistant integration']
-};
-
-// Function to validate insights against available terms
-function validateInsightsAgainstData(insights: string[]): string[] {
-  const validatedInsights = insights.map(insight => {
-    let validatedInsight = insight;
-    
-    // Check for any terms not in our available data and replace with generic terms
-    const allTerms = [
-      ...AVAILABLE_TERMS.oems,
-      ...AVAILABLE_TERMS.countries,
-      ...AVAILABLE_TERMS.categories,
-      ...AVAILABLE_TERMS.businessModels,
-      ...AVAILABLE_TERMS.features
-    ];
-    
-    // For any undefined terms, replace them with validated terms or make them more generic
-    const words = insight.split(' ');
-    const validatedWords = words.map(word => {
-      const cleanWord = word.replace(/[.,;:]/g, '');
-      // If it's a proper noun not in our available terms, replace with generic term
-      if (/^[A-Z][a-z]+$/.test(cleanWord) && !allTerms.includes(cleanWord)) {
-        if (cleanWord.includes('OEM') || /^[A-Z]{2,}$/.test(cleanWord)) {
-          return 'manufacturers';
-        }
-        return word.toLowerCase();
-      }
-      return word;
-    });
-    
-    validatedInsight = validatedWords.join(' ');
-    
-    return validatedInsight;
-  });
-  
-  console.log('Original insights:', insights);
-  console.log('Validated insights:', validatedInsights);
-  
-  return validatedInsights;
-}
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -126,9 +78,6 @@ serve(async (req) => {
 
     // Ensure we have exactly 3 insights
     insights = ensureThreeInsights(insights);
-    
-    // Validate insights against available data terms
-    insights = validateInsightsAgainstData(insights);
 
     const result = {
       success: true,
