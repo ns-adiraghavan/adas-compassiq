@@ -1,9 +1,12 @@
 import { ArrowLeft } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
+import { useState } from "react"
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext"
 import ThemeSelector from "@/components/ThemeSelector"
 import WaypointLogo from "@/components/WaypointLogo"
 import AskWayPointChatButton from "@/components/AskWayPointChatButton"
+import TaxonomyDialog from "@/components/TaxonomyDialog"
+import { Button } from "@/components/ui/button"
 
 interface PassengerCarsLayoutProps {
   children: React.ReactNode
@@ -12,6 +15,7 @@ interface PassengerCarsLayoutProps {
 const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
   const { theme } = useTheme()
   const location = useLocation()
+  const [taxonomyDialogOpen, setTaxonomyDialogOpen] = useState(false)
 
   const sections = [
     { 
@@ -76,15 +80,16 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
           
           {/* Header Content */}
           <div className="relative px-8 py-4">
-            {/* Themes button and Taxonomy link at extreme top left */}
+            {/* Themes button and Taxonomy button at extreme top left */}
             <div className="absolute top-4 left-8 z-50 flex items-center gap-3">
               <ThemeSelector />
-              <Link 
-                to="#" 
-                className="text-white text-sm font-medium hover:text-gray-300 transition-colors bg-black/20 backdrop-blur-sm border border-white/20 px-3 py-2 rounded-md"
+              <Button 
+                variant="ghost"
+                onClick={() => setTaxonomyDialogOpen(true)}
+                className="text-white text-sm font-medium hover:text-gray-300 transition-colors bg-black/20 backdrop-blur-sm border border-white/20 px-3 py-2 rounded-md hover:bg-black/30"
               >
                 Taxonomy
-              </Link>
+              </Button>
             </div>
             
             {/* Back to Home button - positioned below theme selector, aligned to left */}
@@ -150,6 +155,12 @@ const PassengerCarsLayoutContent = ({ children }: PassengerCarsLayoutProps) => {
 
       {/* Ask WayPoint Chat Button - appears on all passenger cars pages */}
       <AskWayPointChatButton />
+
+      {/* Taxonomy Dialog */}
+      <TaxonomyDialog 
+        open={taxonomyDialogOpen} 
+        onOpenChange={setTaxonomyDialogOpen} 
+      />
     </div>
   )
 }
