@@ -62,7 +62,7 @@ const AVLandscapeTable = ({ selectedRegion, selectedCategory }: AVLandscapeTable
             ) : (
               <TableRow>
                 <TableCell colSpan={6} className={`text-center ${theme.textMuted} py-8`}>
-                  No data available for the selected region and category
+                  No AV platform data available.
                 </TableCell>
               </TableRow>
             )}

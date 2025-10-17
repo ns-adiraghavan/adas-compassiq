@@ -19,7 +19,7 @@ export function useAVLandscapeData(selectedRegion: string, selectedCategory: str
       const { data, error } = await supabase
         .from('adas_current_snapshot' as any)
         .select('*')
-        .ilike('Parameter', '%AV%Landscape%')
+        .or('Parameter.ilike.%AV%Landscape%,Attribute.ilike.%AV%Landscape%')
       
       if (error) {
         console.error('Error fetching AV landscape data:', error)
