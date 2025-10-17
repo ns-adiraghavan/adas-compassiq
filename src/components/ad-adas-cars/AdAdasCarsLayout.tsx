@@ -6,9 +6,74 @@ import ThemeSelector from "@/components/ThemeSelector"
 import WaypointLogo from "@/components/WaypointLogo"
 import AskWayPointChatButton from "@/components/AskWayPointChatButton"
 import { Button } from "@/components/ui/button"
+import CountryButtons from "@/components/CountryButtons"
+import PlayerCategoryButtons from "./PlayerCategoryButtons"
+import SubTabButtons from "./SubTabButtons"
 
 interface AdAdasCarsLayoutProps {
   children: React.ReactNode
+}
+
+interface ContentSectionProps {
+  selectedCountry: string
+  onCountryChange: (country: string) => void
+  selectedCategory: string
+  onCategoryChange: (category: string) => void
+  subTabs?: string[]
+  selectedSubTab?: string
+  onSubTabChange?: (tab: string) => void
+}
+
+const ContentSection = ({ 
+  selectedCountry, 
+  onCountryChange, 
+  selectedCategory, 
+  onCategoryChange,
+  subTabs,
+  selectedSubTab,
+  onSubTabChange 
+}: ContentSectionProps) => {
+  const { theme } = useTheme()
+  
+  return (
+    <div className="container mx-auto px-8 py-6 space-y-6">
+      {/* Countries/Regions Section */}
+      <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
+        <CountryButtons
+          selectedCountry={selectedCountry}
+          onCountryChange={onCountryChange}
+        />
+      </div>
+
+      {/* Player Category Section */}
+      <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
+        <PlayerCategoryButtons
+          selectedCategory={selectedCategory}
+          onCategoryChange={onCategoryChange}
+        />
+      </div>
+
+      {/* Sub-Tab Buttons (if provided) */}
+      {subTabs && selectedSubTab && onSubTabChange && (
+        <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
+          <h3 className={`text-sm font-medium ${theme.textMuted} mb-3`}>Analysis Type</h3>
+          <SubTabButtons
+            tabs={subTabs}
+            selectedTab={selectedSubTab}
+            onTabChange={onSubTabChange}
+          />
+        </div>
+      )}
+
+      {/* Content Placeholder */}
+      <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-12 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
+        <div className={`text-center ${theme.textMuted}`}>
+          <p className="text-lg">Content will be displayed here</p>
+          <p className="text-sm mt-2">Selected: {selectedCountry} | {selectedCategory}</p>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 const AdAdasCarsLayoutContent = ({ children }: AdAdasCarsLayoutProps) => {
@@ -151,5 +216,7 @@ const AdAdasCarsLayout = ({ children }: AdAdasCarsLayoutProps) => {
     </ThemeProvider>
   )
 }
+
+AdAdasCarsLayout.Content = ContentSection
 
 export default AdAdasCarsLayout
