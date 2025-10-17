@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, ChevronDown } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 import { useState } from "react"
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext"
@@ -8,7 +8,11 @@ import AskWayPointChatButton from "@/components/AskWayPointChatButton"
 import { Button } from "@/components/ui/button"
 import RegionButtons from "./RegionButtons"
 import PlayerCategoryButtons from "./PlayerCategoryButtons"
-import SubTabButtons from "./SubTabButtons"
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card"
 
 interface AdAdasCarsLayoutProps {
   children: React.ReactNode
@@ -19,9 +23,6 @@ interface ContentSectionProps {
   onRegionChange: (region: string) => void
   selectedCategory: string
   onCategoryChange: (category: string) => void
-  subTabs?: string[]
-  selectedSubTab?: string
-  onSubTabChange?: (tab: string) => void
   children?: React.ReactNode
 }
 
@@ -30,9 +31,6 @@ const ContentSection = ({
   onRegionChange, 
   selectedCategory, 
   onCategoryChange,
-  subTabs,
-  selectedSubTab,
-  onSubTabChange,
   children
 }: ContentSectionProps) => {
   const { theme } = useTheme()
@@ -52,18 +50,6 @@ const ContentSection = ({
           />
         </div>
       </div>
-
-      {/* Sub-Tab Buttons (if provided) */}
-      {subTabs && selectedSubTab && onSubTabChange && (
-        <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
-          <h3 className={`text-sm font-medium ${theme.textMuted} mb-3`}>Analysis Type</h3>
-          <SubTabButtons
-            tabs={subTabs}
-            selectedTab={selectedSubTab}
-            onTabChange={onSubTabChange}
-          />
-        </div>
-      )}
 
       {/* Custom Content or Placeholder */}
       {children || (
@@ -91,17 +77,20 @@ const AdAdasCarsLayoutContent = ({ children }: AdAdasCarsLayoutProps) => {
     { 
       id: 'current-snapshot', 
       name: 'Current Snapshot', 
-      path: '/ad-adas-cars/current-snapshot'
+      path: '/ad-adas-cars/current-snapshot',
+      subTabs: ['AV Landscape', 'Portfolio Dynamics', 'Operational Design Domain (ODD)']
     },
     { 
       id: 'core-systems', 
       name: 'Core Systems Breakdown', 
-      path: '/ad-adas-cars/core-systems'
+      path: '/ad-adas-cars/core-systems',
+      subTabs: ['Semantics', 'Computational Core', 'Driving Intelligence', 'Connectivity & Localization', 'Advanced Technologies']
     },
     { 
       id: 'future-blueprint', 
       name: 'Future Blueprint', 
-      path: '/ad-adas-cars/future-blueprint'
+      path: '/ad-adas-cars/future-blueprint',
+      subTabs: ['Global Footprint', 'Key Technology Investments', 'Core Technology Roadmap', 'Vehicle-Level Roadmap']
     },
     { 
       id: 'ecosystem', 
@@ -168,19 +157,56 @@ const AdAdasCarsLayoutContent = ({ children }: AdAdasCarsLayoutProps) => {
           <div className="w-full px-8 mb-4">
             <div className="flex items-center justify-between w-full max-w-none">
               {sections.map((section) => (
-                <Link
-                  key={section.id}
-                  to={section.path}
-                  className={`flex-1 mx-1 px-4 py-2 rounded-lg text-sm font-medium text-center transition-all duration-300 ease-out transform hover:scale-105 hover:-translate-y-1 shadow-md hover:shadow-lg ${
-                    getCurrentSection() === section.id
-                      ? `${theme.primary} text-white shadow-lg scale-105 animate-scale-in`
-                      : `bg-white/10 backdrop-blur-sm border-2 border-white/20 text-white hover:bg-white/20`
-                  }`}
-                >
-                  <span className="block transition-all duration-300">
-                    {section.name}
-                  </span>
-                </Link>
+                section.subTabs ? (
+                  <HoverCard key={section.id} openDelay={0} closeDelay={100}>
+                    <HoverCardTrigger asChild>
+                      <Link
+                        to={section.path}
+                        className={`flex-1 mx-1 px-4 py-2 rounded-lg text-sm font-medium text-center transition-all duration-300 ease-out transform hover:scale-105 hover:-translate-y-1 shadow-md hover:shadow-lg flex items-center justify-center gap-1 ${
+                          getCurrentSection() === section.id
+                            ? `${theme.primary} text-white shadow-lg scale-105 animate-scale-in`
+                            : `bg-white/10 backdrop-blur-sm border-2 border-white/20 text-white hover:bg-white/20`
+                        }`}
+                      >
+                        <span className="block transition-all duration-300">
+                          {section.name}
+                        </span>
+                        <ChevronDown className="h-3 w-3" />
+                      </Link>
+                    </HoverCardTrigger>
+                    <HoverCardContent 
+                      className="w-64 p-2 bg-background/95 backdrop-blur-sm border shadow-xl z-50"
+                      side="bottom"
+                      align="center"
+                    >
+                      <div className="space-y-1">
+                        {section.subTabs.map((subTab) => (
+                          <Link
+                            key={subTab}
+                            to={`${section.path}?tab=${encodeURIComponent(subTab)}`}
+                            className="block px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors"
+                          >
+                            {subTab}
+                          </Link>
+                        ))}
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
+                ) : (
+                  <Link
+                    key={section.id}
+                    to={section.path}
+                    className={`flex-1 mx-1 px-4 py-2 rounded-lg text-sm font-medium text-center transition-all duration-300 ease-out transform hover:scale-105 hover:-translate-y-1 shadow-md hover:shadow-lg ${
+                      getCurrentSection() === section.id
+                        ? `${theme.primary} text-white shadow-lg scale-105 animate-scale-in`
+                        : `bg-white/10 backdrop-blur-sm border-2 border-white/20 text-white hover:bg-white/20`
+                    }`}
+                  >
+                    <span className="block transition-all duration-300">
+                      {section.name}
+                    </span>
+                  </Link>
+                )
               ))}
             </div>
           </div>
