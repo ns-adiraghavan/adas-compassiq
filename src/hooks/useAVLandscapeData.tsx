@@ -12,9 +12,9 @@ interface AVPlatformData {
 
 export function useAVLandscapeData(selectedRegion: string, selectedCategory: string) {
   return useQuery({
-    queryKey: ['av-landscape', selectedRegion, selectedCategory],
+    queryKey: ['av-landscape'],
     queryFn: async () => {
-      console.log('Fetching AV Landscape data for:', selectedRegion, selectedCategory)
+      console.log('Fetching AV Landscape data (region filter disabled)')
       
       const { data, error } = await supabase
         .from('adas_current_snapshot' as any)
@@ -39,9 +39,6 @@ export function useAVLandscapeData(selectedRegion: string, selectedCategory: str
         const value = row['Value']
 
         if (!oem || !attribute) return
-
-        // Filter by region if needed
-        if (selectedRegion && row['Country'] && row['Country'] !== selectedRegion) return
 
         if (!attributeMap[oem]) {
           attributeMap[oem] = {}
