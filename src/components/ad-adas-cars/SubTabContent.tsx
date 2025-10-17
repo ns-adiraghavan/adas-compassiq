@@ -1,6 +1,8 @@
 import { useTheme } from "@/contexts/ThemeContext"
 import AVLandscapeTable from "./current-snapshot/AVLandscapeTable"
 import AVLandscapeInsights from "./current-snapshot/AVLandscapeInsights"
+import PortfolioDynamicsTable from "./current-snapshot/PortfolioDynamicsTable"
+import ODDTable from "./current-snapshot/ODDTable"
 
 interface SubTabContentProps {
   selectedSubTab: string
@@ -17,6 +19,40 @@ const SubTabContent = ({ selectedSubTab, selectedRegion, selectedCategory }: Sub
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <AVLandscapeTable 
+            selectedRegion={selectedRegion}
+            selectedCategory={selectedCategory}
+          />
+        </div>
+        <div className="lg:col-span-1">
+          <AVLandscapeInsights />
+        </div>
+      </div>
+    )
+  }
+
+  // Portfolio Dynamics content
+  if (selectedSubTab === "Portfolio Dynamics") {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <PortfolioDynamicsTable 
+            selectedRegion={selectedRegion}
+            selectedCategory={selectedCategory}
+          />
+        </div>
+        <div className="lg:col-span-1">
+          <AVLandscapeInsights />
+        </div>
+      </div>
+    )
+  }
+
+  // ODD content
+  if (selectedSubTab === "Operational Design Domain (ODD)") {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <ODDTable 
             selectedRegion={selectedRegion}
             selectedCategory={selectedCategory}
           />
