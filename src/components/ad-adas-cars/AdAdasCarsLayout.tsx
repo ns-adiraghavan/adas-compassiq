@@ -6,7 +6,7 @@ import ThemeSelector from "@/components/ThemeSelector"
 import WaypointLogo from "@/components/WaypointLogo"
 import AskWayPointChatButton from "@/components/AskWayPointChatButton"
 import { Button } from "@/components/ui/button"
-import CountryButtons from "@/components/CountryButtons"
+import RegionButtons from "./RegionButtons"
 import PlayerCategoryButtons from "./PlayerCategoryButtons"
 import SubTabButtons from "./SubTabButtons"
 
@@ -15,42 +15,42 @@ interface AdAdasCarsLayoutProps {
 }
 
 interface ContentSectionProps {
-  selectedCountry: string
-  onCountryChange: (country: string) => void
+  selectedRegion: string
+  onRegionChange: (region: string) => void
   selectedCategory: string
   onCategoryChange: (category: string) => void
   subTabs?: string[]
   selectedSubTab?: string
   onSubTabChange?: (tab: string) => void
+  children?: React.ReactNode
 }
 
 const ContentSection = ({ 
-  selectedCountry, 
-  onCountryChange, 
+  selectedRegion, 
+  onRegionChange, 
   selectedCategory, 
   onCategoryChange,
   subTabs,
   selectedSubTab,
-  onSubTabChange 
+  onSubTabChange,
+  children
 }: ContentSectionProps) => {
   const { theme } = useTheme()
   
   return (
     <div className="container mx-auto px-8 py-6 space-y-6">
-      {/* Countries/Regions Section */}
+      {/* Combined Filters Row - Region and Player Category on same line */}
       <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
-        <CountryButtons
-          selectedCountry={selectedCountry}
-          onCountryChange={onCountryChange}
-        />
-      </div>
-
-      {/* Player Category Section */}
-      <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
-        <PlayerCategoryButtons
-          selectedCategory={selectedCategory}
-          onCategoryChange={onCategoryChange}
-        />
+        <div className="grid grid-cols-2 gap-8">
+          <RegionButtons
+            selectedRegion={selectedRegion}
+            onRegionChange={onRegionChange}
+          />
+          <PlayerCategoryButtons
+            selectedCategory={selectedCategory}
+            onCategoryChange={onCategoryChange}
+          />
+        </div>
       </div>
 
       {/* Sub-Tab Buttons (if provided) */}
@@ -65,13 +65,15 @@ const ContentSection = ({
         </div>
       )}
 
-      {/* Content Placeholder */}
-      <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-12 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
-        <div className={`text-center ${theme.textMuted}`}>
-          <p className="text-lg">Content will be displayed here</p>
-          <p className="text-sm mt-2">Selected: {selectedCountry} | {selectedCategory}</p>
+      {/* Custom Content or Placeholder */}
+      {children || (
+        <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-12 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
+          <div className={`text-center ${theme.textMuted}`}>
+            <p className="text-lg">Content will be displayed here</p>
+            <p className="text-sm mt-2">Selected: {selectedRegion} | {selectedCategory}</p>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
