@@ -19,7 +19,7 @@ export function useAVLandscapeData(selectedRegion: string, selectedCategory: str
       const { data, error } = await supabase
         .from('adas_current_snapshot' as any)
         .select('*')
-        .eq('Parameter', 'AV Platform Landscape')
+        .ilike('Parameter', '%AV%Landscape%')
       
       if (error) {
         console.error('Error fetching AV landscape data:', error)
@@ -30,32 +30,51 @@ export function useAVLandscapeData(selectedRegion: string, selectedCategory: str
 
       // Process the data to extract platform information
       const platformData: AVPlatformData[] = []
-      const attributeMap: Record<string, any> = {}
+      const attributeMap: Record<string, Record<string, string>> = {}
 
-      data?.forEach(row => {
-        const oem = row['OEM Name']
-        const attribute = row['Attribute']
-        const remarks = row['Remarks']
-        const value = row['Value']
+      const canonicalMap = {
+        'platform name': 'Platform Name',
+        'maximum autonomy level deployed in vehicles': 'Maximum Autonomy Level Deployed in Vehicles',
+        'platform variants with l2+ and above capability': 'Platform Variants with L2+ and Above Capability',
+        'most advanced variant of av platform': 'Most Advanced Variant of AV Platform',
+        'level of driver intervention in most advanced av platform': 'Level of Driver Intervention in Most Advanced AV Platform',
+      } as const
 
-        if (!oem || !attribute) return
+      const normalize = (s: any) => (s ?? '').toString().trim()
+      const toCanonical = (attr: string) => {
+        const key = attr.toLowerCase().replace(/\s+/g, ' ').trim()
+        return (canonicalMap as any)[key] || attr
+      }
 
-        if (!attributeMap[oem]) {
-          attributeMap[oem] = {}
+      data?.forEach((row: any) => {
+        const oem = normalize(row['OEM Name'] ?? row.OEM)
+        const attributeRaw = normalize(row['Attribute'])
+        const remarksRaw = normalize(row['Remarks'] ?? row['Remark'])
+        const valueRaw = normalize(row['Value'])
+
+        if (!oem || !attributeRaw) return
+
+        const attribute = toCanonical(attributeRaw)
+
+        if (!attributeMap[oem]) attributeMap[oem] = {}
+
+        let content = remarksRaw
+        if ((valueRaw === '2' || valueRaw === '2.0' || valueRaw.toLowerCase?.() === 'two') && remarksRaw) {
+          const parts = remarksRaw.split(/[;\n,]/).map((v: string) => v.trim()).filter(Boolean)
+          content = parts.join(', ')
         }
 
-        // Handle multiple values (Value = 2 means multiple entries in remarks)
-        if (value === '2' && remarks) {
-          // Split by common delimiters or newlines
-          const values = remarks.split(/[;,\n]/).filter(v => v.trim())
-          attributeMap[oem][attribute] = values.join(', ')
+        if (attributeMap[oem][attribute]) {
+          const existing = attributeMap[oem][attribute]
+          const merged = Array.from(new Set((existing + ', ' + content).split(',').map((s: string) => s.trim()).filter(Boolean))).join(', ')
+          attributeMap[oem][attribute] = merged
         } else {
-          attributeMap[oem][attribute] = remarks || ''
+          attributeMap[oem][attribute] = content
         }
       })
 
       // Convert to array format
-      Object.entries(attributeMap).forEach(([oem, attributes]: [string, any]) => {
+      Object.entries(attributeMap).forEach(([oem, attributes]) => {
         platformData.push({
           oem,
           platformName: attributes['Platform Name'] || '',
@@ -65,6 +84,8 @@ export function useAVLandscapeData(selectedRegion: string, selectedCategory: str
           driverIntervention: attributes['Level of Driver Intervention in Most Advanced AV Platform'] || ''
         })
       })
+
+      platformData.sort((a, b) => a.oem.localeCompare(b.oem))
 
       console.log('Processed AV landscape data:', platformData)
       return platformData
