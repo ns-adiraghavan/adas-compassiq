@@ -12,14 +12,14 @@ interface AVPlatformData {
 
 export function useAVLandscapeData(selectedRegion: string, selectedCategory: string) {
   return useQuery({
-    queryKey: ['av-landscape'],
+    queryKey: ['av-landscape','v2'],
     queryFn: async () => {
       console.log('Fetching AV Landscape data (region filter disabled)')
       
       const { data, error } = await supabase
         .from('adas_current_snapshot' as any)
         .select('*')
-        .or('Parameter.ilike.%AV%Landscape%,Attribute.ilike.%AV%Landscape%')
+        .eq('Parameter', 'AV Platform Landscape')
       
       if (error) {
         console.error('Error fetching AV landscape data:', error)
@@ -90,5 +90,7 @@ export function useAVLandscapeData(selectedRegion: string, selectedCategory: str
       console.log('Processed AV landscape data:', platformData)
       return platformData
     },
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: false,
   })
 }

@@ -11,6 +11,7 @@ interface AVLandscapeTableProps {
 const AVLandscapeTable = ({ selectedRegion, selectedCategory }: AVLandscapeTableProps) => {
   const { theme } = useTheme()
   const { data: platformData, isLoading } = useAVLandscapeData(selectedRegion, selectedCategory)
+  console.log('AVLandscapeTable rows:', platformData?.length, platformData)
 
   if (isLoading) {
     return (
