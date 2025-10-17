@@ -19,7 +19,9 @@ const FeatureModules = ({ vehicleType }: FeatureModulesProps) => {
           },
           {
             icon: Shield,
-            title: "Autonomous Driving-ADAS Module"
+            title: "Autonomous Driving-ADAS Module",
+            isLinked: true,
+            href: "/ad-adas-cars"
           },
           {
             icon: Monitor,
