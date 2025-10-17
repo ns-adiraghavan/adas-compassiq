@@ -11,6 +11,11 @@ import PassengerCarsAnalytics from "./pages/passenger-cars/Analytics";
 import PassengerCarsIntelligence from "./pages/passenger-cars/Intelligence";
 import PassengerCarsModeling from "./pages/passenger-cars/Modeling";
 import PassengerCarsInsights from "./pages/passenger-cars/Insights";
+import AdAdasHomepage from "./pages/ad-adas-cars/Homepage";
+import AdAdasCurrentSnapshot from "./pages/ad-adas-cars/CurrentSnapshot";
+import AdAdasCoreSystems from "./pages/ad-adas-cars/CoreSystems";
+import AdAdasFutureBlueprint from "./pages/ad-adas-cars/FutureBlueprint";
+import AdAdasEcosystem from "./pages/ad-adas-cars/Ecosystem";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +34,12 @@ const App = () => (
             <Route path="/passenger-cars/intelligence" element={<PassengerCarsIntelligence />} />
             <Route path="/passenger-cars/modeling" element={<PassengerCarsModeling />} />
             <Route path="/passenger-cars/insights" element={<PassengerCarsInsights />} />
+            <Route path="/ad-adas-cars" element={<Navigate to="/ad-adas-cars/homepage" replace />} />
+            <Route path="/ad-adas-cars/homepage" element={<AdAdasHomepage />} />
+            <Route path="/ad-adas-cars/current-snapshot" element={<AdAdasCurrentSnapshot />} />
+            <Route path="/ad-adas-cars/core-systems" element={<AdAdasCoreSystems />} />
+            <Route path="/ad-adas-cars/future-blueprint" element={<AdAdasFutureBlueprint />} />
+            <Route path="/ad-adas-cars/ecosystem" element={<AdAdasEcosystem />} />
             <Route path="*" element={<Index />} />
           </Routes>
         </BrowserRouter>
