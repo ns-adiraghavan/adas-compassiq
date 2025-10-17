@@ -1,4 +1,6 @@
 import { useTheme } from "@/contexts/ThemeContext"
+import AVLandscapeTable from "./current-snapshot/AVLandscapeTable"
+import AVLandscapeInsights from "./current-snapshot/AVLandscapeInsights"
 
 interface SubTabContentProps {
   selectedSubTab: string
@@ -9,6 +11,24 @@ interface SubTabContentProps {
 const SubTabContent = ({ selectedSubTab, selectedRegion, selectedCategory }: SubTabContentProps) => {
   const { theme } = useTheme()
 
+  // AV Landscape content
+  if (selectedSubTab === "AV Landscape") {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <AVLandscapeTable 
+            selectedRegion={selectedRegion}
+            selectedCategory={selectedCategory}
+          />
+        </div>
+        <div className="lg:col-span-1">
+          <AVLandscapeInsights />
+        </div>
+      </div>
+    )
+  }
+
+  // Default placeholder for other tabs
   return (
     <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-8 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
       <h2 className="text-2xl font-bold mb-6">{selectedSubTab}</h2>
