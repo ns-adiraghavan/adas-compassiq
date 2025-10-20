@@ -5,6 +5,7 @@ import AnimatedVehicleImage from "./AnimatedVehicleImage"
 import VehicleContent from "./VehicleContent"
 import VehicleCards from "./VehicleCards"
 import FeatureModules from "./FeatureModules"
+import ADASModuleBoxes from "./ADASModuleBoxes"
 
 interface VehicleCategory {
   title: string
@@ -47,9 +48,15 @@ const VehicleSection = ({ category, index, currentSection, sectionIndex }: Vehic
                 subtitle={category.subtitle}
                 description={category.description}
                 textTransform={getTextTransform(isEven)}
+                href={category.href}
               />
               
               <FeatureModules vehicleType={category.title} />
+              
+              {/* Show module boxes only for AD/ADAS */}
+              {category.title === "Autonomous Driving & Advanced Safety" && (
+                <ADASModuleBoxes />
+              )}
             </div>
 
             {/* Image/Carousel */}
