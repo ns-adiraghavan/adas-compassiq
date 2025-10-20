@@ -58,7 +58,7 @@ const HeroSection = ({ scrollY }: HeroSectionProps) => {
         </h1>
         
         <p 
-          className={`text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto transition-all duration-1000 delay-1000 ${
+          className={`text-xl md:text-3xl text-green-300 font-bold mb-8 max-w-2xl mx-auto transition-all duration-1000 delay-1000 ${
             subtitleVisible ? 'animate-slide-in-right opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
           }`}
           style={{
@@ -70,7 +70,7 @@ const HeroSection = ({ scrollY }: HeroSectionProps) => {
         </p>
         
         <div 
-          className={`text-base md:text-lg text-gray-400 leading-relaxed max-w-3xl mx-auto transition-all duration-1000 delay-2000 ${
+          className={`text-base md:text-lg text-gray-300 leading-relaxed max-w-3xl mx-auto transition-all duration-1000 delay-2000 ${
             descriptionVisible ? 'animate-fade-in opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
           style={{
@@ -78,7 +78,7 @@ const HeroSection = ({ scrollY }: HeroSectionProps) => {
             opacity: Math.max(0, 1 - scrollY / 400)
           }}
         >
-          <p className="animate-pulse-slow">
+          <p className="animate-pulse-slow font-normal">
             CompassIQ is a specialized data and insights platform focused on autonomous driving and advanced safety systems. 
             Curated by a team of passionate automotive analysts, it delivers comprehensive intelligence on AD/ADAS technologies, 
             OEM strategies, and the evolving landscape of autonomous vehicles—providing the strategic insights needed to navigate 

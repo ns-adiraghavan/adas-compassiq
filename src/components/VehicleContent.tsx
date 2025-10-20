@@ -21,32 +21,32 @@ const VehicleContent = ({ icon: Icon, title, subtitle, description, textTransfor
       {href ? (
         <Link to={href} className="group cursor-pointer">
           <div className="flex items-center space-x-6">
-            <div className="p-4 bg-white/20 rounded-3xl backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
-              <Icon className="h-12 w-12 text-white" />
+            <div className="p-4 bg-green-600/20 rounded-2xl backdrop-blur-sm transition-all duration-300 hover:bg-green-500/30 hover:scale-110 border border-green-500/30">
+              <Icon className="h-12 w-12 text-green-400" />
             </div>
             <div>
-              <h3 className="text-4xl xl:text-5xl font-light text-white mb-2 leading-tight group-hover:text-green-300 transition-colors duration-300">
+              <h3 className="text-5xl xl:text-6xl font-bold text-white mb-2 leading-tight group-hover:text-green-300 transition-colors duration-300">
                 {title}
               </h3>
-              <p className="text-xl xl:text-2xl text-white/70 font-light">{subtitle}</p>
+              <p className="text-2xl xl:text-3xl text-green-300/80 font-bold">{subtitle}</p>
             </div>
           </div>
         </Link>
       ) : (
         <div className="flex items-center space-x-6">
-          <div className="p-4 bg-white/20 rounded-3xl backdrop-blur-sm transition-all duration-300 hover:bg-white/30 hover:scale-110">
-            <Icon className="h-12 w-12 text-white" />
+          <div className="p-4 bg-green-600/20 rounded-2xl backdrop-blur-sm transition-all duration-300 hover:bg-green-500/30 hover:scale-110 border border-green-500/30">
+            <Icon className="h-12 w-12 text-green-400" />
           </div>
           <div>
-            <h3 className="text-4xl xl:text-5xl font-light text-white mb-2 leading-tight">{title}</h3>
-            <p className="text-xl xl:text-2xl text-white/70 font-light">{subtitle}</p>
+            <h3 className="text-5xl xl:text-6xl font-bold text-white mb-2 leading-tight">{title}</h3>
+            <p className="text-2xl xl:text-3xl text-green-300/80 font-bold">{subtitle}</p>
           </div>
         </div>
       )}
 
       {/* Description */}
-      <div className="space-y-4">
-        <p className="text-white/60 font-light leading-relaxed text-lg xl:text-xl max-w-2xl">
+      <div className="space-y-4 mt-6">
+        <p className="text-white/70 font-normal leading-relaxed text-lg xl:text-xl max-w-3xl">
           {description}
         </p>
       </div>
