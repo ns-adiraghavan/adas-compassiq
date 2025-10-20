@@ -15,7 +15,7 @@ export function useComputationalCoreData(selectedRegion: string, selectedCategor
       const { data, error } = await supabase
         .from('adas_onboard_compute_systems' as any)
         .select('*')
-        .eq('Parameter', 'Computational Core')
+        .or('Parameter.eq.AV System Architecture,Parameter.eq.SoC/AI Chipset Platform,Parameter.ilike.SoC%')
       
       if (error) {
         console.error('Error fetching computational core data:', error)
@@ -23,39 +23,65 @@ export function useComputationalCoreData(selectedRegion: string, selectedCategor
       }
 
       console.log('Raw computational core data:', data)
+      console.log('Total fetched rows:', data?.length || 0)
+      console.log('Distinct Parameters:', [...new Set(data?.map((r: any) => r['Parameter']))])
 
-      // Group by Attribute (row) and OEM Name (column)
-      const parameterMap: Record<string, Record<string, string>> = {}
+      // Normalize and pivot robustly
+      const parameterMap: Record<string, Record<string, string[]>> = {}
       const oemsSet = new Set<string>()
 
       data?.forEach((row: any) => {
-        const attribute = row['Attribute']?.trim()
+        const param = row['Parameter']?.trim() || ''
+        const attr = row['Attribute']?.trim() || ''
         const oem = row['OEM Name']?.trim()
-        const value = row['Values']?.trim() || ''
+        const values = row['Values']?.trim() || ''
+        const unit = row['Unit']?.trim() || ''
+        const remarks = row['Remarks']?.trim() || ''
 
-        if (!attribute || !oem) return
+        // Derive rowLabel
+        let rowLabel = attr || (param === 'SoC/AI Chipset Platform' ? 'SoC/AI Chipset Platform' : null)
+        
+        if (!rowLabel || !oem) return
 
         oemsSet.add(oem)
 
-        if (!parameterMap[attribute]) {
-          parameterMap[attribute] = {}
+        if (!parameterMap[rowLabel]) {
+          parameterMap[rowLabel] = {}
         }
 
-        parameterMap[attribute][oem] = value
+        if (!parameterMap[rowLabel][oem]) {
+          parameterMap[rowLabel][oem] = []
+        }
+
+        // Prefer Remarks, else compose from Values and Unit
+        const displayValue = remarks || (values ? `${values}${unit ? ' ' + unit : ''}` : '')
+        if (displayValue) {
+          parameterMap[rowLabel][oem].push(displayValue)
+        }
       })
 
-      const result: ComputationalCoreData[] = Object.entries(parameterMap).map(([parameter, oemValues]) => ({
-        parameter,
-        oemValues
-      }))
+      // Combine multiple values per (rowLabel, OEM) and build result
+      const result: ComputationalCoreData[] = Object.entries(parameterMap).map(([parameter, oemValuesArray]) => {
+        const oemValues: Record<string, string> = {}
+        Object.entries(oemValuesArray).forEach(([oem, valuesArr]) => {
+          // Join unique values with "; "
+          const uniqueValues = [...new Set(valuesArr)]
+          oemValues[oem] = uniqueValues.join('; ') || '-'
+        })
+        return { parameter, oemValues }
+      })
 
       // Sort parameters in logical order
       const order = [
-        'AV System Architecture',
         'SoC/AI Chipset Platform',
-        'CPU Specifications',
-        'GPU Specifications',
-        'NPU Specifications'
+        'Domain Centralized Architecture',
+        'Zonal Architecture',
+        'Central Architecture',
+        'Distributed Architecture',
+        'CPU',
+        'GPU',
+        'NPU',
+        'Overall Processing Specifications'
       ]
 
       result.sort((a, b) => {
@@ -69,6 +95,7 @@ export function useComputationalCoreData(selectedRegion: string, selectedCategor
 
       console.log('Processed computational core data:', result)
       console.log('OEMs found:', Array.from(oemsSet))
+      console.log('Total rows after processing:', result.length)
       
       return { data: result, oems: Array.from(oemsSet).sort() }
     },
