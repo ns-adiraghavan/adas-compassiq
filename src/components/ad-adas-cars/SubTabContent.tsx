@@ -3,6 +3,7 @@ import AVLandscapeTable from "./current-snapshot/AVLandscapeTable"
 import AVLandscapeInsights from "./current-snapshot/AVLandscapeInsights"
 import PortfolioDynamicsTable from "./current-snapshot/PortfolioDynamicsTable"
 import ODDTable from "./current-snapshot/ODDTable"
+import ComputationalCoreTable from "./core-systems/ComputationalCoreTable"
 
 interface SubTabContentProps {
   selectedSubTab: string
@@ -53,6 +54,23 @@ const SubTabContent = ({ selectedSubTab, selectedRegion, selectedCategory }: Sub
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <ODDTable 
+            selectedRegion={selectedRegion}
+            selectedCategory={selectedCategory}
+          />
+        </div>
+        <div className="lg:col-span-1">
+          <AVLandscapeInsights />
+        </div>
+      </div>
+    )
+  }
+
+  // Computational Core content
+  if (selectedSubTab === "Computational Core") {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <ComputationalCoreTable 
             selectedRegion={selectedRegion}
             selectedCategory={selectedCategory}
           />
