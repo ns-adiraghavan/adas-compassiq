@@ -28,11 +28,13 @@ const WaypointLogo = () => {
       {logoUrl ? (
         <img 
           src={logoUrl} 
-          alt="WayPoint Logo" 
+          alt="CompassIQ Logo" 
           className="h-12 w-auto"
         />
       ) : (
-        <div className="h-12 w-12 bg-gray-300 animate-pulse rounded"></div>
+        <div className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent">
+          CompassIQ
+        </div>
       )}
     </div>
   )

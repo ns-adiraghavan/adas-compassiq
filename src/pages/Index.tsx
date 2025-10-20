@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react"
-import { Car, Bike, Truck, Tractor } from "lucide-react"
+import { Car } from "lucide-react"
 import HeroSection from "@/components/HeroSection"
 import VehicleSection from "@/components/VehicleSection"
 import FooterSection from "@/components/FooterSection"
@@ -31,40 +31,13 @@ const Index = () => {
 
   const vehicleCategories = [
     {
-      title: "Passenger Cars",
-      subtitle: "Premium Automotive Intelligence",
-      description: "Advanced AI-powered insights for passenger vehicle features and technologies",
+      title: "Autonomous Driving & Advanced Safety",
+      subtitle: "AD/ADAS Intelligence Hub",
+      description: "Comprehensive insights into autonomous driving systems, ADAS technologies, and the competitive landscape of self-driving innovation",
       image: "/lovable-uploads/c13e6208-3f44-451f-9b43-5f2707ee413c.png",
       icon: Car,
-      href: "/passenger-cars",
-      color: "from-blue-600 to-purple-600"
-    },
-    {
-      title: "Two Wheelers",
-      subtitle: "Smart Mobility Solutions",
-      description: "Next-generation analytics for motorcycles and electric two-wheelers",
-      image: "/lovable-uploads/5bc26e8f-c225-4798-a305-557d8cc8b4af.png",
-      icon: Bike,
-      href: "#",
-      color: "from-green-600 to-teal-600"
-    },
-    {
-      title: "Commercial Vehicles",
-      subtitle: "Fleet Intelligence Platform",
-      description: "Comprehensive data analytics for trucks and commercial transportation",
-      image: "/lovable-uploads/849e6ee5-f48d-44b5-b934-674f44399eeb.png",
-      icon: Truck,
-      href: "#",
-      color: "from-orange-600 to-red-600"
-    },
-    {
-      title: "Agriculture Vehicles",
-      subtitle: "Smart Farming Technology",
-      description: "Revolutionary insights for agricultural machinery and automation",
-      image: "/lovable-uploads/a639b2c6-adaa-455a-adb5-c2c550261d96.png",
-      icon: Tractor,
-      href: "#",
-      color: "from-yellow-600 to-orange-600"
+      href: "/ad-adas-cars",
+      color: "from-green-600 to-emerald-400"
     }
   ]
 
@@ -94,7 +67,7 @@ const Index = () => {
       </div>
 
       {/* Navigation dots */}
-      <NavigationDots currentSection={currentSection} totalSections={6} />
+      <NavigationDots currentSection={currentSection} totalSections={3} />
     </div>
   )
 }

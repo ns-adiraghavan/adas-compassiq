@@ -22,33 +22,33 @@ interface Theme {
 const themes: Record<ThemeType, Theme> = {
   dark: {
     name: 'Dark',
-    primary: 'bg-blue-600',
-    secondary: 'bg-cyan-500',
-    accent: 'bg-blue-400',
+    primary: 'bg-green-600',
+    secondary: 'bg-emerald-500',
+    accent: 'bg-green-400',
     background: 'bg-slate-900',
-    backgroundGradient: 'bg-gradient-to-br from-slate-900 via-blue-900/20 to-cyan-900/10',
+    backgroundGradient: 'bg-gradient-to-br from-black via-slate-900 to-emerald-950/30',
     cardBackground: 'bg-slate-800/60 backdrop-blur-sm',
     cardBorder: 'border-slate-700/50',
     textPrimary: 'text-white',
     textSecondary: 'text-slate-200',
     textMuted: 'text-slate-400',
     hoverEffect: 'hover:bg-slate-700/50',
-    shadowColor: 'shadow-blue-500/20'
+    shadowColor: 'shadow-green-500/20'
   },
   light: {
     name: 'Light',
-    primary: 'bg-slate-700',
-    secondary: 'bg-blue-600',
-    accent: 'bg-slate-500',
+    primary: 'bg-green-700',
+    secondary: 'bg-emerald-600',
+    accent: 'bg-green-500',
     background: 'bg-slate-50',
-    backgroundGradient: 'bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100/50',
+    backgroundGradient: 'bg-gradient-to-br from-slate-50 via-emerald-50/30 to-slate-100/50',
     cardBackground: 'bg-white/80 backdrop-blur-sm',
     cardBorder: 'border-slate-200/60',
     textPrimary: 'text-slate-900',
     textSecondary: 'text-slate-700',
     textMuted: 'text-slate-500',
     hoverEffect: 'hover:bg-slate-100/50',
-    shadowColor: 'shadow-slate-500/20'
+    shadowColor: 'shadow-green-500/20'
   }
 }
 

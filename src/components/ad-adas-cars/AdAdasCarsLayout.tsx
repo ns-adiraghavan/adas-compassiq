@@ -145,10 +145,10 @@ const AdAdasCarsLayoutContent = ({ children }: AdAdasCarsLayoutProps) => {
             {/* Title and subtitle aligned to left */}
             <div className="mb-4">
               <h1 className="text-3xl font-thin mb-1 text-white tracking-tight">
-                Passenger Cars — AD/ADAS Tech Module
+                CompassIQ — Autonomous Driving Intelligence
               </h1>
               <p className="text-base text-gray-200 font-light">
-                Advanced Driver Assistance Systems Intelligence
+                Advanced Driver Assistance Systems & Autonomous Vehicle Technology
               </p>
             </div>
           </div>

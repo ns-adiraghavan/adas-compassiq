@@ -45,16 +45,16 @@ const HeroSection = ({ scrollY }: HeroSectionProps) => {
 
       <div className="relative z-10 text-center max-w-4xl mx-auto px-6">
         <h1 
-          className={`text-7xl md:text-9xl font-bold mb-6 bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent transition-all duration-1000 ${
+          className={`text-7xl md:text-9xl font-bold mb-6 bg-gradient-to-r from-white via-green-200 to-green-400 bg-clip-text text-transparent transition-all duration-1000 ${
             titleVisible ? 'animate-fade-in opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
           style={{
             transform: `translateY(${scrollY * 0.2}px)`,
             opacity: Math.max(0, 1 - scrollY / 600),
-            animation: titleVisible ? 'typewriter 2s steps(8, end), blink-caret 0.75s step-end infinite' : 'none'
+            animation: titleVisible ? 'typewriter 2s steps(10, end), blink-caret 0.75s step-end infinite' : 'none'
           }}
         >
-          WayPoint
+          CompassIQ
         </h1>
         
         <p 
@@ -66,7 +66,7 @@ const HeroSection = ({ scrollY }: HeroSectionProps) => {
             opacity: Math.max(0, 1 - scrollY / 500)
           }}
         >
-          AI-Powered Automotive Intelligence Platform
+          Autonomous Driving Intelligence Platform
         </p>
         
         <div 
@@ -79,10 +79,10 @@ const HeroSection = ({ scrollY }: HeroSectionProps) => {
           }}
         >
           <p className="animate-pulse-slow">
-            WayPoint is a specialized data and insights platform designed specifically for the mobility industry. 
-            Curated by a team of passionate automotive analysts, it reflects a deep understanding of the pulse 
-            and dynamics of the automotive sector. The platform is structured around four core solution areas, 
-            each tailored to a distinct vehicle class, ensuring targeted, relevant insights for strategic thinking.
+            CompassIQ is a specialized data and insights platform focused on autonomous driving and advanced safety systems. 
+            Curated by a team of passionate automotive analysts, it delivers comprehensive intelligence on AD/ADAS technologies, 
+            OEM strategies, and the evolving landscape of autonomous vehicles—providing the strategic insights needed to navigate 
+            the future of mobility.
           </p>
         </div>
       </div>
