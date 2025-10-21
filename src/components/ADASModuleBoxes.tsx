@@ -21,7 +21,7 @@ const ADASModuleBoxes = () => {
       href: "/ad-adas-cars/core-systems",
       description: "Deep dive into the technical architecture of AD/ADAS systems",
       subsections: [
-        "Semantics",
+        "Sensorics",
         "Computational Core",
         "Driving Intelligence",
         "Connectivity & Localization",

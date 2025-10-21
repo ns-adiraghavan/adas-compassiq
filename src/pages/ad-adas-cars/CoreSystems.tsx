@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom"
 import AdAdasCarsLayout from "@/components/ad-adas-cars/AdAdasCarsLayout"
 import SubTabContent from "@/components/ad-adas-cars/SubTabContent"
 
-const subTabs = ["Semantics", "Computational Core", "Driving Intelligence", "Connectivity & Localization", "Advanced Technologies"]
+const subTabs = ["Sensorics", "Computational Core", "Driving Intelligence", "Connectivity & Localization", "Advanced Technologies"]
 
 const CoreSystems = () => {
   const [selectedRegion, setSelectedRegion] = useState("US")
