@@ -16,6 +16,12 @@ const FeatureModules = ({ vehicleType }: FeatureModulesProps) => {
             title: "Connected Feature Module",
             isLinked: true,
             href: "/passenger-cars"
+          },
+          {
+            icon: Shield,
+            title: "Autonomous AD/AS",
+            isLinked: true,
+            href: "/ad-adas-cars"
           }
         ]
       
