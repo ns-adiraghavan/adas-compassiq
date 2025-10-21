@@ -5,6 +5,7 @@ import PortfolioDynamicsTable from "./current-snapshot/PortfolioDynamicsTable"
 import ODDTable from "./current-snapshot/ODDTable"
 import ComputationalCoreTable from "./core-systems/ComputationalCoreTable"
 import DrivingIntelligenceTable from "./core-systems/DrivingIntelligenceTable"
+import AdvancedTechnologiesTable from "./core-systems/AdvancedTechnologiesTable"
 
 interface SubTabContentProps {
   selectedSubTab: string
@@ -89,6 +90,23 @@ const SubTabContent = ({ selectedSubTab, selectedRegion, selectedCategory }: Sub
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <DrivingIntelligenceTable 
+            selectedRegion={selectedRegion}
+            selectedCategory={selectedCategory}
+          />
+        </div>
+        <div className="lg:col-span-1">
+          <AVLandscapeInsights />
+        </div>
+      </div>
+    )
+  }
+
+  // Advanced Technologies content
+  if (selectedSubTab === "Advanced Technologies") {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <AdvancedTechnologiesTable 
             selectedRegion={selectedRegion}
             selectedCategory={selectedCategory}
           />
