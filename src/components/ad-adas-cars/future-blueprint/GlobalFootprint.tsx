@@ -35,7 +35,8 @@ const GlobalFootprint = ({ selectedRegion }: GlobalFootprintProps) => {
   }
 
   const oems = data?.oems || []
-  const facilityTypes = ["All", "R&D Center", "Testing"]
+  const facilityTypes = ["All", "R&D Center", "Testing", "Expansion"]
+  const filteredFacilities = data?.facilities || []
 
   return (
     <div className="space-y-6">
@@ -90,12 +91,18 @@ const GlobalFootprint = ({ selectedRegion }: GlobalFootprintProps) => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Map Visualization */}
         <div className="lg:col-span-2">
-          <USMapVisualization facilities={data?.facilities || []} />
+          {filteredFacilities.length === 0 ? (
+            <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-12 ${theme.shadowColor} shadow-lg backdrop-blur-sm text-center`}>
+              <p className={`${theme.textSecondary} text-lg`}>No facilities found matching the selected filters.</p>
+            </div>
+          ) : (
+            <USMapVisualization facilities={filteredFacilities} />
+          )}
         </div>
 
         {/* Key Insights/Announcements */}
         <div className="lg:col-span-1">
-          <AnnouncementsTable facilities={data?.facilities || []} />
+          <AnnouncementsTable facilities={filteredFacilities} />
         </div>
       </div>
     </div>

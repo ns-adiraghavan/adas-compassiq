@@ -72,9 +72,22 @@ const USMapVisualization = ({ facilities }: USMapVisualizationProps) => {
     return acc
   }, {} as Record<string, FacilityLocation[]>)
 
+  const totalFacilities = facilities.length
+  const rdCount = facilities.filter(f => f.facilityType === "R&D Center").length
+  const testingCount = facilities.filter(f => f.facilityType === "Testing").length
+
   return (
     <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm relative`}>
-      <h3 className={`text-lg font-bold ${theme.textPrimary} mb-4`}>Facility Footprint</h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className={`text-lg font-bold ${theme.textPrimary}`}>Facility Footprint</h3>
+        <div className={`text-sm ${theme.textSecondary}`}>
+          <span className="font-semibold">{totalFacilities}</span> facilities
+          <span className="mx-2">•</span>
+          <span className="text-red-400">{rdCount} R&D</span>
+          <span className="mx-2">•</span>
+          <span className="text-blue-400">{testingCount} Testing</span>
+        </div>
+      </div>
       
       <div className="relative w-full h-[600px] rounded-lg overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900">
         {/* US Map Background */}
