@@ -8,6 +8,8 @@ import DrivingIntelligenceTable from "./core-systems/DrivingIntelligenceTable"
 import AdvancedTechnologiesTable from "./core-systems/AdvancedTechnologiesTable"
 import GlobalFootprint from "./future-blueprint/GlobalFootprint"
 import KeyTechnologyInvestments from "./future-blueprint/KeyTechnologyInvestments"
+import CoreTechnologyRoadmap from "./future-blueprint/CoreTechnologyRoadmap"
+import VehicleRoadmap from "./future-blueprint/VehicleRoadmap"
 
 interface SubTabContentProps {
   selectedSubTab: string
@@ -134,6 +136,26 @@ const SubTabContent = ({ selectedSubTab, selectedRegion, selectedCategory }: Sub
   if (selectedSubTab === "Key Technology Investments") {
     return (
       <KeyTechnologyInvestments 
+        selectedRegion={selectedRegion}
+        selectedCategory={selectedCategory}
+      />
+    )
+  }
+
+  // Core Technology Roadmap content
+  if (selectedSubTab === "Core Technology Roadmap") {
+    return (
+      <CoreTechnologyRoadmap 
+        selectedRegion={selectedRegion}
+        selectedCategory={selectedCategory}
+      />
+    )
+  }
+
+  // Vehicle-Level Roadmap content
+  if (selectedSubTab === "Vehicle-Level Roadmap") {
+    return (
+      <VehicleRoadmap 
         selectedRegion={selectedRegion}
         selectedCategory={selectedCategory}
       />
