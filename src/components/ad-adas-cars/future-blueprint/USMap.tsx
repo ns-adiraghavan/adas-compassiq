@@ -1,5 +1,6 @@
 import { useTheme } from "@/contexts/ThemeContext"
 import { FacilityLocation } from "@/hooks/useGlobalFootprintData"
+import usMapImage from "@/assets/us-map.png"
 
 interface USMapProps {
   facilities: FacilityLocation[]
@@ -33,25 +34,18 @@ const USMap = ({ facilities }: USMapProps) => {
   return (
     <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
       <h3 className={`text-lg font-bold mb-4 ${theme.textPrimary}`}>US Facilities Map</h3>
-      <svg viewBox="0 0 700 450" className="w-full h-auto">
-        {/* US Map Outline (simplified) */}
-        <path
-          d="M 100,50 L 600,50 L 600,380 L 100,380 Z"
-          fill="hsl(var(--muted)/0.3)"
-          stroke="hsl(var(--border))"
-          strokeWidth="2"
-        />
-        
-        {/* State representations */}
-        {Object.entries(statePositions).map(([state, pos]) => (
-          <circle
-            key={state}
-            cx={pos.x}
-            cy={pos.y}
-            r="4"
-            fill="hsl(var(--muted-foreground)/0.5)"
+      <div className="relative w-full">
+        <svg viewBox="0 0 700 450" className="w-full h-auto">
+          {/* US Map Image */}
+          <image
+            href={usMapImage}
+            x="50"
+            y="30"
+            width="600"
+            height="370"
+            opacity="0.6"
+            className="mix-blend-multiply dark:mix-blend-screen"
           />
-        ))}
 
         {/* Facility pins */}
         {Object.entries(facilitiesByLocation).map(([location, locationFacilities]) => {
@@ -100,7 +94,8 @@ const USMap = ({ facilities }: USMapProps) => {
           <circle cx="170" cy="0" r="6" fill="hsl(var(--primary))" stroke="white" strokeWidth="1.5" />
           <text x="182" y="4" className="text-xs fill-current" fill="hsl(var(--foreground))">Both</text>
         </g>
-      </svg>
+        </svg>
+      </div>
     </div>
   )
 }
