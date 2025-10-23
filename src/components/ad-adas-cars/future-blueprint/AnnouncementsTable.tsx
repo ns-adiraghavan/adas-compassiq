@@ -1,6 +1,6 @@
 import { useTheme } from "@/contexts/ThemeContext"
 import { FacilityLocation } from "@/hooks/useGlobalFootprintData"
-import { Megaphone, Calendar } from "lucide-react"
+import { Lightbulb, Calendar } from "lucide-react"
 
 interface AnnouncementsTableProps {
   facilities: FacilityLocation[]
@@ -16,10 +16,10 @@ const AnnouncementsTable = ({ facilities }: AnnouncementsTableProps) => {
 
   if (announcements.length === 0) {
     return (
-      <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
+      <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm h-full`}>
         <div className="flex items-center gap-2 mb-4">
-          <Megaphone className={`w-5 h-5 ${theme.textPrimary}`} />
-          <h3 className={`text-lg font-bold ${theme.textPrimary}`}>Key Insights & Announcements</h3>
+          <Lightbulb className={`w-5 h-5 ${theme.textPrimary}`} />
+          <h3 className={`text-lg font-bold ${theme.textPrimary}`}>Key Insights/Announcements</h3>
         </div>
         <p className={`text-sm ${theme.textMuted} text-center py-8`}>
           No announcements found for the selected filters
@@ -29,10 +29,10 @@ const AnnouncementsTable = ({ facilities }: AnnouncementsTableProps) => {
   }
 
   return (
-    <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
+    <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm h-full`}>
       <div className="flex items-center gap-2 mb-4">
-        <Megaphone className={`w-5 h-5 ${theme.textPrimary}`} />
-        <h3 className={`text-lg font-bold ${theme.textPrimary}`}>Key Insights & Announcements</h3>
+        <Lightbulb className={`w-5 h-5 ${theme.textPrimary}`} />
+        <h3 className={`text-lg font-bold ${theme.textPrimary}`}>Key Insights/Announcements</h3>
       </div>
 
       <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">

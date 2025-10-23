@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useTheme } from "@/contexts/ThemeContext"
 import { useGlobalFootprintData } from "@/hooks/useGlobalFootprintData"
-import FacilityCards from "./FacilityCards"
+import USMapVisualization from "./USMapVisualization"
 import AnnouncementsTable from "./AnnouncementsTable"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -86,25 +86,18 @@ const GlobalFootprint = ({ selectedRegion }: GlobalFootprintProps) => {
         </div>
       </div>
 
-      {/* Facilities Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* R&D Centers */}
-        <FacilityCards 
-          facilities={data?.facilities || []} 
-          title="R&D Centers"
-          facilityType="R&D Center"
-        />
+      {/* Main Layout: Map + Announcements */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Map Visualization */}
+        <div className="lg:col-span-2">
+          <USMapVisualization facilities={data?.facilities || []} />
+        </div>
 
-        {/* Testing Facilities */}
-        <FacilityCards 
-          facilities={data?.facilities || []} 
-          title="Testing Facilities"
-          facilityType="Testing"
-        />
+        {/* Key Insights/Announcements */}
+        <div className="lg:col-span-1">
+          <AnnouncementsTable facilities={data?.facilities || []} />
+        </div>
       </div>
-
-      {/* Announcements Section */}
-      <AnnouncementsTable facilities={data?.facilities || []} />
     </div>
   )
 }
