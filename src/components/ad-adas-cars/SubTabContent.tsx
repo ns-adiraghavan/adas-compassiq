@@ -7,6 +7,7 @@ import ComputationalCoreTable from "./core-systems/ComputationalCoreTable"
 import DrivingIntelligenceTable from "./core-systems/DrivingIntelligenceTable"
 import AdvancedTechnologiesTable from "./core-systems/AdvancedTechnologiesTable"
 import GlobalFootprint from "./future-blueprint/GlobalFootprint"
+import KeyTechnologyInvestments from "./future-blueprint/KeyTechnologyInvestments"
 
 interface SubTabContentProps {
   selectedSubTab: string
@@ -123,6 +124,16 @@ const SubTabContent = ({ selectedSubTab, selectedRegion, selectedCategory }: Sub
   if (selectedSubTab === "Global Footprint") {
     return (
       <GlobalFootprint 
+        selectedRegion={selectedRegion}
+        selectedCategory={selectedCategory}
+      />
+    )
+  }
+
+  // Key Technology Investments content
+  if (selectedSubTab === "Key Technology Investments") {
+    return (
+      <KeyTechnologyInvestments 
         selectedRegion={selectedRegion}
         selectedCategory={selectedCategory}
       />
