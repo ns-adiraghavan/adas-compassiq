@@ -3,8 +3,6 @@ import { useTheme } from "@/contexts/ThemeContext"
 import { FacilityLocation } from "@/hooks/useGlobalFootprintData"
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 
 interface USMapProps {
   facilities: FacilityLocation[]
@@ -15,14 +13,12 @@ const USMap = ({ facilities }: USMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null)
   const map = useRef<mapboxgl.Map | null>(null)
   const markers = useRef<mapboxgl.Marker[]>([])
-  const [mapboxToken, setMapboxToken] = useState<string>("")
-  const [tokenInput, setTokenInput] = useState<string>("")
-  const [isTokenSet, setIsTokenSet] = useState(false)
+  const [isMapLoaded, setIsMapLoaded] = useState(false)
 
-  const initializeMap = (token: string) => {
+  const initializeMap = () => {
     if (!mapContainer.current || map.current) return
 
-    mapboxgl.accessToken = token
+    mapboxgl.accessToken = 'pk.eyJ1IjoiYWRpcmFnaGF2YW4iLCJhIjoiY21oM2FpZ2U0MGt2cDJpczl6NmtwOXlyZyJ9.gW4Y9gEvsb6rSuoLiXQzsw'
     
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
@@ -33,26 +29,19 @@ const USMap = ({ facilities }: USMapProps) => {
 
     map.current.addControl(new mapboxgl.NavigationControl(), 'top-right')
     
-    // Add dark mode support
-    if (theme.name === 'dark') {
-      map.current.on('load', () => {
-        map.current?.setStyle('mapbox://styles/mapbox/dark-v11')
-      })
-    }
-
-    setIsTokenSet(true)
+    map.current.on('load', () => {
+      setIsMapLoaded(true)
+    })
   }
 
-  const handleSetToken = () => {
-    if (tokenInput.trim()) {
-      setMapboxToken(tokenInput.trim())
-      initializeMap(tokenInput.trim())
-    }
-  }
+  // Initialize map on mount
+  useEffect(() => {
+    initializeMap()
+  }, [])
 
   // Update markers when facilities change
   useEffect(() => {
-    if (!map.current || !isTokenSet) return
+    if (!map.current || !isMapLoaded) return
 
     // Clear existing markers
     markers.current.forEach(marker => marker.remove())
@@ -116,7 +105,7 @@ const USMap = ({ facilities }: USMapProps) => {
 
       markers.current.push(marker)
     })
-  }, [facilities, isTokenSet])
+  }, [facilities, isMapLoaded])
 
   // Cleanup
   useEffect(() => {
@@ -125,39 +114,6 @@ const USMap = ({ facilities }: USMapProps) => {
       map.current?.remove()
     }
   }, [])
-
-  if (!isTokenSet) {
-    return (
-      <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
-        <h3 className={`text-lg font-bold mb-4 ${theme.textPrimary}`}>US Facilities Map</h3>
-        <div className="space-y-4">
-          <p className={`text-sm ${theme.textSecondary}`}>
-            Enter your Mapbox public token to view the interactive map. You can get one at{' '}
-            <a 
-              href="https://mapbox.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
-            >
-              mapbox.com
-            </a>
-          </p>
-          <div className="flex gap-2">
-            <Input
-              type="text"
-              placeholder="pk.eyJ1IjoieW91ci11c2VybmFtZSIsImEiOi..."
-              value={tokenInput}
-              onChange={(e) => setTokenInput(e.target.value)}
-              className="flex-1"
-            />
-            <Button onClick={handleSetToken}>
-              Load Map
-            </Button>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
