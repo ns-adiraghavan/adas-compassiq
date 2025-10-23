@@ -6,6 +6,7 @@ import ODDTable from "./current-snapshot/ODDTable"
 import ComputationalCoreTable from "./core-systems/ComputationalCoreTable"
 import DrivingIntelligenceTable from "./core-systems/DrivingIntelligenceTable"
 import AdvancedTechnologiesTable from "./core-systems/AdvancedTechnologiesTable"
+import GlobalFootprint from "./future-blueprint/GlobalFootprint"
 
 interface SubTabContentProps {
   selectedSubTab: string
@@ -115,6 +116,16 @@ const SubTabContent = ({ selectedSubTab, selectedRegion, selectedCategory }: Sub
           <AVLandscapeInsights />
         </div>
       </div>
+    )
+  }
+
+  // Global Footprint content
+  if (selectedSubTab === "Global Footprint") {
+    return (
+      <GlobalFootprint 
+        selectedRegion={selectedRegion}
+        selectedCategory={selectedCategory}
+      />
     )
   }
 
