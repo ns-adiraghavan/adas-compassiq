@@ -2,61 +2,62 @@ import { useState } from "react"
 import { useTheme } from "@/contexts/ThemeContext"
 import { FacilityLocation } from "@/hooks/useGlobalFootprintData"
 import { Building2, FlaskConical } from "lucide-react"
+import usMapImage from "@/assets/us-map.png"
 
 interface USMapVisualizationProps {
   facilities: FacilityLocation[]
 }
 
-// Simplified US state positions for a stylized grid layout
+// US state positions scaled for percentage-based positioning (0-100 scale)
 const statePositions: Record<string, { x: number; y: number; abbr: string }> = {
-  "washington": { x: 50, y: 40, abbr: "WA" },
-  "oregon": { x: 50, y: 80, abbr: "OR" },
-  "california": { x: 40, y: 140, abbr: "CA" },
-  "nevada": { x: 80, y: 100, abbr: "NV" },
-  "arizona": { x: 90, y: 160, abbr: "AZ" },
-  "idaho": { x: 90, y: 50, abbr: "ID" },
-  "montana": { x: 120, y: 30, abbr: "MT" },
-  "wyoming": { x: 130, y: 70, abbr: "WY" },
-  "utah": { x: 110, y: 110, abbr: "UT" },
-  "colorado": { x: 150, y: 110, abbr: "CO" },
-  "new mexico": { x: 140, y: 160, abbr: "NM" },
-  "north dakota": { x: 180, y: 30, abbr: "ND" },
-  "south dakota": { x: 180, y: 70, abbr: "SD" },
-  "nebraska": { x: 190, y: 100, abbr: "NE" },
-  "kansas": { x: 200, y: 130, abbr: "KS" },
-  "oklahoma": { x: 210, y: 160, abbr: "OK" },
-  "texas": { x: 210, y: 200, abbr: "TX" },
-  "minnesota": { x: 220, y: 50, abbr: "MN" },
-  "iowa": { x: 230, y: 90, abbr: "IA" },
-  "missouri": { x: 240, y: 130, abbr: "MO" },
-  "arkansas": { x: 250, y: 165, abbr: "AR" },
-  "louisiana": { x: 260, y: 200, abbr: "LA" },
-  "wisconsin": { x: 260, y: 60, abbr: "WI" },
-  "illinois": { x: 270, y: 100, abbr: "IL" },
-  "michigan": { x: 290, y: 60, abbr: "MI" },
-  "indiana": { x: 290, y: 110, abbr: "IN" },
-  "ohio": { x: 320, y: 100, abbr: "OH" },
-  "kentucky": { x: 310, y: 140, abbr: "KY" },
-  "tennessee": { x: 300, y: 165, abbr: "TN" },
-  "mississippi": { x: 280, y: 190, abbr: "MS" },
-  "alabama": { x: 300, y: 190, abbr: "AL" },
-  "florida": { x: 340, y: 220, abbr: "FL" },
-  "georgia": { x: 330, y: 180, abbr: "GA" },
-  "south carolina": { x: 350, y: 170, abbr: "SC" },
-  "north carolina": { x: 360, y: 150, abbr: "NC" },
-  "virginia": { x: 370, y: 130, abbr: "VA" },
-  "west virginia": { x: 340, y: 120, abbr: "WV" },
-  "pennsylvania": { x: 370, y: 100, abbr: "PA" },
-  "new york": { x: 390, y: 80, abbr: "NY" },
-  "vermont": { x: 410, y: 60, abbr: "VT" },
-  "new hampshire": { x: 425, y: 65, abbr: "NH" },
-  "maine": { x: 440, y: 40, abbr: "ME" },
-  "massachusetts": { x: 430, y: 80, abbr: "MA" },
-  "rhode island": { x: 440, y: 85, abbr: "RI" },
-  "connecticut": { x: 420, y: 90, abbr: "CT" },
-  "new jersey": { x: 400, y: 105, abbr: "NJ" },
-  "delaware": { x: 395, y: 120, abbr: "DE" },
-  "maryland": { x: 380, y: 125, abbr: "MD" },
+  "washington": { x: 12, y: 15, abbr: "WA" },
+  "oregon": { x: 10, y: 28, abbr: "OR" },
+  "california": { x: 8, y: 48, abbr: "CA" },
+  "nevada": { x: 16, y: 38, abbr: "NV" },
+  "arizona": { x: 20, y: 58, abbr: "AZ" },
+  "idaho": { x: 18, y: 22, abbr: "ID" },
+  "montana": { x: 25, y: 18, abbr: "MT" },
+  "wyoming": { x: 28, y: 30, abbr: "WY" },
+  "utah": { x: 24, y: 42, abbr: "UT" },
+  "colorado": { x: 32, y: 44, abbr: "CO" },
+  "new mexico": { x: 30, y: 60, abbr: "NM" },
+  "north dakota": { x: 38, y: 20, abbr: "ND" },
+  "south dakota": { x: 40, y: 30, abbr: "SD" },
+  "nebraska": { x: 42, y: 40, abbr: "NE" },
+  "kansas": { x: 44, y: 48, abbr: "KS" },
+  "oklahoma": { x: 46, y: 58, abbr: "OK" },
+  "texas": { x: 45, y: 72, abbr: "TX" },
+  "minnesota": { x: 48, y: 22, abbr: "MN" },
+  "iowa": { x: 50, y: 36, abbr: "IA" },
+  "missouri": { x: 52, y: 48, abbr: "MO" },
+  "arkansas": { x: 54, y: 60, abbr: "AR" },
+  "louisiana": { x: 56, y: 70, abbr: "LA" },
+  "wisconsin": { x: 54, y: 28, abbr: "WI" },
+  "illinois": { x: 58, y: 42, abbr: "IL" },
+  "michigan": { x: 62, y: 30, abbr: "MI" },
+  "indiana": { x: 62, y: 44, abbr: "IN" },
+  "ohio": { x: 68, y: 42, abbr: "OH" },
+  "kentucky": { x: 66, y: 52, abbr: "KY" },
+  "tennessee": { x: 64, y: 58, abbr: "TN" },
+  "mississippi": { x: 60, y: 66, abbr: "MS" },
+  "alabama": { x: 64, y: 66, abbr: "AL" },
+  "florida": { x: 72, y: 78, abbr: "FL" },
+  "georgia": { x: 70, y: 64, abbr: "GA" },
+  "south carolina": { x: 74, y: 60, abbr: "SC" },
+  "north carolina": { x: 76, y: 54, abbr: "NC" },
+  "virginia": { x: 78, y: 48, abbr: "VA" },
+  "west virginia": { x: 72, y: 48, abbr: "WV" },
+  "pennsylvania": { x: 78, y: 42, abbr: "PA" },
+  "new york": { x: 82, y: 34, abbr: "NY" },
+  "vermont": { x: 86, y: 28, abbr: "VT" },
+  "new hampshire": { x: 88, y: 30, abbr: "NH" },
+  "maine": { x: 90, y: 20, abbr: "ME" },
+  "massachusetts": { x: 88, y: 36, abbr: "MA" },
+  "rhode island": { x: 90, y: 38, abbr: "RI" },
+  "connecticut": { x: 86, y: 40, abbr: "CT" },
+  "new jersey": { x: 82, y: 42, abbr: "NJ" },
+  "delaware": { x: 80, y: 46, abbr: "DE" },
+  "maryland": { x: 78, y: 48, abbr: "MD" },
 }
 
 const USMapVisualization = ({ facilities }: USMapVisualizationProps) => {
@@ -75,15 +76,23 @@ const USMapVisualization = ({ facilities }: USMapVisualizationProps) => {
     <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm relative`}>
       <h3 className={`text-lg font-bold ${theme.textPrimary} mb-4`}>Facility Footprint</h3>
       
-      <div className="relative w-full h-[500px] bg-slate-900/50 rounded-lg overflow-hidden">
+      <div className="relative w-full h-[600px] rounded-lg overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900">
+        {/* US Map Background */}
+        <img 
+          src={usMapImage} 
+          alt="US Map" 
+          className="absolute inset-0 w-full h-full object-contain opacity-30"
+        />
+        
         {/* State labels */}
         {Object.entries(statePositions).map(([state, pos]) => (
           <div
             key={state}
-            className="absolute text-xs text-slate-600 font-medium"
+            className="absolute text-xs text-slate-400 font-semibold"
             style={{
-              left: `${pos.x}px`,
-              top: `${pos.y}px`,
+              left: `${pos.x}%`,
+              top: `${pos.y}%`,
+              transform: 'translate(-50%, -50%)'
             }}
           >
             {pos.abbr}
@@ -103,10 +112,10 @@ const USMapVisualization = ({ facilities }: USMapVisualizationProps) => {
               {/* R&D Center marker */}
               {hasRD && (
                 <div
-                  className="absolute cursor-pointer transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 hover:scale-125"
+                  className="absolute cursor-pointer transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 hover:scale-125 z-10"
                   style={{
-                    left: `${pos.x + 5}px`,
-                    top: `${pos.y + 15}px`,
+                    left: `${pos.x}%`,
+                    top: `${pos.y}%`,
                   }}
                   onMouseEnter={(e) => {
                     const facility = locationFacilities.find(f => f.facilityType === "R&D Center")
@@ -121,10 +130,10 @@ const USMapVisualization = ({ facilities }: USMapVisualizationProps) => {
                   onMouseLeave={() => setHoveredFacility(null)}
                 >
                   <div className="relative">
-                    <div className="w-5 h-5 bg-red-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center">
-                      <Building2 className="w-3 h-3 text-white" />
+                    <div className="w-6 h-6 bg-red-500 rounded-full border-2 border-white shadow-xl flex items-center justify-center">
+                      <Building2 className="w-3.5 h-3.5 text-white" />
                     </div>
-                    <div className="absolute inset-0 w-5 h-5 bg-red-500 rounded-full animate-ping opacity-20" />
+                    <div className="absolute inset-0 w-6 h-6 bg-red-500 rounded-full animate-ping opacity-25" />
                   </div>
                 </div>
               )}
@@ -132,10 +141,10 @@ const USMapVisualization = ({ facilities }: USMapVisualizationProps) => {
               {/* Testing facility marker */}
               {hasTesting && (
                 <div
-                  className="absolute cursor-pointer transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 hover:scale-125"
+                  className="absolute cursor-pointer transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200 hover:scale-125 z-10"
                   style={{
-                    left: `${pos.x + 15}px`,
-                    top: `${pos.y + 15}px`,
+                    left: `${pos.x + 3}%`,
+                    top: `${pos.y}%`,
                   }}
                   onMouseEnter={(e) => {
                     const facility = locationFacilities.find(f => f.facilityType === "Testing")
@@ -150,10 +159,10 @@ const USMapVisualization = ({ facilities }: USMapVisualizationProps) => {
                   onMouseLeave={() => setHoveredFacility(null)}
                 >
                   <div className="relative">
-                    <div className="w-5 h-5 bg-blue-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center">
-                      <FlaskConical className="w-3 h-3 text-white" />
+                    <div className="w-6 h-6 bg-blue-500 rounded-full border-2 border-white shadow-xl flex items-center justify-center">
+                      <FlaskConical className="w-3.5 h-3.5 text-white" />
                     </div>
-                    <div className="absolute inset-0 w-5 h-5 bg-blue-500 rounded-full animate-ping opacity-20" />
+                    <div className="absolute inset-0 w-6 h-6 bg-blue-500 rounded-full animate-ping opacity-25" />
                   </div>
                 </div>
               )}
