@@ -84,7 +84,7 @@ const AdAdasCarsLayoutContent = ({ children }: AdAdasCarsLayoutProps) => {
       id: 'core-systems', 
       name: 'Core Systems Breakdown', 
       path: '/ad-adas-cars/core-systems',
-      subTabs: ['Semantics', 'Computational Core', 'Driving Intelligence', 'Connectivity & Localization', 'Advanced Technologies']
+      subTabs: ['Sensorics', 'Computational Core', 'Driving Intelligence', 'Connectivity & Localization', 'Advanced Technologies']
     },
     { 
       id: 'future-blueprint', 
