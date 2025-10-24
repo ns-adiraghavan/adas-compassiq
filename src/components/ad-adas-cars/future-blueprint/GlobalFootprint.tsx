@@ -35,7 +35,7 @@ const GlobalFootprint = ({ selectedRegion }: GlobalFootprintProps) => {
   }
 
   const oems = data?.oems || []
-  const facilityTypes = ["All", "R&D Center", "Testing", "Expansion"]
+  const facilityTypes = ["All", "R&D Center", "Testing & Expansion"]
   const filteredFacilities = data?.facilities || []
 
   return (

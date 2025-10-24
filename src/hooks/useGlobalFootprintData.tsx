@@ -37,23 +37,14 @@ export const useGlobalFootprintData = (region: string, selectedOEM?: string, fac
           })
         }
 
-        // Process Testing Facilities
-        if (row["Testing Facilities"]) {
+        // Process Testing Facilities and Expansion Plans (combined)
+        if (row["Testing Facilities"] || row["Expansion Plans"]) {
+          const details = [row["Testing Facilities"], row["Expansion Plans"]].filter(Boolean).join("; ")
           facilities.push({
             oem,
             location,
-            facilityType: "Testing",
-            details: row["Testing Facilities"]
-          })
-        }
-
-        // Process Expansion Plans
-        if (row["Expansion Plans"]) {
-          facilities.push({
-            oem,
-            location,
-            facilityType: "Expansion",
-            details: row["Expansion Plans"]
+            facilityType: "Testing & Expansion",
+            details
           })
         }
       })

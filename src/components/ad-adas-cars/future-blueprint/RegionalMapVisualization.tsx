@@ -14,7 +14,7 @@ interface RegionalMapVisualizationProps {
 const RegionalMapVisualization = ({ facilities, region }: RegionalMapVisualizationProps) => {
   const [hoveredFacility, setHoveredFacility] = useState<FacilityLocation | null>(null)
 
-  // Group facilities by location
+  // Group facilities by location to get unique locations with all their facilities
   const facilitiesByLocation = facilities.reduce((acc, facility) => {
     if (!acc[facility.location]) {
       acc[facility.location] = []
@@ -24,17 +24,16 @@ const RegionalMapVisualization = ({ facilities, region }: RegionalMapVisualizati
   }, {} as Record<string, FacilityLocation[]>)
 
   const rdFacilities = facilities.filter(f => f.facilityType === "R&D Center")
-  const testingFacilities = facilities.filter(f => f.facilityType === "Testing")
-  const expansionFacilities = facilities.filter(f => f.facilityType === "Expansion")
+  const testingExpansionFacilities = facilities.filter(f => f.facilityType === "Testing & Expansion")
 
   // Select map based on region and facility types
   const getMapImage = () => {
     if (region === "US") {
       const hasRnd = rdFacilities.length > 0
-      const hasTestingOrExpansion = testingFacilities.length > 0 || expansionFacilities.length > 0
+      const hasTestingExpansion = testingExpansionFacilities.length > 0
       
-      if (hasRnd && !hasTestingOrExpansion) return usMapRnd
-      if (hasTestingOrExpansion) return usMapTestingExpansion
+      if (hasRnd && !hasTestingExpansion) return usMapRnd
+      if (hasTestingExpansion) return usMapTestingExpansion
       return usMapRnd
     } else if (region === "Europe") {
       return europeMap
@@ -44,99 +43,109 @@ const RegionalMapVisualization = ({ facilities, region }: RegionalMapVisualizati
     return usMapRnd
   }
 
+  // Get unique locations with their coordinates for labels
+  const uniqueLocations = Object.entries(facilitiesByLocation).map(([location, locationFacilities]) => ({
+    location,
+    facilities: locationFacilities,
+    lat: locationFacilities[0].lat,
+    lng: locationFacilities[0].lng,
+  })).filter(loc => loc.lat !== undefined && loc.lng !== undefined)
+
   return (
     <div className="space-y-4">
       <Card className="p-4 bg-card border-border">
         <div className="flex justify-between items-center mb-2">
           <h3 className="text-sm font-semibold text-foreground">Facility Distribution - {region}</h3>
           <div className="text-xs text-muted-foreground space-x-4">
-            <span>Total: {facilities.length}</span>
-            <span>R&D: {rdFacilities.length}</span>
-            <span>Testing: {testingFacilities.length}</span>
-            <span>Expansion: {expansionFacilities.length}</span>
+            <span>Total Locations: {uniqueLocations.length}</span>
+            <span>R&D Centers: {rdFacilities.length}</span>
+            <span>Testing & Expansion: {testingExpansionFacilities.length}</span>
           </div>
         </div>
       </Card>
 
       <Card className="p-6 bg-card border-border">
-        <div className="relative w-full" style={{ paddingBottom: '66%' }}>
+        <div className="relative w-full mx-auto max-w-5xl" style={{ paddingBottom: '70%' }}>
           <img
             src={getMapImage()}
             alt={`${region} Map`}
             className="absolute inset-0 w-full h-full object-contain"
           />
 
-          {/* R&D Center markers */}
-          {rdFacilities.map((facility, idx) => (
-            facility.lat !== undefined && facility.lng !== undefined && (
+          {/* Location labels and markers */}
+          {uniqueLocations.map((locationData, idx) => {
+            const hasRnd = locationData.facilities.some(f => f.facilityType === "R&D Center")
+            const hasTestingExpansion = locationData.facilities.some(f => f.facilityType === "Testing & Expansion")
+            
+            return (
               <div
-                key={`rd-${idx}`}
-                className="absolute w-4 h-4 -ml-2 -mt-2 cursor-pointer transform transition-transform hover:scale-125"
+                key={`location-${idx}`}
+                className="absolute -ml-3 -mt-3"
                 style={{
-                  left: `${facility.lng}%`,
-                  top: `${facility.lat}%`,
+                  left: `${locationData.lng}%`,
+                  top: `${locationData.lat}%`,
                 }}
-                onMouseEnter={() => setHoveredFacility(facility)}
-                onMouseLeave={() => setHoveredFacility(null)}
               >
-                <div className="w-full h-full rounded-full bg-[#2DD4BF] border-2 border-white shadow-lg" />
+                {/* Marker */}
+                <div
+                  className="w-6 h-6 cursor-pointer transform transition-transform hover:scale-125 relative"
+                  onMouseEnter={() => setHoveredFacility(locationData.facilities[0])}
+                  onMouseLeave={() => setHoveredFacility(null)}
+                >
+                  <div className="w-full h-full rounded-full bg-[#2DD4BF] border-2 border-white shadow-lg flex items-center justify-center">
+                    <span className="text-[8px] font-bold text-white">
+                      {locationData.facilities.length}
+                    </span>
+                  </div>
+                </div>
+                
+                {/* Location label */}
+                <div className="absolute top-7 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                  <div className="bg-background/90 border border-border rounded px-2 py-0.5 shadow-sm">
+                    <div className="text-[10px] font-semibold text-foreground">
+                      {locationData.location}
+                    </div>
+                    <div className="text-[8px] text-muted-foreground">
+                      {hasRnd && "R&D"}
+                      {hasRnd && hasTestingExpansion && " • "}
+                      {hasTestingExpansion && "Test/Exp"}
+                    </div>
+                  </div>
+                </div>
               </div>
             )
-          ))}
-
-          {/* Testing facilities markers */}
-          {testingFacilities.map((facility, idx) => (
-            facility.lat !== undefined && facility.lng !== undefined && (
-              <div
-                key={`testing-${idx}`}
-                className="absolute w-4 h-4 -ml-2 -mt-2 cursor-pointer transform transition-transform hover:scale-125"
-                style={{
-                  left: `${facility.lng}%`,
-                  top: `${facility.lat}%`,
-                }}
-                onMouseEnter={() => setHoveredFacility(facility)}
-                onMouseLeave={() => setHoveredFacility(null)}
-              >
-                <div className="w-full h-full rounded-full bg-[#2DD4BF] border-2 border-white shadow-lg" />
-              </div>
-            )
-          ))}
-
-          {/* Expansion facilities markers */}
-          {expansionFacilities.map((facility, idx) => (
-            facility.lat !== undefined && facility.lng !== undefined && (
-              <div
-                key={`expansion-${idx}`}
-                className="absolute w-4 h-4 -ml-2 -mt-2 cursor-pointer transform transition-transform hover:scale-125"
-                style={{
-                  left: `${facility.lng}%`,
-                  top: `${facility.lat}%`,
-                }}
-                onMouseEnter={() => setHoveredFacility(facility)}
-                onMouseLeave={() => setHoveredFacility(null)}
-              >
-                <div className="w-full h-full rounded-full bg-[#2DD4BF] border-2 border-white shadow-lg" />
-              </div>
-            )
-          ))}
+          })}
 
           {/* Tooltip */}
           {hoveredFacility && hoveredFacility.lat !== undefined && hoveredFacility.lng !== undefined && (
             <div
-              className="absolute z-10 bg-background border border-border rounded-lg shadow-lg p-3 min-w-[200px] pointer-events-none"
+              className="absolute z-10 bg-background border border-border rounded-lg shadow-xl p-3 min-w-[250px] max-w-[350px] pointer-events-none"
               style={{
                 left: `${hoveredFacility.lng}%`,
-                top: `${hoveredFacility.lat - 15}%`,
-                transform: 'translateX(-50%)',
+                top: `${hoveredFacility.lat - 18}%`,
+                transform: 'translateX(-50%) translateY(-100%)',
               }}
             >
-              <div className="text-sm">
-                <div className="font-semibold text-foreground mb-1">{hoveredFacility.oem}</div>
-                <div className="text-xs text-muted-foreground mb-1">{hoveredFacility.location}</div>
-                <div className="text-xs">
-                  <span className="font-medium text-foreground">{hoveredFacility.facilityType}</span>
+              <div className="text-sm space-y-2">
+                <div className="font-semibold text-foreground border-b border-border pb-1">
+                  {hoveredFacility.location}
                 </div>
-                <div className="text-xs text-muted-foreground mt-1">{hoveredFacility.details}</div>
+                {/* Show all facilities at this location */}
+                {facilitiesByLocation[hoveredFacility.location]?.map((fac, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <div className="flex items-start gap-2">
+                      <div className="text-xs font-medium text-foreground min-w-[60px]">
+                        {fac.facilityType}:
+                      </div>
+                      <div className="text-xs text-muted-foreground flex-1">
+                        {fac.oem}
+                      </div>
+                    </div>
+                    <div className="text-xs text-muted-foreground pl-[68px]">
+                      {fac.details}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -145,16 +154,10 @@ const RegionalMapVisualization = ({ facilities, region }: RegionalMapVisualizati
         {/* Legend */}
         <div className="mt-4 flex items-center gap-6 text-sm">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-[#2DD4BF] border-2 border-white" />
-            <span className="text-muted-foreground">R&D Center</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-[#2DD4BF] border-2 border-white" />
-            <span className="text-muted-foreground">Testing Facility</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-[#2DD4BF] border-2 border-white" />
-            <span className="text-muted-foreground">Expansion Plan</span>
+            <div className="w-4 h-4 rounded-full bg-[#2DD4BF] border-2 border-white flex items-center justify-center">
+              <span className="text-[8px] font-bold text-white">#</span>
+            </div>
+            <span className="text-muted-foreground">Facility Locations (hover for details)</span>
           </div>
         </div>
       </Card>
