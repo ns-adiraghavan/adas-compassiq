@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useTheme } from "@/contexts/ThemeContext"
 import { useGlobalFootprintData } from "@/hooks/useGlobalFootprintData"
-import USMapVisualization from "./USMapVisualization"
+import RegionalMapVisualization from "./RegionalMapVisualization"
 import AnnouncementsTable from "./AnnouncementsTable"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -96,7 +96,7 @@ const GlobalFootprint = ({ selectedRegion }: GlobalFootprintProps) => {
               <p className={`${theme.textSecondary} text-lg`}>No facilities found matching the selected filters.</p>
             </div>
           ) : (
-            <USMapVisualization facilities={filteredFacilities} />
+            <RegionalMapVisualization facilities={filteredFacilities} region={selectedRegion} />
           )}
         </div>
 
