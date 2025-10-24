@@ -65,11 +65,11 @@ const RegionalMapVisualization = ({ facilities, region }: RegionalMapVisualizati
       </Card>
 
       <Card className="p-6 bg-card border-border">
-        <div className="relative w-full mx-auto max-w-5xl" style={{ paddingBottom: '70%' }}>
+        <div className="relative w-full mx-auto" style={{ minHeight: '600px', height: '70vh' }}>
           <img
             src={getMapImage()}
             alt={`${region} Map`}
-            className="absolute inset-0 w-full h-full object-contain"
+            className="absolute inset-0 w-full h-full object-contain pointer-events-none"
           />
 
           {/* Location labels and markers */}
@@ -88,24 +88,24 @@ const RegionalMapVisualization = ({ facilities, region }: RegionalMapVisualizati
               >
                 {/* Marker */}
                 <div
-                  className="w-6 h-6 cursor-pointer transform transition-transform hover:scale-125 relative"
+                  className="w-8 h-8 cursor-pointer transform transition-all hover:scale-125 relative z-20"
                   onMouseEnter={() => setHoveredFacility(locationData.facilities[0])}
                   onMouseLeave={() => setHoveredFacility(null)}
                 >
                   <div className="w-full h-full rounded-full bg-[#2DD4BF] border-2 border-white shadow-lg flex items-center justify-center">
-                    <span className="text-[8px] font-bold text-white">
+                    <span className="text-[10px] font-bold text-white">
                       {locationData.facilities.length}
                     </span>
                   </div>
                 </div>
                 
                 {/* Location label */}
-                <div className="absolute top-7 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                  <div className="bg-background/90 border border-border rounded px-2 py-0.5 shadow-sm">
-                    <div className="text-[10px] font-semibold text-foreground">
+                <div className="absolute top-9 left-1/2 -translate-x-1/2 whitespace-nowrap z-10">
+                  <div className="bg-background/95 border-2 border-primary/50 rounded px-3 py-1 shadow-md">
+                    <div className="text-xs font-bold text-foreground">
                       {locationData.location}
                     </div>
-                    <div className="text-[8px] text-muted-foreground">
+                    <div className="text-[9px] text-muted-foreground font-medium">
                       {hasRnd && "R&D"}
                       {hasRnd && hasTestingExpansion && " • "}
                       {hasTestingExpansion && "Test/Exp"}
@@ -119,29 +119,29 @@ const RegionalMapVisualization = ({ facilities, region }: RegionalMapVisualizati
           {/* Tooltip */}
           {hoveredFacility && hoveredFacility.lat !== undefined && hoveredFacility.lng !== undefined && (
             <div
-              className="absolute z-10 bg-background border border-border rounded-lg shadow-xl p-3 min-w-[250px] max-w-[350px] pointer-events-none"
+              className="absolute z-50 bg-background border-2 border-primary rounded-lg shadow-2xl p-4 min-w-[280px] max-w-[400px] pointer-events-none"
               style={{
                 left: `${hoveredFacility.lng}%`,
-                top: `${hoveredFacility.lat - 18}%`,
+                top: `${hoveredFacility.lat - 20}%`,
                 transform: 'translateX(-50%) translateY(-100%)',
               }}
             >
-              <div className="text-sm space-y-2">
-                <div className="font-semibold text-foreground border-b border-border pb-1">
+              <div className="text-sm space-y-3">
+                <div className="font-bold text-foreground border-b-2 border-primary pb-2 text-base">
                   {hoveredFacility.location}
                 </div>
                 {/* Show all facilities at this location */}
                 {facilitiesByLocation[hoveredFacility.location]?.map((fac, idx) => (
-                  <div key={idx} className="space-y-1">
+                  <div key={idx} className="space-y-1 bg-muted/50 p-2 rounded">
                     <div className="flex items-start gap-2">
-                      <div className="text-xs font-medium text-foreground min-w-[60px]">
-                        {fac.facilityType}:
+                      <div className="text-xs font-semibold text-primary min-w-[80px]">
+                        {fac.facilityType}
                       </div>
-                      <div className="text-xs text-muted-foreground flex-1">
+                      <div className="text-xs font-medium text-foreground flex-1">
                         {fac.oem}
                       </div>
                     </div>
-                    <div className="text-xs text-muted-foreground pl-[68px]">
+                    <div className="text-xs text-muted-foreground leading-relaxed">
                       {fac.details}
                     </div>
                   </div>
