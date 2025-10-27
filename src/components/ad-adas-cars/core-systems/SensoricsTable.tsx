@@ -38,6 +38,7 @@ const sensorPositions = [
 const oemToImageIndex: Record<string, number> = {
   "Tesla": 0,
   "RIVIAN": 1,
+  "Rivian": 1, // Alias for RIVIAN
   "BMW": 2,
   "General Motors": 3,
   "GM": 3, // Alias for General Motors
@@ -70,7 +71,11 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
     return matchesSensorType && matchesPosition && matchesOEM
   }) || []
 
-  const uniqueOEMs = Array.from(new Set(data?.map(item => item.oem).filter(Boolean))) || []
+  // Ensure all OEMs from composite image are available, plus any from data
+  const uniqueOEMs = Array.from(new Set([
+    ...Object.keys(oemToImageIndex),
+    ...(data?.map(item => item.oem).filter(Boolean) || [])
+  ]))
   const currentSensorColor = sensorTypes.find(s => s.id === selectedSensorType)?.color || "hsl(var(--primary))"
   const oemIndex = oemToImageIndex[selectedOEM] ?? 0
   
@@ -252,7 +257,7 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
                   <div 
                     className="absolute inset-0 transition-all duration-500"
                     style={{
-                      filter: `drop-shadow(0 0 30px ${currentSensorColor}40)`,
+                      filter: `drop-shadow(0 0 30px ${currentSensorColor})`,
                     }}
                   >
                     <div 
@@ -268,7 +273,7 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
                         className="w-full h-full object-contain"
                         style={{
                           // Compensate for the clip by scaling and positioning
-                          transform: `translateX(-${carLeftOffset}%) scale(${100 / carWidthPercent}%)`,
+                          transform: `translateX(-${carLeftOffset}%) scale(${100 / carWidthPercent})`,
                           transformOrigin: 'left center',
                         }}
                       />
