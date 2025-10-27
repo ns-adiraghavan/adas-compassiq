@@ -168,15 +168,26 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
             <div className="p-6">
               {/* Sensor Legend */}
               <Card className="absolute top-6 left-6 z-10 bg-background/95 backdrop-blur-sm border shadow-lg">
-                <div className="p-3 space-y-2">
-                  <div className="text-xs font-semibold text-muted-foreground mb-2">
-                    Sensor Distribution
+                <div className="p-3 space-y-3">
+                  <div>
+                    <div className="text-xs font-semibold text-muted-foreground mb-1">
+                      Sensor Count by Type
+                    </div>
+                    <div className="text-[10px] text-muted-foreground mb-2">
+                      for {selectedOEM}
+                    </div>
                   </div>
                   {sensorTypes.map(({ id, icon: Icon, color }) => {
                     const count = sensorCounts.find(s => s.type === id)?.count || 0
                     return (
                       <div key={id} className="flex items-center gap-2 text-xs">
-                        <Icon className="h-3 w-3" style={{ color }} />
+                        <div className="flex items-center gap-1.5">
+                          <div 
+                            className="w-2 h-2 rounded-full" 
+                            style={{ backgroundColor: color }}
+                          />
+                          <Icon className="h-3 w-3" style={{ color }} />
+                        </div>
                         <span className="flex-1">{id}</span>
                         <Badge variant="secondary" className="h-5 px-2 text-xs">
                           {count}
@@ -184,6 +195,10 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
                       </div>
                     )
                   })}
+                  <Separator className="my-2" />
+                  <div className="text-[10px] text-muted-foreground">
+                    Colored dots show active {selectedSensorType} sensors
+                  </div>
                 </div>
               </Card>
 
@@ -203,17 +218,18 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
                     />
                   </div>
                   
-                  {/* Dynamic Sensor Position Overlays */}
+                  {/* Dynamic Sensor Position Overlays - Aligned with image dots */}
                   {Object.entries(activeSensorPositions).map(([zone, count]) => {
                     if (count === 0) return null
                     
-                    // Position overlays based on zone
+                    // Position overlays to match the dots on the car images
+                    // These positions are calibrated to overlay the existing dots
                     const overlayPosition = zone === 'Front' 
-                      ? 'top-8 left-1/2 -translate-x-1/2'
+                      ? 'top-[15%] left-1/2 -translate-x-1/2'
                       : zone === 'Rear'
-                      ? 'bottom-8 left-1/2 -translate-x-1/2'
+                      ? 'bottom-[15%] left-1/2 -translate-x-1/2'
                       : zone === 'Side'
-                      ? 'top-1/2 right-8 -translate-y-1/2'
+                      ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
                       : 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
                     
                     return (
@@ -221,37 +237,60 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
                         key={zone}
                         className={`absolute ${overlayPosition} transition-all duration-500`}
                       >
-                        <div 
-                          className="relative flex items-center justify-center animate-pulse"
-                          style={{
-                            width: '24px',
-                            height: '24px',
-                          }}
-                        >
-                          {/* Pulsing ring */}
-                          <div 
-                            className="absolute inset-0 rounded-full animate-ping opacity-75"
-                            style={{
-                              backgroundColor: currentSensorColor,
-                            }}
-                          />
-                          {/* Solid dot */}
-                          <div 
-                            className="relative rounded-full border-2 border-background shadow-lg"
-                            style={{
-                              width: '16px',
-                              height: '16px',
-                              backgroundColor: currentSensorColor,
-                            }}
-                          />
-                          {/* Count badge */}
-                          <div 
-                            className="absolute -top-2 -right-2 bg-background border rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold shadow-sm"
-                            style={{ color: currentSensorColor }}
-                          >
-                            {count}
-                          </div>
-                        </div>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div 
+                              className="relative flex items-center justify-center cursor-pointer"
+                              style={{
+                                width: '32px',
+                                height: '32px',
+                              }}
+                            >
+                              {/* Pulsing ring - larger and more visible */}
+                              <div 
+                                className="absolute inset-0 rounded-full animate-ping opacity-60"
+                                style={{
+                                  backgroundColor: currentSensorColor,
+                                }}
+                              />
+                              {/* Outer glow ring */}
+                              <div 
+                                className="absolute inset-0 rounded-full opacity-40 blur-sm"
+                                style={{
+                                  backgroundColor: currentSensorColor,
+                                }}
+                              />
+                              {/* Solid dot - overlays existing image dot */}
+                              <div 
+                                className="relative rounded-full border-3 border-background shadow-2xl"
+                                style={{
+                                  width: '20px',
+                                  height: '20px',
+                                  backgroundColor: currentSensorColor,
+                                  boxShadow: `0 0 20px ${currentSensorColor}80`,
+                                }}
+                              />
+                              {/* Count badge */}
+                              <div 
+                                className="absolute -top-1 -right-1 bg-background border-2 rounded-full w-6 h-6 flex items-center justify-center text-[10px] font-bold shadow-lg"
+                                style={{ 
+                                  color: currentSensorColor,
+                                  borderColor: currentSensorColor,
+                                }}
+                              >
+                                {count}
+                              </div>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <div className="text-xs">
+                              <div className="font-semibold">{zone} Zone</div>
+                              <div className="text-muted-foreground">
+                                {count} {selectedSensorType} sensor{count !== 1 ? 's' : ''}
+                              </div>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
                       </div>
                     )
                   })}
