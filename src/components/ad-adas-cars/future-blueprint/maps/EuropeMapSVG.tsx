@@ -1,66 +1,61 @@
+import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps"
+import { Building2, FlaskConical } from "lucide-react"
 import { FacilityLocation } from "@/hooks/useGlobalFootprintData"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
-import { Badge } from "@/components/ui/badge"
-import { MapPin, Building2, FlaskConical } from "lucide-react"
 
 interface EuropeMapSVGProps {
   facilities: FacilityLocation[]
 }
 
-// Coordinate mapping for European cities to SVG coordinates
-const cityCoordinates: { [key: string]: { x: number; y: number } } = {
-  "Munich": { x: 520, y: 320 },
-  "Stuttgart": { x: 500, y: 330 },
-  "Ingolstadt": { x: 530, y: 310 },
-  "Wolfsburg": { x: 520, y: 260 },
-  "Berlin": { x: 560, y: 240 },
-  "Hamburg": { x: 510, y: 220 },
-  "Paris": { x: 420, y: 320 },
-  "London": { x: 380, y: 270 },
-  "Amsterdam": { x: 460, y: 240 },
-  "Brussels": { x: 450, y: 270 },
-  "Zurich": { x: 490, y: 350 },
-  "Milan": { x: 500, y: 380 },
-  "Rome": { x: 540, y: 450 },
-  "Barcelona": { x: 410, y: 450 },
-  "Madrid": { x: 360, y: 420 },
-  "Stockholm": { x: 580, y: 150 },
-  "Oslo": { x: 520, y: 140 },
-  "Copenhagen": { x: 540, y: 200 },
-  "Vienna": { x: 570, y: 330 },
-  "Prague": { x: 560, y: 300 },
-  "Warsaw": { x: 630, y: 260 },
-  "Budapest": { x: 620, y: 350 },
+const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"
+
+// Map city locations to [longitude, latitude] coordinates
+const cityCoordinates: Record<string, [number, number]> = {
+  "Munich, Germany": [11.5820, 48.1351],
+  "Ingolstadt, Germany": [11.4250, 48.7665],
+  "Stuttgart, Germany": [9.1829, 48.7758],
+  "Wolfsburg, Germany": [10.7872, 52.4227],
+  "Berlin, Germany": [13.4050, 52.5200],
+  "Arjeplog, Sweden": [17.8333, 66.0500],
+  "Miramas, France": [5.0000, 43.5833],
+  "Rodez, France": [2.5750, 44.3500],
+  "Coventry, UK": [-1.5080, 52.4068],
+  "Barcelona, Spain": [2.1734, 41.3851],
 }
 
-// Country paths for coloring
-const countryPaths = {
-  "Germany": "M480,230 L560,225 L575,270 L570,320 L540,340 L490,335 L475,290 Z",
-  "France": "M380,270 L450,265 L465,310 L460,380 L400,400 L365,350 Z",
-  "UK": "M350,230 L400,225 L405,285 L385,295 L345,280 Z",
-  "Italy": "M500,360 L540,355 L560,420 L555,480 L510,490 L495,430 Z",
-  "Spain": "M320,390 L420,385 L430,465 L340,475 Z",
-  "Sweden": "M540,100 L600,95 L610,180 L545,185 Z",
-  "Poland": "M590,240 L660,235 L670,290 L595,295 Z",
-  "Netherlands": "M440,220 L480,215 L485,255 L445,260 Z",
-  "Belgium": "M430,250 L470,245 L475,280 L435,285 Z",
-  "Switzerland": "M475,330 L510,325 L515,365 L480,370 Z",
-  "Austria": "M540,310 L590,305 L595,345 L545,350 Z",
-  "Czech Republic": "M540,280 L580,275 L585,310 L545,315 Z",
+// Map locations to country names for coloring
+const locationToCountry: Record<string, string> = {
+  "Munich, Germany": "Germany",
+  "Ingolstadt, Germany": "Germany",
+  "Stuttgart, Germany": "Germany",
+  "Wolfsburg, Germany": "Germany",
+  "Berlin, Germany": "Germany",
+  "Arjeplog, Sweden": "Sweden",
+  "Miramas, France": "France",
+  "Rodez, France": "France",
+  "Coventry, UK": "United Kingdom",
+  "Barcelona, Spain": "Spain",
 }
 
 export const EuropeMapSVG = ({ facilities }: EuropeMapSVGProps) => {
   // Group facilities by location
   const facilitiesByLocation = facilities.reduce((acc, facility) => {
-    const key = facility.location
-    if (!acc[key]) acc[key] = []
-    acc[key].push(facility)
+    const existing = acc.find(f => f.location === facility.location)
+    if (existing) {
+      existing.facilities.push(facility)
+    } else {
+      acc.push({
+        location: facility.location,
+        coordinates: cityCoordinates[facility.location] || [0, 0],
+        facilities: [facility]
+      })
+    }
     return acc
-  }, {} as { [key: string]: FacilityLocation[] })
+  }, [] as Array<{ location: string; coordinates: [number, number]; facilities: FacilityLocation[] }>)
 
   // Determine country colors based on facility types
-  const getCountryColor = (country: string) => {
-    const countryFacilities = facilities.filter(f => f.location.includes(country))
+  const getCountryColor = (countryName: string) => {
+    const countryFacilities = facilities.filter(f => locationToCountry[f.location] === countryName)
     if (countryFacilities.length === 0) return "hsl(var(--muted))"
     
     const hasRD = countryFacilities.some(f => f.facilityType === "R&D Center")
@@ -72,139 +67,136 @@ export const EuropeMapSVG = ({ facilities }: EuropeMapSVGProps) => {
     return "hsl(var(--muted))"
   }
 
-  const getMarkerCoordinates = (location: string) => {
-    // Try exact match first
-    const exactMatch = cityCoordinates[location]
-    if (exactMatch) return exactMatch
-
-    // Try partial match
-    for (const [city, coords] of Object.entries(cityCoordinates)) {
-      if (location.includes(city) || city.includes(location)) {
-        return coords
-      }
-    }
-
-    return null
-  }
-
   return (
-    <div className="relative w-full h-full">
-      <svg
-        viewBox="0 0 900 600"
-        className="w-full h-full"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {/* Draw countries */}
-        {Object.entries(countryPaths).map(([country, path]) => (
-          <path
-            key={country}
-            d={path}
-            fill={getCountryColor(country)}
-            stroke="hsl(var(--border))"
-            strokeWidth="1.5"
-            className="transition-all duration-300 hover:opacity-80"
-          />
-        ))}
+    <ComposableMap
+      projection="geoMercator"
+      className="w-full h-full"
+      projectionConfig={{
+        center: [10, 53],
+        scale: 600,
+      }}
+    >
+      <Geographies geography={geoUrl}>
+        {({ geographies }) =>
+          geographies
+            .filter(geo => {
+              // Filter to show only European countries
+              const europeanCountries = [
+                "Germany", "France", "United Kingdom", "Spain", "Italy", "Sweden",
+                "Norway", "Finland", "Denmark", "Poland", "Netherlands", "Belgium",
+                "Austria", "Switzerland", "Portugal", "Greece", "Czech Republic",
+                "Romania", "Hungary", "Ireland", "Slovakia", "Bulgaria", "Croatia"
+              ]
+              return europeanCountries.includes(geo.properties.name)
+            })
+            .map((geo) => (
+              <Geography
+                key={geo.rsmKey}
+                geography={geo}
+                fill={getCountryColor(geo.properties.name)}
+                stroke="hsl(var(--border))"
+                strokeWidth={0.5}
+                style={{
+                  default: { outline: "none" },
+                  hover: { fill: "hsl(var(--accent))", outline: "none" },
+                  pressed: { outline: "none" },
+                }}
+              />
+            ))
+        }
+      </Geographies>
 
-        {/* Draw facility markers */}
-        {Object.entries(facilitiesByLocation).map(([location, locationFacilities]) => {
-          const coords = getMarkerCoordinates(location)
-          if (!coords) return null
-
-          const hasRD = locationFacilities.some(f => f.facilityType === "R&D Center")
-          const hasTesting = locationFacilities.some(f => f.facilityType === "Testing & Expansion")
-
-          return (
-            <HoverCard key={location} openDelay={0} closeDelay={100}>
+      {/* Render facility markers */}
+      {facilitiesByLocation.map((location) => {
+        if (!location.coordinates[0] || !location.coordinates[1]) return null
+        
+        const rdCount = location.facilities.filter(f => f.facilityType === "R&D Center").length
+        const testingCount = location.facilities.filter(f => f.facilityType === "Testing & Expansion").length
+        const primaryType = rdCount >= testingCount ? "R&D Center" : "Testing & Expansion"
+        
+        return (
+          <Marker key={location.location} coordinates={location.coordinates}>
+            <HoverCard openDelay={0} closeDelay={0}>
               <HoverCardTrigger asChild>
-                <g
-                  className="cursor-pointer transition-transform duration-200 hover:scale-125"
-                  style={{ transformOrigin: `${coords.x}px ${coords.y}px` }}
-                >
-                  {/* Pulsing animation circle */}
+                <g className="cursor-pointer">
+                  {/* Pulsing circle animation */}
                   <circle
-                    cx={coords.x}
-                    cy={coords.y}
-                    r="12"
-                    fill={hasRD ? "hsl(var(--chart-1))" : "hsl(var(--chart-2))"}
-                    opacity="0.3"
-                    className="animate-ping"
-                    style={{ animationDuration: "3s" }}
+                    r={12}
+                    fill={primaryType === "R&D Center" ? "hsl(var(--chart-1))" : "hsl(var(--chart-2))"}
+                    opacity={0.3}
+                    className="animate-pulse"
                   />
                   
                   {/* Main marker */}
                   <circle
-                    cx={coords.x}
-                    cy={coords.y}
-                    r="8"
-                    fill={hasRD ? "hsl(var(--chart-1))" : "hsl(var(--chart-2))"}
-                    stroke="hsl(var(--background))"
-                    strokeWidth="3"
-                    className="drop-shadow-xl"
+                    r={8}
+                    fill={primaryType === "R&D Center" ? "hsl(var(--chart-1))" : "hsl(var(--chart-2))"}
+                    stroke="white"
+                    strokeWidth={2}
                   />
                   
-                  {/* Count badge if multiple facilities */}
-                  {locationFacilities.length > 1 && (
+                  {/* Icon */}
+                  <foreignObject x={-6} y={-6} width={12} height={12}>
+                    {primaryType === "R&D Center" ? (
+                      <Building2 className="w-3 h-3 text-white" />
+                    ) : (
+                      <FlaskConical className="w-3 h-3 text-white" />
+                    )}
+                  </foreignObject>
+                  
+                  {/* Count badge */}
+                  {location.facilities.length > 1 && (
                     <>
-                      <circle
-                        cx={coords.x + 10}
-                        cy={coords.y - 10}
-                        r="7"
-                        fill="hsl(var(--primary))"
-                        stroke="hsl(var(--background))"
-                        strokeWidth="2"
-                      />
-                      <text
-                        x={coords.x + 10}
-                        y={coords.y - 7}
-                        fontSize="9"
-                        fontWeight="bold"
-                        fill="hsl(var(--primary-foreground))"
-                        textAnchor="middle"
-                      >
-                        {locationFacilities.length}
+                      <circle cx={8} cy={-8} r={6} fill="hsl(var(--background))" stroke="hsl(var(--border))" strokeWidth={1} />
+                      <text x={8} y={-6} textAnchor="middle" fontSize={8} fill="hsl(var(--foreground))" fontWeight="bold">
+                        {location.facilities.length}
                       </text>
                     </>
                   )}
                 </g>
               </HoverCardTrigger>
-              <HoverCardContent className="w-80 p-4" side="top">
+              
+              <HoverCardContent className="w-80 z-[60]">
                 <div className="space-y-3">
-                  <div className="flex items-start gap-2">
-                    <MapPin className="w-4 h-4 mt-0.5 text-primary flex-shrink-0" />
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-sm">{location}</h4>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {hasRD && (
-                          <Badge variant="outline" className="text-xs bg-chart-1/10 border-chart-1">
-                            <Building2 className="w-3 h-3 mr-1" />
-                            R&D ({locationFacilities.filter(f => f.facilityType === "R&D Center").length})
-                          </Badge>
-                        )}
-                        {hasTesting && (
-                          <Badge variant="outline" className="text-xs bg-chart-2/10 border-chart-2">
-                            <FlaskConical className="w-3 h-3 mr-1" />
-                            Testing ({locationFacilities.filter(f => f.facilityType === "Testing & Expansion").length})
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
+                  <div>
+                    <h4 className="font-semibold text-sm text-foreground">{location.location}</h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {rdCount > 0 && `${rdCount} R&D Center${rdCount > 1 ? 's' : ''}`}
+                      {rdCount > 0 && testingCount > 0 && ', '}
+                      {testingCount > 0 && `${testingCount} Testing & Expansion`}
+                    </p>
                   </div>
                   
-                  <div className="space-y-2 text-xs">
-                    {locationFacilities.map((facility, idx) => (
-                      <div key={idx} className="p-2 rounded-md bg-muted/50">
-                        <div className="font-medium">{facility.oem}</div>
-                        <div className="text-muted-foreground mt-1">{facility.details}</div>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {location.facilities.map((facility, idx) => (
+                      <div key={idx} className="text-xs border-t border-border pt-2">
+                        <div className="flex items-start gap-2">
+                          <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                            facility.facilityType === "R&D Center" ? "bg-chart-1" : "bg-chart-2"
+                          }`}>
+                            {facility.facilityType === "R&D Center" ? (
+                              <Building2 className="w-2.5 h-2.5 text-white" />
+                            ) : (
+                              <FlaskConical className="w-2.5 h-2.5 text-white" />
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-medium text-foreground">{facility.oem}</div>
+                            <div className="text-muted-foreground">{facility.facilityType}</div>
+                            {facility.details && (
+                              <div className="text-muted-foreground mt-1">{facility.details}</div>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
               </HoverCardContent>
             </HoverCard>
-          )
-        })}
-      </svg>
-    </div>
+          </Marker>
+        )
+      })}
+    </ComposableMap>
   )
 }

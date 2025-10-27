@@ -1,69 +1,71 @@
+import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps"
+import { Building2, FlaskConical } from "lucide-react"
 import { FacilityLocation } from "@/hooks/useGlobalFootprintData"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
-import { Badge } from "@/components/ui/badge"
-import { MapPin, Building2, FlaskConical } from "lucide-react"
 
 interface USMapSVGProps {
   facilities: FacilityLocation[]
 }
 
-// Coordinate mapping for US cities to SVG coordinates
-const cityCoordinates: { [key: string]: { x: number; y: number } } = {
-  "Dearborn": { x: 620, y: 280 },
-  "Detroit": { x: 620, y: 280 },
-  "Warren": { x: 625, y: 278 },
-  "Pontiac": { x: 622, y: 275 },
-  "Milford": { x: 615, y: 285 },
-  "Palo Alto": { x: 120, y: 380 },
-  "San Francisco": { x: 115, y: 370 },
-  "Mountain View": { x: 125, y: 375 },
-  "Fremont": { x: 128, y: 378 },
-  "Pittsburgh": { x: 700, y: 310 },
-  "Phoenix": { x: 200, y: 450 },
-  "Austin": { x: 480, y: 520 },
-  "Seattle": { x: 140, y: 180 },
-  "Las Vegas": { x: 180, y: 410 },
-  "San Diego": { x: 130, y: 450 },
-  "Los Angeles": { x: 135, y: 430 },
-  "Denver": { x: 350, y: 350 },
-  "Chicago": { x: 600, y: 290 },
-  "Boston": { x: 780, y: 260 },
-  "New York": { x: 770, y: 280 },
-  "Atlanta": { x: 660, y: 450 },
-  "Miami": { x: 720, y: 570 },
-  "Dallas": { x: 490, y: 480 },
-  "Houston": { x: 500, y: 520 },
+const geoUrl = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json"
+
+// Map city locations to [longitude, latitude] coordinates
+const cityCoordinates: Record<string, [number, number]> = {
+  "Dearborn, MI": [-83.1763, 42.3223],
+  "Detroit, MI": [-83.0458, 42.3314],
+  "Palo Alto, CA": [-122.1430, 37.4419],
+  "Mountain View, CA": [-122.0838, 37.3861],
+  "San Francisco, CA": [-122.4194, 37.7749],
+  "Fremont, CA": [-121.9886, 37.5485],
+  "Austin, TX": [-97.7431, 30.2672],
+  "Phoenix, AZ": [-112.0740, 33.4484],
+  "Atlanta, GA": [-84.3880, 33.7490],
+  "Milford, MI": [-83.6000, 42.5917],
+  "Warren, MI": [-83.0277, 42.5145],
+  "Pittsburgh, PA": [-79.9959, 40.4406],
+  "Seattle, WA": [-122.3321, 47.6062],
+  "Las Vegas, NV": [-115.1398, 36.1699],
+  "Yuma, AZ": [-114.6276, 32.6927],
 }
 
-// State paths for coloring
-const statePaths = {
-  "MI": "M620,250 L660,250 L665,280 L665,310 L640,320 L610,310 L605,275 Z",
-  "CA": "M80,350 L150,340 L160,400 L165,480 L140,500 L90,490 L85,420 Z",
-  "PA": "M685,290 L735,285 L738,315 L710,325 L685,320 Z",
-  "AZ": "M180,400 L250,395 L255,470 L185,475 Z",
-  "TX": "M440,460 L560,455 L565,540 L545,580 L440,575 L435,520 Z",
-  "WA": "M100,140 L180,135 L185,190 L105,195 Z",
-  "NV": "M150,360 L220,355 L230,450 L155,455 Z",
-  "CO": "M310,320 L390,315 L395,390 L315,395 Z",
-  "IL": "M580,270 L630,265 L635,320 L585,325 Z",
-  "MA": "M765,245 L795,242 L798,270 L768,273 Z",
-  "NY": "M740,250 L790,245 L795,295 L745,300 Z",
-  "GA": "M640,420 L685,415 L690,480 L645,485 Z",
-  "FL": "M690,500 L730,495 L745,580 L700,585 Z",
+// Map locations to state names for coloring
+const locationToState: Record<string, string> = {
+  "Dearborn, MI": "Michigan",
+  "Detroit, MI": "Michigan",
+  "Milford, MI": "Michigan",
+  "Warren, MI": "Michigan",
+  "Palo Alto, CA": "California",
+  "Mountain View, CA": "California",
+  "San Francisco, CA": "California",
+  "Fremont, CA": "California",
+  "Austin, TX": "Texas",
+  "Phoenix, AZ": "Arizona",
+  "Yuma, AZ": "Arizona",
+  "Atlanta, GA": "Georgia",
+  "Pittsburgh, PA": "Pennsylvania",
+  "Seattle, WA": "Washington",
+  "Las Vegas, NV": "Nevada",
 }
 
 export const USMapSVG = ({ facilities }: USMapSVGProps) => {
   // Group facilities by location
   const facilitiesByLocation = facilities.reduce((acc, facility) => {
-    const key = facility.location
-    if (!acc[key]) acc[key] = []
-    acc[key].push(facility)
+    const existing = acc.find(f => f.location === facility.location)
+    if (existing) {
+      existing.facilities.push(facility)
+    } else {
+      acc.push({
+        location: facility.location,
+        coordinates: cityCoordinates[facility.location] || [0, 0],
+        facilities: [facility]
+      })
+    }
     return acc
-  }, {} as { [key: string]: FacilityLocation[] })
+  }, [] as Array<{ location: string; coordinates: [number, number]; facilities: FacilityLocation[] }>)
 
   // Determine state colors based on facility types
-  const getStateColor = (state: string) => {
-    const stateFacilities = facilities.filter(f => f.location.includes(state))
+  const getStateColor = (stateName: string) => {
+    const stateFacilities = facilities.filter(f => locationToState[f.location] === stateName)
     if (stateFacilities.length === 0) return "hsl(var(--muted))"
     
     const hasRD = stateFacilities.some(f => f.facilityType === "R&D Center")
@@ -75,139 +77,124 @@ export const USMapSVG = ({ facilities }: USMapSVGProps) => {
     return "hsl(var(--muted))"
   }
 
-  const getMarkerCoordinates = (location: string) => {
-    // Try exact match first
-    const exactMatch = cityCoordinates[location]
-    if (exactMatch) return exactMatch
-
-    // Try partial match
-    for (const [city, coords] of Object.entries(cityCoordinates)) {
-      if (location.includes(city) || city.includes(location)) {
-        return coords
-      }
-    }
-
-    return null
-  }
-
   return (
-    <div className="relative w-full h-full">
-      <svg
-        viewBox="0 0 900 600"
-        className="w-full h-full"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {/* Draw states */}
-        {Object.entries(statePaths).map(([state, path]) => (
-          <path
-            key={state}
-            d={path}
-            fill={getStateColor(state)}
-            stroke="hsl(var(--border))"
-            strokeWidth="1.5"
-            className="transition-all duration-300 hover:opacity-80"
-          />
-        ))}
+    <ComposableMap
+      projection="geoAlbersUsa"
+      className="w-full h-full"
+      projectionConfig={{
+        scale: 1000,
+      }}
+    >
+      <Geographies geography={geoUrl}>
+        {({ geographies }) =>
+          geographies.map((geo) => (
+            <Geography
+              key={geo.rsmKey}
+              geography={geo}
+              fill={getStateColor(geo.properties.name)}
+              stroke="hsl(var(--border))"
+              strokeWidth={0.5}
+              style={{
+                default: { outline: "none" },
+                hover: { fill: "hsl(var(--accent))", outline: "none" },
+                pressed: { outline: "none" },
+              }}
+            />
+          ))
+        }
+      </Geographies>
 
-        {/* Draw facility markers */}
-        {Object.entries(facilitiesByLocation).map(([location, locationFacilities]) => {
-          const coords = getMarkerCoordinates(location)
-          if (!coords) return null
-
-          const hasRD = locationFacilities.some(f => f.facilityType === "R&D Center")
-          const hasTesting = locationFacilities.some(f => f.facilityType === "Testing & Expansion")
-
-          return (
-            <HoverCard key={location} openDelay={0} closeDelay={100}>
+      {/* Render facility markers */}
+      {facilitiesByLocation.map((location) => {
+        if (!location.coordinates[0] || !location.coordinates[1]) return null
+        
+        const rdCount = location.facilities.filter(f => f.facilityType === "R&D Center").length
+        const testingCount = location.facilities.filter(f => f.facilityType === "Testing & Expansion").length
+        const primaryType = rdCount >= testingCount ? "R&D Center" : "Testing & Expansion"
+        
+        return (
+          <Marker key={location.location} coordinates={location.coordinates}>
+            <HoverCard openDelay={0} closeDelay={0}>
               <HoverCardTrigger asChild>
-                <g
-                  className="cursor-pointer transition-transform duration-200 hover:scale-125"
-                  style={{ transformOrigin: `${coords.x}px ${coords.y}px` }}
-                >
-                  {/* Pulsing animation circle */}
+                <g className="cursor-pointer">
+                  {/* Pulsing circle animation */}
                   <circle
-                    cx={coords.x}
-                    cy={coords.y}
-                    r="12"
-                    fill={hasRD ? "hsl(var(--chart-1))" : "hsl(var(--chart-2))"}
-                    opacity="0.3"
-                    className="animate-ping"
-                    style={{ animationDuration: "3s" }}
+                    r={12}
+                    fill={primaryType === "R&D Center" ? "hsl(var(--chart-1))" : "hsl(var(--chart-2))"}
+                    opacity={0.3}
+                    className="animate-pulse"
                   />
                   
                   {/* Main marker */}
                   <circle
-                    cx={coords.x}
-                    cy={coords.y}
-                    r="8"
-                    fill={hasRD ? "hsl(var(--chart-1))" : "hsl(var(--chart-2))"}
-                    stroke="hsl(var(--background))"
-                    strokeWidth="3"
-                    className="drop-shadow-xl"
+                    r={8}
+                    fill={primaryType === "R&D Center" ? "hsl(var(--chart-1))" : "hsl(var(--chart-2))"}
+                    stroke="white"
+                    strokeWidth={2}
                   />
                   
-                  {/* Count badge if multiple facilities */}
-                  {locationFacilities.length > 1 && (
+                  {/* Icon */}
+                  <foreignObject x={-6} y={-6} width={12} height={12}>
+                    {primaryType === "R&D Center" ? (
+                      <Building2 className="w-3 h-3 text-white" />
+                    ) : (
+                      <FlaskConical className="w-3 h-3 text-white" />
+                    )}
+                  </foreignObject>
+                  
+                  {/* Count badge */}
+                  {location.facilities.length > 1 && (
                     <>
-                      <circle
-                        cx={coords.x + 10}
-                        cy={coords.y - 10}
-                        r="7"
-                        fill="hsl(var(--primary))"
-                        stroke="hsl(var(--background))"
-                        strokeWidth="2"
-                      />
-                      <text
-                        x={coords.x + 10}
-                        y={coords.y - 7}
-                        fontSize="9"
-                        fontWeight="bold"
-                        fill="hsl(var(--primary-foreground))"
-                        textAnchor="middle"
-                      >
-                        {locationFacilities.length}
+                      <circle cx={8} cy={-8} r={6} fill="hsl(var(--background))" stroke="hsl(var(--border))" strokeWidth={1} />
+                      <text x={8} y={-6} textAnchor="middle" fontSize={8} fill="hsl(var(--foreground))" fontWeight="bold">
+                        {location.facilities.length}
                       </text>
                     </>
                   )}
                 </g>
               </HoverCardTrigger>
-              <HoverCardContent className="w-80 p-4" side="top">
+              
+              <HoverCardContent className="w-80 z-[60]">
                 <div className="space-y-3">
-                  <div className="flex items-start gap-2">
-                    <MapPin className="w-4 h-4 mt-0.5 text-primary flex-shrink-0" />
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-sm">{location}</h4>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {hasRD && (
-                          <Badge variant="outline" className="text-xs bg-chart-1/10 border-chart-1">
-                            <Building2 className="w-3 h-3 mr-1" />
-                            R&D ({locationFacilities.filter(f => f.facilityType === "R&D Center").length})
-                          </Badge>
-                        )}
-                        {hasTesting && (
-                          <Badge variant="outline" className="text-xs bg-chart-2/10 border-chart-2">
-                            <FlaskConical className="w-3 h-3 mr-1" />
-                            Testing ({locationFacilities.filter(f => f.facilityType === "Testing & Expansion").length})
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
+                  <div>
+                    <h4 className="font-semibold text-sm text-foreground">{location.location}</h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {rdCount > 0 && `${rdCount} R&D Center${rdCount > 1 ? 's' : ''}`}
+                      {rdCount > 0 && testingCount > 0 && ', '}
+                      {testingCount > 0 && `${testingCount} Testing & Expansion`}
+                    </p>
                   </div>
                   
-                  <div className="space-y-2 text-xs">
-                    {locationFacilities.map((facility, idx) => (
-                      <div key={idx} className="p-2 rounded-md bg-muted/50">
-                        <div className="font-medium">{facility.oem}</div>
-                        <div className="text-muted-foreground mt-1">{facility.details}</div>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {location.facilities.map((facility, idx) => (
+                      <div key={idx} className="text-xs border-t border-border pt-2">
+                        <div className="flex items-start gap-2">
+                          <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                            facility.facilityType === "R&D Center" ? "bg-chart-1" : "bg-chart-2"
+                          }`}>
+                            {facility.facilityType === "R&D Center" ? (
+                              <Building2 className="w-2.5 h-2.5 text-white" />
+                            ) : (
+                              <FlaskConical className="w-2.5 h-2.5 text-white" />
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-medium text-foreground">{facility.oem}</div>
+                            <div className="text-muted-foreground">{facility.facilityType}</div>
+                            {facility.details && (
+                              <div className="text-muted-foreground mt-1">{facility.details}</div>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
               </HoverCardContent>
             </HoverCard>
-          )
-        })}
-      </svg>
-    </div>
+          </Marker>
+        )
+      })}
+    </ComposableMap>
   )
 }

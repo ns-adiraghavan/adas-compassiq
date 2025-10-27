@@ -1,64 +1,48 @@
+import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps"
+import { Building2, FlaskConical } from "lucide-react"
 import { FacilityLocation } from "@/hooks/useGlobalFootprintData"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
-import { Badge } from "@/components/ui/badge"
-import { MapPin, Building2, FlaskConical } from "lucide-react"
 
 interface ChinaMapSVGProps {
   facilities: FacilityLocation[]
 }
 
-// Coordinate mapping for Chinese cities to SVG coordinates
-const cityCoordinates: { [key: string]: { x: number; y: number } } = {
-  "Beijing": { x: 580, y: 280 },
-  "Shanghai": { x: 650, y: 400 },
-  "Shenzhen": { x: 600, y: 520 },
-  "Guangzhou": { x: 590, y: 510 },
-  "Chengdu": { x: 440, y: 400 },
-  "Chongqing": { x: 480, y: 410 },
-  "Wuhan": { x: 580, y: 400 },
-  "Hangzhou": { x: 650, y: 410 },
-  "Nanjing": { x: 640, y: 380 },
-  "Xi'an": { x: 500, y: 360 },
-  "Tianjin": { x: 590, y: 290 },
-  "Suzhou": { x: 655, y: 390 },
-  "Changsha": { x: 590, y: 440 },
-  "Hefei": { x: 630, y: 390 },
-  "Dalian": { x: 630, y: 270 },
-  "Qingdao": { x: 640, y: 340 },
-  "Ningbo": { x: 665, y: 415 },
-  "Foshan": { x: 585, y: 515 },
-}
+const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"
 
-// Province paths for coloring (simplified)
-const provincePaths = {
-  "Beijing": "M560,260 L600,255 L605,295 L565,300 Z",
-  "Shanghai": "M635,385 L670,380 L675,420 L640,425 Z",
-  "Guangdong": "M560,490 L630,485 L640,540 L570,545 Z",
-  "Sichuan": "M400,370 L480,365 L490,440 L410,445 Z",
-  "Hubei": "M560,380 L620,375 L625,425 L565,430 Z",
-  "Zhejiang": "M630,390 L680,385 L690,435 L640,440 Z",
-  "Jiangsu": "M620,360 L670,355 L675,400 L625,405 Z",
-  "Shaanxi": "M470,330 L530,325 L540,390 L480,395 Z",
-  "Liaoning": "M600,240 L660,235 L670,290 L610,295 Z",
-  "Shandong": "M600,310 L670,305 L680,360 L610,365 Z",
+// Map city locations to [longitude, latitude] coordinates
+const cityCoordinates: Record<string, [number, number]> = {
+  "Beijing, China": [116.4074, 39.9042],
+  "Shanghai, China": [121.4737, 31.2304],
+  "Shenzhen, China": [114.0579, 22.5431],
+  "Guangzhou, China": [113.2644, 23.1291],
+  "Chengdu, China": [104.0668, 30.5728],
+  "Hangzhou, China": [120.1551, 30.2741],
+  "Wuhan, China": [114.3055, 30.5928],
+  "Xi'an, China": [108.9398, 34.3416],
 }
 
 export const ChinaMapSVG = ({ facilities }: ChinaMapSVGProps) => {
   // Group facilities by location
   const facilitiesByLocation = facilities.reduce((acc, facility) => {
-    const key = facility.location
-    if (!acc[key]) acc[key] = []
-    acc[key].push(facility)
+    const existing = acc.find(f => f.location === facility.location)
+    if (existing) {
+      existing.facilities.push(facility)
+    } else {
+      acc.push({
+        location: facility.location,
+        coordinates: cityCoordinates[facility.location] || [0, 0],
+        facilities: [facility]
+      })
+    }
     return acc
-  }, {} as { [key: string]: FacilityLocation[] })
+  }, [] as Array<{ location: string; coordinates: [number, number]; facilities: FacilityLocation[] }>)
 
-  // Determine province colors based on facility types
-  const getProvinceColor = (province: string) => {
-    const provinceFacilities = facilities.filter(f => f.location.includes(province))
-    if (provinceFacilities.length === 0) return "hsl(var(--muted))"
+  // Determine color based on facility types
+  const getChinaColor = () => {
+    if (facilities.length === 0) return "hsl(var(--muted))"
     
-    const hasRD = provinceFacilities.some(f => f.facilityType === "R&D Center")
-    const hasTesting = provinceFacilities.some(f => f.facilityType === "Testing & Expansion")
+    const hasRD = facilities.some(f => f.facilityType === "R&D Center")
+    const hasTesting = facilities.some(f => f.facilityType === "Testing & Expansion")
     
     if (hasRD && hasTesting) return "hsl(var(--chart-3))"
     if (hasRD) return "hsl(var(--chart-1))"
@@ -66,139 +50,127 @@ export const ChinaMapSVG = ({ facilities }: ChinaMapSVGProps) => {
     return "hsl(var(--muted))"
   }
 
-  const getMarkerCoordinates = (location: string) => {
-    // Try exact match first
-    const exactMatch = cityCoordinates[location]
-    if (exactMatch) return exactMatch
-
-    // Try partial match
-    for (const [city, coords] of Object.entries(cityCoordinates)) {
-      if (location.includes(city) || city.includes(location)) {
-        return coords
-      }
-    }
-
-    return null
-  }
-
   return (
-    <div className="relative w-full h-full">
-      <svg
-        viewBox="0 0 900 600"
-        className="w-full h-full"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {/* Draw provinces */}
-        {Object.entries(provincePaths).map(([province, path]) => (
-          <path
-            key={province}
-            d={path}
-            fill={getProvinceColor(province)}
-            stroke="hsl(var(--border))"
-            strokeWidth="1.5"
-            className="transition-all duration-300 hover:opacity-80"
-          />
-        ))}
+    <ComposableMap
+      projection="geoMercator"
+      className="w-full h-full"
+      projectionConfig={{
+        center: [105, 35],
+        scale: 600,
+      }}
+    >
+      <Geographies geography={geoUrl}>
+        {({ geographies }) =>
+          geographies
+            .filter(geo => geo.properties.name === "China")
+            .map((geo) => (
+              <Geography
+                key={geo.rsmKey}
+                geography={geo}
+                fill={getChinaColor()}
+                stroke="hsl(var(--border))"
+                strokeWidth={0.5}
+                style={{
+                  default: { outline: "none" },
+                  hover: { fill: "hsl(var(--accent))", outline: "none" },
+                  pressed: { outline: "none" },
+                }}
+              />
+            ))
+        }
+      </Geographies>
 
-        {/* Draw facility markers */}
-        {Object.entries(facilitiesByLocation).map(([location, locationFacilities]) => {
-          const coords = getMarkerCoordinates(location)
-          if (!coords) return null
-
-          const hasRD = locationFacilities.some(f => f.facilityType === "R&D Center")
-          const hasTesting = locationFacilities.some(f => f.facilityType === "Testing & Expansion")
-
-          return (
-            <HoverCard key={location} openDelay={0} closeDelay={100}>
+      {/* Render facility markers */}
+      {facilitiesByLocation.map((location) => {
+        if (!location.coordinates[0] || !location.coordinates[1]) return null
+        
+        const rdCount = location.facilities.filter(f => f.facilityType === "R&D Center").length
+        const testingCount = location.facilities.filter(f => f.facilityType === "Testing & Expansion").length
+        const primaryType = rdCount >= testingCount ? "R&D Center" : "Testing & Expansion"
+        
+        return (
+          <Marker key={location.location} coordinates={location.coordinates}>
+            <HoverCard openDelay={0} closeDelay={0}>
               <HoverCardTrigger asChild>
-                <g
-                  className="cursor-pointer transition-transform duration-200 hover:scale-125"
-                  style={{ transformOrigin: `${coords.x}px ${coords.y}px` }}
-                >
-                  {/* Pulsing animation circle */}
+                <g className="cursor-pointer">
+                  {/* Pulsing circle animation */}
                   <circle
-                    cx={coords.x}
-                    cy={coords.y}
-                    r="12"
-                    fill={hasRD ? "hsl(var(--chart-1))" : "hsl(var(--chart-2))"}
-                    opacity="0.3"
-                    className="animate-ping"
-                    style={{ animationDuration: "3s" }}
+                    r={12}
+                    fill={primaryType === "R&D Center" ? "hsl(var(--chart-1))" : "hsl(var(--chart-2))"}
+                    opacity={0.3}
+                    className="animate-pulse"
                   />
                   
                   {/* Main marker */}
                   <circle
-                    cx={coords.x}
-                    cy={coords.y}
-                    r="8"
-                    fill={hasRD ? "hsl(var(--chart-1))" : "hsl(var(--chart-2))"}
-                    stroke="hsl(var(--background))"
-                    strokeWidth="3"
-                    className="drop-shadow-xl"
+                    r={8}
+                    fill={primaryType === "R&D Center" ? "hsl(var(--chart-1))" : "hsl(var(--chart-2))"}
+                    stroke="white"
+                    strokeWidth={2}
                   />
                   
-                  {/* Count badge if multiple facilities */}
-                  {locationFacilities.length > 1 && (
+                  {/* Icon */}
+                  <foreignObject x={-6} y={-6} width={12} height={12}>
+                    {primaryType === "R&D Center" ? (
+                      <Building2 className="w-3 h-3 text-white" />
+                    ) : (
+                      <FlaskConical className="w-3 h-3 text-white" />
+                    )}
+                  </foreignObject>
+                  
+                  {/* Count badge */}
+                  {location.facilities.length > 1 && (
                     <>
-                      <circle
-                        cx={coords.x + 10}
-                        cy={coords.y - 10}
-                        r="7"
-                        fill="hsl(var(--primary))"
-                        stroke="hsl(var(--background))"
-                        strokeWidth="2"
-                      />
-                      <text
-                        x={coords.x + 10}
-                        y={coords.y - 7}
-                        fontSize="9"
-                        fontWeight="bold"
-                        fill="hsl(var(--primary-foreground))"
-                        textAnchor="middle"
-                      >
-                        {locationFacilities.length}
+                      <circle cx={8} cy={-8} r={6} fill="hsl(var(--background))" stroke="hsl(var(--border))" strokeWidth={1} />
+                      <text x={8} y={-6} textAnchor="middle" fontSize={8} fill="hsl(var(--foreground))" fontWeight="bold">
+                        {location.facilities.length}
                       </text>
                     </>
                   )}
                 </g>
               </HoverCardTrigger>
-              <HoverCardContent className="w-80 p-4" side="top">
+              
+              <HoverCardContent className="w-80 z-[60]">
                 <div className="space-y-3">
-                  <div className="flex items-start gap-2">
-                    <MapPin className="w-4 h-4 mt-0.5 text-primary flex-shrink-0" />
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-sm">{location}</h4>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {hasRD && (
-                          <Badge variant="outline" className="text-xs bg-chart-1/10 border-chart-1">
-                            <Building2 className="w-3 h-3 mr-1" />
-                            R&D ({locationFacilities.filter(f => f.facilityType === "R&D Center").length})
-                          </Badge>
-                        )}
-                        {hasTesting && (
-                          <Badge variant="outline" className="text-xs bg-chart-2/10 border-chart-2">
-                            <FlaskConical className="w-3 h-3 mr-1" />
-                            Testing ({locationFacilities.filter(f => f.facilityType === "Testing & Expansion").length})
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
+                  <div>
+                    <h4 className="font-semibold text-sm text-foreground">{location.location}</h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {rdCount > 0 && `${rdCount} R&D Center${rdCount > 1 ? 's' : ''}`}
+                      {rdCount > 0 && testingCount > 0 && ', '}
+                      {testingCount > 0 && `${testingCount} Testing & Expansion`}
+                    </p>
                   </div>
                   
-                  <div className="space-y-2 text-xs">
-                    {locationFacilities.map((facility, idx) => (
-                      <div key={idx} className="p-2 rounded-md bg-muted/50">
-                        <div className="font-medium">{facility.oem}</div>
-                        <div className="text-muted-foreground mt-1">{facility.details}</div>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {location.facilities.map((facility, idx) => (
+                      <div key={idx} className="text-xs border-t border-border pt-2">
+                        <div className="flex items-start gap-2">
+                          <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                            facility.facilityType === "R&D Center" ? "bg-chart-1" : "bg-chart-2"
+                          }`}>
+                            {facility.facilityType === "R&D Center" ? (
+                              <Building2 className="w-2.5 h-2.5 text-white" />
+                            ) : (
+                              <FlaskConical className="w-2.5 h-2.5 text-white" />
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-medium text-foreground">{facility.oem}</div>
+                            <div className="text-muted-foreground">{facility.facilityType}</div>
+                            {facility.details && (
+                              <div className="text-muted-foreground mt-1">{facility.details}</div>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
               </HoverCardContent>
             </HoverCard>
-          )
-        })}
-      </svg>
-    </div>
+          </Marker>
+        )
+      })}
+    </ComposableMap>
   )
 }
