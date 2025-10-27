@@ -40,6 +40,7 @@ const oemToImageIndex: Record<string, number> = {
   "RIVIAN": 1,
   "BMW": 2,
   "General Motors": 3,
+  "GM": 3, // Alias for General Motors
   "Ford": 4,
 }
 
