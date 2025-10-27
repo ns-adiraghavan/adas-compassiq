@@ -16,6 +16,19 @@ import topViewRadar from "@/assets/vehicles/top-view-radar.png"
 import sideViewRadar from "@/assets/vehicles/side-view-radar.png"
 import topViewUltrasonic from "@/assets/vehicles/top-view-ultrasonic.png"
 
+// Per-OEM top view images (clean and camera)
+import bmwTopClean from "@/assets/vehicles/bmw_top_view_clean.png"
+import fordTopClean from "@/assets/vehicles/ford_top_view_clean.png"
+import gmTopClean from "@/assets/vehicles/gm_top_view_clean.png"
+import rivianTopClean from "@/assets/vehicles/rivian_top_view_clean.png"
+import teslaTopClean from "@/assets/vehicles/tesla_top_view_clean.png"
+
+import bmwTopCamera from "@/assets/vehicles/bmw_top_view_camera.png"
+import fordTopCamera from "@/assets/vehicles/ford_top_view_camera.png"
+import gmTopCamera from "@/assets/vehicles/gm_top_view_camera.png"
+import rivianTopCamera from "@/assets/vehicles/rivian_top_view_camera.png"
+import teslaTopCamera from "@/assets/vehicles/tesla_top_view_camera.png"
+
 interface SensoricsTableProps {
   selectedRegion: string
   selectedCategory: string
@@ -79,10 +92,37 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
   const currentSensorColor = sensorTypes.find(s => s.id === selectedSensorType)?.color || "hsl(var(--primary))"
   const oemIndex = oemToImageIndex[selectedOEM] ?? 0
   
-  // Calculate the position offset for the specific OEM in the composite image
-  // Each car takes approximately 20% of the width (5 cars total)
-  const carWidthPercent = 20
-  const carLeftOffset = oemIndex * carWidthPercent
+  // Image selection using per-OEM assets (top view)
+  const topCleanByOEM: Record<string, string> = {
+    Tesla: teslaTopClean,
+    RIVIAN: rivianTopClean,
+    Rivian: rivianTopClean,
+    BMW: bmwTopClean,
+    'General Motors': gmTopClean,
+    GM: gmTopClean,
+    Ford: fordTopClean,
+  }
+
+  const topCameraByOEM: Record<string, string> = {
+    Tesla: teslaTopCamera,
+    RIVIAN: rivianTopCamera,
+    Rivian: rivianTopCamera,
+    BMW: bmwTopCamera,
+    'General Motors': gmTopCamera,
+    GM: gmTopCamera,
+    Ford: fordTopCamera,
+  }
+
+  const imageSrc = (() => {
+    if (viewType === 'top') {
+      if (selectedSensorType === 'Camera') return topCameraByOEM[selectedOEM] || topViewCamera
+      return topCleanByOEM[selectedOEM] || topViewClean
+    }
+    if (selectedSensorType === 'Camera') return sideViewCamera
+    if (selectedSensorType === 'Radar') return sideViewRadar
+    if (selectedSensorType === 'Ultrasonic') return topViewUltrasonic
+    return topViewClean
+  })()
 
   const sensorCounts = sensorTypes.map(({ id }) => ({
     type: id,
@@ -261,13 +301,9 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
                     }}
                   >
                     <img 
-                      src={getSensorReferenceImage(selectedSensorType, viewType)}
+                      src={imageSrc}
                       alt={`${selectedOEM} ${selectedSensorType} sensors`}
-                      className="h-full object-contain transition-all duration-500"
-                      style={{
-                        width: '500%', // 5 cars in composite
-                        objectPosition: `${oemIndex * -100}% center`, // Shift to show correct car
-                      }}
+                      className="h-full w-full object-contain transition-all duration-500"
                     />
                   </div>
                   
