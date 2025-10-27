@@ -6,6 +6,7 @@ import ODDTable from "./current-snapshot/ODDTable"
 import ComputationalCoreTable from "./core-systems/ComputationalCoreTable"
 import DrivingIntelligenceTable from "./core-systems/DrivingIntelligenceTable"
 import AdvancedTechnologiesTable from "./core-systems/AdvancedTechnologiesTable"
+import ConnectivityLocalizationTable from "./core-systems/ConnectivityLocalizationTable"
 import GlobalFootprint from "./future-blueprint/GlobalFootprint"
 import KeyTechnologyInvestments from "./future-blueprint/KeyTechnologyInvestments"
 import CoreTechnologyRoadmap from "./future-blueprint/CoreTechnologyRoadmap"
@@ -111,6 +112,23 @@ const SubTabContent = ({ selectedSubTab, selectedRegion, selectedCategory }: Sub
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <AdvancedTechnologiesTable 
+            selectedRegion={selectedRegion}
+            selectedCategory={selectedCategory}
+          />
+        </div>
+        <div className="lg:col-span-1">
+          <AVLandscapeInsights />
+        </div>
+      </div>
+    )
+  }
+
+  // Connectivity & Localization content
+  if (selectedSubTab === "Connectivity & Localization") {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <ConnectivityLocalizationTable 
             selectedRegion={selectedRegion}
             selectedCategory={selectedCategory}
           />
