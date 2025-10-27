@@ -29,6 +29,18 @@ import gmTopCamera from "@/assets/vehicles/gm_top_view_camera.png"
 import rivianTopCamera from "@/assets/vehicles/rivian_top_view_camera.png"
 import teslaTopCamera from "@/assets/vehicles/tesla_top_view_camera.png"
 
+import bmwTopRadar from "@/assets/vehicles/bmw_top_view_radar.png"
+import fordTopRadar from "@/assets/vehicles/ford_top_view_radar.png"
+import gmTopRadar from "@/assets/vehicles/gm_top_view_radar.png"
+import rivianTopRadar from "@/assets/vehicles/rivian_top_view_radar.png"
+import teslaTopRadar from "@/assets/vehicles/tesla_top_view_radar.png"
+
+import bmwTopUltrasonic from "@/assets/vehicles/bmw_top_view_ultrasonic.png"
+import fordTopUltrasonic from "@/assets/vehicles/ford_top_view_ultrasonic.png"
+import gmTopUltrasonic from "@/assets/vehicles/gm_top_view_ultrasonic.png"
+import rivianTopUltrasonic from "@/assets/vehicles/rivian_top_view_ultrasonic.png"
+import teslaTopUltrasonic from "@/assets/vehicles/tesla_top_view_ultrasonic.png"
+
 interface SensoricsTableProps {
   selectedRegion: string
   selectedCategory: string
@@ -113,9 +125,31 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
     Ford: fordTopCamera,
   }
 
+  const topRadarByOEM: Record<string, string> = {
+    Tesla: teslaTopRadar,
+    RIVIAN: rivianTopRadar,
+    Rivian: rivianTopRadar,
+    BMW: bmwTopRadar,
+    'General Motors': gmTopRadar,
+    GM: gmTopRadar,
+    Ford: fordTopRadar,
+  }
+
+  const topUltrasonicByOEM: Record<string, string> = {
+    Tesla: teslaTopUltrasonic,
+    RIVIAN: rivianTopUltrasonic,
+    Rivian: rivianTopUltrasonic,
+    BMW: bmwTopUltrasonic,
+    'General Motors': gmTopUltrasonic,
+    GM: gmTopUltrasonic,
+    Ford: fordTopUltrasonic,
+  }
+
   const imageSrc = (() => {
     if (viewType === 'top') {
       if (selectedSensorType === 'Camera') return topCameraByOEM[selectedOEM] || topViewCamera
+      if (selectedSensorType === 'Radar') return topRadarByOEM[selectedOEM] || topViewRadar
+      if (selectedSensorType === 'Ultrasonic') return topUltrasonicByOEM[selectedOEM] || topViewUltrasonic
       return topCleanByOEM[selectedOEM] || topViewClean
     }
     if (selectedSensorType === 'Camera') return sideViewCamera
