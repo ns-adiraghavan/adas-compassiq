@@ -75,52 +75,6 @@ export const useGlobalFootprintData = (region: string, selectedOEM?: string, fac
         filteredFacilities = filteredFacilities.filter(f => f.facilityType === facilityType)
       }
 
-      // Map coordinates by region
-      const usCoords: Record<string, {x: number, y: number}> = {
-        "california": {x: 12, y: 58},
-        "texas": {x: 42, y: 68},
-        "michigan": {x: 60, y: 38},
-        "arizona": {x: 22, y: 62},
-        "nevada": {x: 18, y: 48},
-        "ohio": {x: 62, y: 45},
-        "tennessee": {x: 60, y: 58},
-        "florida": {x: 75, y: 78},
-      }
-
-      const chinaCoords: Record<string, {x: number, y: number}> = {
-        "beijing": {x: 75, y: 35},
-        "shanghai": {x: 82, y: 58},
-        "shenzhen": {x: 72, y: 80},
-        "guangzhou": {x: 70, y: 82},
-      }
-
-      const europeCoords: Record<string, {x: number, y: number}> = {
-        "germany": {x: 52, y: 42},
-        "france": {x: 35, y: 52},
-        "uk": {x: 28, y: 35},
-        "italy": {x: 50, y: 65},
-        "czech": {x: 58, y: 45},
-      }
-
-      filteredFacilities = filteredFacilities.map(facility => {
-        const locationKey = facility.location.toLowerCase()
-        let coords
-        
-        if (region === "US") {
-          coords = Object.entries(usCoords).find(([key]) => locationKey.includes(key))?.[1]
-        } else if (region === "China") {
-          coords = Object.entries(chinaCoords).find(([key]) => locationKey.includes(key))?.[1]
-        } else if (region === "Europe") {
-          coords = Object.entries(europeCoords).find(([key]) => locationKey.includes(key))?.[1]
-        }
-        
-        return {
-          ...facility,
-          lat: coords?.x,
-          lng: coords?.y
-        }
-      })
-
       return {
         facilities: filteredFacilities,
         oems: [...new Set(regionFilteredFacilities.map(f => f.oem))].filter(Boolean),
