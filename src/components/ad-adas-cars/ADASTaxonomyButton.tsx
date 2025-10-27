@@ -19,6 +19,9 @@ import {
 const ADASTaxonomyButton = () => {
   const { data, isLoading, error } = useADASTaxonomy()
 
+  // Get column names from first row
+  const columns = data && data.length > 0 ? Object.keys(data[0]) : []
+
   return (
     <HoverCard openDelay={200} closeDelay={100}>
       <HoverCardTrigger asChild>
@@ -32,7 +35,7 @@ const ADASTaxonomyButton = () => {
         </Button>
       </HoverCardTrigger>
       <HoverCardContent 
-        className="w-[800px] p-0 bg-background/98 backdrop-blur-sm border shadow-2xl z-50"
+        className="w-[1000px] max-w-[95vw] p-0 bg-background/98 backdrop-blur-sm border shadow-2xl z-50"
         side="bottom"
         align="start"
       >
@@ -52,35 +55,42 @@ const ADASTaxonomyButton = () => {
           )}
           
           {data && data.length > 0 && (
-            <ScrollArea className="h-[500px] rounded-md border">
-              <Table>
-                <TableHeader className="sticky top-0 bg-muted/95 backdrop-blur-sm z-10">
-                  <TableRow>
-                    <TableHead className="w-[150px]">Category</TableHead>
-                    <TableHead className="w-[200px]">Parameter</TableHead>
-                    <TableHead className="w-[200px]">Attribute</TableHead>
-                    <TableHead>Description</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {data.map((row, index) => (
-                    <TableRow key={index} className="hover:bg-muted/50">
-                      <TableCell className="font-medium text-xs align-top">
-                        {row['Module 1: OEM-level Benchmarking']}
-                      </TableCell>
-                      <TableCell className="text-xs align-top">
-                        {row['']}
-                      </TableCell>
-                      <TableCell className="text-xs align-top">
-                        {row['__1']}
-                      </TableCell>
-                      <TableCell className="text-xs align-top">
-                        {row['__2']}
-                      </TableCell>
+            <ScrollArea className="h-[600px] w-full rounded-md border">
+              <div className="min-w-max">
+                <Table>
+                  <TableHeader className="sticky top-0 bg-muted/95 backdrop-blur-sm z-10">
+                    <TableRow>
+                      {columns.map((col, idx) => (
+                        <TableHead 
+                          key={idx} 
+                          className={`px-3 py-2 text-xs font-semibold whitespace-nowrap ${
+                            idx === 0 ? 'w-[180px]' : 
+                            idx === columns.length - 1 ? 'min-w-[300px]' : 'min-w-[150px]'
+                          }`}
+                        >
+                          {col}
+                        </TableHead>
+                      ))}
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {data.map((row, index) => (
+                      <TableRow key={index} className="hover:bg-muted/50">
+                        {columns.map((col, colIdx) => (
+                          <TableCell 
+                            key={colIdx} 
+                            className={`px-3 py-2 align-top text-xs ${
+                              colIdx === 0 ? 'font-medium' : ''
+                            } ${colIdx === columns.length - 1 ? 'whitespace-normal' : 'whitespace-pre-wrap'}`}
+                          >
+                            {row[col] || ''}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </ScrollArea>
           )}
         </div>
