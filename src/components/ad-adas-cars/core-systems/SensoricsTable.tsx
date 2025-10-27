@@ -41,6 +41,18 @@ import gmTopUltrasonic from "@/assets/vehicles/gm_top_view_ultrasonic.png"
 import rivianTopUltrasonic from "@/assets/vehicles/rivian_top_view_ultrasonic.png"
 import teslaTopUltrasonic from "@/assets/vehicles/tesla_top_view_ultrasonic.png"
 
+import bmwSideCamera from "@/assets/vehicles/bmw_side_view_camera.png"
+import fordSideCamera from "@/assets/vehicles/ford_side_view_camera.png"
+import gmSideCamera from "@/assets/vehicles/gm_side_view_camera.png"
+import rivianSideCamera from "@/assets/vehicles/rivian_side_view_camera.png"
+import teslaSideCamera from "@/assets/vehicles/tesla_side_view_camera.png"
+
+import bmwSideRadar from "@/assets/vehicles/bmw_side_view_radar.png"
+import fordSideRadar from "@/assets/vehicles/ford_side_view_radar.png"
+import gmSideRadar from "@/assets/vehicles/gm_side_view_radar.png"
+import rivianSideRadar from "@/assets/vehicles/rivian_side_view_radar.png"
+import teslaSideRadar from "@/assets/vehicles/tesla_side_view_radar.png"
+
 interface SensoricsTableProps {
   selectedRegion: string
   selectedCategory: string
@@ -145,6 +157,26 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
     Ford: fordTopUltrasonic,
   }
 
+  const sideCameraByOEM: Record<string, string> = {
+    Tesla: teslaSideCamera,
+    RIVIAN: rivianSideCamera,
+    Rivian: rivianSideCamera,
+    BMW: bmwSideCamera,
+    'General Motors': gmSideCamera,
+    GM: gmSideCamera,
+    Ford: fordSideCamera,
+  }
+
+  const sideRadarByOEM: Record<string, string> = {
+    Tesla: teslaSideRadar,
+    RIVIAN: rivianSideRadar,
+    Rivian: rivianSideRadar,
+    BMW: bmwSideRadar,
+    'General Motors': gmSideRadar,
+    GM: gmSideRadar,
+    Ford: fordSideRadar,
+  }
+
   const imageSrc = (() => {
     if (viewType === 'top') {
       if (selectedSensorType === 'Camera') return topCameraByOEM[selectedOEM] || topViewCamera
@@ -152,10 +184,11 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
       if (selectedSensorType === 'Ultrasonic') return topUltrasonicByOEM[selectedOEM] || topViewUltrasonic
       return topCleanByOEM[selectedOEM] || topViewClean
     }
-    if (selectedSensorType === 'Camera') return sideViewCamera
-    if (selectedSensorType === 'Radar') return sideViewRadar
-    if (selectedSensorType === 'Ultrasonic') return topViewUltrasonic
-    return topViewClean
+    // Side view
+    if (selectedSensorType === 'Camera') return sideCameraByOEM[selectedOEM] || sideViewCamera
+    if (selectedSensorType === 'Radar') return sideRadarByOEM[selectedOEM] || sideViewRadar
+    if (selectedSensorType === 'Ultrasonic') return topUltrasonicByOEM[selectedOEM] || topViewUltrasonic
+    return topCleanByOEM[selectedOEM] || topViewClean
   })()
 
   const sensorCounts = sensorTypes.map(({ id }) => ({
