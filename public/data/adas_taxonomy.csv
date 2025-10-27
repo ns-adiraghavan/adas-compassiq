@@ -1,0 +1,157 @@
+Module 1: OEM-level Benchmarking ,,,
+1.1. Current Standing,,,
+Parameter,AV Platform Landscape,Assesses the key characteristics of an OEM’s automated driving (AD) platform offerings.,
+"Attribute/
+Indicator",AV Platform Name,"The platform name representing the complete package of automated driving (AD) functionalities offered by the OEM (e.g., Tesla Autopilot, Ford BlueCruise).",
+,Highest Autonomy Level in Commercially Available Private Vehicles,"The level of driving automation (Level 1 to Level 5) commercially deployed by the OEM in its production vehicles, based on the system's key functionalities.",
+,Platform Versions Supporting L2+ or Higher Autonomy,"Different versions of an OEM's AD platform offering Level 2+ and above autonomous driving capabilities (e.g., Ford’s BlueCruise versions 1.2, 1.3, 1.4, and 1.5, all providing Level 2+ functionality).",
+,Most Advanced Version of AV Platform,"The most advanced AD version offered by an OEM (e.g., BlueCruise 1.5), representing the highest level of available functionality within its platform lineup.",
+,Driver Intervention for Critical AV Feature (Automatic Lane Change),"• Physical input is required: The driver must confirm the lane change via turn signal or other input (such as eye gazing)
+• No physical input is required: The vehicle executes lane changes autonomously without driver input, based on system judgment.",
+Parameter,Vehicle Portfolio Dynamics for AV Platform,Evaluate each OEM’s portfolio equipped with Level 2+ or higher autonomy by analyzing the mix of models offered and their market performance across key regions.,
+"Attribute/
+Indicator",Penetration Across Vehicle Model Portfolio with L2+ and Higher Autonomy,The percentage of vehicle models in each OEM’s portfolio that are equipped with AD Level 2+ or higher autonomous driving technology.,
+,Models Featuring L2+ and Higher Autonomy Capabilities,The list of vehicle models that are equipped with Level 2+ or higher autonomy capabilities.,
+,Most Technologically Advanced AV Model,This refers to the most advanced model in terms of autonomy level and functionalities—often serving as the flagship model line for launching new autonomous driving features.,
+,Sales Penetration of L2+ and Higher Autonomy Capable Vehicles,The sales penetration of the most advanced vehicle model in US and Europe by OEM.,
+Parameter,Defined AV Driving Scope: Operation Design Domain (ODD),"Specific conditions under which an autonomous vehicle (AV) system is designed to operate safely such as geographic areas (e.g., highways, urban roads), speed range etc.",
+Parameter,Regulatory Compliance and Standing,"Measures the extent to which an OEM’s AD systems meet official certification, legal approvals, and operational permissions.",
+"Attribute/
+Indicator",Key Industry Standards and Compliances,"The key industry standards and compliance frameworks (e.g., ISO, SAE) that OEMs adhere to and publicly report, validating the safety, performance, and regulatory compliance of their AD systems.",
+,Key Regulatory Approvals/Endorsements,"Recent or ongoing regulatory engagements/endorsements by the OEM to obtain approvals, certifications, or ensure compliance related to AD and autonomous driving technologies.",
+Parameter,Major Setbacks and Risk Events,"Tracks incidents, system failures, recalls, and legal challenges associated with an OEM’s AD or autonomous driving deployments.",
+"Attribute/
+Indicator",AV Technology-related Crash Incidents and Follow-up Actions/Recalls,"Officially reported accidents involving vehicles equipped with AD or autonomous driving features, where incidents were attributed to system behavior or failure—along with any subsequent recalls initiated or actions taken in response to these crashes.",
+,"Reported System Malfunctions, Related Recalls, and Repairments (OTA/Physical)",Instances where the AD system malfunctioned or failed to operate as intended. It also includes any subsequent recalls or corrective actions taken by the OEM in response.,
+,Active Legal Proceedings,"Ongoing legal cases or investigations involving the OEM related to its AD technology, including liability claims or regulatory non-compliance.",
+1.2 AV Stack Breakdown ,,,
+1.2 AV Stack Breakdown - A) Sensing and Perception,,,
+Parameter,AV Sensor Suite,Quantifies and categorizes the types and number of sensors integrated into the AD suite for environmental perception.,
+"Attribute/
+Indicator",Total Sensors,"The combined count of all sensor types (camera, radar, LiDAR, ultrasonic, etc.) integrated into the AD system.",
+,Camera,Count of Vision-based (Camera) sensors used for AD technology.,
+,Radar,Count of Radio wave-based sensors for AD technology.,
+,LiDAR,Count of Laser-based sensors used for AD technology.,
+,Ultrasonic,Count of Short-range sensors Count of Light-based sensors used for AD technology.,
+Parameter,"Camera Configuration 
+and Specifications","Details the placement, types, and technical characteristics of cameras used for AD functions.",
+"Attribute/
+Indicator",Camera Count by Zone,"Number of Cameras mounted at the front, side and rear mounting ",
+,Camera Mounting/Integration by Zone,"The specific placement and method of integrating cameras into different areas of the vehicle (front, side, rear) to optimize their field of view and support AD functions",
+,Underlying Technology (Specifications),The core imaging and sensor mechanism used in the camera system that determines its functionality and performance characteristics.,
+Parameter,"Radar Configuration 
+and Specifications","Describes the arrangement, types, and performance metrics of radar sensors within the AD architecture.",
+"Attribute/
+Indicator",Radar Count by Zone,"The number of radar sensors installed in designated vehicle zones (front, side, rear), each supporting specific AD detection and safety functions",
+,Radar Mounting/Integration by Zone,"The physical locations of radar sensors by vehicle zone (e.g., Front, Side and Rear)",
+,Underlying Technology (Specifications),"The fundamental attributes utilized to define radar's performance (e.g., radar band, FOV and range) in diverse driving conditions",
+Parameter,"LiDAR Configuration 
+and Specifications","Specifies the positioning, operational parameters, and technical features of LiDAR sensors in the AD sensor array.",
+"Attribute/
+Indicator",LiDAR Count by Zone,"The number of LiDAR sensors deployed in each vehicle zone (front, side, rear), providing mapping for AD and autonomous features.",
+,LiDAR Mounting/Integration by Zone,The placement and integration approach for LiDAR sensors in different parts of the vehicle to maximize their sensing range and coverage,
+,Underlying Technology (Specifications),"The core sensing principle and architecture used in LiDAR systems that influences its performance attributes (e.g., type, resolution, wavelength, etc).",
+Parameter,Ultrasonic Sensor Specifications,"Outlines the quantity, locations, and underlying properties of ultrasonic sensors implemented for close-range detection.",
+"Attribute/
+Indicator",UIltrasonic Count by Zone,"The number of ultrasonic sensors installed in the front, side, and rear zones of the vehicle, primarily for close-range object detection and parking assistance.",
+,Ultrasonic Mounting/Integration by Zone,"The specific locations and methods for embedding ultrasonic sensors in the vehicle’s body (e.g., bumpers, corners)",
+Parameter,Sensor Fusion/Redundancy Approach,"Sensor fusion and redundancy approach to combine data from multiple sensors (e.g., LiDAR, radar, camera) to enhance perception accuracy, while ensuring functional reliability by using overlapping sensors or systems to maintain safety in case of failure.",
+1.2 AV Stack Breakdown - B. Computing System (Hardware),,,
+Parameter,AV System Architecture and Characterstics,Defines the hardware configuration of the platform that manages AD and autonomous driving computations.,
+"Attribute/
+Indicator",Distributed Architecture,"Each function (e.g., AD, infotainment) is controlled by a dedicated ECU; vehicle electronics are function-specific and loosely connected.",
+,Domain Centralized Architecture,"ECUs are grouped by function into domains (e.g., powertrain, AD), each managed by a domain controller for improved coordination and efficiency.",
+,Zonal Architecture,"Vehicle is divided into physical zones (e.g., front-left, rear-right), each with a zonal controller that handles local I/O and communicates with central processors.",
+,Central Architecture,"A few high-performance central computers manage all major functions across the vehicle, significantly reducing the number of ECUs and wiring complexity.",
+Parameter,SoC/AI Chipset Platform,"SOC type, product series name (e.g., Nvidia Orin, Qualcomm Snapdragon Ride)",
+Parameter,SoC Configuration and Specifications,"Summarizes the performance, memory, and hardware acceleration features of the main computing platform for AV operations.",
+"Attribute/
+Indicator",Overall Processing Specifications,"Specifications of computational performance, memory, and capabilities of all core processors supporting AV/AD functions.",
+,Central Processing Unit (CPU),"The main processor responsible for executing general-purpose computing tasks within the AV/AD hardware platform. (e.g. Number of cores, Clock speed etc.)",
+,Graphics Processing Unit (GPU),"A specialized processing unit focused on parallelized computations for graphics rendering and acceleration of perception tasks in the AV stack. (e.g., no. of cores and TFLOPS)",
+,Neural Processing Unit (NPU),A dedicated processor optimized for rapid execution of AI and deep learning workloads essential to autonomous vehicle decision-making.,
+1.2 AV Stack Breakdown - C. Software and HMI,,,
+Parameter,L2+ AD Software Platform,"Describes the operating system(s), middleware, update mechanisms, and development strategies powering L2+ AD applications.",
+"Attribute/
+Indicator","OS Compatibility
+(e.g., QNX, Linux)","The operating systems that the AD software stack can run on, ensuring integration with vehicle ECUs.",
+,"Middleware Platform
+(e.g., AUTOSAR)","Software layer that enables communication between hardware and application layers, promoting standardization and interoperability.",
+,OTA Capability,"The ability to deliver software updates wirelessly, enhancing features, performance, and security post-deployment.",
+,Data Loop Process and Working Mechanism,"Explains how sensor data is gathered, processed, and analyzed to improve AD features for future operations—either by refining AI models or implementing functional changes—which are then deployed to the vehicle through over-the-air (OTA) updates.",
+,Software Development Approach,"The software development approach refers to the method used to create and deliver software applications (e.g. - Inhouse, Outsourced).",
+,Cybersecurity Approach and Initiatives,Cybersecurity strategic frameworks and initiatives adopted by the OEM to ensure the safety and security of the entire AD and autonomous driving technology stack.,
+,"Strategy Rationale (Platform scalability, modularity, etc.)","Explains the design principles behind the software architecture to ensure adaptability, reuse, and future scalability.",
+Parameter,Human-Machine Interface (HMI) Elements and Features,"In-vehicle interface components and related details, such as interaction methods, and feedback systems for driver-AD communication.",
+"Attribute/
+Indicator",HMI Devices for AV Functions,"The suite of hardware devices (displays, HUDs etc.) enabling interaction between the vehicle’s AV systems and the driver.",
+,Interface Characterstics,"Visual, auditory, or haptic cues within the HMI that proactively communicate AV system status, intent, or requests to the driver.",
+,Real-Time Alerts and Requests,Immediate notifications and prompts issued by the AV system to inform or request action from the driver during operation.,
+1.2 AV Stack Breakdown - D. Connectivity & Localization,,,
+Parameter,Environmental Perception and Contextual Awareness,Refers to the vehicle’s ability to interpret its surroundings through advanced sensing and connectivity.,
+"Attribute/
+Indicator",Traffic Light & Sign Recognition,Detects and interprets traffic lights and road signs to guide vehicle behavior.,
+,"Road Type Identification 
+(e.g., Highway, city, etc.)",Classifies road types to optimize driving strategies and decision-making.,
+,"Dynamic Object Awareness
+(e.g., Construction Sites Warnings, Parked Vehicles Alert)",Detects temporary obstacles or road changes to enhance route planning and safety.,
+,V2P Function,Enables communication between the vehicle and pedestrians to improve awareness and prevent collisions.,
+Parameter,Communication Channels for L2+ AV,"The types of network communication technologies (e.g., 4G, 5G, Wi-Fi, Ethernet) supported by L2+ AD systems for real-time connectivity and data exchange between vehicles and networks.",
+"Attribute/
+Indicator",Wireless Communication Network,Cellular communication enabling high speed data exchange with the external network.,
+,In-vehicle Communication Protocols,"High-speed, low-latency in-vehicle network communication supporting real-time data flow within architecture.",
+Parameter,Advanced Mapping Technique,"The specific digital mapping technologies employed (such as HD or 3D maps) to provide highly detailed, up-to-date environmental data for autonomous navigation and decision-making.",
+"Attribute/
+Indicator",HD Maps,"High-definition maps offering detailed, lane-level information for precise navigation.",
+,3D Maps,Maps providing 3D spatial data to aid in environment perception and localization.,
+Parameter,Precise Localization and Vehicle Positioning Technology,"The combined hardware and software methods (e.g., GNSS, IMU, map matching, sensor fusion) that enable highly accurate, real-time determination of the vehicle's location within its environment.",
+1.2 AV Stack Breakdown - E. Advanced Technology,,,
+Parameter,"Integration of Artificial Intelligence, Machine/Deep Learning/LLMs","The extent and manner in which artificial intelligence, including machine learning and deep learning, is incorporated into the AD stack for perception, decision-making, and control.",
+"Attribute/
+Indicator",AI-Integration in AV Tech Stack,The extent and manner in which a AI is embedded and harmonized within the overall AV system architecture.,
+,AI & Deep Learning Utilization,"The use and application intensity of AI technologies, including neural networks and deep learning models, across the AV system's functions.",
+Parameter,Edge and Cloud Computing Capabilities,"The approach and technologies used to balance or coordinate between in-vehicle computation (edge) and remote, cloud-based services to enhance AD performance, scalability, and feature delivery.",
+"Attribute/
+Indicator",Cloud Computing,"Centralized processing of large datasets for AV training, model updates, and long-term analytics.",
+,Edge Computing,"Real-time, on-vehicle computation to reduce latency and support immediate decision-making.",
+,Standout Features,Enables coordinated processing between cloud and edge systems,
+1.3. Strategy Roadmap,,,
+Parameter,1. Strategic Investments in AD/AD Technologies,"The scale, focus, and trends of financial commitments made by the OEM in advancing autonomous driving and AD-related research, development, and deployment.",
+"Attribute/
+Indicator",Investment Trends in AV/AD Projects,"Historical and current patterns in financial allocation, funding, and investment focus towards AV/AD research and development.",
+,AV/AD Specific Subsidies,"Historic investment, financial incentives, or subsidies exclusively to encourage AV/AD adoption and innovation.",
+Parameter,2. Facility Footprint and Expansion Roadmap,"The geographic distribution, capacity, and planned growth of physical sites (such as R&D centers, testing grounds, and production facilities) dedicated to AV/AD activities.",
+"Attribute/
+Indicator",R&D Centers,OEM research facilities focused on AV/AD development.,
+,Testing Facilities,OEM infrastructure for validating and testing AV/AD features and safety systems.,
+,Expansion Plans ,OEM’s strategies for increasing capacity or capability through facility upgrades or new builds.,
+Parameter,3. In-house Technology Development Approach,"The OEM’s strategies and practices for developing AD and AV technologies internally, as opposed to partnering or outsourcing, including areas of core competency and innovation.",
+"Attribute/
+Indicator",Sensing and Perception,Development approach of in-house capabilities in sensors and environmental perception systems.,
+,Computing Hardware,Proprietary development of on-vehicle computing platforms for AV/AD,
+,Software,"Internal efforts in creating perception, decision-making, and control software for AV/AD",
+Parameter,4. AD/AD Tech Stack Roadmap,"The current state and strategic future plans for the evolution of the OEM’s full AD and AV technology stack, covering hardware, software, and integration milestones.",
+"Attribute/
+Indicator",Hardware Aspiration,Future goals around sensors and hardware architecture for AV/AD,
+,Software Advancement,Planned or ongoing enhancements in software features or platforms for AV/AD,
+,AI Integration,Integration of artificial intelligence into the AV/AD stack ,
+Parameter,5. Workforce Characteristics,"Key quantitative and qualitative features of the OEM's human resources dedicated to AV/AD, including size, and leadership or team insights.",
+"Attribute/
+Indicator",Empolyee Count,Number of personnel dedicated to AV/AD development.,
+,Executive Verbatims,"Statements by company executives outlining vision, strategy, or priorities in AV/AD.",
+Parameter,6. Ongoing Regulatory Compliance Conversations and Clearances ,Active discussions and processes with regulatory bodies to ensure current or upcoming AD features meet legal and safety standards.,
+Parameter,7. Vehicle-Level Roadmap,The planned rollout schedule and details for next-generation vehicle platforms and models featuring advanced AD and autonomous capabilities.,
+"Attribute/
+Indicator",Next-Gen Vehicle Platform,"A future vehicle architecture that underpins upcoming models, designed to support advanced AD and autonomous driving capabilities. (e.g., Tesla HW 4.0 and 5.0)",
+,Upcoming Vehicle Models,Planned new vehicle releases featuring updated or next-generation AD and autonomous driving systems.,
+,New Features in the Pipeline,Upcoming AD functionalities or enhancements that are currently under development or planned for future rollout by the OEM.,
+,"Strategic Initiatives
+(e.g., pilot programs)",OEM-led programs or trials focused on deploying or validating AV/AD features.,
+Parameter,8. Patent Analysis,The review and assessment of exemplary patents that indicate the OEM’s innovation strengths and focus areas in AD and autonomous vehicle technologies.,
+"Attribute/
+Indicator",Innovative Topic from OEM,Key focus area or technological frontier each OEM is advancing in AV/AD.,
+,Exemplary Patent 1 of Innovative Topic,Representative patent showcasing OEM’s innovation,
+,Exemplary Patent 2 of Innovative Topic,Another significant patent that illustrates depth in OEM’s approach.,
+Parameter,9. Consumer Pulse,Customer perceptions and feedback on standout features provided by the OEM.,
+Parameter,"10. Strategic Roadmap and Aspiration 
+(summary based on trending patterns)",Summary of OEM’s long-term vision and trends in AD/AV development.,

@@ -8,6 +8,7 @@ import AskWayPointChatButton from "@/components/AskWayPointChatButton"
 import { Button } from "@/components/ui/button"
 import RegionButtons from "./RegionButtons"
 import PlayerCategoryButtons from "./PlayerCategoryButtons"
+import ADASTaxonomyButton from "./ADASTaxonomyButton"
 import {
   HoverCard,
   HoverCardContent,
@@ -126,9 +127,10 @@ const AdAdasCarsLayoutContent = ({ children }: AdAdasCarsLayoutProps) => {
           
           {/* Header Content */}
           <div className="relative px-8 py-4">
-            {/* Themes button at extreme top left */}
+            {/* Themes and Taxonomy buttons at extreme top left */}
             <div className="absolute top-4 left-8 z-50 flex items-center gap-3">
               <ThemeSelector />
+              <ADASTaxonomyButton />
             </div>
             
             {/* Back to Home button - positioned below theme selector */}
