@@ -3,6 +3,7 @@ import AVLandscapeTable from "./current-snapshot/AVLandscapeTable"
 import AVLandscapeInsights from "./current-snapshot/AVLandscapeInsights"
 import PortfolioDynamicsTable from "./current-snapshot/PortfolioDynamicsTable"
 import ODDTable from "./current-snapshot/ODDTable"
+import SensoricsTable from "./core-systems/SensoricsTable"
 import ComputationalCoreTable from "./core-systems/ComputationalCoreTable"
 import DrivingIntelligenceTable from "./core-systems/DrivingIntelligenceTable"
 import AdvancedTechnologiesTable from "./core-systems/AdvancedTechnologiesTable"
@@ -20,6 +21,16 @@ interface SubTabContentProps {
 
 const SubTabContent = ({ selectedSubTab, selectedRegion, selectedCategory }: SubTabContentProps) => {
   const { theme } = useTheme()
+
+  // Sensorics content
+  if (selectedSubTab === "Sensorics") {
+    return (
+      <SensoricsTable 
+        selectedRegion={selectedRegion}
+        selectedCategory={selectedCategory}
+      />
+    )
+  }
 
   // AV Landscape content
   if (selectedSubTab === "AV Landscape") {
