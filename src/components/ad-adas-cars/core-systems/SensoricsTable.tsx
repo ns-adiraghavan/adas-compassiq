@@ -67,6 +67,18 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
     ).length || 0
   }))
 
+  // Get sensor positions for the selected type and OEM
+  const activeSensorPositions = data?.filter(item =>
+    item.parameterCategory.includes(selectedSensorType) &&
+    item.oem === selectedOEM &&
+    (!selectedPosition || item.zone === selectedPosition)
+  ).reduce((acc, item) => {
+    const zone = item.zone || 'Unknown'
+    if (!acc[zone]) acc[zone] = 0
+    acc[zone]++
+    return acc
+  }, {} as Record<string, number>) || {}
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -177,17 +189,72 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
 
               {/* Car Visualization */}
               <div className="flex items-center justify-center min-h-[500px]">
-                <div 
-                  className={`transition-all duration-700 ease-out ${currentZoom}`}
-                  style={{
-                    filter: `drop-shadow(0 0 30px ${currentSensorColor}40)`
-                  }}
-                >
-                  <img
-                    src={vehicleImages[selectedOEM] || teslaImage}
-                    alt={`${selectedOEM} Vehicle`}
-                    className="w-auto h-[400px] object-contain"
-                  />
+                <div className="relative">
+                  <div 
+                    className={`transition-all duration-700 ease-out ${currentZoom}`}
+                    style={{
+                      filter: `drop-shadow(0 0 30px ${currentSensorColor}40)`
+                    }}
+                  >
+                    <img
+                      src={vehicleImages[selectedOEM] || teslaImage}
+                      alt={`${selectedOEM} Vehicle`}
+                      className="w-auto h-[400px] object-contain"
+                    />
+                  </div>
+                  
+                  {/* Dynamic Sensor Position Overlays */}
+                  {Object.entries(activeSensorPositions).map(([zone, count]) => {
+                    if (count === 0) return null
+                    
+                    // Position overlays based on zone
+                    const overlayPosition = zone === 'Front' 
+                      ? 'top-8 left-1/2 -translate-x-1/2'
+                      : zone === 'Rear'
+                      ? 'bottom-8 left-1/2 -translate-x-1/2'
+                      : zone === 'Side'
+                      ? 'top-1/2 right-8 -translate-y-1/2'
+                      : 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
+                    
+                    return (
+                      <div
+                        key={zone}
+                        className={`absolute ${overlayPosition} transition-all duration-500`}
+                      >
+                        <div 
+                          className="relative flex items-center justify-center animate-pulse"
+                          style={{
+                            width: '24px',
+                            height: '24px',
+                          }}
+                        >
+                          {/* Pulsing ring */}
+                          <div 
+                            className="absolute inset-0 rounded-full animate-ping opacity-75"
+                            style={{
+                              backgroundColor: currentSensorColor,
+                            }}
+                          />
+                          {/* Solid dot */}
+                          <div 
+                            className="relative rounded-full border-2 border-background shadow-lg"
+                            style={{
+                              width: '16px',
+                              height: '16px',
+                              backgroundColor: currentSensorColor,
+                            }}
+                          />
+                          {/* Count badge */}
+                          <div 
+                            className="absolute -top-2 -right-2 bg-background border rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold shadow-sm"
+                            style={{ color: currentSensorColor }}
+                          >
+                            {count}
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
 
