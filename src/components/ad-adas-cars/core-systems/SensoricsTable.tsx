@@ -9,11 +9,12 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import bmwImage from "@/assets/vehicles/bmw.png"
-import teslaImage from "@/assets/vehicles/tesla.png"
-import fordImage from "@/assets/vehicles/ford.png"
-import gmImage from "@/assets/vehicles/gm.png"
-import rivianImage from "@/assets/vehicles/rivian.png"
+import topViewClean from "@/assets/vehicles/top-view-clean.png"
+import topViewCamera from "@/assets/vehicles/top-view-camera.png"
+import sideViewCamera from "@/assets/vehicles/side-view-camera.png"
+import topViewRadar from "@/assets/vehicles/top-view-radar.png"
+import sideViewRadar from "@/assets/vehicles/side-view-radar.png"
+import topViewUltrasonic from "@/assets/vehicles/top-view-ultrasonic.png"
 
 interface SensoricsTableProps {
   selectedRegion: string
@@ -28,17 +29,30 @@ const sensorTypes = [
 ]
 
 const sensorPositions = [
-  { id: "Front", label: "Front", zoom: "scale-125 -translate-y-12" },
-  { id: "Side", label: "Side", zoom: "scale-115" },
-  { id: "Rear", label: "Rear", zoom: "scale-125 translate-y-12" },
+  { id: "Front", label: "Front" },
+  { id: "Side", label: "Side" },
+  { id: "Rear", label: "Rear" },
 ]
 
-const vehicleImages: Record<string, string> = {
-  "BMW": bmwImage,
-  "Tesla": teslaImage,
-  "Ford": fordImage,
-  "General Motors": gmImage,
-  "RIVIAN": rivianImage,
+// Map OEM names to their position in the image (0-4: Tesla, Rivian, BMW, GM, Ford)
+const oemToImageIndex: Record<string, number> = {
+  "Tesla": 0,
+  "RIVIAN": 1,
+  "BMW": 2,
+  "General Motors": 3,
+  "Ford": 4,
+}
+
+// Map sensor types to their reference images
+const getSensorReferenceImage = (sensorType: string, viewType: 'top' | 'side') => {
+  if (sensorType === "Camera") {
+    return viewType === 'top' ? topViewCamera : sideViewCamera
+  } else if (sensorType === "Radar") {
+    return viewType === 'top' ? topViewRadar : sideViewRadar
+  } else if (sensorType === "Ultrasonic") {
+    return topViewUltrasonic // Only top view for ultrasonic
+  }
+  return topViewClean
 }
 
 const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProps) => {
@@ -46,6 +60,7 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
   const [selectedSensorType, setSelectedSensorType] = useState<string>("Camera")
   const [selectedPosition, setSelectedPosition] = useState<string>("Front")
   const [selectedOEM, setSelectedOEM] = useState<string>("Tesla")
+  const [viewType, setViewType] = useState<'top' | 'side'>('top')
 
   const filteredData = data?.filter(item => {
     const matchesSensorType = item.parameterCategory.includes(selectedSensorType)
@@ -55,9 +70,13 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
   }) || []
 
   const uniqueOEMs = Array.from(new Set(data?.map(item => item.oem).filter(Boolean))) || []
-
-  const currentZoom = sensorPositions.find(p => p.id === selectedPosition)?.zoom || ""
   const currentSensorColor = sensorTypes.find(s => s.id === selectedSensorType)?.color || "hsl(var(--primary))"
+  const oemIndex = oemToImageIndex[selectedOEM] ?? 0
+  
+  // Calculate the position offset for the specific OEM in the composite image
+  // Each car takes approximately 20% of the width (5 cars total)
+  const carWidthPercent = 20
+  const carLeftOffset = oemIndex * carWidthPercent
 
   const sensorCounts = sensorTypes.map(({ id }) => ({
     type: id,
@@ -67,11 +86,10 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
     ).length || 0
   }))
 
-  // Get sensor positions for the selected type and OEM
-  const activeSensorPositions = data?.filter(item =>
+  // Count sensors by zone
+  const sensorsByZone = data?.filter(item =>
     item.parameterCategory.includes(selectedSensorType) &&
-    item.oem === selectedOEM &&
-    (!selectedPosition || item.zone === selectedPosition)
+    item.oem === selectedOEM
   ).reduce((acc, item) => {
     const zone = item.zone || 'Unknown'
     if (!acc[zone]) acc[zone] = 0
@@ -158,6 +176,30 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
                 ))}
               </div>
             </div>
+
+            <Separator orientation="vertical" className="h-6" />
+
+            {/* View Type Toggle */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-muted-foreground">View:</span>
+              <div className="flex gap-1">
+                <Button
+                  variant={viewType === 'top' ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setViewType('top')}
+                >
+                  Top
+                </Button>
+                <Button
+                  variant={viewType === 'side' ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setViewType('side')}
+                  disabled={selectedSensorType === "Ultrasonic"}
+                >
+                  Side
+                </Button>
+              </div>
+            </div>
           </div>
         </Card>
 
@@ -197,101 +239,78 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
                   })}
                   <Separator className="my-2" />
                   <div className="text-[10px] text-muted-foreground">
-                    Colored dots show active {selectedSensorType} sensors
+                    Reference dots shown on {viewType === 'top' ? 'top' : 'side'} view image
                   </div>
                 </div>
               </Card>
 
-              {/* Car Visualization */}
-              <div className="flex items-center justify-center min-h-[500px]">
-                <div className="relative">
+              {/* Car Visualization with precise cropping */}
+              <div className="flex items-center justify-center min-h-[500px] overflow-hidden">
+                <div className="relative w-full h-[500px]">
+                  {/* Display the full composite image but crop to show only selected OEM */}
                   <div 
-                    className={`transition-all duration-700 ease-out ${currentZoom}`}
+                    className="absolute inset-0 transition-all duration-500"
                     style={{
-                      filter: `drop-shadow(0 0 30px ${currentSensorColor}40)`
+                      filter: `drop-shadow(0 0 30px ${currentSensorColor}40)`,
                     }}
                   >
-                    <img
-                      src={vehicleImages[selectedOEM] || teslaImage}
-                      alt={`${selectedOEM} Vehicle`}
-                      className="w-auto h-[400px] object-contain"
-                    />
+                    <div 
+                      className="relative w-full h-full overflow-hidden"
+                      style={{
+                        // Create a window that shows only the selected car
+                        clipPath: `inset(0 ${100 - carLeftOffset - carWidthPercent}% 0 ${carLeftOffset}%)`,
+                      }}
+                    >
+                      <img
+                        src={getSensorReferenceImage(selectedSensorType, viewType)}
+                        alt={`${selectedOEM} ${selectedSensorType} sensors`}
+                        className="w-full h-full object-contain"
+                        style={{
+                          // Compensate for the clip by scaling and positioning
+                          transform: `translateX(-${carLeftOffset}%) scale(${100 / carWidthPercent}%)`,
+                          transformOrigin: 'left center',
+                        }}
+                      />
+                    </div>
                   </div>
                   
-                  {/* Dynamic Sensor Position Overlays - Aligned with image dots */}
-                  {Object.entries(activeSensorPositions).map(([zone, count]) => {
+                  {/* Zone badges showing sensor counts */}
+                  {Object.entries(sensorsByZone).map(([zone, count]) => {
                     if (count === 0) return null
                     
-                    // Position overlays to match the dots on the car images
-                    // These positions are calibrated to overlay the existing dots
-                    const overlayPosition = zone === 'Front' 
-                      ? 'top-[15%] left-1/2 -translate-x-1/2'
+                    // Position badges based on zone
+                    const badgePosition = zone === 'Front' 
+                      ? 'top-8 left-1/2 -translate-x-1/2'
                       : zone === 'Rear'
-                      ? 'bottom-[15%] left-1/2 -translate-x-1/2'
+                      ? 'bottom-8 left-1/2 -translate-x-1/2'
                       : zone === 'Side'
-                      ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
+                      ? 'top-1/2 right-8 -translate-y-1/2'
                       : 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
                     
                     return (
-                      <div
-                        key={zone}
-                        className={`absolute ${overlayPosition} transition-all duration-500`}
-                      >
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div 
-                              className="relative flex items-center justify-center cursor-pointer"
-                              style={{
-                                width: '32px',
-                                height: '32px',
-                              }}
-                            >
-                              {/* Pulsing ring - larger and more visible */}
-                              <div 
-                                className="absolute inset-0 rounded-full animate-ping opacity-60"
-                                style={{
-                                  backgroundColor: currentSensorColor,
-                                }}
-                              />
-                              {/* Outer glow ring */}
-                              <div 
-                                className="absolute inset-0 rounded-full opacity-40 blur-sm"
-                                style={{
-                                  backgroundColor: currentSensorColor,
-                                }}
-                              />
-                              {/* Solid dot - overlays existing image dot */}
-                              <div 
-                                className="relative rounded-full border-3 border-background shadow-2xl"
-                                style={{
-                                  width: '20px',
-                                  height: '20px',
-                                  backgroundColor: currentSensorColor,
-                                  boxShadow: `0 0 20px ${currentSensorColor}80`,
-                                }}
-                              />
-                              {/* Count badge */}
-                              <div 
-                                className="absolute -top-1 -right-1 bg-background border-2 rounded-full w-6 h-6 flex items-center justify-center text-[10px] font-bold shadow-lg"
-                                style={{ 
-                                  color: currentSensorColor,
-                                  borderColor: currentSensorColor,
-                                }}
-                              >
-                                {count}
-                              </div>
+                      <Tooltip key={zone}>
+                        <TooltipTrigger asChild>
+                          <Badge
+                            className={`absolute ${badgePosition} cursor-pointer shadow-lg transition-all hover:scale-110`}
+                            style={{
+                              backgroundColor: currentSensorColor,
+                              color: 'white',
+                              borderColor: currentSensorColor,
+                            }}
+                          >
+                            <span className="font-semibold">{zone}:</span>
+                            <span className="ml-1">{count}</span>
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <div className="text-xs">
+                            <div className="font-semibold">{zone} Zone</div>
+                            <div className="text-muted-foreground">
+                              {count} {selectedSensorType} sensor{count !== 1 ? 's' : ''}
                             </div>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <div className="text-xs">
-                              <div className="font-semibold">{zone} Zone</div>
-                              <div className="text-muted-foreground">
-                                {count} {selectedSensorType} sensor{count !== 1 ? 's' : ''}
-                              </div>
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
                     )
                   })}
                 </div>
@@ -300,7 +319,7 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
               {/* Status Badge */}
               <div className="absolute bottom-6 right-6">
                 <Badge variant="secondary" className="shadow-lg">
-                  {selectedSensorType} • {selectedPosition} Zone
+                  {selectedSensorType} • {selectedPosition} • {viewType === 'top' ? 'Top View' : 'Side View'}
                 </Badge>
               </div>
             </div>
