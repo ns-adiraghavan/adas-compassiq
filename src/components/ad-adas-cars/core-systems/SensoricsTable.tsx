@@ -255,29 +255,20 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
                 <div className="relative w-full h-[500px]">
                   {/* Display the full composite image but crop to show only selected OEM */}
                   <div 
-                    className="absolute inset-0 transition-all duration-500"
+                    className="absolute inset-0 overflow-hidden transition-all duration-500"
                     style={{
                       filter: `drop-shadow(0 0 30px ${currentSensorColor})`,
                     }}
                   >
-                    <div 
-                      className="relative w-full h-full overflow-hidden"
+                    <img 
+                      src={getSensorReferenceImage(selectedSensorType, viewType)}
+                      alt={`${selectedOEM} ${selectedSensorType} sensors`}
+                      className="h-full object-contain transition-all duration-500"
                       style={{
-                        // Create a window that shows only the selected car
-                        clipPath: `inset(0 ${100 - carLeftOffset - carWidthPercent}% 0 ${carLeftOffset}%)`,
+                        width: '500%', // 5 cars in composite
+                        objectPosition: `${oemIndex * -100}% center`, // Shift to show correct car
                       }}
-                    >
-                      <img
-                        src={getSensorReferenceImage(selectedSensorType, viewType)}
-                        alt={`${selectedOEM} ${selectedSensorType} sensors`}
-                        className="w-full h-full object-contain"
-                        style={{
-                          // Compensate for the clip by scaling and positioning
-                          transform: `translateX(-${carLeftOffset}%) scale(${100 / carWidthPercent})`,
-                          transformOrigin: 'left center',
-                        }}
-                      />
-                    </div>
+                    />
                   </div>
                   
                   {/* Zone badges showing sensor counts */}
