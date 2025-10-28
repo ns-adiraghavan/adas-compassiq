@@ -11,40 +11,86 @@ const geoUrl = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json"
 
 // Map city locations to [longitude, latitude] coordinates
 const cityCoordinates: Record<string, [number, number]> = {
+  // Michigan
   "Dearborn, MI": [-83.1763, 42.3223],
   "Detroit, MI": [-83.0458, 42.3314],
+  "Detroit,Michigan, US": [-83.0458, 42.3314],
+  "Ann Arbor, MI": [-83.7430, 42.2808],
+  "Milford, MI": [-83.6000, 42.5917],
+  "Warren, MI": [-83.0277, 42.5145],
+  "Romeo, MI": [-83.0130, 42.8023],
+  "Plymouth, Michigan": [-83.4703, 42.3712],
+  // California
   "Palo Alto, CA": [-122.1430, 37.4419],
+  "Palo Alto, California": [-122.1430, 37.4419],
   "Mountain View, CA": [-122.0838, 37.3861],
   "San Francisco, CA": [-122.4194, 37.7749],
   "Fremont, CA": [-121.9886, 37.5485],
+  "Fremont, California": [-121.9886, 37.5485],
+  "Irvine, California": [-117.8265, 33.6846],
+  // Texas
   "Austin, TX": [-97.7431, 30.2672],
+  // Arizona
   "Phoenix, AZ": [-112.0740, 33.4484],
-  "Atlanta, GA": [-84.3880, 33.7490],
-  "Milford, MI": [-83.6000, 42.5917],
-  "Warren, MI": [-83.0277, 42.5145],
-  "Pittsburgh, PA": [-79.9959, 40.4406],
-  "Seattle, WA": [-122.3321, 47.6062],
-  "Las Vegas, NV": [-115.1398, 36.1699],
   "Yuma, AZ": [-114.6276, 32.6927],
+  "Wittmann, AZ": [-112.5285, 33.7814],
+  // Georgia
+  "Atlanta, GA": [-84.3880, 33.7490],
+  "Georgia, Atlanta,US": [-84.3880, 33.7490],
+  // Pennsylvania
+  "Pittsburgh, PA": [-79.9959, 40.4406],
+  // Washington
+  "Seattle, WA": [-122.3321, 47.6062],
+  // Nevada
+  "Las Vegas, NV": [-115.1398, 36.1699],
+  // New York
+  "Buffalo, NY": [-78.8784, 42.8864],
+  // South Carolina
+  "Greenville, SC": [-82.3940, 34.8526],
+  // Illinois
+  "Normal, Illinois,US": [-88.9906, 40.5142],
 }
 
 // Map locations to state names for coloring
 const locationToState: Record<string, string> = {
+  // Michigan
   "Dearborn, MI": "Michigan",
   "Detroit, MI": "Michigan",
+  "Detroit,Michigan, US": "Michigan",
+  "Ann Arbor, MI": "Michigan",
   "Milford, MI": "Michigan",
   "Warren, MI": "Michigan",
+  "Romeo, MI": "Michigan",
+  "Plymouth, Michigan": "Michigan",
+  // California
   "Palo Alto, CA": "California",
+  "Palo Alto, California": "California",
   "Mountain View, CA": "California",
   "San Francisco, CA": "California",
   "Fremont, CA": "California",
+  "Fremont, California": "California",
+  "Irvine, California": "California",
+  // Texas
   "Austin, TX": "Texas",
+  // Arizona
   "Phoenix, AZ": "Arizona",
   "Yuma, AZ": "Arizona",
+  "Wittmann, AZ": "Arizona",
+  // Georgia
   "Atlanta, GA": "Georgia",
+  "Georgia, Atlanta,US": "Georgia",
+  // Pennsylvania
   "Pittsburgh, PA": "Pennsylvania",
+  // Washington
   "Seattle, WA": "Washington",
+  // Nevada
   "Las Vegas, NV": "Nevada",
+  // New York
+  "Buffalo, NY": "New York",
+  // South Carolina
+  "Greenville, SC": "South Carolina",
+  // Illinois
+  "Normal, Illinois,US": "Illinois",
 }
 
 export const USMapSVG = ({ facilities }: USMapSVGProps) => {

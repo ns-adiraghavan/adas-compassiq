@@ -11,30 +11,56 @@ const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"
 
 // Map city locations to [longitude, latitude] coordinates
 const cityCoordinates: Record<string, [number, number]> = {
+  // Germany
   "Munich, Germany": [11.5820, 48.1351],
   "Ingolstadt, Germany": [11.4250, 48.7665],
   "Stuttgart, Germany": [9.1829, 48.7758],
   "Wolfsburg, Germany": [10.7872, 52.4227],
   "Berlin, Germany": [13.4050, 52.5200],
+  "Unterschleißheim, Germany": [11.5744, 48.2839],
+  // Sweden
   "Arjeplog, Sweden": [17.8333, 66.0500],
+  // France
   "Miramas, France": [5.0000, 43.5833],
   "Rodez, France": [2.5750, 44.3500],
+  // UK
   "Coventry, UK": [-1.5080, 52.4068],
+  // Spain
   "Barcelona, Spain": [2.1734, 41.3851],
+  "Tarragona, Spain": [1.2445, 41.1189],
+  // Netherlands
+  "Tilburg, Netherlands": [5.0913, 51.5555],
+  // Czech Republic
+  "Sokolov, Czech Republic": [12.6400, 50.1814],
+  // Serbia
+  "Belgrade, Serbia,Europe": [20.4489, 44.7866],
 }
 
 // Map locations to country names for coloring
 const locationToCountry: Record<string, string> = {
+  // Germany
   "Munich, Germany": "Germany",
   "Ingolstadt, Germany": "Germany",
   "Stuttgart, Germany": "Germany",
   "Wolfsburg, Germany": "Germany",
   "Berlin, Germany": "Germany",
+  "Unterschleißheim, Germany": "Germany",
+  // Sweden
   "Arjeplog, Sweden": "Sweden",
+  // France
   "Miramas, France": "France",
   "Rodez, France": "France",
+  // UK
   "Coventry, UK": "United Kingdom",
+  // Spain
   "Barcelona, Spain": "Spain",
+  "Tarragona, Spain": "Spain",
+  // Netherlands
+  "Tilburg, Netherlands": "Netherlands",
+  // Czech Republic
+  "Sokolov, Czech Republic": "Czech Republic",
+  // Serbia
+  "Belgrade, Serbia,Europe": "Serbia",
 }
 
 export const EuropeMapSVG = ({ facilities }: EuropeMapSVGProps) => {
@@ -85,7 +111,8 @@ export const EuropeMapSVG = ({ facilities }: EuropeMapSVGProps) => {
                 "Germany", "France", "United Kingdom", "Spain", "Italy", "Sweden",
                 "Norway", "Finland", "Denmark", "Poland", "Netherlands", "Belgium",
                 "Austria", "Switzerland", "Portugal", "Greece", "Czech Republic",
-                "Romania", "Hungary", "Ireland", "Slovakia", "Bulgaria", "Croatia"
+                "Romania", "Hungary", "Ireland", "Slovakia", "Bulgaria", "Croatia",
+                "Serbia"
               ]
               return europeanCountries.includes(geo.properties.name)
             })
