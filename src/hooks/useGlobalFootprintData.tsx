@@ -10,6 +10,31 @@ export interface FacilityLocation {
   lng?: number
 }
 
+// OEM normalization function to handle naming variations
+const normalizeOEM = (oem: string): string => {
+  const normalized = oem.trim()
+  const lowerOEM = normalized.toLowerCase()
+  
+  // Handle common variations
+  if (lowerOEM === 'general motors' || lowerOEM === 'gm') return 'GM'
+  if (lowerOEM === 'rivian') return 'Rivian'
+  if (lowerOEM === 'tesla') return 'Tesla'
+  if (lowerOEM === 'ford') return 'Ford'
+  if (lowerOEM === 'bmw') return 'BMW'
+  if (lowerOEM === 'mercedes-benz' || lowerOEM === 'mercedes') return 'Mercedes-Benz'
+  if (lowerOEM === 'volkswagen' || lowerOEM === 'vw') return 'Volkswagen'
+  if (lowerOEM === 'audi') return 'Audi'
+  if (lowerOEM === 'porsche') return 'Porsche'
+  if (lowerOEM === 'volvo') return 'Volvo'
+  if (lowerOEM === 'byd') return 'BYD'
+  if (lowerOEM === 'nio') return 'NIO'
+  if (lowerOEM === 'xpeng') return 'XPeng'
+  if (lowerOEM === 'li auto') return 'Li Auto'
+  if (lowerOEM === 'geely') return 'Geely'
+  
+  return normalized
+}
+
 // Location normalization function
 const normalizeLocation = (location: string): string => {
   return location
@@ -27,7 +52,7 @@ const normalizeLocation = (location: string): string => {
     .trim()
 }
 
-// OEM to Category mapping
+// OEM to Category mapping (using normalized names)
 const oemCategoryMap: Record<string, string> = {
   'Tesla': 'oem',
   'Rivian': 'oem',
@@ -47,7 +72,7 @@ const oemCategoryMap: Record<string, string> = {
 }
 
 // Export for use in components
-export { normalizeLocation }
+export { normalizeLocation, normalizeOEM }
 
 export const useGlobalFootprintData = (region: string, selectedCategory?: string, selectedOEM?: string, facilityType?: string) => {
   return useQuery({
@@ -63,7 +88,7 @@ export const useGlobalFootprintData = (region: string, selectedCategory?: string
       const facilities: FacilityLocation[] = []
 
       data?.forEach((row) => {
-        const oem = row["OEM Name"] || ""
+        const oem = normalizeOEM(row["OEM Name"] || "")
         const location = row.Location || ""
         
         // Process R&D Centers
@@ -119,9 +144,9 @@ export const useGlobalFootprintData = (region: string, selectedCategory?: string
         )
       }
 
-      // Filter by selected OEM if provided
+      // Filter by selected OEM if provided (normalize both sides for comparison)
       let filteredFacilities = selectedOEM && selectedOEM !== "All"
-        ? categoryFilteredFacilities.filter(f => f.oem.toLowerCase().includes(selectedOEM.toLowerCase()))
+        ? categoryFilteredFacilities.filter(f => normalizeOEM(f.oem) === normalizeOEM(selectedOEM))
         : categoryFilteredFacilities
 
       // Filter by facility type if provided
