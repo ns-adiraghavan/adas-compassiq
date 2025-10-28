@@ -96,15 +96,17 @@ const FileUpload = ({ onFileAnalyzed }: FileUploadProps) => {
         }
       }
 
-      // Use original filename for storage path
-      const filePath = `uploads/${file.name}`
+      // Generate unique filename to prevent overwrites
+      const timestamp = Date.now()
+      const randomStr = Math.random().toString(36).substring(7)
+      const filePath = `uploads/${timestamp}_${randomStr}_${file.name}`
 
-      // Upload file to Supabase Storage with original filename
+      // Upload file to Supabase Storage with unique filename
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('documents')
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: true // Allow overwriting files with same name
+          upsert: false
         })
 
       if (uploadError) {
