@@ -47,14 +47,34 @@ serve(async (req) => {
       throw new Error(`File size exceeds maximum limit of ${MAX_FILE_SIZE / (1024 * 1024)}MB`);
     }
 
-    // Sanitize file name - remove path traversal characters and dangerous chars
+    // Enhanced file name sanitization - normalize unicode and remove dangerous patterns
     const sanitizedFileName = fileName
-      .replace(/[^a-zA-Z0-9._-]/g, '_')
+      .normalize('NFD') // Normalize unicode to prevent bypass tricks
+      .replace(/[\u0300-\u036f]/g, '') // Remove combining characters
+      .replace(/[^a-zA-Z0-9._-]/g, '_') // Only allow safe characters
       .replace(/^\.+/, '') // Remove leading dots
+      .replace(/\.{2,}/g, '.') // Prevent double dots
       .substring(0, 255); // Limit length
     
-    if (!sanitizedFileName) {
+    if (!sanitizedFileName || sanitizedFileName.length < 1) {
       throw new Error('Invalid file name after sanitization');
+    }
+
+    // Validate file extension matches content type
+    const fileExtension = sanitizedFileName.split('.').pop()?.toLowerCase();
+    const validExtensions: Record<string, string[]> = {
+      'application/pdf': ['pdf'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['xlsx'],
+      'application/vnd.ms-excel': ['xls'],
+      'text/csv': ['csv'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['docx'],
+      'application/msword': ['doc'],
+      'text/plain': ['txt']
+    };
+
+    const expectedExtensions = validExtensions[fileType];
+    if (!expectedExtensions || !fileExtension || !expectedExtensions.includes(fileExtension)) {
+      throw new Error(`File extension ${fileExtension} does not match content type ${fileType}`);
     }
 
     // Create Supabase client
@@ -66,13 +86,83 @@ serve(async (req) => {
     // Use sanitized filename with uploads/ prefix
     const filePath = `uploads/${sanitizedFileName}`;
 
+    // Upload file to Supabase Storage - prevent overwriting by checking existence first
+    const { data: existingFile } = await supabase.storage
+      .from('documents')
+      .list('uploads', {
+        search: sanitizedFileName
+      });
+
+    if (existingFile && existingFile.length > 0) {
+      // File already exists, generate unique name
+      const timestamp = Date.now();
+      const nameParts = sanitizedFileName.split('.');
+      const ext = nameParts.pop();
+      const baseName = nameParts.join('.');
+      const uniqueFileName = `${baseName}_${timestamp}.${ext}`;
+      const uniqueFilePath = `uploads/${uniqueFileName}`;
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(uniqueFilePath, binaryData, {
+          contentType: fileType,
+          cacheControl: '3600',
+          upsert: false // Never overwrite
+        });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Store with unique filename
+      const { data, error } = await supabase
+        .from('documents')
+        .insert({
+          file_name: uniqueFileName,
+          file_type: fileType,
+          file_size: fileSize || 0,
+          file_path: uploadData.path,
+          storage_path: uploadData.path,
+          metadata: {
+            upload_timestamp: new Date().toISOString(),
+            original_name: fileName,
+            sanitized_name: uniqueFileName,
+            storage_bucket: 'documents',
+            uploaded_via: 'edge_function'
+          }
+        })
+        .select()
+        .single();
+
+      if (error) {
+        await supabase.storage.from('documents').remove([uploadData.path]);
+        throw error;
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          id: data.id,
+          fileName: uniqueFileName,
+          originalFileName: fileName,
+          fileType,
+          fileSize,
+          storagePath: uploadData.path,
+          message: 'Document stored successfully with unique name to prevent overwrite'
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
     // Upload file to Supabase Storage with original name
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('documents')
       .upload(filePath, binaryData, {
         contentType: fileType,
         cacheControl: '3600',
-        upsert: true // Allow overwriting files with same name
+        upsert: false // Never allow overwriting
       });
 
     if (uploadError) {
