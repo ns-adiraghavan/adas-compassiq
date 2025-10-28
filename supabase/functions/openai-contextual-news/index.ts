@@ -148,7 +148,8 @@ async function validateURLsConcurrently(articles: any[]): Promise<NewsSnippet[]>
         url: response.ok ? article.url : generateFallbackURL(article.source)
       };
     } catch (error) {
-      console.log(`URL validation failed for ${article.url}:`, error.message);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.log(`URL validation failed for ${article.url}:`, errorMessage);
       
       // Calculate time ago for fallback with better date parsing
       let publishedDate = new Date(article.publishedAt);
@@ -244,7 +245,8 @@ async function searchRealNewsWithFunctionCalling(query: string): Promise<NewsSni
           url: article.url
         };
       } catch (error) {
-        console.log(`Error processing article ${index}:`, error.message);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.log(`Error processing article ${index}:`, errorMessage);
         return null;
       }
     })
@@ -355,6 +357,7 @@ serve(async (req) => {
 
     } catch (functionCallingError) {
       console.error('Function Calling search failed:', functionCallingError);
+      const errorMessage = functionCallingError instanceof Error ? functionCallingError.message : 'Unknown error';
       
       // Fallback to contextual content with quality URLs
       const fallbackNews = generateContextualFallback(selectedOEMs, selectedCountry, analysisType);
@@ -363,7 +366,7 @@ serve(async (req) => {
         JSON.stringify({ 
           success: true, 
           newsSnippets: fallbackNews,
-          context: { selectedOEMs, selectedCountry, analysisType, source: 'fallback_function_calling_error', error: functionCallingError.message }
+          context: { selectedOEMs, selectedCountry, analysisType, source: 'fallback_function_calling_error', error: errorMessage }
         }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -373,6 +376,7 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in openai-contextual-news function:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     
     // Return contextual fallback news with quality URLs
     const fallbackNews = generateContextualFallback([], '', 'general');
@@ -381,7 +385,7 @@ serve(async (req) => {
       JSON.stringify({ 
         success: false, 
         newsSnippets: fallbackNews,
-        error: error.message,
+        error: errorMessage,
         context: { source: 'fallback_general_error' }
       }),
       {

@@ -163,10 +163,11 @@ Focus on actionable business intelligence that can enhance the passenger car ana
 
   } catch (error) {
     console.error('Error in document-analysis function:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: error.message,
+        error: errorMessage,
         details: 'Failed to analyze document'
       }),
       {

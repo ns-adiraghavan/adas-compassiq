@@ -61,11 +61,11 @@ export function parseOpenAIResponse(data: any): string[] {
   let insights: string[] = []
   
   if (Array.isArray(parsed)) {
-    insights = parsed.filter(insight => typeof insight === 'string' && insight.trim().length > 0)
+    insights = parsed.filter((insight: any) => typeof insight === 'string' && insight.trim().length > 0)
   } else if (parsed.insights && Array.isArray(parsed.insights)) {
-    insights = parsed.insights.filter(insight => typeof insight === 'string' && insight.trim().length > 0)
+    insights = parsed.insights.filter((insight: any) => typeof insight === 'string' && insight.trim().length > 0)
   } else if (parsed.data && Array.isArray(parsed.data)) {
-    insights = parsed.data.filter(insight => typeof insight === 'string' && insight.trim().length > 0)
+    insights = parsed.data.filter((insight: any) => typeof insight === 'string' && insight.trim().length > 0)
   } else {
     throw new Error(`Response format not recognized: ${typeof parsed}`)
   }

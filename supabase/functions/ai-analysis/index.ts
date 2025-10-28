@@ -263,7 +263,9 @@ serve(async (req) => {
     // Limit cache size to prevent memory issues
     if (processedDataCache.size > 100) {
       const firstKey = processedDataCache.keys().next().value;
-      processedDataCache.delete(firstKey);
+      if (firstKey !== undefined) {
+        processedDataCache.delete(firstKey);
+      }
     }
 
     return new Response(
@@ -273,10 +275,11 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in ai-analysis function:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: error.message,
+        error: errorMessage,
         details: 'Failed to generate AI analysis'
       }),
       {

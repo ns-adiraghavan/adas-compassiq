@@ -48,7 +48,7 @@ function isValidNewsURL(url: string): boolean {
     const reasonableDomain = domain.length > 4 && domain.includes('.') && 
                            !domain.startsWith('localhost') && !domain.includes('127.0.0.1');
     
-    return isReputableDomain || (hasValidPath && notSpamDomain && reasonableDomain);
+    return Boolean(isReputableDomain || (hasValidPath && notSpamDomain && reasonableDomain));
   } catch (error) {
     console.log('Invalid URL detected:', url);
     return false;

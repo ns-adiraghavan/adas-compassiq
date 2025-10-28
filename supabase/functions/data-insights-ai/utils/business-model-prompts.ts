@@ -26,13 +26,13 @@ export function createBusinessModelAnalysisPrompt(
   const secondCategory = topCategories[1] || { category: 'Safety', total: Math.floor(totalFeatures * 0.25), leader: selectedOEMs[1] || 'Second OEM' };
 
   // Calculate OEM performance with real data
-  const oemPerformance = selectedOEMs.map((oem, index) => {
+  const oemPerformance = selectedOEMs.map((oem: string, index: number) => {
     const total = oemTotals[oem] || Math.max(1, Math.floor(totalFeatures * (0.4 - index * 0.1)));
-    const strongestBM = businessModelComparison.find(bm => 
-      bm.oemBreakdown?.find(breakdown => breakdown.oem === oem && breakdown.count > 0)
+    const strongestBM = businessModelComparison.find((bm: any) => 
+      bm.oemBreakdown?.find((breakdown: any) => breakdown.oem === oem && breakdown.count > 0)
     )?.businessModel || (index === 0 ? topBusinessModel.businessModel : secondBusinessModel.businessModel);
     return { oem, total, strongestBusinessModel: strongestBM };
-  }).sort((a, b) => b.total - a.total);
+  }).sort((a: any, b: any) => b.total - a.total);
 
   const leadingOEM = oemPerformance[0] || { oem: selectedOEMs[0] || 'Market Leader', total: Math.floor(totalFeatures * 0.4), strongestBusinessModel: topBusinessModel.businessModel };
   const secondOEM = oemPerformance[1] || { oem: selectedOEMs[1] || 'Runner Up', total: Math.floor(totalFeatures * 0.3), strongestBusinessModel: secondBusinessModel.businessModel };

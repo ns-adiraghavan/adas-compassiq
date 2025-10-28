@@ -93,10 +93,11 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in data-insights-ai function:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     
     return new Response(JSON.stringify({
       success: false,
-      error: error.message,
+      error: errorMessage,
       insights: [
         "Strategic market analysis indicates competitive opportunities in automotive technology deployment",
         "Connected vehicle innovation shows significant potential for OEM differentiation and engagement",

@@ -67,7 +67,8 @@ async function getNewsWithFallback(selectedOEMs: string[], selectedCountry: stri
         console.log(`Strategy ${i + 1} returned no articles`);
       }
     } catch (error) {
-      console.error(`Strategy ${i + 1} failed:`, error.message);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`Strategy ${i + 1} failed:`, errorMessage);
       // Continue to next strategy
     }
   }
@@ -136,6 +137,7 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in news-snippets-ai function:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     
     // Return contextual fallback news if there's an error
     const fallbackNews = generateContextualFallback([], '', 'general');
@@ -144,7 +146,7 @@ serve(async (req) => {
       JSON.stringify({ 
         success: false, 
         newsSnippets: fallbackNews,
-        error: error.message,
+        error: errorMessage,
         context: { source: 'fallback_error' }
       }),
       {

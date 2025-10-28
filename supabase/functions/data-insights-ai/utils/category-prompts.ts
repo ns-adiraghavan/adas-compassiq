@@ -37,14 +37,15 @@ export function createCategoryAnalysisPrompt(
   };
 
   // Calculate OEM performance with real data
-  const oemPerformance = selectedOEMs.map((oem, index) => {
+  const oemPerformance = selectedOEMs.map((oem: string, index: number) => {
     const total = oemTotals[oem] || Math.max(1, Math.floor(totalFeatures * (0.4 - index * 0.1)));
-    const strongestCategory = categoryBreakdown.find(cat => 
-      cat.oemDistribution?.[oem] && cat.oemDistribution[oem] === Math.max(...Object.values(cat.oemDistribution || {}))
-    )?.category || [topCategory.category, secondCategory.category, thirdCategory.category][index] || topCategory.category;
+    const strongestCategory = categoryBreakdown.find((cat: any) => {
+      const values = Object.values(cat.oemDistribution || {}) as number[];
+      return cat.oemDistribution?.[oem] && cat.oemDistribution[oem] === Math.max(...values);
+    })?.category || [topCategory.category, secondCategory.category, thirdCategory.category][index] || topCategory.category;
     
     return { oem, total, strongestCategory };
-  }).sort((a, b) => b.total - a.total);
+  }).sort((a: any, b: any) => b.total - a.total);
 
   const leadingOEM = oemPerformance[0] || { 
     oem: selectedOEMs[0] || 'Market Leader', 
