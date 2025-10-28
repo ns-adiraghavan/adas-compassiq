@@ -1,6 +1,5 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
 
 interface AuthContextType {
   user: User | null;
@@ -13,7 +12,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
   user: null,
   session: null,
-  loading: true,
+  loading: false,
   signOut: async () => {},
   userRole: null,
 });
@@ -27,63 +26,34 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  // Mock user - always authenticated
+  const mockUser: User = {
+    id: "mock-user-id",
+    email: "user@compassiq.com",
+    aud: "authenticated",
+    role: "authenticated",
+    created_at: new Date().toISOString(),
+    app_metadata: {},
+    user_metadata: {},
+  } as User;
 
-  useEffect(() => {
-    // Set up auth state listener first
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-      }
-    );
+  const mockSession: Session = {
+    access_token: "mock-token",
+    token_type: "bearer",
+    user: mockUser,
+    expires_in: 3600,
+    expires_at: Date.now() + 3600000,
+    refresh_token: "mock-refresh",
+  } as Session;
 
-    // Then check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  // Separate effect to fetch user role when user changes
-  useEffect(() => {
-    if (user?.id) {
-      const fetchUserRole = async () => {
-        try {
-          const { data, error } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', user.id)
-            .single();
-          
-          if (error) {
-            setUserRole(null);
-            return;
-          }
-          
-          setUserRole(data?.role ?? null);
-        } catch (error) {
-          setUserRole(null);
-        }
-      };
-      
-      fetchUserRole();
-    } else {
-      setUserRole(null);
-    }
-  }, [user]);
+  const [user] = useState<User | null>(mockUser);
+  const [session] = useState<Session | null>(mockSession);
+  const [loading] = useState(false);
+  const [userRole] = useState<string | null>("admin");
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
-    setUserRole(null);
+    // Mock sign out - does nothing
+    console.log("Mock sign out");
   };
 
   return (
