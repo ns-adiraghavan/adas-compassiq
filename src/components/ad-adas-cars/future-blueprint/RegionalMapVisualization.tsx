@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card"
 import { Building2, FlaskConical } from "lucide-react"
-import { FacilityLocation } from "@/hooks/useGlobalFootprintData"
+import { FacilityLocation, normalizeLocation } from "@/hooks/useGlobalFootprintData"
 import { USMapSVG } from "./maps/USMapSVG"
 import { EuropeMapSVG } from "./maps/EuropeMapSVG"
 import { ChinaMapSVG } from "./maps/ChinaMapSVG"
@@ -16,8 +16,8 @@ const RegionalMapVisualization = ({ facilities, region, facilityType }: Regional
   const rdFacilities = facilities.filter(f => f.facilityType === "R&D Center")
   const testingFacilities = facilities.filter(f => f.facilityType === "Testing & Expansion")
   
-  // Get unique locations
-  const uniqueLocations = [...new Set(facilities.map(f => f.location))].length
+  // Get unique locations (normalized to avoid counting duplicates with different formats)
+  const uniqueLocations = [...new Set(facilities.map(f => normalizeLocation(f.location)))].length
 
   // Select appropriate map component
   const MapComponent = () => {

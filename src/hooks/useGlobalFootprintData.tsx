@@ -10,6 +10,23 @@ export interface FacilityLocation {
   lng?: number
 }
 
+// Location normalization function
+const normalizeLocation = (location: string): string => {
+  return location
+    .toLowerCase()
+    .replace(/,\s*/g, ', ') // Normalize comma spacing
+    .replace('detroit,michigan, us', 'detroit, mi')
+    .replace('palo alto, california', 'palo alto, ca')
+    .replace('georgia, atlanta,us', 'atlanta, ga')
+    .replace('normal, illinois,us', 'normal, il')
+    .replace('california', 'ca')
+    .replace('michigan', 'mi')
+    .replace('illinois', 'il')
+    .replace('south carolina', 'sc')
+    .replace(/, us$/, '') // Remove trailing ", US"
+    .trim()
+}
+
 // OEM to Category mapping
 const oemCategoryMap: Record<string, string> = {
   'Tesla': 'oem',
@@ -28,6 +45,9 @@ const oemCategoryMap: Record<string, string> = {
   'Li Auto': 'oem',
   'Geely': 'oem',
 }
+
+// Export for use in components
+export { normalizeLocation }
 
 export const useGlobalFootprintData = (region: string, selectedCategory?: string, selectedOEM?: string, facilityType?: string) => {
   return useQuery({
@@ -74,11 +94,18 @@ export const useGlobalFootprintData = (region: string, selectedCategory?: string
         regionFilteredFacilities = facilities.filter(f => {
           const loc = f.location.toLowerCase()
           if (region === "US") {
-            return ["california", "texas", "michigan", "arizona", "nevada", "ohio", "tennessee", "florida"].some(state => loc.includes(state))
+            return loc.includes("us") || 
+              ["california", "ca", "texas", "tx", "michigan", "mi", "arizona", "az", 
+               "nevada", "nv", "ohio", "oh", "tennessee", "tn", "florida", "fl", 
+               "georgia", "ga", "illinois", "il", "new york", "ny", 
+               "south carolina", "sc", "pennsylvania", "pa"].some(state => loc.includes(state))
           } else if (region === "China") {
-            return loc.includes("china") || loc.includes("beijing") || loc.includes("shanghai") || loc.includes("shenzhen") || loc.includes("guangzhou")
+            return loc.includes("china") || loc.includes("beijing") || loc.includes("shanghai") || 
+                   loc.includes("shenzhen") || loc.includes("guangzhou")
           } else if (region === "Europe") {
-            return loc.includes("germany") || loc.includes("france") || loc.includes("uk") || loc.includes("italy") || loc.includes("czech")
+            return loc.includes("europe") || 
+              ["germany", "france", "uk", "italy", "czech", "sweden", 
+               "serbia", "spain", "netherlands"].some(country => loc.includes(country))
           }
           return true
         })
