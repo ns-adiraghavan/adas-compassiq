@@ -18,8 +18,27 @@ export function useStoredDocuments() {
         throw error
       }
 
-      console.log('Stored documents:', data)
-      return data || []
+      // Generate signed URLs for each document
+      const documentsWithUrls = await Promise.all(
+        (data || []).map(async (doc) => {
+          try {
+            const { data: signedUrlData } = await supabase.storage
+              .from('documents')
+              .createSignedUrl(doc.storage_path, 3600); // 1 hour expiry
+            
+            return {
+              ...doc,
+              signedUrl: signedUrlData?.signedUrl || null
+            };
+          } catch (error) {
+            console.error(`Error creating signed URL for ${doc.file_name}:`, error);
+            return { ...doc, signedUrl: null };
+          }
+        })
+      );
+
+      console.log('Stored documents with signed URLs:', documentsWithUrls)
+      return documentsWithUrls
     },
   })
 }

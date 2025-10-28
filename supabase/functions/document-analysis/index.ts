@@ -7,6 +7,20 @@ const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
+// Allowed file types for analysis
+const ALLOWED_FILE_TYPES = [
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-excel',
+  'text/csv',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/msword',
+  'text/plain'
+];
+
+// Maximum file size: 50MB
+const MAX_FILE_SIZE = 50 * 1024 * 1024;
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -19,6 +33,26 @@ serve(async (req) => {
 
   try {
     const { fileName, fileType, fileContent } = await req.json();
+    
+    // Validate required fields
+    if (!fileName || !fileType || !fileContent) {
+      throw new Error('Missing required fields: fileName, fileType, or fileContent');
+    }
+
+    // Validate file type
+    if (!ALLOWED_FILE_TYPES.includes(fileType)) {
+      throw new Error(`Invalid file type: ${fileType}. Allowed types: ${ALLOWED_FILE_TYPES.join(', ')}`);
+    }
+
+    // Sanitize file name
+    const sanitizedFileName = fileName
+      .replace(/[^a-zA-Z0-9._-]/g, '_')
+      .replace(/^\.+/, '')
+      .substring(0, 255);
+    
+    if (!sanitizedFileName) {
+      throw new Error('Invalid file name after sanitization');
+    }
     
     // Create Supabase client
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -55,12 +89,12 @@ serve(async (req) => {
     }
 
     // Create AI prompt for document analysis
-    const prompt = `You are an expert automotive industry analyst. Analyze the uploaded document (${fileName}) and create intelligent dashboard insights that correlate with the existing passenger car CSV data.
+    const prompt = `You are an expert automotive industry analyst. Analyze the uploaded document (${sanitizedFileName}) and create intelligent dashboard insights that correlate with the existing passenger car CSV data.
 
 Current CSV Data Context: ${csvSummary}
 
 Document Type: ${fileType}
-File Name: ${fileName}
+File Name: ${sanitizedFileName}
 
 Please analyze the document content and provide:
 1. Key insights from the document that relate to automotive/passenger car industry
@@ -119,11 +153,11 @@ Focus on actionable business intelligence that can enhance the passenger car ana
     } catch {
       // Create a structured response from text analysis
       structuredAnalysis = {
-        summary: `AI analysis of ${fileName}`,
+        summary: `AI analysis of ${sanitizedFileName}`,
         insights: [analysis.substring(0, 500) + "..."],
         recommended_metrics: ["Document-based KPIs", "Industry Metrics", "Performance Indicators"],
         dashboard_sections: ["Document Insights", "Correlation Analysis", "Business Intelligence"],
-        correlation_analysis: `Analysis of ${fileName} in context of passenger car data`,
+        correlation_analysis: `Analysis of ${sanitizedFileName} in context of passenger car data`,
         visualization_suggestions: ["Charts based on document content", "Correlation graphs", "Trend analysis"]
       };
     }
@@ -133,7 +167,8 @@ Focus on actionable business intelligence that can enhance the passenger car ana
       .from('waypoint_data_context')
       .insert({
         data_summary: {
-          document_name: fileName,
+          document_name: sanitizedFileName,
+          original_name: fileName,
           document_type: fileType,
           analysis: structuredAnalysis,
           upload_timestamp: new Date().toISOString()
@@ -152,7 +187,8 @@ Focus on actionable business intelligence that can enhance the passenger car ana
       JSON.stringify({
         success: true,
         analysis: structuredAnalysis,
-        fileName,
+        fileName: sanitizedFileName,
+        originalFileName: fileName,
         fileType,
         message: 'Document analyzed successfully'
       }),

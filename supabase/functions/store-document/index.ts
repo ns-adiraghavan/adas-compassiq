@@ -5,6 +5,20 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0'
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
+// Allowed file types for upload
+const ALLOWED_FILE_TYPES = [
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-excel',
+  'text/csv',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/msword',
+  'text/plain'
+];
+
+// Maximum file size: 50MB
+const MAX_FILE_SIZE = 50 * 1024 * 1024;
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -18,8 +32,29 @@ serve(async (req) => {
   try {
     const { fileName, fileType, fileContent, fileSize } = await req.json();
     
+    // Validate required fields
     if (!fileName || !fileType || !fileContent) {
       throw new Error('Missing required fields: fileName, fileType, or fileContent');
+    }
+
+    // Validate file type
+    if (!ALLOWED_FILE_TYPES.includes(fileType)) {
+      throw new Error(`Invalid file type: ${fileType}. Allowed types: ${ALLOWED_FILE_TYPES.join(', ')}`);
+    }
+
+    // Validate file size
+    if (fileSize && fileSize > MAX_FILE_SIZE) {
+      throw new Error(`File size exceeds maximum limit of ${MAX_FILE_SIZE / (1024 * 1024)}MB`);
+    }
+
+    // Sanitize file name - remove path traversal characters and dangerous chars
+    const sanitizedFileName = fileName
+      .replace(/[^a-zA-Z0-9._-]/g, '_')
+      .replace(/^\.+/, '') // Remove leading dots
+      .substring(0, 255); // Limit length
+    
+    if (!sanitizedFileName) {
+      throw new Error('Invalid file name after sanitization');
     }
 
     // Create Supabase client
@@ -28,8 +63,8 @@ serve(async (req) => {
     // Convert base64 to binary data
     const binaryData = Uint8Array.from(atob(fileContent), c => c.charCodeAt(0));
     
-    // Use original filename with uploads/ prefix
-    const filePath = `uploads/${fileName}`;
+    // Use sanitized filename with uploads/ prefix
+    const filePath = `uploads/${sanitizedFileName}`;
 
     // Upload file to Supabase Storage with original name
     const { data: uploadData, error: uploadError } = await supabase.storage
@@ -44,11 +79,11 @@ serve(async (req) => {
       throw uploadError;
     }
 
-    // Store file metadata in database with original filename
+    // Store file metadata in database with sanitized filename
     const { data, error } = await supabase
       .from('documents')
       .insert({
-        file_name: fileName, // Keep original filename
+        file_name: sanitizedFileName,
         file_type: fileType,
         file_size: fileSize || 0,
         file_path: uploadData.path,
@@ -56,6 +91,7 @@ serve(async (req) => {
         metadata: {
           upload_timestamp: new Date().toISOString(),
           original_name: fileName,
+          sanitized_name: sanitizedFileName,
           storage_bucket: 'documents',
           uploaded_via: 'edge_function'
         }
@@ -69,17 +105,18 @@ serve(async (req) => {
       throw error;
     }
 
-    console.log('Document stored successfully with original name:', fileName);
+    console.log('Document stored successfully:', sanitizedFileName);
 
     return new Response(
       JSON.stringify({
         success: true,
         id: data.id,
-        fileName,
+        fileName: sanitizedFileName,
+        originalFileName: fileName,
         fileType,
         fileSize,
         storagePath: uploadData.path,
-        message: 'Document stored successfully with original filename'
+        message: 'Document stored successfully'
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
