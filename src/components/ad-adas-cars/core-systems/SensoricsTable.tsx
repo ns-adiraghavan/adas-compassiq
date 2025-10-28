@@ -103,7 +103,7 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
 
   const filteredData = data?.filter(item => {
     const matchesSensorType = item.parameterCategory.includes(selectedSensorType)
-    const matchesPosition = !selectedPosition || item.zone === selectedPosition
+    const matchesPosition = !selectedPosition || item.zone === selectedPosition || !item.zone
     const matchesOEM = !selectedOEM || item.oem === selectedOEM
     return matchesSensorType && matchesPosition && matchesOEM
   }) || []
