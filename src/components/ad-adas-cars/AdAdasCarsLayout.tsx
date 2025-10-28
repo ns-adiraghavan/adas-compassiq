@@ -6,6 +6,7 @@ import ThemeSelector from "@/components/ThemeSelector"
 import WaypointLogo from "@/components/WaypointLogo"
 import AskWayPointChatButton from "@/components/AskWayPointChatButton"
 import { Button } from "@/components/ui/button"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import RegionButtons from "./RegionButtons"
 import PlayerCategoryButtons from "./PlayerCategoryButtons"
 import ADASTaxonomyButton from "./ADASTaxonomyButton"
@@ -25,6 +26,7 @@ interface ContentSectionProps {
   selectedCategory: string
   onCategoryChange: (category: string) => void
   children?: React.ReactNode
+  defaultExpanded?: boolean
 }
 
 const ContentSection = ({ 
@@ -32,25 +34,42 @@ const ContentSection = ({
   onRegionChange, 
   selectedCategory, 
   onCategoryChange,
-  children
+  children,
+  defaultExpanded = true
 }: ContentSectionProps) => {
   const { theme } = useTheme()
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded)
   
   return (
     <div className="container mx-auto px-8 py-6 space-y-6">
-      {/* Combined Filters Row - Region and Player Category on same line */}
-      <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
-        <div className="grid grid-cols-2 gap-8">
-          <RegionButtons
-            selectedRegion={selectedRegion}
-            onRegionChange={onRegionChange}
-          />
-          <PlayerCategoryButtons
-            selectedCategory={selectedCategory}
-            onCategoryChange={onCategoryChange}
-          />
+      {/* Combined Filters Row - Region and Player Category - Collapsible */}
+      <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+        <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl overflow-hidden ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
+          <CollapsibleTrigger className="w-full p-4 flex items-center justify-between hover:bg-muted/5 transition-colors">
+            <h3 className="text-sm font-semibold text-foreground">
+              Filters: Region & Player Category
+            </h3>
+            <ChevronDown 
+              className={`h-5 w-5 ${theme.textMuted} transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+            />
+          </CollapsibleTrigger>
+          
+          <CollapsibleContent>
+            <div className="p-6 pt-2 border-t border-border">
+              <div className="grid grid-cols-2 gap-8">
+                <RegionButtons
+                  selectedRegion={selectedRegion}
+                  onRegionChange={onRegionChange}
+                />
+                <PlayerCategoryButtons
+                  selectedCategory={selectedCategory}
+                  onCategoryChange={onCategoryChange}
+                />
+              </div>
+            </div>
+          </CollapsibleContent>
         </div>
-      </div>
+      </Collapsible>
 
       {/* Custom Content or Placeholder */}
       {children || (

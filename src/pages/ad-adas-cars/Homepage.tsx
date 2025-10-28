@@ -16,6 +16,7 @@ const AdAdasHomepage = () => {
         onRegionChange={setSelectedRegion}
         selectedCategory={selectedCategory}
         onCategoryChange={setSelectedCategory}
+        defaultExpanded={false}
       >
         {/* Gantt Chart - Full Width */}
         <ADASGanttChart />
