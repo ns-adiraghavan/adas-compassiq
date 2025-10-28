@@ -11,12 +11,12 @@ interface GlobalFootprintProps {
   selectedCategory: string
 }
 
-const GlobalFootprint = ({ selectedRegion }: GlobalFootprintProps) => {
+const GlobalFootprint = ({ selectedRegion, selectedCategory }: GlobalFootprintProps) => {
   const { theme } = useTheme()
   const [selectedOEM, setSelectedOEM] = useState<string>("All")
   const [facilityType, setFacilityType] = useState<string>("All")
   
-  const { data, isLoading } = useGlobalFootprintData(selectedRegion, selectedOEM, facilityType)
+  const { data, isLoading } = useGlobalFootprintData(selectedRegion, selectedCategory, selectedOEM, facilityType)
 
   if (isLoading) {
     return (

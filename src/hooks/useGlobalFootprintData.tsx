@@ -10,9 +10,28 @@ export interface FacilityLocation {
   lng?: number
 }
 
-export const useGlobalFootprintData = (region: string, selectedOEM?: string, facilityType?: string) => {
+// OEM to Category mapping
+const oemCategoryMap: Record<string, string> = {
+  'Tesla': 'oem',
+  'Rivian': 'oem',
+  'Ford': 'oem',
+  'GM': 'oem',
+  'BMW': 'oem',
+  'Mercedes-Benz': 'oem',
+  'Volkswagen': 'oem',
+  'Audi': 'oem',
+  'Porsche': 'oem',
+  'Volvo': 'oem',
+  'BYD': 'oem',
+  'NIO': 'oem',
+  'XPeng': 'oem',
+  'Li Auto': 'oem',
+  'Geely': 'oem',
+}
+
+export const useGlobalFootprintData = (region: string, selectedCategory?: string, selectedOEM?: string, facilityType?: string) => {
   return useQuery({
-    queryKey: ['global-footprint', region, selectedOEM, facilityType],
+    queryKey: ['global-footprint', region, selectedCategory, selectedOEM, facilityType],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('adas_future_blueprint')
@@ -65,20 +84,31 @@ export const useGlobalFootprintData = (region: string, selectedOEM?: string, fac
         })
       }
 
+      // Filter by category
+      let categoryFilteredFacilities = regionFilteredFacilities
+      if (selectedCategory && selectedCategory !== 'all') {
+        categoryFilteredFacilities = regionFilteredFacilities.filter(f => 
+          oemCategoryMap[f.oem] === selectedCategory
+        )
+      }
+
       // Filter by selected OEM if provided
       let filteredFacilities = selectedOEM && selectedOEM !== "All"
-        ? regionFilteredFacilities.filter(f => f.oem.toLowerCase().includes(selectedOEM.toLowerCase()))
-        : regionFilteredFacilities
+        ? categoryFilteredFacilities.filter(f => f.oem.toLowerCase().includes(selectedOEM.toLowerCase()))
+        : categoryFilteredFacilities
 
       // Filter by facility type if provided
       if (facilityType && facilityType !== "All") {
         filteredFacilities = filteredFacilities.filter(f => f.facilityType === facilityType)
       }
 
+      // Get available OEMs after category filtering
+      const availableOEMs = [...new Set(categoryFilteredFacilities.map(f => f.oem))].filter(Boolean)
+
       return {
         facilities: filteredFacilities,
-        oems: [...new Set(regionFilteredFacilities.map(f => f.oem))].filter(Boolean),
-        facilityTypes: [...new Set(regionFilteredFacilities.map(f => f.facilityType))].filter(Boolean)
+        oems: availableOEMs,
+        facilityTypes: [...new Set(categoryFilteredFacilities.map(f => f.facilityType))].filter(Boolean)
       }
     },
   })
