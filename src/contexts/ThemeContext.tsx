@@ -22,33 +22,33 @@ interface Theme {
 const themes: Record<ThemeType, Theme> = {
   dark: {
     name: 'Dark',
-    primary: 'bg-green-600',
-    secondary: 'bg-emerald-500',
-    accent: 'bg-green-400',
-    background: 'bg-slate-900',
-    backgroundGradient: 'bg-gradient-to-br from-black via-slate-900 to-emerald-950/30',
-    cardBackground: 'bg-slate-800/60 backdrop-blur-sm',
-    cardBorder: 'border-slate-700/50',
-    textPrimary: 'text-white',
-    textSecondary: 'text-slate-200',
-    textMuted: 'text-slate-400',
-    hoverEffect: 'hover:bg-slate-700/50',
-    shadowColor: 'shadow-green-500/20'
+    primary: 'bg-primary',
+    secondary: 'bg-secondary',
+    accent: 'bg-accent',
+    background: 'bg-background',
+    backgroundGradient: 'bg-gradient-to-br from-background via-background to-primary/10',
+    cardBackground: 'bg-card/60 backdrop-blur-sm',
+    cardBorder: 'border-border',
+    textPrimary: 'text-foreground',
+    textSecondary: 'text-foreground/90',
+    textMuted: 'text-muted-foreground',
+    hoverEffect: 'hover:bg-accent/10',
+    shadowColor: 'shadow-primary/20'
   },
   light: {
     name: 'Light',
-    primary: 'bg-green-700',
-    secondary: 'bg-emerald-600',
-    accent: 'bg-green-500',
-    background: 'bg-slate-50',
-    backgroundGradient: 'bg-gradient-to-br from-slate-50 via-emerald-50/30 to-slate-100/50',
-    cardBackground: 'bg-white/80 backdrop-blur-sm',
-    cardBorder: 'border-slate-200/60',
-    textPrimary: 'text-slate-900',
-    textSecondary: 'text-slate-700',
-    textMuted: 'text-slate-500',
-    hoverEffect: 'hover:bg-slate-100/50',
-    shadowColor: 'shadow-green-500/20'
+    primary: 'bg-primary',
+    secondary: 'bg-secondary',
+    accent: 'bg-accent',
+    background: 'bg-background',
+    backgroundGradient: 'bg-gradient-to-br from-background via-primary/5 to-background',
+    cardBackground: 'bg-card/80 backdrop-blur-sm',
+    cardBorder: 'border-border',
+    textPrimary: 'text-foreground',
+    textSecondary: 'text-foreground/80',
+    textMuted: 'text-muted-foreground',
+    hoverEffect: 'hover:bg-accent/10',
+    shadowColor: 'shadow-primary/20'
   }
 }
 
@@ -70,6 +70,15 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setCurrentTheme(savedTheme)
     }
   }, [])
+
+  useEffect(() => {
+    // Apply or remove dark class on document root
+    if (currentTheme === 'dark') {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  }, [currentTheme])
 
   const setTheme = (theme: ThemeType) => {
     setCurrentTheme(theme)
