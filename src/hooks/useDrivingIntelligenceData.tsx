@@ -6,9 +6,47 @@ interface DrivingIntelligenceData {
   oemValues: Record<string, string>
 }
 
+// OEM to Region mapping
+const oemRegionMap: Record<string, string> = {
+  'Tesla': 'US',
+  'Rivian': 'US',
+  'Ford': 'US',
+  'GM': 'US',
+  'BMW': 'Europe',
+  'Mercedes-Benz': 'Europe',
+  'Volkswagen': 'Europe',
+  'Audi': 'Europe',
+  'Porsche': 'Europe',
+  'Volvo': 'Europe',
+  'BYD': 'China',
+  'NIO': 'China',
+  'XPeng': 'China',
+  'Li Auto': 'China',
+  'Geely': 'China',
+}
+
+// OEM to Category mapping
+const oemCategoryMap: Record<string, string> = {
+  'Tesla': 'oem',
+  'Rivian': 'oem',
+  'Ford': 'oem',
+  'GM': 'oem',
+  'BMW': 'oem',
+  'Mercedes-Benz': 'oem',
+  'Volkswagen': 'oem',
+  'Audi': 'oem',
+  'Porsche': 'oem',
+  'Volvo': 'oem',
+  'BYD': 'oem',
+  'NIO': 'oem',
+  'XPeng': 'oem',
+  'Li Auto': 'oem',
+  'Geely': 'oem',
+}
+
 export function useDrivingIntelligenceData(selectedRegion: string, selectedCategory: string) {
   return useQuery({
-    queryKey: ['driving-intelligence-data', 'v1'],
+    queryKey: ['driving-intelligence-data', selectedRegion, selectedCategory],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('adas_software')
@@ -65,9 +103,30 @@ export function useDrivingIntelligenceData(selectedRegion: string, selectedCateg
         .filter(param => processedData[param])
         .map(param => processedData[param])
 
-      const oems = Array.from(oemsSet).sort()
+      let oems = Array.from(oemsSet).sort()
 
-      return { data: sortedData, oems }
+      // Filter OEMs by region
+      if (selectedRegion && selectedRegion !== 'All') {
+        oems = oems.filter(oem => oemRegionMap[oem] === selectedRegion)
+      }
+
+      // Filter OEMs by category
+      if (selectedCategory && selectedCategory !== 'all') {
+        oems = oems.filter(oem => oemCategoryMap[oem] === selectedCategory)
+      }
+
+      // Filter the data to only include filtered OEMs
+      const filteredData = sortedData.map(row => ({
+        parameter: row.parameter,
+        oemValues: Object.keys(row.oemValues)
+          .filter(oem => oems.includes(oem))
+          .reduce((acc, oem) => {
+            acc[oem] = row.oemValues[oem]
+            return acc
+          }, {} as Record<string, string>)
+      }))
+
+      return { data: filteredData, oems }
     },
     refetchOnMount: 'always',
     refetchOnWindowFocus: false,

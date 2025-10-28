@@ -38,10 +38,10 @@ const DrivingIntelligenceTable = ({ selectedRegion, selectedCategory }: DrivingI
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow className="border-b border-white/10">
-              <TableHead className="font-bold text-white min-w-[200px]">Parameter</TableHead>
+            <TableRow>
+              <TableHead className="font-bold min-w-[200px]">Parameter</TableHead>
               {oems.map((oem) => (
-                <TableHead key={oem} className="font-bold text-white text-center min-w-[150px]">
+                <TableHead key={oem} className="font-bold text-center min-w-[150px]">
                   {oem}
                 </TableHead>
               ))}
@@ -49,17 +49,14 @@ const DrivingIntelligenceTable = ({ selectedRegion, selectedCategory }: DrivingI
           </TableHeader>
           <TableBody>
             {tableData.map((row, index) => (
-              <TableRow 
-                key={index} 
-                className="border-b border-white/10 hover:bg-white/5 transition-colors"
-              >
-                <TableCell className="font-medium text-white/90">
+              <TableRow key={index}>
+                <TableCell className="font-medium">
                   {row.parameter}
                 </TableCell>
                 {oems.map((oem) => (
                   <TableCell 
                     key={oem} 
-                    className="text-center text-white/70 text-sm"
+                    className="text-center text-muted-foreground text-sm"
                   >
                     {row.oemValues[oem] || '-'}
                   </TableCell>
