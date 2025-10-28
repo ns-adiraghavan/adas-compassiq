@@ -65,6 +65,15 @@ serve(async (req) => {
   }
 
   try {
+    // Verify authentication
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Missing authorization header' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     const requestBody = await req.text();
     console.log('Raw request body:', requestBody);
     
@@ -78,8 +87,21 @@ serve(async (req) => {
 
     const { message, conversationHistory, contextData } = parsedData;
 
+    // Input validation
     if (!message || typeof message !== 'string') {
       throw new Error('Message is required and must be a string');
+    }
+    
+    if (message.length > 5000) {
+      throw new Error('Message too long: max 5000 characters');
+    }
+    
+    if (conversationHistory && !Array.isArray(conversationHistory)) {
+      throw new Error('conversationHistory must be an array');
+    }
+    
+    if (conversationHistory && conversationHistory.length > 20) {
+      throw new Error('Too many conversation history items: max 20');
     }
 
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
