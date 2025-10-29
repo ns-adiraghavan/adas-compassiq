@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import WaypointLogo from "@/components/WaypointLogo";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -13,8 +12,8 @@ const Auth = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock login - just navigate to dashboard
-    navigate("/");
+    // Mock login - navigate to AD/ADAS homepage
+    navigate("/ad-adas-cars/homepage");
   };
 
   return (
@@ -28,11 +27,8 @@ const Auth = () => {
 
       <Card className="w-full max-w-md mx-4 bg-black/40 backdrop-blur-lg border-primary/20 shadow-2xl animate-fade-in">
         <CardHeader className="space-y-4">
-          <div className="flex justify-center">
-            <WaypointLogo />
-          </div>
-          <CardTitle className="text-2xl text-center bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent">
-            Autonomous Driving Intelligence Platform
+          <CardTitle className="text-3xl text-center bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent font-bold">
+            Welcome to CompassIQ
           </CardTitle>
         </CardHeader>
         <CardContent>
