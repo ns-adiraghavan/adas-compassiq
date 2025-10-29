@@ -2,6 +2,7 @@ import { useTheme } from "@/contexts/ThemeContext"
 import { useAdvancedTechnologiesData } from "@/hooks/useAdvancedTechnologiesData"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
+import OEMLogoCell from "../shared/OEMLogoCell"
 
 interface AdvancedTechnologiesTableProps {
   selectedRegion: string
@@ -54,7 +55,10 @@ const AdvancedTechnologiesTable = ({ selectedRegion, selectedCategory }: Advance
               </TableHead>
               {data.oems.map((oem) => (
                 <TableHead key={oem} className={`${theme.textPrimary} font-bold text-center min-w-[200px]`}>
-                  {oem}
+                  <div className="flex justify-center">
+                    <OEMLogoCell oemName={oem} showName={false} />
+                  </div>
+                  <div className="mt-1">{oem}</div>
                 </TableHead>
               ))}
             </TableRow>

@@ -2,6 +2,7 @@ import { useTheme } from "@/contexts/ThemeContext"
 import { usePortfolioDynamicsData } from "@/hooks/usePortfolioDynamicsData"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
+import OEMLogoCell from "../shared/OEMLogoCell"
 
 interface PortfolioDynamicsTableProps {
   selectedRegion: string
@@ -38,7 +39,9 @@ const PortfolioDynamicsTable = ({ selectedRegion, selectedCategory }: PortfolioD
             {portfolioData && portfolioData.length > 0 ? (
               portfolioData.map((row, index) => (
                 <TableRow key={index}>
-                  <TableCell className="font-medium">{row.oem}</TableCell>
+                  <TableCell className="font-medium">
+                    <OEMLogoCell oemName={row.oem} />
+                  </TableCell>
                   <TableCell>{row.modelsEquipped}</TableCell>
                   <TableCell>{row.mostAdvancedModel}</TableCell>
                   <TableCell>{row.salesOfAdvancedModel}</TableCell>

@@ -2,6 +2,7 @@ import { useTheme } from "@/contexts/ThemeContext"
 import { useAVLandscapeData } from "@/hooks/useAVLandscapeData"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
+import OEMLogoCell from "../shared/OEMLogoCell"
 
 interface AVLandscapeTableProps {
   selectedRegion: string
@@ -52,7 +53,9 @@ const AVLandscapeTable = ({ selectedRegion, selectedCategory }: AVLandscapeTable
             {platformData && platformData.length > 0 ? (
               platformData.map((row, index) => (
                 <TableRow key={index} className={theme.cardBorder}>
-                  <TableCell className={`font-medium ${theme.textPrimary}`}>{row.oem}</TableCell>
+                  <TableCell className={`font-medium ${theme.textPrimary}`}>
+                    <OEMLogoCell oemName={row.oem} />
+                  </TableCell>
                   <TableCell className={theme.textSecondary}>{row.platformName}</TableCell>
                   <TableCell className={theme.textSecondary}>{row.maxAutonomyLevel}</TableCell>
                   <TableCell className={theme.textSecondary}>{row.platformVariants}</TableCell>

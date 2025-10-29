@@ -2,6 +2,7 @@ import { useTheme } from "@/contexts/ThemeContext"
 import { useDrivingIntelligenceData } from "@/hooks/useDrivingIntelligenceData"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
+import OEMLogoCell from "../shared/OEMLogoCell"
 
 interface DrivingIntelligenceTableProps {
   selectedRegion: string
@@ -42,7 +43,10 @@ const DrivingIntelligenceTable = ({ selectedRegion, selectedCategory }: DrivingI
               <TableHead className="font-bold min-w-[200px]">Parameter</TableHead>
               {oems.map((oem) => (
                 <TableHead key={oem} className="font-bold text-center min-w-[150px]">
-                  {oem}
+                  <div className="flex justify-center">
+                    <OEMLogoCell oemName={oem} showName={false} />
+                  </div>
+                  <div className="mt-1">{oem}</div>
                 </TableHead>
               ))}
             </TableRow>

@@ -2,6 +2,7 @@ import { useTheme } from "@/contexts/ThemeContext"
 import { useComputationalCoreData } from "@/hooks/useComputationalCoreData"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
+import OEMLogoCell from "../shared/OEMLogoCell"
 
 interface ComputationalCoreTableProps {
   selectedRegion: string
@@ -43,7 +44,10 @@ const ComputationalCoreTable = ({ selectedRegion, selectedCategory }: Computatio
               <TableHead className="font-bold min-w-[200px]">Parameter</TableHead>
               {oems.map((oem) => (
                 <TableHead key={oem} className="font-bold min-w-[200px]">
-                  {oem}
+                  <div className="flex justify-center">
+                    <OEMLogoCell oemName={oem} showName={false} />
+                  </div>
+                  <div className="mt-1">{oem}</div>
                 </TableHead>
               ))}
             </TableRow>

@@ -2,6 +2,7 @@ import { useTheme } from "@/contexts/ThemeContext"
 import { useODDData } from "@/hooks/useODDData"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
+import OEMLogoCell from "../shared/OEMLogoCell"
 
 interface ODDTableProps {
   selectedRegion: string
@@ -39,7 +40,9 @@ const ODDTable = ({ selectedRegion, selectedCategory }: ODDTableProps) => {
             {oddData && oddData.length > 0 ? (
               oddData.map((row, index) => (
                 <TableRow key={index}>
-                  <TableCell className="font-medium">{row.oem}</TableCell>
+                  <TableCell className="font-medium">
+                    <OEMLogoCell oemName={row.oem} />
+                  </TableCell>
                   <TableCell>{row.geographicArea}</TableCell>
                   <TableCell>{row.maxOperatingSpeed}</TableCell>
                   <TableCell>{row.roadNetwork}</TableCell>
