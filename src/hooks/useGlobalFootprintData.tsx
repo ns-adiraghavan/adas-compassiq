@@ -11,12 +11,12 @@ export interface FacilityLocation {
 }
 
 // OEM normalization function to handle naming variations
-const normalizeOEM = (oem: string): string => {
+export const normalizeOEM = (oem: string): string => {
   const normalized = oem.trim()
   const lowerOEM = normalized.toLowerCase()
   
-  // Handle common variations
-  if (lowerOEM === 'general motors' || lowerOEM === 'gm') return 'GM'
+  // Handle common variations - always use consistent display names
+  if (lowerOEM === 'general motors' || lowerOEM === 'gm') return 'General Motors'
   if (lowerOEM === 'rivian') return 'Rivian'
   if (lowerOEM === 'tesla') return 'Tesla'
   if (lowerOEM === 'ford') return 'Ford'
@@ -36,7 +36,7 @@ const normalizeOEM = (oem: string): string => {
 }
 
 // Location normalization function
-const normalizeLocation = (location: string): string => {
+export const normalizeLocation = (location: string): string => {
   return location
     .toLowerCase()
     .replace(/,\s*/g, ', ') // Normalize comma spacing
@@ -57,7 +57,7 @@ const oemCategoryMap: Record<string, string> = {
   'Tesla': 'oem',
   'Rivian': 'oem',
   'Ford': 'oem',
-  'GM': 'oem',
+  'General Motors': 'oem',
   'BMW': 'oem',
   'Mercedes-Benz': 'oem',
   'Volkswagen': 'oem',
@@ -70,9 +70,6 @@ const oemCategoryMap: Record<string, string> = {
   'Li Auto': 'oem',
   'Geely': 'oem',
 }
-
-// Export for use in components
-export { normalizeLocation, normalizeOEM }
 
 export const useGlobalFootprintData = (region: string, selectedCategory?: string, selectedOEM?: string, facilityType?: string) => {
   return useQuery({
