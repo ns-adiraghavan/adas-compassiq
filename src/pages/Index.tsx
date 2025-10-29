@@ -1,73 +1,59 @@
 
-import { useState, useEffect } from "react"
-import { Car } from "lucide-react"
-import HeroSection from "@/components/HeroSection"
-import VehicleSection from "@/components/VehicleSection"
-import FooterSection from "@/components/FooterSection"
-import NavigationDots from "@/components/NavigationDots"
-import FloatingParticles from "@/components/FloatingParticles"
+import { useNavigate } from "react-router-dom"
+import { Button } from "@/components/ui/button"
+import { Car, ArrowRight } from "lucide-react"
 
 const Index = () => {
-  const [scrollY, setScrollY] = useState(0)
-  const [currentSection, setCurrentSection] = useState(0)
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrollY(window.scrollY)
-      
-      // Determine current section based on scroll position
-      const sections = document.querySelectorAll('.section')
-      sections.forEach((section, index) => {
-        const rect = section.getBoundingClientRect()
-        if (rect.top <= window.innerHeight / 2 && rect.bottom >= window.innerHeight / 2) {
-          setCurrentSection(index)
-        }
-      })
-    }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  const vehicleCategories = [
-    {
-      title: "Autonomous Driving & Advanced Safety",
-      subtitle: "AD/ADAS Intelligence Hub",
-      description: "Comprehensive insights into autonomous driving systems, ADAS technologies, and the competitive landscape of self-driving innovation",
-      image: "/lovable-uploads/c13e6208-3f44-451f-9b43-5f2707ee413c.png",
-      icon: Car,
-      href: "/ad-adas-cars",
-      color: "from-green-600 to-emerald-400"
-    }
-  ]
+  const navigate = useNavigate()
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-x-hidden">
-      {/* Hero Section */}
-      <div className="section">
-        <HeroSection scrollY={scrollY} />
-      </div>
-      <FloatingParticles scrollY={scrollY} />
-
-      {/* Vehicle Categories */}
-      {vehicleCategories.map((category, index) => (
-        <div key={category.title} className="section">
-          <VehicleSection
-            category={category}
-            index={index}
-            currentSection={currentSection}
-            sectionIndex={index + 1}
-          />
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted flex items-center justify-center p-4">
+      <div className="max-w-4xl mx-auto text-center space-y-8">
+        {/* Logo/Icon */}
+        <div className="flex justify-center">
+          <div className="p-6 bg-primary/10 rounded-full">
+            <Car className="w-20 h-20 text-primary" />
+          </div>
         </div>
-      ))}
 
-      {/* Footer */}
-      <div className="section">
-        <FooterSection />
+        {/* Main Content */}
+        <div className="space-y-4">
+          <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
+            Automotive Intelligence Platform
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Comprehensive insights into autonomous driving systems, ADAS technologies, and the competitive landscape of self-driving innovation
+          </p>
+        </div>
+
+        {/* CTA Button */}
+        <div className="pt-8">
+          <Button
+            size="lg"
+            onClick={() => navigate("/ad-adas-cars")}
+            className="text-lg px-8 py-6 group"
+          >
+            Explore AD/ADAS Intelligence
+            <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </Button>
+        </div>
+
+        {/* Additional Info */}
+        <div className="pt-12 grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+          <div className="p-4 rounded-lg bg-card border">
+            <h3 className="font-semibold mb-2">Current Snapshot</h3>
+            <p className="text-muted-foreground">Real-time AV landscape analysis</p>
+          </div>
+          <div className="p-4 rounded-lg bg-card border">
+            <h3 className="font-semibold mb-2">Core Systems</h3>
+            <p className="text-muted-foreground">Technology stack insights</p>
+          </div>
+          <div className="p-4 rounded-lg bg-card border">
+            <h3 className="font-semibold mb-2">Future Blueprint</h3>
+            <p className="text-muted-foreground">Roadmap & investments</p>
+          </div>
+        </div>
       </div>
-
-      {/* Navigation dots */}
-      <NavigationDots currentSection={currentSection} totalSections={3} />
     </div>
   )
 }
