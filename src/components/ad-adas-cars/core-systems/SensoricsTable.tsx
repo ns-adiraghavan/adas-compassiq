@@ -363,6 +363,9 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
                   {Object.entries(sensorsByZone).map(([zone, count]) => {
                     if (count === 0) return null
                     
+                    // Check if this zone is currently selected/highlighted
+                    const isHighlighted = zone === selectedPosition
+                    
                     // Position badges based on zone
                     const badgePosition = zone === 'Front' 
                       ? 'top-8 left-1/2 -translate-x-1/2'
@@ -376,7 +379,9 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
                       <Tooltip key={zone}>
                         <TooltipTrigger asChild>
                           <Badge
-                            className={`absolute ${badgePosition} cursor-pointer shadow-lg transition-all hover:scale-110`}
+                            className={`absolute ${badgePosition} cursor-pointer shadow-lg transition-all hover:scale-110 ${
+                              isHighlighted ? 'animate-pulse ring-4 ring-white/50 scale-110' : 'opacity-50'
+                            }`}
                             style={{
                               backgroundColor: currentSensorColor,
                               color: 'white',
@@ -393,6 +398,11 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
                             <div className="text-muted-foreground">
                               {count} {selectedSensorType} sensor{count !== 1 ? 's' : ''}
                             </div>
+                            {isHighlighted && (
+                              <div className="text-xs font-semibold mt-1 text-primary">
+                                Currently viewing in table
+                              </div>
+                            )}
                           </div>
                         </TooltipContent>
                       </Tooltip>
