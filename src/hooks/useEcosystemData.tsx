@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
+import { normalizeOEM } from "./useGlobalFootprintData"
 
 interface EcosystemRow {
   "OEM Name": string | null
@@ -15,9 +16,9 @@ interface EcosystemRow {
 // Map parameter categories to their attributes
 const parameterMapping: Record<string, string[]> = {
   "Sensorics": ["Camera", "Radar", "Lidar"],
-  "Hardware": ["Other (if any)"], // Will include hardware-related sub-attributes
-  "Software": [], // Software related items
-  "Advanced Tech": ["Cloud and Edge Service Provider", "Localization & Mapping"]
+  "Hardware": ["SoC/AI Chips", "Other (if any)"],
+  "Software": ["Software Stack"],
+  "Advanced Tech": ["Cloud and Edge Service Provider", "Localization & Mapping", "Vehicle Gateway/eSIM"]
 }
 
 export const useEcosystemData = (region: string, category: string, parameter: string) => {
@@ -37,9 +38,11 @@ export const useEcosystemData = (region: string, category: string, parameter: st
         return attr && attributes.includes(attr)
       })
 
-      // Get unique OEMs
+      // Get unique OEMs and normalize names
       const oems = Array.from(
-        new Set(filteredData?.map((item: EcosystemRow) => item["OEM Name"]).filter(Boolean))
+        new Set(filteredData?.map((item: EcosystemRow) => 
+          item["OEM Name"] ? normalizeOEM(item["OEM Name"]) : null
+        ).filter(Boolean))
       ) as string[]
 
       // Get unique attributes for columns
@@ -61,7 +64,10 @@ export const useEcosystemData = (region: string, category: string, parameter: st
       }>>> = {}
 
       filteredData?.forEach((item: EcosystemRow) => {
-        const oemName = item["OEM Name"]
+        const rawOEM = item["OEM Name"]
+        if (!rawOEM) return
+        
+        const oemName = normalizeOEM(rawOEM)
         const attr = item["Attribute/Indicator"]
         const subAttr = item["Sub-attribute"]
         const column = subAttr && subAttr.trim() ? `${attr} - ${subAttr}` : attr
