@@ -14,8 +14,9 @@ interface KeyTechnologyInvestmentsProps {
 const KeyTechnologyInvestments = ({ selectedRegion }: KeyTechnologyInvestmentsProps) => {
   const { theme } = useTheme()
   const [selectedOEM, setSelectedOEM] = useState<string>("All")
+  const [selectedInvestmentType, setSelectedInvestmentType] = useState<string>("All")
   
-  const { data, isLoading } = useKeyTechnologyInvestmentsData(selectedRegion, selectedOEM)
+  const { data, isLoading } = useKeyTechnologyInvestmentsData(selectedRegion, selectedOEM, selectedInvestmentType)
 
   if (isLoading) {
     return (
@@ -34,11 +35,13 @@ const KeyTechnologyInvestments = ({ selectedRegion }: KeyTechnologyInvestmentsPr
   }
 
   const oems = data?.oems || []
+  const investmentTypes = data?.investmentTypes || []
 
   return (
     <div className="space-y-6">
-      {/* OEM Selector */}
-      <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
+      {/* Filters */}
+      <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm space-y-6`}>
+        {/* OEM Selector */}
         <div>
           <h3 className={`text-sm font-semibold mb-3 ${theme.textSecondary}`}>Player Selector</h3>
           <div className="flex flex-wrap gap-2">
@@ -63,13 +66,39 @@ const KeyTechnologyInvestments = ({ selectedRegion }: KeyTechnologyInvestmentsPr
             ))}
           </div>
         </div>
+
+        {/* Investment Type Selector */}
+        <div>
+          <h3 className={`text-sm font-semibold mb-3 ${theme.textSecondary}`}>Investment Type</h3>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={() => setSelectedInvestmentType("All")}
+              variant={selectedInvestmentType === "All" ? "default" : "outline"}
+              size="sm"
+              className="transition-all duration-300"
+            >
+              All
+            </Button>
+            {investmentTypes.map((type) => (
+              <Button
+                key={type}
+                onClick={() => setSelectedInvestmentType(type)}
+                variant={selectedInvestmentType === type ? "default" : "outline"}
+                size="sm"
+                className="transition-all duration-300"
+              >
+                {type}
+              </Button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Main Layout: Investments Table + Announcements */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Investments Table */}
         <div className="lg:col-span-2">
-          <KeyTechnologyInvestmentsTable selectedOEM={selectedOEM} />
+          <KeyTechnologyInvestmentsTable selectedOEM={selectedOEM} selectedInvestmentType={selectedInvestmentType} />
         </div>
 
         {/* Key Insights/Announcements */}

@@ -10,9 +10,9 @@ export interface InvestmentData {
   location: string
 }
 
-export const useKeyTechnologyInvestmentsData = (region: string, selectedOEM?: string) => {
+export const useKeyTechnologyInvestmentsData = (region: string, selectedOEM?: string, selectedInvestmentType?: string) => {
   return useQuery({
-    queryKey: ['key-technology-investments', region, selectedOEM],
+    queryKey: ['key-technology-investments', region, selectedOEM, selectedInvestmentType],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('adas_future_blueprint')
@@ -48,9 +48,17 @@ export const useKeyTechnologyInvestmentsData = (region: string, selectedOEM?: st
         ? investments.filter(inv => inv.oem.toLowerCase().includes(selectedOEM.toLowerCase()))
         : investments
 
+      // Filter by investment type if provided
+      if (selectedInvestmentType && selectedInvestmentType !== "All") {
+        filteredInvestments = filteredInvestments.filter(inv => 
+          inv.subAttribute === selectedInvestmentType
+        )
+      }
+
       return {
         investments: filteredInvestments,
-        oems: [...new Set(investments.map(inv => inv.oem))].filter(Boolean)
+        oems: [...new Set(investments.map(inv => inv.oem))].filter(Boolean),
+        investmentTypes: [...new Set(investments.map(inv => inv.subAttribute))].filter(Boolean).sort()
       }
     },
   })

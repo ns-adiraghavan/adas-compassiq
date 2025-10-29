@@ -25,11 +25,12 @@ const getOEMLogo = (oemName: string): string => {
 
 interface KeyTechnologyInvestmentsTableProps {
   selectedOEM: string
+  selectedInvestmentType: string
 }
 
-const KeyTechnologyInvestmentsTable = ({ selectedOEM }: KeyTechnologyInvestmentsTableProps) => {
+const KeyTechnologyInvestmentsTable = ({ selectedOEM, selectedInvestmentType }: KeyTechnologyInvestmentsTableProps) => {
   const { theme } = useTheme()
-  const { data, isLoading } = useKeyTechnologyInvestmentsData("US", selectedOEM)
+  const { data, isLoading } = useKeyTechnologyInvestmentsData("US", selectedOEM, selectedInvestmentType)
 
   if (isLoading) {
     return (
