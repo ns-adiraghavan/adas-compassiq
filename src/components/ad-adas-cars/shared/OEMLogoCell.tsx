@@ -13,13 +13,29 @@ const OEMLogoCell = ({ oemName, showName = true, className = "" }: OEMLogoCellPr
     return <div className={`text-sm ${className}`}>{showName ? oemName : ""}</div>
   }
 
+  // Special handling for BMW and GM logos
+  const getLogoClassName = () => {
+    const baseClasses = "w-10 h-10 object-contain flex-shrink-0 opacity-90"
+    
+    if (oemName === "BMW") {
+      // BMW logo: black in light mode, white in dark mode
+      return `${baseClasses} brightness-0 dark:invert`
+    } else if (oemName === "General Motors" || oemName === "GM") {
+      // GM logo: black in light mode, white in dark mode
+      return `${baseClasses} brightness-0 dark:invert`
+    } else {
+      // All other logos: white in dark mode
+      return `${baseClasses} dark:brightness-0 dark:invert`
+    }
+  }
+
   if (logoUrl) {
     return (
       <div className={`flex items-center gap-3 ${className}`}>
         <img 
           src={logoUrl} 
           alt={`${oemName} logo`}
-          className="w-10 h-10 object-contain flex-shrink-0 dark:brightness-0 dark:invert opacity-90"
+          className={getLogoClassName()}
         />
         {showName && <span className="font-medium">{oemName}</span>}
       </div>
