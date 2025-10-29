@@ -10,9 +10,9 @@ export interface InvestmentData {
   location: string
 }
 
-export const useKeyTechnologyInvestmentsData = (region: string, selectedOEM?: string, selectedInvestmentType?: string) => {
+export const useKeyTechnologyInvestmentsData = (region: string, selectedOEM?: string, selectedInvestmentType?: string, sortOrder?: "asc" | "desc" | "none") => {
   return useQuery({
-    queryKey: ['key-technology-investments', region, selectedOEM, selectedInvestmentType],
+    queryKey: ['key-technology-investments', region, selectedOEM, selectedInvestmentType, sortOrder],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('adas_future_blueprint')
@@ -53,6 +53,29 @@ export const useKeyTechnologyInvestmentsData = (region: string, selectedOEM?: st
         filteredInvestments = filteredInvestments.filter(inv => 
           inv.subAttribute === selectedInvestmentType
         )
+      }
+
+      // Sort by value if specified
+      if (sortOrder && sortOrder !== "none") {
+        filteredInvestments = [...filteredInvestments].sort((a, b) => {
+          // Extract numeric values from strings like "$500M", "2.5B", etc.
+          const extractNumber = (str: string): number => {
+            const match = str.match(/[\d.,]+/)
+            if (!match) return 0
+            let num = parseFloat(match[0].replace(/,/g, ''))
+            
+            // Handle B (billions) and M (millions) suffixes
+            if (str.toUpperCase().includes('B')) num *= 1000000000
+            else if (str.toUpperCase().includes('M')) num *= 1000000
+            
+            return num
+          }
+
+          const aValue = extractNumber(a.value)
+          const bValue = extractNumber(b.value)
+
+          return sortOrder === "asc" ? aValue - bValue : bValue - aValue
+        })
       }
 
       return {

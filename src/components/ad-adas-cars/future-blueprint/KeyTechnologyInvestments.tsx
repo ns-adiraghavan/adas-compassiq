@@ -15,8 +15,9 @@ const KeyTechnologyInvestments = ({ selectedRegion }: KeyTechnologyInvestmentsPr
   const { theme } = useTheme()
   const [selectedOEM, setSelectedOEM] = useState<string>("All")
   const [selectedInvestmentType, setSelectedInvestmentType] = useState<string>("All")
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc" | "none">("none")
   
-  const { data, isLoading } = useKeyTechnologyInvestmentsData(selectedRegion, selectedOEM, selectedInvestmentType)
+  const { data, isLoading } = useKeyTechnologyInvestmentsData(selectedRegion, selectedOEM, selectedInvestmentType, sortOrder)
 
   if (isLoading) {
     return (
@@ -90,6 +91,37 @@ const KeyTechnologyInvestments = ({ selectedRegion }: KeyTechnologyInvestmentsPr
                 {type}
               </Button>
             ))}
+          </div>
+        </div>
+
+        {/* Sort by Value */}
+        <div>
+          <h3 className={`text-sm font-semibold mb-3 ${theme.textSecondary}`}>Sort by Value</h3>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={() => setSortOrder("none")}
+              variant={sortOrder === "none" ? "default" : "outline"}
+              size="sm"
+              className="transition-all duration-300"
+            >
+              None
+            </Button>
+            <Button
+              onClick={() => setSortOrder("asc")}
+              variant={sortOrder === "asc" ? "default" : "outline"}
+              size="sm"
+              className="transition-all duration-300"
+            >
+              Ascending
+            </Button>
+            <Button
+              onClick={() => setSortOrder("desc")}
+              variant={sortOrder === "desc" ? "default" : "outline"}
+              size="sm"
+              className="transition-all duration-300"
+            >
+              Descending
+            </Button>
           </div>
         </div>
       </div>
