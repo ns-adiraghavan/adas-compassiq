@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CountryProvider } from "@/contexts/CountryContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -19,27 +20,29 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <CountryProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-            <Route path="/ad-adas-cars" element={<Navigate to="/ad-adas-cars/homepage" replace />} />
-            <Route path="/ad-adas-cars/homepage" element={<ProtectedRoute><AdAdasHomepage /></ProtectedRoute>} />
-            <Route path="/ad-adas-cars/current-snapshot" element={<ProtectedRoute><AdAdasCurrentSnapshot /></ProtectedRoute>} />
-            <Route path="/ad-adas-cars/core-systems" element={<ProtectedRoute><AdAdasCoreSystems /></ProtectedRoute>} />
-            <Route path="/ad-adas-cars/future-blueprint" element={<ProtectedRoute><AdAdasFutureBlueprint /></ProtectedRoute>} />
-            <Route path="/ad-adas-cars/ecosystem" element={<ProtectedRoute><AdAdasEcosystem /></ProtectedRoute>} />
-            <Route path="*" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </CountryProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <CountryProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+                <Route path="/ad-adas-cars" element={<Navigate to="/ad-adas-cars/homepage" replace />} />
+                <Route path="/ad-adas-cars/homepage" element={<ProtectedRoute><AdAdasHomepage /></ProtectedRoute>} />
+                <Route path="/ad-adas-cars/current-snapshot" element={<ProtectedRoute><AdAdasCurrentSnapshot /></ProtectedRoute>} />
+                <Route path="/ad-adas-cars/core-systems" element={<ProtectedRoute><AdAdasCoreSystems /></ProtectedRoute>} />
+                <Route path="/ad-adas-cars/future-blueprint" element={<ProtectedRoute><AdAdasFutureBlueprint /></ProtectedRoute>} />
+                <Route path="/ad-adas-cars/ecosystem" element={<ProtectedRoute><AdAdasEcosystem /></ProtectedRoute>} />
+                <Route path="*" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </CountryProvider>
+      </AuthProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
