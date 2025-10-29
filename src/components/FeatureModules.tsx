@@ -12,12 +12,6 @@ const FeatureModules = ({ vehicleType }: FeatureModulesProps) => {
       case "Autonomous Driving & Advanced Safety":
         return [
           {
-            icon: Wifi,
-            title: "Connected Feature Module",
-            isLinked: true,
-            href: "/passenger-cars"
-          },
-          {
             icon: Shield,
             title: "Autonomous AD/AS",
             isLinked: true,

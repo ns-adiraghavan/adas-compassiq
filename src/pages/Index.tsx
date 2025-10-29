@@ -6,6 +6,7 @@ import VehicleSection from "@/components/VehicleSection"
 import FooterSection from "@/components/FooterSection"
 import NavigationDots from "@/components/NavigationDots"
 import FloatingParticles from "@/components/FloatingParticles"
+import ThemeSelector from "@/components/ThemeSelector"
 
 const Index = () => {
   const [scrollY, setScrollY] = useState(0)
@@ -43,6 +44,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
+      {/* Theme Selector */}
+      <div className="fixed top-6 right-6 z-50">
+        <ThemeSelector />
+      </div>
+      
       {/* Hero Section */}
       <div className="section">
         <HeroSection scrollY={scrollY} />
