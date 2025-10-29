@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
+import { normalizeOEM } from './useGlobalFootprintData'
 
 export interface SensoricsData {
   oem: string
@@ -30,7 +31,7 @@ const fetchSensoricsData = async (
   }
 
   return (data || []).map((row: any) => ({
-    oem: row['OEM Name'] || '',
+    oem: normalizeOEM(row['OEM Name'] || ''),
     parameterCategory: row['Parameter Category'] || '',
     parameter: row['Parameter'] || '',
     subParameter: row['SubParameter'] || '',
