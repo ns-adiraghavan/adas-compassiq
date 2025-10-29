@@ -9,9 +9,17 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
+  const [step, setStep] = useState<"email" | "otp">("email");
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleEmailSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email) {
+      setStep("otp");
+    }
+  };
+
+  const handleOtpSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Mock login - any 6-digit OTP works for now
     if (otp.length === 6) {
@@ -35,40 +43,64 @@ const Auth = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-foreground">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your.email@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-background/50 border-border focus:border-primary/50"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="otp" className="text-foreground">One-Time Password</Label>
-              <div className="flex justify-center">
-                <InputOTP maxLength={6} value={otp} onChange={setOtp}>
-                  <InputOTPGroup>
-                    <InputOTPSlot index={0} />
-                    <InputOTPSlot index={1} />
-                    <InputOTPSlot index={2} />
-                    <InputOTPSlot index={3} />
-                    <InputOTPSlot index={4} />
-                    <InputOTPSlot index={5} />
-                  </InputOTPGroup>
-                </InputOTP>
+          {step === "email" ? (
+            <form onSubmit={handleEmailSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-foreground">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="your.email@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="bg-background/50 border-border focus:border-primary/50"
+                  required
+                />
               </div>
-            </div>
-            <Button 
-              type="submit" 
-              className="w-full bg-gradient-to-r from-green-600 to-emerald-400 hover:from-green-700 hover:to-emerald-500 text-white font-semibold"
-            >
-              Access Platform
-            </Button>
-          </form>
+              <Button 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-green-600 to-emerald-400 hover:from-green-700 hover:to-emerald-500 text-white font-semibold"
+              >
+                Continue
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleOtpSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="otp" className="text-foreground text-center block">Enter One-Time Password</Label>
+                <p className="text-sm text-muted-foreground text-center mb-4">
+                  Sent to {email}
+                </p>
+                <div className="flex justify-center">
+                  <InputOTP maxLength={6} value={otp} onChange={setOtp}>
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} />
+                      <InputOTPSlot index={1} />
+                      <InputOTPSlot index={2} />
+                      <InputOTPSlot index={3} />
+                      <InputOTPSlot index={4} />
+                      <InputOTPSlot index={5} />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
+              </div>
+              <Button 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-green-600 to-emerald-400 hover:from-green-700 hover:to-emerald-500 text-white font-semibold"
+                disabled={otp.length !== 6}
+              >
+                Access Platform
+              </Button>
+              <Button 
+                type="button"
+                variant="ghost"
+                className="w-full text-muted-foreground"
+                onClick={() => setStep("email")}
+              >
+                Back to Email
+              </Button>
+            </form>
+          )}
           
           <div className="mt-6 text-center text-sm text-muted-foreground">
             <p>Powered by CompassIQ Analytics</p>
