@@ -19,7 +19,7 @@ const OEMLogoCell = ({ oemName, showName = true, className = "" }: OEMLogoCellPr
         <img 
           src={logoUrl} 
           alt={`${oemName} logo`}
-          className="w-10 h-10 object-contain flex-shrink-0"
+          className="w-10 h-10 object-contain flex-shrink-0 dark:brightness-0 dark:invert opacity-90"
         />
         {showName && <span className="font-medium">{oemName}</span>}
       </div>
