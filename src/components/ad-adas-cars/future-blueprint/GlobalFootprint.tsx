@@ -40,11 +40,11 @@ const GlobalFootprint = ({ selectedRegion, selectedCategory }: GlobalFootprintPr
 
   return (
     <div className="space-y-6">
-      {/* Facility Type Buttons */}
-      <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-6 ${theme.shadowColor} shadow-lg backdrop-blur-sm`}>
+      {/* Filter Controls - Lighter styling */}
+      <div className="p-5 bg-background/30 backdrop-blur-sm rounded-xl border border-border/30">
         <div className="space-y-4">
           <div>
-            <h3 className={`text-sm font-semibold mb-3 ${theme.textSecondary}`}>Facility Type</h3>
+            <h3 className="text-xs font-semibold mb-3 text-muted-foreground uppercase tracking-wider">Facility Type</h3>
             <div className="flex flex-wrap gap-2">
               {facilityTypes.map((type) => (
                 <Button
@@ -52,7 +52,11 @@ const GlobalFootprint = ({ selectedRegion, selectedCategory }: GlobalFootprintPr
                   onClick={() => setFacilityType(type)}
                   variant={facilityType === type ? "default" : "outline"}
                   size="sm"
-                  className="transition-all duration-300"
+                  className={`transition-all duration-300 ${
+                    facilityType === type 
+                      ? 'ring-4 ring-primary/20 shadow-[0_0_20px_rgba(var(--primary),0.3)]' 
+                      : 'hover:ring-2 hover:ring-primary/10'
+                  }`}
                 >
                   {type}
                 </Button>
@@ -60,14 +64,18 @@ const GlobalFootprint = ({ selectedRegion, selectedCategory }: GlobalFootprintPr
             </div>
           </div>
 
-          <div>
-            <h3 className={`text-sm font-semibold mb-3 ${theme.textSecondary}`}>Player Selector</h3>
+          <div className="border-t border-dashed border-border/50 pt-4">
+            <h3 className="text-xs font-semibold mb-3 text-muted-foreground uppercase tracking-wider">Player Selector</h3>
             <div className="flex flex-wrap gap-2">
               <Button
                 onClick={() => setSelectedOEM("All")}
                 variant={selectedOEM === "All" ? "default" : "outline"}
                 size="sm"
-                className="transition-all duration-300"
+                className={`transition-all duration-300 ${
+                  selectedOEM === "All" 
+                    ? 'ring-4 ring-primary/20 shadow-[0_0_20px_rgba(var(--primary),0.3)]' 
+                    : 'hover:ring-2 hover:ring-primary/10'
+                }`}
               >
                 All
               </Button>
@@ -77,7 +85,11 @@ const GlobalFootprint = ({ selectedRegion, selectedCategory }: GlobalFootprintPr
                   onClick={() => setSelectedOEM(oem)}
                   variant={selectedOEM === oem ? "default" : "outline"}
                   size="sm"
-                  className="transition-all duration-300"
+                  className={`transition-all duration-300 ${
+                    selectedOEM === oem 
+                      ? 'ring-4 ring-primary/20 shadow-[0_0_20px_rgba(var(--primary),0.3)]' 
+                      : 'hover:ring-2 hover:ring-primary/10'
+                  }`}
                 >
                   {oem}
                 </Button>
@@ -92,8 +104,8 @@ const GlobalFootprint = ({ selectedRegion, selectedCategory }: GlobalFootprintPr
         {/* Map Visualization */}
         <div className="lg:col-span-2">
           {filteredFacilities.length === 0 ? (
-            <div className={`${theme.cardBackground} ${theme.cardBorder} border rounded-2xl p-12 ${theme.shadowColor} shadow-lg backdrop-blur-sm text-center`}>
-              <p className={`${theme.textSecondary} text-lg`}>No facilities found matching the selected filters.</p>
+            <div className="p-12 text-center bg-background/20 backdrop-blur-sm rounded-xl border border-dashed border-border/50">
+              <p className="text-muted-foreground text-lg">No facilities found matching the selected filters.</p>
             </div>
           ) : (
             <RegionalMapVisualization facilities={filteredFacilities} region={selectedRegion} />
