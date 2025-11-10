@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useSensoricsData } from "@/hooks/useSensoricsData"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -101,6 +101,8 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
   const [imageLoading, setImageLoading] = useState<boolean>(true)
   const [preloadedImages, setPreloadedImages] = useState<Set<string>>(new Set())
   const [perspectiveView, setPerspectiveView] = useState<boolean>(true)
+  const [selectedSensorIndex, setSelectedSensorIndex] = useState<number | null>(null)
+  const tableRowRefs = useRef<(HTMLTableRowElement | null)[]>([])
 
   const filteredData = data?.filter(item => {
     const matchesSensorType = item.parameterCategory.includes(selectedSensorType)
@@ -236,6 +238,24 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
       setImageLoading(false)
     }
   }, [imageSrc, preloadedImages])
+
+  // Handle sensor click and scroll to row
+  const handleSensorClick = (index: number) => {
+    setSelectedSensorIndex(index)
+    
+    // Scroll to the corresponding row
+    setTimeout(() => {
+      const row = tableRowRefs.current[index]
+      if (row) {
+        row.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }, 100)
+  }
+
+  // Reset selected sensor when filters change
+  useEffect(() => {
+    setSelectedSensorIndex(null)
+  }, [selectedOEM, selectedSensorType, selectedPosition, viewType])
 
   const sensorCounts = sensorTypes.map(({ id }) => ({
     type: id,
@@ -458,6 +478,7 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
                   {/* Interactive Sensor Dots Overlay */}
                   {!imageLoading && filteredData.map((sensor, index) => {
                     const zone = sensor.zone || 'Unknown'
+                    const isSelected = selectedSensorIndex === index
                     
                     // Position dots based on zone with slight randomization for visual variety
                     const getPosition = () => {
@@ -484,26 +505,37 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
                           <div
                             className="absolute cursor-pointer group/sensor"
                             style={getPosition()}
+                            onClick={() => handleSensorClick(index)}
                           >
                             {/* Pulsing Glow Halo */}
                             <div 
-                              className="absolute inset-0 w-6 h-6 rounded-full animate-pulse opacity-40 group-hover/sensor:opacity-70 transition-opacity"
+                              className={`absolute inset-0 w-6 h-6 rounded-full opacity-40 transition-opacity ${
+                                isSelected ? 'animate-pulse opacity-90' : 'animate-pulse group-hover/sensor:opacity-70'
+                              }`}
                               style={{
                                 background: `radial-gradient(circle, ${currentSensorColor} 0%, transparent 70%)`,
                                 transform: 'translate(-50%, -50%) scale(2)',
                                 left: '50%',
                                 top: '50%',
-                                animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                                animation: isSelected 
+                                  ? 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite' 
+                                  : 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                               }}
                             />
                             
                             {/* Sensor Dot */}
                             <div 
-                              className="relative w-3 h-3 rounded-full border-2 transition-all duration-300 group-hover/sensor:scale-150 group-hover/sensor:shadow-lg"
+                              className={`relative w-3 h-3 rounded-full border-2 transition-all duration-300 ${
+                                isSelected 
+                                  ? 'scale-150 ring-4 ring-white/60' 
+                                  : 'group-hover/sensor:scale-150 group-hover/sensor:shadow-lg'
+                              }`}
                               style={{
                                 backgroundColor: currentSensorColor,
                                 borderColor: 'white',
-                                boxShadow: `0 0 8px ${currentSensorColor}`,
+                                boxShadow: isSelected 
+                                  ? `0 0 20px ${currentSensorColor}` 
+                                  : `0 0 8px ${currentSensorColor}`,
                               }}
                             />
                           </div>
@@ -522,6 +554,9 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
                               {sensor.cameraCategory && (
                                 <div>Category: {sensor.cameraCategory}</div>
                               )}
+                            </div>
+                            <div className="text-xs font-semibold text-primary pt-1 border-t mt-2">
+                              Click to view in table →
                             </div>
                           </div>
                         </TooltipContent>
@@ -631,7 +666,12 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
                         filteredData.map((item, index) => (
                           <TableRow 
                             key={index}
-                            className="transition-colors hover:bg-muted/50"
+                            ref={(el) => (tableRowRefs.current[index] = el)}
+                            className={`transition-all duration-300 ${
+                              selectedSensorIndex === index
+                                ? 'bg-primary/20 border-l-4 border-l-primary shadow-lg'
+                                : 'hover:bg-muted/50'
+                            }`}
                           >
                             <TableCell className="font-medium">{item.parameter}</TableCell>
                             <TableCell>{item.subParameter}</TableCell>
