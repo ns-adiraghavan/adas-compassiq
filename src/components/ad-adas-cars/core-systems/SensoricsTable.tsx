@@ -103,6 +103,11 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
   const [perspectiveView, setPerspectiveView] = useState<boolean>(true)
   const [selectedSensorIndex, setSelectedSensorIndex] = useState<number | null>(null)
   const tableRowRefs = useRef<(HTMLTableRowElement | null)[]>([])
+  const [clickRipple, setClickRipple] = useState<{ x: string; y: string; show: boolean }>({ 
+    x: '0', 
+    y: '0', 
+    show: false 
+  })
 
   const filteredData = data?.filter(item => {
     const matchesSensorType = item.parameterCategory.includes(selectedSensorType)
@@ -240,8 +245,25 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
   }, [imageSrc, preloadedImages])
 
   // Handle sensor click and scroll to row
-  const handleSensorClick = (index: number) => {
+  const handleSensorClick = (index: number, event: React.MouseEvent<HTMLDivElement>) => {
     setSelectedSensorIndex(index)
+    
+    // Get click position for ripple effect
+    const rect = event.currentTarget.getBoundingClientRect()
+    const parentRect = event.currentTarget.offsetParent?.getBoundingClientRect()
+    
+    if (parentRect) {
+      setClickRipple({
+        x: `${rect.left - parentRect.left + rect.width / 2}px`,
+        y: `${rect.top - parentRect.top + rect.height / 2}px`,
+        show: true,
+      })
+      
+      // Hide ripple after animation
+      setTimeout(() => {
+        setClickRipple(prev => ({ ...prev, show: false }))
+      }, 800)
+    }
     
     // Scroll to the corresponding row
     setTimeout(() => {
@@ -443,6 +465,37 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
                     </TooltipContent>
                   </Tooltip>
 
+                  {/* Click Ripple Effect */}
+                  {clickRipple.show && (
+                    <div
+                      className="absolute pointer-events-none z-30"
+                      style={{
+                        left: clickRipple.x,
+                        top: clickRipple.y,
+                        transform: 'translate(-50%, -50%)',
+                      }}
+                    >
+                      <div
+                        className="absolute inset-0 rounded-full animate-ping opacity-75"
+                        style={{
+                          width: '100px',
+                          height: '100px',
+                          backgroundColor: currentSensorColor,
+                          animation: 'ping 0.8s cubic-bezier(0, 0, 0.2, 1)',
+                        }}
+                      />
+                      <div
+                        className="absolute inset-0 rounded-full"
+                        style={{
+                          width: '100px',
+                          height: '100px',
+                          background: `radial-gradient(circle, ${currentSensorColor} 0%, transparent 70%)`,
+                          animation: 'scale-out 0.8s ease-out forwards',
+                        }}
+                      />
+                    </div>
+                  )}
+
                   {/* Loading skeleton */}
                   {imageLoading && (
                     <div className="absolute inset-0 flex items-center justify-center bg-muted/20 rounded-lg">
@@ -505,7 +558,7 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
                           <div
                             className="absolute cursor-pointer group/sensor"
                             style={getPosition()}
-                            onClick={() => handleSensorClick(index)}
+                            onClick={(e) => handleSensorClick(index, e)}
                           >
                             {/* Pulsing Glow Halo */}
                             <div 
@@ -663,30 +716,33 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
                           </TableCell>
                         </TableRow>
                       ) : (
-                        filteredData.map((item, index) => (
-                          <TableRow 
-                            key={index}
-                            ref={(el) => (tableRowRefs.current[index] = el)}
-                            className={`transition-all duration-300 ${
-                              selectedSensorIndex === index
-                                ? 'bg-primary/20 border-l-4 border-l-primary shadow-lg'
-                                : 'hover:bg-muted/50'
-                            }`}
-                          >
-                            <TableCell className="font-medium">{item.parameter}</TableCell>
-                            <TableCell>{item.subParameter}</TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className="text-xs">
-                                {item.position || item.zone}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="font-mono text-sm">{item.value || "-"}</TableCell>
-                            <TableCell className="text-muted-foreground text-sm">{item.unit || "-"}</TableCell>
-                            {selectedSensorType === "Camera" && (
-                              <TableCell className="text-sm">{item.cameraCategory || "-"}</TableCell>
-                            )}
-                          </TableRow>
-                        ))
+                        filteredData.map((item, index) => {
+                          const isHighlighted = selectedSensorIndex === index
+                          return (
+                            <TableRow 
+                              key={index}
+                              ref={(el) => (tableRowRefs.current[index] = el)}
+                              className={`transition-all duration-500 ${
+                                isHighlighted
+                                  ? 'bg-primary/20 border-l-4 border-l-primary shadow-lg animate-fade-in'
+                                  : 'hover:bg-muted/50'
+                              }`}
+                            >
+                              <TableCell className="font-medium">{item.parameter}</TableCell>
+                              <TableCell>{item.subParameter}</TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="text-xs">
+                                  {item.position || item.zone}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="font-mono text-sm">{item.value || "-"}</TableCell>
+                              <TableCell className="text-muted-foreground text-sm">{item.unit || "-"}</TableCell>
+                              {selectedSensorType === "Camera" && (
+                                <TableCell className="text-sm">{item.cameraCategory || "-"}</TableCell>
+                              )}
+                            </TableRow>
+                          )
+                        })
                       )}
                     </TableBody>
                   </Table>
