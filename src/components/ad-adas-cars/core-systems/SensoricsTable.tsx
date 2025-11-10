@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useSensoricsData } from "@/hooks/useSensoricsData"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -98,6 +98,8 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
   const [selectedPosition, setSelectedPosition] = useState<string>("Front")
   const [selectedOEM, setSelectedOEM] = useState<string>("Tesla")
   const [viewType, setViewType] = useState<'top' | 'side'>('top')
+  const [imageLoading, setImageLoading] = useState<boolean>(true)
+  const [preloadedImages, setPreloadedImages] = useState<Set<string>>(new Set())
 
   const filteredData = data?.filter(item => {
     const matchesSensorType = item.parameterCategory.includes(selectedSensorType)
@@ -175,6 +177,64 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
     if (selectedSensorType === 'Ultrasonic') return topUltrasonicByOEM[selectedOEM] || topViewUltrasonic
     return topCleanByOEM[selectedOEM] || topViewClean
   })()
+
+  // Preload images when component mounts or dependencies change
+  useEffect(() => {
+    const imagesToPreload: string[] = []
+    
+    // Get all relevant images for current sensor type and view
+    const allOEMs = ["Tesla", "Rivian", "BMW", "General Motors", "Ford"]
+    
+    allOEMs.forEach(oem => {
+      if (viewType === 'top') {
+        if (selectedSensorType === 'Camera' && topCameraByOEM[oem]) {
+          imagesToPreload.push(topCameraByOEM[oem])
+        } else if (selectedSensorType === 'Radar' && topRadarByOEM[oem]) {
+          imagesToPreload.push(topRadarByOEM[oem])
+        } else if (selectedSensorType === 'Ultrasonic' && topUltrasonicByOEM[oem]) {
+          imagesToPreload.push(topUltrasonicByOEM[oem])
+        }
+      } else {
+        if (selectedSensorType === 'Camera' && sideCameraByOEM[oem]) {
+          imagesToPreload.push(sideCameraByOEM[oem])
+        } else if (selectedSensorType === 'Radar' && sideRadarByOEM[oem]) {
+          imagesToPreload.push(sideRadarByOEM[oem])
+        }
+      }
+    })
+
+    // Preload images in background
+    imagesToPreload.forEach(src => {
+      if (!preloadedImages.has(src)) {
+        const img = new Image()
+        img.src = src
+        img.onload = () => {
+          setPreloadedImages(prev => new Set([...prev, src]))
+        }
+      }
+    })
+  }, [selectedSensorType, viewType])
+
+  // Handle image loading for current display
+  useEffect(() => {
+    setImageLoading(true)
+    
+    const img = new Image()
+    img.src = imageSrc
+    
+    img.onload = () => {
+      setImageLoading(false)
+    }
+    
+    img.onerror = () => {
+      setImageLoading(false)
+    }
+
+    // If image is already preloaded, show immediately
+    if (preloadedImages.has(imageSrc)) {
+      setImageLoading(false)
+    }
+  }, [imageSrc, preloadedImages])
 
   const sensorCounts = sensorTypes.map(({ id }) => ({
     type: id,
@@ -345,9 +405,23 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
               {/* Car Visualization with precise cropping */}
               <div className="flex items-center justify-center min-h-[500px] overflow-hidden">
                 <div className="relative w-full h-[500px]">
+                  {/* Loading skeleton */}
+                  {imageLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-muted/20 rounded-lg">
+                      <div className="space-y-4 text-center">
+                        <Skeleton className="h-[300px] w-[400px] mx-auto" />
+                        <div className="text-sm text-muted-foreground animate-pulse">
+                          Loading vehicle visualization...
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
                   {/* Display the full composite image but crop to show only selected OEM */}
                   <div 
-                    className="absolute inset-0 overflow-hidden transition-all duration-500"
+                    className={`absolute inset-0 overflow-hidden transition-all duration-500 ${
+                      imageLoading ? 'opacity-0' : 'opacity-100'
+                    }`}
                     style={{
                       filter: `drop-shadow(0 0 30px ${currentSensorColor})`,
                     }}
@@ -356,6 +430,8 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
                       src={imageSrc}
                       alt={`${selectedOEM} ${selectedSensorType} sensors`}
                       className="h-full w-full object-contain transition-all duration-500"
+                      onLoad={() => setImageLoading(false)}
+                      onError={() => setImageLoading(false)}
                     />
                   </div>
                   
