@@ -71,12 +71,12 @@ const sensorPositions = [
   { id: "Rear", label: "Rear" },
 ]
 
-// Map OEM names to their position in the image (0-4: Tesla, Rivian, BMW, GM, Ford)
+// Map OEM names to their position in the image (0-4: Tesla, Rivian, BMW, General Motors, Ford)
 const oemToImageIndex: Record<string, number> = {
   "Tesla": 0,
   "Rivian": 1,
   "BMW": 2,
-  "GM": 3,
+  "General Motors": 3,
   "Ford": 4,
 }
 
@@ -115,51 +115,51 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
   
   // Image selection using per-OEM assets (top view)
   const topCleanByOEM: Record<string, string> = {
-    Tesla: teslaTopClean,
-    Rivian: rivianTopClean,
-    BMW: bmwTopClean,
-    GM: gmTopClean,
-    Ford: fordTopClean,
+    "Tesla": teslaTopClean,
+    "Rivian": rivianTopClean,
+    "BMW": bmwTopClean,
+    "General Motors": gmTopClean,
+    "Ford": fordTopClean,
   }
 
   const topCameraByOEM: Record<string, string> = {
-    Tesla: teslaTopCamera,
-    Rivian: rivianTopCamera,
-    BMW: bmwTopCamera,
-    GM: gmTopCamera,
-    Ford: fordTopCamera,
+    "Tesla": teslaTopCamera,
+    "Rivian": rivianTopCamera,
+    "BMW": bmwTopCamera,
+    "General Motors": gmTopCamera,
+    "Ford": fordTopCamera,
   }
 
   const topRadarByOEM: Record<string, string> = {
-    Tesla: teslaTopRadar,
-    Rivian: rivianTopRadar,
-    BMW: bmwTopRadar,
-    GM: gmTopRadar,
-    Ford: fordTopRadar,
+    "Tesla": teslaTopRadar,
+    "Rivian": rivianTopRadar,
+    "BMW": bmwTopRadar,
+    "General Motors": gmTopRadar,
+    "Ford": fordTopRadar,
   }
 
   const topUltrasonicByOEM: Record<string, string> = {
-    Tesla: teslaTopUltrasonic,
-    Rivian: rivianTopUltrasonic,
-    BMW: bmwTopUltrasonic,
-    GM: gmTopUltrasonic,
-    Ford: fordTopUltrasonic,
+    "Tesla": teslaTopUltrasonic,
+    "Rivian": rivianTopUltrasonic,
+    "BMW": bmwTopUltrasonic,
+    "General Motors": gmTopUltrasonic,
+    "Ford": fordTopUltrasonic,
   }
 
   const sideCameraByOEM: Record<string, string> = {
-    Tesla: teslaSideCamera,
-    Rivian: rivianSideCamera,
-    BMW: bmwSideCamera,
-    GM: gmSideCamera,
-    Ford: fordSideCamera,
+    "Tesla": teslaSideCamera,
+    "Rivian": rivianSideCamera,
+    "BMW": bmwSideCamera,
+    "General Motors": gmSideCamera,
+    "Ford": fordSideCamera,
   }
 
   const sideRadarByOEM: Record<string, string> = {
-    Tesla: teslaSideRadar,
-    Rivian: rivianSideRadar,
-    BMW: bmwSideRadar,
-    GM: gmSideRadar,
-    Ford: fordSideRadar,
+    "Tesla": teslaSideRadar,
+    "Rivian": rivianSideRadar,
+    "BMW": bmwSideRadar,
+    "General Motors": gmSideRadar,
+    "Ford": fordSideRadar,
   }
 
   const imageSrc = (() => {
