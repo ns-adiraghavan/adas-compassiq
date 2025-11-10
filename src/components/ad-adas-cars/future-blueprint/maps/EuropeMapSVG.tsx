@@ -1,7 +1,7 @@
 import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps"
-import { Building2, FlaskConical } from "lucide-react"
 import { FacilityLocation } from "@/hooks/useGlobalFootprintData"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
+import { useState } from "react"
 
 interface EuropeMapSVGProps {
   facilities: FacilityLocation[]
@@ -64,6 +64,9 @@ const locationToCountry: Record<string, string> = {
 }
 
 export const EuropeMapSVG = ({ facilities }: EuropeMapSVGProps) => {
+  const [openMarkerId, setOpenMarkerId] = useState<string | null>(null)
+  const [clickScale, setClickScale] = useState<string | null>(null)
+
   // Group facilities by location
   const facilitiesByLocation = facilities.reduce((acc, facility) => {
     const existing = acc.find(f => f.location === facility.location)
@@ -125,7 +128,7 @@ export const EuropeMapSVG = ({ facilities }: EuropeMapSVGProps) => {
                 strokeWidth={0.5}
                 style={{
                   default: { outline: "none" },
-                  hover: { fill: "hsl(var(--accent))", outline: "none" },
+                  hover: { fill: getCountryColor(geo.properties.name), opacity: 0.8, outline: "none" },
                   pressed: { outline: "none" },
                 }}
               />
@@ -135,17 +138,33 @@ export const EuropeMapSVG = ({ facilities }: EuropeMapSVGProps) => {
 
       {/* Render facility markers */}
       {facilitiesByLocation.map((location) => {
-        if (!location.coordinates[0] || !location.coordinates[1]) return null
+        if (!location.coordinates[0] || !location.coordinates[1]) {
+          console.warn(`Missing coordinates for location: ${location.location}`)
+          return null
+        }
         
         const rdCount = location.facilities.filter(f => f.facilityType === "R&D Center").length
         const testingCount = location.facilities.filter(f => f.facilityType === "Testing & Expansion").length
         const primaryType = rdCount >= testingCount ? "R&D Center" : "Testing & Expansion"
+        const markerId = location.location
+        
+        const handleMarkerClick = () => {
+          setOpenMarkerId(openMarkerId === markerId ? null : markerId)
+          setClickScale(markerId)
+          setTimeout(() => setClickScale(null), 200)
+        }
         
         return (
           <Marker key={location.location} coordinates={location.coordinates}>
-            <HoverCard openDelay={0} closeDelay={0}>
+            <HoverCard open={openMarkerId === markerId} onOpenChange={(open) => setOpenMarkerId(open ? markerId : null)} openDelay={200} closeDelay={300}>
               <HoverCardTrigger asChild>
-                <g className="cursor-pointer">
+                <g 
+                  className="cursor-pointer transition-transform duration-200"
+                  style={{ 
+                    transform: clickScale === markerId ? 'scale(1.1)' : 'scale(1)'
+                  }}
+                  onClick={handleMarkerClick}
+                >
                   {/* Pulsing circle animation */}
                   <circle
                     r={12}
@@ -162,14 +181,16 @@ export const EuropeMapSVG = ({ facilities }: EuropeMapSVGProps) => {
                     strokeWidth={2}
                   />
                   
-                  {/* Icon */}
-                  <foreignObject x={-6} y={-6} width={12} height={12}>
-                    {primaryType === "R&D Center" ? (
-                      <Building2 className="w-3 h-3 text-white" />
-                    ) : (
-                      <FlaskConical className="w-3 h-3 text-white" />
-                    )}
-                  </foreignObject>
+                  {/* Icon using SVG paths */}
+                  {primaryType === "R&D Center" ? (
+                    <g transform="translate(-4, -4)">
+                      <path d="M2 2h4v6H2z M3 3.5h1 M4.5 3.5h1 M3 5h1 M4.5 5h1" fill="white" stroke="white" strokeWidth={0.3} />
+                    </g>
+                  ) : (
+                    <g transform="translate(-4, -4)">
+                      <path d="M3.5 1.5v1.5l-1.5 3c0 0.8 0.6 1.5 1.5 1.5h1c0.8 0 1.5-0.6 1.5-1.5l-1.5-3V1.5M3 1.5h2" fill="white" stroke="white" strokeWidth={0.3} />
+                    </g>
+                  )}
                   
                   {/* Count badge */}
                   {location.facilities.length > 1 && (
@@ -183,7 +204,7 @@ export const EuropeMapSVG = ({ facilities }: EuropeMapSVGProps) => {
                 </g>
               </HoverCardTrigger>
               
-              <HoverCardContent className="w-80 z-[60]">
+              <HoverCardContent className="w-80 z-[100]" onPointerDownOutside={(e) => e.preventDefault()}>
                 <div className="space-y-3">
                   <div>
                     <h4 className="font-semibold text-sm text-foreground">{location.location}</h4>
@@ -201,11 +222,13 @@ export const EuropeMapSVG = ({ facilities }: EuropeMapSVGProps) => {
                           <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
                             facility.facilityType === "R&D Center" ? "bg-chart-1" : "bg-chart-2"
                           }`}>
-                            {facility.facilityType === "R&D Center" ? (
-                              <Building2 className="w-2.5 h-2.5 text-white" />
-                            ) : (
-                              <FlaskConical className="w-2.5 h-2.5 text-white" />
-                            )}
+                            <svg viewBox="0 0 8 8" className="w-2.5 h-2.5">
+                              {facility.facilityType === "R&D Center" ? (
+                                <path d="M2 2h4v6H2z M3 3.5h1 M4.5 3.5h1 M3 5h1 M4.5 5h1" fill="white" stroke="white" strokeWidth={0.3} />
+                              ) : (
+                                <path d="M3.5 1.5v1.5l-1.5 3c0 0.8 0.6 1.5 1.5 1.5h1c0.8 0 1.5-0.6 1.5-1.5l-1.5-3V1.5M3 1.5h2" fill="white" stroke="white" strokeWidth={0.3} />
+                              )}
+                            </svg>
                           </div>
                           <div className="flex-1">
                             <div className="font-medium text-foreground">{facility.oem}</div>
