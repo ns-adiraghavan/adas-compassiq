@@ -38,84 +38,125 @@ const GlobalFootprint = ({ selectedRegion, selectedCategory }: GlobalFootprintPr
   const facilityTypes = ["All", "R&D Center", "Testing & Expansion"]
   const filteredFacilities = data?.facilities || []
 
-  return (
-    <div className="space-y-6">
-      {/* Filter Controls - Lighter styling */}
-      <div className="p-5 bg-background/30 backdrop-blur-sm rounded-xl border border-border/30">
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-xs font-semibold mb-3 text-muted-foreground uppercase tracking-wider">Facility Type</h3>
-            <div className="flex flex-wrap gap-2">
-              {facilityTypes.map((type) => (
-                <Button
-                  key={type}
-                  onClick={() => setFacilityType(type)}
-                  variant={facilityType === type ? "default" : "outline"}
-                  size="sm"
-                  className={`transition-all duration-300 ${
-                    facilityType === type 
-                      ? 'ring-4 ring-primary/20 shadow-[0_0_20px_rgba(var(--primary),0.3)]' 
-                      : 'hover:ring-2 hover:ring-primary/10'
-                  }`}
-                >
-                  {type}
-                </Button>
-              ))}
-            </div>
-          </div>
+  // Calculate counts for filter badges
+  const allFacilities = data?.facilities || []
+  const rdCount = allFacilities.filter(f => f.facilityType === "R&D Center").length
+  const testingCount = allFacilities.filter(f => f.facilityType === "Testing & Expansion").length
+  const oemCounts = oems.reduce((acc, oem) => {
+    acc[oem] = allFacilities.filter(f => f.oem === oem).length
+    return acc
+  }, {} as Record<string, number>)
 
-          <div className="border-t border-dashed border-border/50 pt-4">
-            <h3 className="text-xs font-semibold mb-3 text-muted-foreground uppercase tracking-wider">Player Selector</h3>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                onClick={() => setSelectedOEM("All")}
-                variant={selectedOEM === "All" ? "default" : "outline"}
-                size="sm"
-                className={`transition-all duration-300 ${
-                  selectedOEM === "All" 
-                    ? 'ring-4 ring-primary/20 shadow-[0_0_20px_rgba(var(--primary),0.3)]' 
-                    : 'hover:ring-2 hover:ring-primary/10'
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
+      {/* Left Sidebar - Filters with Numbers */}
+      <div className="space-y-4">
+        {/* Facility Type Filters */}
+        <div className="p-5 bg-card/80 backdrop-blur-sm rounded-xl border border-border/50 shadow-lg">
+          <h3 className="text-xs font-semibold mb-4 text-muted-foreground uppercase tracking-wider">Facility Type</h3>
+          <div className="space-y-2">
+            <button
+              onClick={() => setFacilityType("All")}
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 ${
+                facilityType === "All"
+                  ? 'bg-primary text-primary-foreground shadow-md ring-2 ring-primary/20'
+                  : 'bg-background/50 text-foreground hover:bg-background/80 border border-border/50'
+              }`}
+            >
+              <span>All Types</span>
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                facilityType === "All" ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'
+              }`}>
+                {allFacilities.length}
+              </span>
+            </button>
+            <button
+              onClick={() => setFacilityType("R&D Center")}
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 ${
+                facilityType === "R&D Center"
+                  ? 'bg-chart-1 text-white shadow-md ring-2 ring-chart-1/20'
+                  : 'bg-background/50 text-foreground hover:bg-background/80 border border-border/50'
+              }`}
+            >
+              <span>R&D Centers</span>
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                facilityType === "R&D Center" ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground'
+              }`}>
+                {rdCount}
+              </span>
+            </button>
+            <button
+              onClick={() => setFacilityType("Testing & Expansion")}
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 ${
+                facilityType === "Testing & Expansion"
+                  ? 'bg-chart-2 text-white shadow-md ring-2 ring-chart-2/20'
+                  : 'bg-background/50 text-foreground hover:bg-background/80 border border-border/50'
+              }`}
+            >
+              <span>Testing & Expansion</span>
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                facilityType === "Testing & Expansion" ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground'
+              }`}>
+                {testingCount}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* Player Selector Filters */}
+        <div className="p-5 bg-card/80 backdrop-blur-sm rounded-xl border border-border/50 shadow-lg">
+          <h3 className="text-xs font-semibold mb-4 text-muted-foreground uppercase tracking-wider">Player Selector</h3>
+          <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+            <button
+              onClick={() => setSelectedOEM("All")}
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 ${
+                selectedOEM === "All"
+                  ? 'bg-primary text-primary-foreground shadow-md ring-2 ring-primary/20'
+                  : 'bg-background/50 text-foreground hover:bg-background/80 border border-border/50'
+              }`}
+            >
+              <span>All Players</span>
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                selectedOEM === "All" ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'
+              }`}>
+                {allFacilities.length}
+              </span>
+            </button>
+            {oems.map((oem) => (
+              <button
+                key={oem}
+                onClick={() => setSelectedOEM(oem)}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 ${
+                  selectedOEM === oem
+                    ? 'bg-primary text-primary-foreground shadow-md ring-2 ring-primary/20'
+                    : 'bg-background/50 text-foreground hover:bg-background/80 border border-border/50'
                 }`}
               >
-                All
-              </Button>
-              {oems.map((oem) => (
-                <Button
-                  key={oem}
-                  onClick={() => setSelectedOEM(oem)}
-                  variant={selectedOEM === oem ? "default" : "outline"}
-                  size="sm"
-                  className={`transition-all duration-300 ${
-                    selectedOEM === oem 
-                      ? 'ring-4 ring-primary/20 shadow-[0_0_20px_rgba(var(--primary),0.3)]' 
-                      : 'hover:ring-2 hover:ring-primary/10'
-                  }`}
-                >
-                  {oem}
-                </Button>
-              ))}
-            </div>
+                <span className="truncate">{oem}</span>
+                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                  selectedOEM === oem ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'
+                }`}>
+                  {oemCounts[oem] || 0}
+                </span>
+              </button>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Main Layout: Map + Announcements */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Right Side - Map and Insights */}
+      <div className="space-y-6">
         {/* Map Visualization */}
-        <div className="lg:col-span-2">
-          {filteredFacilities.length === 0 ? (
-            <div className="p-12 text-center bg-background/20 backdrop-blur-sm rounded-xl border border-dashed border-border/50">
-              <p className="text-muted-foreground text-lg">No facilities found matching the selected filters.</p>
-            </div>
-          ) : (
+        {filteredFacilities.length === 0 ? (
+          <div className="p-12 text-center bg-background/20 backdrop-blur-sm rounded-xl border border-dashed border-border/50">
+            <p className="text-muted-foreground text-lg">No facilities found matching the selected filters.</p>
+          </div>
+        ) : (
+          <>
             <RegionalMapVisualization facilities={filteredFacilities} region={selectedRegion} />
-          )}
-        </div>
-
-        {/* Key Insights/Announcements */}
-        <div className="lg:col-span-1">
-          <AnnouncementsTable facilities={filteredFacilities} />
-        </div>
+            <AnnouncementsTable facilities={filteredFacilities} />
+          </>
+        )}
       </div>
     </div>
   )

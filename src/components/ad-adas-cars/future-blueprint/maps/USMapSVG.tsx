@@ -112,18 +112,18 @@ export const USMapSVG = ({ facilities }: USMapSVGProps) => {
     return acc
   }, [] as Array<{ location: string; coordinates: [number, number]; facilities: FacilityLocation[] }>)
 
-  // Determine state colors based on facility types
+  // Determine state colors based on facility types - improved contrast
   const getStateColor = (stateName: string) => {
     const stateFacilities = facilities.filter(f => locationToState[f.location] === stateName)
-    if (stateFacilities.length === 0) return "hsl(var(--muted))"
+    if (stateFacilities.length === 0) return "hsl(var(--muted) / 0.3)"
     
     const hasRD = stateFacilities.some(f => f.facilityType === "R&D Center")
     const hasTesting = stateFacilities.some(f => f.facilityType === "Testing & Expansion")
     
-    if (hasRD && hasTesting) return "hsl(var(--chart-3))"
-    if (hasRD) return "hsl(var(--chart-1))"
-    if (hasTesting) return "hsl(var(--chart-2))"
-    return "hsl(var(--muted))"
+    if (hasRD && hasTesting) return "hsl(var(--chart-3) / 0.8)"
+    if (hasRD) return "hsl(var(--chart-1) / 0.8)"
+    if (hasTesting) return "hsl(var(--chart-2) / 0.8)"
+    return "hsl(var(--muted) / 0.3)"
   }
 
   return (
@@ -140,14 +140,14 @@ export const USMapSVG = ({ facilities }: USMapSVGProps) => {
             <Geography
               key={geo.rsmKey}
               geography={geo}
-              fill={getStateColor(geo.properties.name)}
-              stroke="hsl(var(--border))"
-              strokeWidth={0.5}
-              style={{
-                default: { outline: "none" },
-                hover: { fill: getStateColor(geo.properties.name), opacity: 0.8, outline: "none" },
-                pressed: { outline: "none" },
-              }}
+                fill={getStateColor(geo.properties.name)}
+                stroke="hsl(var(--foreground) / 0.2)"
+                strokeWidth={0.8}
+                style={{
+                  default: { outline: "none" },
+                  hover: { fill: getStateColor(geo.properties.name), opacity: 0.9, outline: "none", filter: "brightness(1.1)" },
+                  pressed: { outline: "none" },
+                }}
             />
           ))
         }

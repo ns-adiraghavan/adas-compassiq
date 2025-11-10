@@ -82,18 +82,18 @@ export const EuropeMapSVG = ({ facilities }: EuropeMapSVGProps) => {
     return acc
   }, [] as Array<{ location: string; coordinates: [number, number]; facilities: FacilityLocation[] }>)
 
-  // Determine country colors based on facility types
+  // Determine country colors based on facility types - improved contrast
   const getCountryColor = (countryName: string) => {
     const countryFacilities = facilities.filter(f => locationToCountry[f.location] === countryName)
-    if (countryFacilities.length === 0) return "hsl(var(--muted))"
+    if (countryFacilities.length === 0) return "hsl(var(--muted) / 0.3)"
     
     const hasRD = countryFacilities.some(f => f.facilityType === "R&D Center")
     const hasTesting = countryFacilities.some(f => f.facilityType === "Testing & Expansion")
     
-    if (hasRD && hasTesting) return "hsl(var(--chart-3))"
-    if (hasRD) return "hsl(var(--chart-1))"
-    if (hasTesting) return "hsl(var(--chart-2))"
-    return "hsl(var(--muted))"
+    if (hasRD && hasTesting) return "hsl(var(--chart-3) / 0.8)"
+    if (hasRD) return "hsl(var(--chart-1) / 0.8)"
+    if (hasTesting) return "hsl(var(--chart-2) / 0.8)"
+    return "hsl(var(--muted) / 0.3)"
   }
 
   return (
@@ -124,11 +124,11 @@ export const EuropeMapSVG = ({ facilities }: EuropeMapSVGProps) => {
                 key={geo.rsmKey}
                 geography={geo}
                 fill={getCountryColor(geo.properties.name)}
-                stroke="hsl(var(--border))"
-                strokeWidth={0.5}
+                stroke="hsl(var(--foreground) / 0.2)"
+                strokeWidth={0.8}
                 style={{
                   default: { outline: "none" },
-                  hover: { fill: getCountryColor(geo.properties.name), opacity: 0.8, outline: "none" },
+                  hover: { fill: getCountryColor(geo.properties.name), opacity: 0.9, outline: "none", filter: "brightness(1.1)" },
                   pressed: { outline: "none" },
                 }}
               />
