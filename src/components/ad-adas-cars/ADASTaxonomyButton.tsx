@@ -19,8 +19,9 @@ import {
 const ADASTaxonomyButton = () => {
   const { data, isLoading, error } = useADASTaxonomy()
 
-  // Get column names from first row
-  const columns = data && data.length > 0 ? Object.keys(data[0]) : []
+  // Get columns and rows from data
+  const columns = data?.columns || []
+  const rows = data?.rows || []
 
   return (
     <HoverCard openDelay={200} closeDelay={100}>
@@ -54,7 +55,7 @@ const ADASTaxonomyButton = () => {
             </div>
           )}
           
-          {data && data.length > 0 && (
+          {rows.length > 0 && (
             <ScrollArea className="h-[600px] w-full rounded-md border">
               <div className="min-w-max">
                 <Table>
@@ -74,7 +75,7 @@ const ADASTaxonomyButton = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {data.map((row, index) => (
+                    {rows.map((row, index) => (
                       <TableRow key={index} className="hover:bg-muted/50">
                         {columns.map((col, colIdx) => (
                           <TableCell 

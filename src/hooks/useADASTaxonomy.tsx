@@ -5,7 +5,12 @@ interface TaxonomyRow {
   [key: string]: string
 }
 
-const fetchADASTaxonomy = async (): Promise<TaxonomyRow[]> => {
+interface TaxonomyData {
+  columns: string[]
+  rows: TaxonomyRow[]
+}
+
+const fetchADASTaxonomy = async (): Promise<TaxonomyData> => {
   const response = await fetch('/data/adas_taxonomy.xlsx')
   const arrayBuffer = await response.arrayBuffer()
   
@@ -16,16 +21,22 @@ const fetchADASTaxonomy = async (): Promise<TaxonomyRow[]> => {
   // Convert to JSON array
   const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as string[][]
   
-  if (jsonData.length === 0) return []
+  if (jsonData.length === 0) return { columns: [], rows: [] }
   
-  // First row contains column headers
-  const columns = jsonData[0].map(col => String(col || '').trim())
+  // First row contains column headers - ensure we get ALL columns
+  const columns = jsonData[0]
+    .map(col => String(col || '').trim())
+    .filter(col => col !== '') // Remove empty column headers
+  
+  console.log('ADAS Taxonomy columns:', columns)
   
   // Remaining rows contain data
-  const rows = jsonData.slice(1).map(row => {
+  const rows = jsonData.slice(1).map((row, rowIndex) => {
     const rowObj: TaxonomyRow = {}
+    // Ensure we process ALL columns for each row
     columns.forEach((col, index) => {
-      rowObj[col] = String(row[index] || '').trim()
+      const cellValue = row[index]
+      rowObj[col] = cellValue !== undefined && cellValue !== null ? String(cellValue).trim() : ''
     })
     return rowObj
   }).filter(row => {
@@ -33,7 +44,9 @@ const fetchADASTaxonomy = async (): Promise<TaxonomyRow[]> => {
     return Object.values(row).some(val => val !== '')
   })
   
-  return rows
+  console.log('ADAS Taxonomy rows sample:', rows.slice(0, 2))
+  
+  return { columns, rows }
 }
 
 export const useADASTaxonomy = () => {
