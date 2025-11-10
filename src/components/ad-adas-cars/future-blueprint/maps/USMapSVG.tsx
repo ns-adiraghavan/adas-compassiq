@@ -1,6 +1,6 @@
 import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps"
 import { FacilityLocation } from "@/hooks/useGlobalFootprintData"
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useState } from "react"
 
 interface USMapSVGProps {
@@ -173,10 +173,10 @@ export const USMapSVG = ({ facilities }: USMapSVGProps) => {
         
         return (
           <Marker key={location.location} coordinates={location.coordinates}>
-            <HoverCard open={openMarkerId === markerId} onOpenChange={(open) => setOpenMarkerId(open ? markerId : null)} openDelay={200} closeDelay={300}>
-              <HoverCardTrigger asChild>
+            <Popover open={openMarkerId === markerId} onOpenChange={(open) => setOpenMarkerId(open ? markerId : null)}>
+              <PopoverTrigger asChild>
                 <g 
-                  className="cursor-pointer transition-transform duration-200"
+                  className="cursor-pointer transition-transform duration-200 hover:opacity-90"
                   style={{ 
                     transform: clickScale === markerId ? 'scale(1.1)' : 'scale(1)'
                   }}
@@ -219,9 +219,9 @@ export const USMapSVG = ({ facilities }: USMapSVGProps) => {
                     </>
                   )}
                 </g>
-              </HoverCardTrigger>
+              </PopoverTrigger>
               
-              <HoverCardContent className="w-80 z-[100]" onPointerDownOutside={(e) => e.preventDefault()}>
+              <PopoverContent className="w-80 z-[100]">
                 <div className="space-y-3">
                   <div>
                     <h4 className="font-semibold text-sm text-foreground">{location.location}</h4>
@@ -259,8 +259,8 @@ export const USMapSVG = ({ facilities }: USMapSVGProps) => {
                     ))}
                   </div>
                 </div>
-              </HoverCardContent>
-            </HoverCard>
+              </PopoverContent>
+            </Popover>
           </Marker>
         )
       })}
