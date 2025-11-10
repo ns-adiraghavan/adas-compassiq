@@ -3,7 +3,7 @@ import { useSensoricsData } from "@/hooks/useSensoricsData"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Camera, Radio, Radar, CircleDot } from "lucide-react"
+import { Camera, Radio, Radar, CircleDot, View } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Separator } from "@/components/ui/separator"
@@ -100,6 +100,7 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
   const [viewType, setViewType] = useState<'top' | 'side'>('top')
   const [imageLoading, setImageLoading] = useState<boolean>(true)
   const [preloadedImages, setPreloadedImages] = useState<Set<string>>(new Set())
+  const [perspectiveView, setPerspectiveView] = useState<boolean>(true)
 
   const filteredData = data?.filter(item => {
     const matchesSensorType = item.parameterCategory.includes(selectedSensorType)
@@ -405,6 +406,23 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
               {/* Car Visualization with precise cropping */}
               <div className="flex items-center justify-center min-h-[500px] overflow-hidden">
                 <div className="relative w-full h-[500px]">
+                  {/* 3D/Flat View Toggle */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="absolute top-4 right-4 z-20 bg-background/95 backdrop-blur-sm shadow-lg"
+                        onClick={() => setPerspectiveView(!perspectiveView)}
+                      >
+                        <View className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {perspectiveView ? 'Switch to Flat View' : 'Switch to 3D View'}
+                    </TooltipContent>
+                  </Tooltip>
+
                   {/* Loading skeleton */}
                   {imageLoading && (
                     <div className="absolute inset-0 flex items-center justify-center bg-muted/20 rounded-lg">
@@ -419,21 +437,97 @@ const SensoricsTable = ({ selectedRegion, selectedCategory }: SensoricsTableProp
                   
                   {/* Display the full composite image but crop to show only selected OEM */}
                   <div 
-                    className={`absolute inset-0 overflow-hidden transition-all duration-500 ${
+                    className={`absolute inset-0 overflow-hidden transition-all duration-700 ${
                       imageLoading ? 'opacity-0' : 'opacity-100'
-                    }`}
+                    } ${perspectiveView ? 'animate-fade-in' : ''}`}
                     style={{
                       filter: `drop-shadow(0 0 30px ${currentSensorColor})`,
+                      transform: perspectiveView ? 'perspective(1200px) rotateX(5deg) scale(0.95)' : 'none',
+                      transformStyle: 'preserve-3d',
                     }}
                   >
                     <img 
                       src={imageSrc}
                       alt={`${selectedOEM} ${selectedSensorType} sensors`}
-                      className="h-full w-full object-contain transition-all duration-500"
+                      className="h-full w-full object-contain transition-all duration-700"
                       onLoad={() => setImageLoading(false)}
                       onError={() => setImageLoading(false)}
                     />
                   </div>
+
+                  {/* Interactive Sensor Dots Overlay */}
+                  {!imageLoading && filteredData.map((sensor, index) => {
+                    const zone = sensor.zone || 'Unknown'
+                    
+                    // Position dots based on zone with slight randomization for visual variety
+                    const getPosition = () => {
+                      const basePositions = {
+                        'Front': { top: '15%', left: '50%' },
+                        'Rear': { bottom: '15%', left: '50%' },
+                        'Side': { top: '50%', right: '20%' },
+                      }
+                      const base = basePositions[zone as keyof typeof basePositions] || { top: '50%', left: '50%' }
+                      
+                      // Add slight offset for multiple sensors in same zone
+                      const offset = index % 3
+                      const horizontalOffset = (offset - 1) * 40
+                      
+                      return {
+                        ...base,
+                        transform: `translate(calc(-50% + ${horizontalOffset}px), -50%)`,
+                      }
+                    }
+
+                    return (
+                      <Tooltip key={`sensor-${index}`}>
+                        <TooltipTrigger asChild>
+                          <div
+                            className="absolute cursor-pointer group/sensor"
+                            style={getPosition()}
+                          >
+                            {/* Pulsing Glow Halo */}
+                            <div 
+                              className="absolute inset-0 w-6 h-6 rounded-full animate-pulse opacity-40 group-hover/sensor:opacity-70 transition-opacity"
+                              style={{
+                                background: `radial-gradient(circle, ${currentSensorColor} 0%, transparent 70%)`,
+                                transform: 'translate(-50%, -50%) scale(2)',
+                                left: '50%',
+                                top: '50%',
+                                animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                              }}
+                            />
+                            
+                            {/* Sensor Dot */}
+                            <div 
+                              className="relative w-3 h-3 rounded-full border-2 transition-all duration-300 group-hover/sensor:scale-150 group-hover/sensor:shadow-lg"
+                              style={{
+                                backgroundColor: currentSensorColor,
+                                borderColor: 'white',
+                                boxShadow: `0 0 8px ${currentSensorColor}`,
+                              }}
+                            />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="max-w-xs">
+                          <div className="space-y-1">
+                            <div className="font-semibold text-sm">
+                              {zone} {sensor.parameterCategory} #{index + 1}
+                            </div>
+                            <div className="text-xs text-muted-foreground space-y-0.5">
+                              {sensor.parameter && <div>Type: {sensor.parameter}</div>}
+                              {sensor.position && <div>Position: {sensor.position}</div>}
+                              {sensor.value && sensor.unit && (
+                                <div>Spec: {sensor.value} {sensor.unit}</div>
+                              )}
+                              {sensor.cameraCategory && (
+                                <div>Category: {sensor.cameraCategory}</div>
+                              )}
+                            </div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    )
+                  })}
                   
                   {/* Zone badges showing sensor counts */}
                   {Object.entries(sensorsByZone).map(([zone, count]) => {
