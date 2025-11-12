@@ -3,7 +3,7 @@ import { useTheme } from "@/contexts/ThemeContext"
 import { useEcosystemData } from "@/hooks/useEcosystemData"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useOEMLogo } from "@/hooks/useOEMLogo"
+import OEMLogoCell from "@/components/ad-adas-cars/shared/OEMLogoCell"
 
 interface EcosystemTableProps {
   selectedRegion: string
@@ -113,26 +113,6 @@ const EcosystemTable = ({ selectedRegion, selectedCategory }: EcosystemTableProp
       </div>
     </div>
   )
-}
-
-// Helper component for OEM logo
-const OEMLogoCell = ({ oemName }: { oemName: string }) => {
-  const { data: logoUrl, isLoading } = useOEMLogo(oemName)
-
-  if (isLoading) {
-    return <div className="text-sm">{oemName}</div>
-  }
-
-  if (logoUrl) {
-    return (
-      <div className="flex items-center gap-2">
-        <img src={logoUrl} alt={oemName} className="h-8 w-auto object-contain" />
-        <span className="text-sm">{oemName}</span>
-      </div>
-    )
-  }
-
-  return <div className="text-sm">{oemName}</div>
 }
 
 export default EcosystemTable
