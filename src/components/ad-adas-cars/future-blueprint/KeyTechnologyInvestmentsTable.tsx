@@ -2,26 +2,7 @@ import { useTheme } from "@/contexts/ThemeContext"
 import { useKeyTechnologyInvestmentsData } from "@/hooks/useKeyTechnologyInvestmentsData"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
-import teslaLogo from "@/assets/oem-logos/tesla_logo.png"
-import rivianLogo from "@/assets/oem-logos/rivian_logo.png"
-import bmwLogo from "@/assets/oem-logos/bmw_logo.png"
-import gmLogo from "@/assets/oem-logos/gm_logo.png"
-import fordLogo from "@/assets/oem-logos/ford_logo.png"
-
-// Local logo mapping for common OEMs
-const OEM_LOGOS: Record<string, string> = {
-  'tesla': teslaLogo,
-  'rivian': rivianLogo,
-  'bmw': bmwLogo,
-  'gm': gmLogo,
-  'general motors': gmLogo,
-  'ford': fordLogo,
-}
-
-const getOEMLogo = (oemName: string): string => {
-  const normalizedName = oemName.toLowerCase().trim()
-  return OEM_LOGOS[normalizedName] || ""
-}
+import OEMLogoCell from "@/components/ad-adas-cars/shared/OEMLogoCell"
 
 interface KeyTechnologyInvestmentsTableProps {
   selectedOEM: string
@@ -68,16 +49,7 @@ const KeyTechnologyInvestmentsTable = ({ selectedOEM, selectedInvestmentType }: 
               {investments.map((investment, index) => (
                 <TableRow key={index}>
                   <TableCell>
-                    <div className="flex items-center gap-3">
-                      {getOEMLogo(investment.oem) && (
-                        <img 
-                          src={getOEMLogo(investment.oem)} 
-                          alt={`${investment.oem} logo`}
-                          className="w-10 h-10 object-contain"
-                        />
-                      )}
-                      <span className="font-medium">{investment.oem}</span>
-                    </div>
+                    <OEMLogoCell oemName={investment.oem} />
                   </TableCell>
                   <TableCell className={theme.textSecondary}>{investment.subAttribute}</TableCell>
                   <TableCell className="font-medium">{investment.value}</TableCell>
